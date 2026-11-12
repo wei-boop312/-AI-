@@ -66,4 +66,6 @@ API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md]
 
 BFL官方协议的离线传输契约与字段映射见[docs/BFL_PROTOCOL.md](docs/BFL_PROTOCOL.md)：`python scripts/check.py task P4-01 --profile offline`。该模块未启用真实Worker调用，不能作为真实模型验收。
 
-Gemini官方SDK一次检测和严格事实校验见[docs/GEMINI_PROTOCOL.md](docs/GEMINI_PROTOCOL.md)：`python scripts/check.py task P4-02 --profile offline`。SDK重试及自动续发均关闭；真实调用和组合Worker接线仍未验收。
+Gemini官方SDK一次检测和严格事实校验见[docs/GEMINI_PROTOCOL.md](docs/GEMINI_PROTOCOL.md)：`python scripts/check.py task P4-02 --profile offline`。SDK重试及自动续发均关闭；真实供应商调用及其Worker接线仍未验收。
+
+两种官方协议经Worker、PG和私有S3的离线组合闭环见[docs/PROTOCOL_PIPELINE.md](docs/PROTOCOL_PIPELINE.md)。该模式强制双方MockTransport并显式标记协议模拟；真实传输仍未启用。

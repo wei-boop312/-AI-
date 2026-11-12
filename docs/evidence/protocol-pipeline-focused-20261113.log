@@ -1,0 +1,14 @@
+test_archive_failure_restarts_without_generate_resubmit (test_protocol_pipeline.ProtocolPipelineTests.test_archive_failure_restarts_without_generate_resubmit) ... ok
+test_detection_response_loss_keeps_frozen_and_never_reposts (test_protocol_pipeline.ProtocolPipelineTests.test_detection_response_loss_keeps_frozen_and_never_reposts) ... ok
+test_full_protocol_worker_final_png_cost_observations_and_single_charge (test_protocol_pipeline.ProtocolPipelineTests.test_full_protocol_worker_final_png_cost_observations_and_single_charge) ... ok
+test_generate_response_loss_keeps_frozen_and_never_reposts (test_protocol_pipeline.ProtocolPipelineTests.test_generate_response_loss_keeps_frozen_and_never_reposts) ... ok
+test_observation_fencing_permissions_and_append_only (test_protocol_pipeline.ProtocolPipelineTests.test_observation_fencing_permissions_and_append_only) ... ok
+test_pending_known_receipt_and_private_metadata_loss_only_query_again (test_protocol_pipeline.ProtocolPipelineTests.test_pending_known_receipt_and_private_metadata_loss_only_query_again) ... ok
+test_terminal_poll_failure_refunds_without_detection (test_protocol_pipeline.ProtocolPipelineTests.test_terminal_poll_failure_refunds_without_detection) ... ok
+test_wrong_generated_dimensions_quarantined_before_detection (test_protocol_pipeline.ProtocolPipelineTests.test_wrong_generated_dimensions_quarantined_before_detection) ... ok
+test_wrong_provider_cannot_run_locked_quote (test_protocol_pipeline.ProtocolPipelineTests.test_wrong_provider_cannot_run_locked_quote) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 22.710s
+
+OK

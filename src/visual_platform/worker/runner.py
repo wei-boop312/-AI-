@@ -1,11 +1,12 @@
 import asyncio
 import contextlib
 import hashlib
+import inspect
 import json
 from uuid import UUID,uuid4,uuid5
 import asyncpg
 from botocore.exceptions import BotoCoreError,ClientError
-from visual_platform.providers.contract import ProviderFailure,ProviderUncertain
+from visual_platform.providers.contract import ProviderFailure,ProviderUncertain,ProviderPending
 from visual_platform.domain.facts import Facts
 from visual_platform.domain.compliance import evaluate_rules
 from visual_platform.services.upload import decode
@@ -19,6 +20,20 @@ class Worker:
         async with self.pool.acquire() as c: return await c.fetchval(query,*args)
     async def context(self,task,fence):
         return json.loads(await self.db('SELECT app.worker_context($1,$2,$3)',task,self.owner,fence))
+    async def call_provider(self,method,*args):
+        if inspect.iscoroutinefunction(method):return await method(*args)
+        return await asyncio.to_thread(method,*args)
+    async def cost(self,task,fence,attempt_id,stage):
+        if getattr(self.provider,'execution_profile','offline')=='offline':
+            if stage=='response':await self.db('SELECT app.record_fake_cost($1,$2,$3,$4)',task,self.owner,fence,attempt_id)
+            return
+        usage={'transport':'offline_mock','state':'submission_outcome_not_yet_known'}
+        if stage=='response':
+            ctx=await self.context(task,fence)
+            if any(row['attempt_id']==str(attempt_id) and row['kind']=='response_observation' for row in ctx.get('cost_observations',[])):return
+            attempt=next(a for a in ctx['attempts'] if a['id']==str(attempt_id))
+            usage=await self.call_provider(self.provider.observation,attempt['step'],attempt)
+        await self.db('SELECT app.record_protocol_observation($1,$2,$3,$4,$5,$6::jsonb)',task,self.owner,fence,attempt_id,stage,json.dumps(usage,sort_keys=True))
     async def read(self,record):
         if record['bucket']!=self.storage.bucket: raise RuntimeError('bucket not configured')
         data,_,_=await asyncio.to_thread(self.storage.get,record['object_key'],version=record['storage_version_id'],limit=80*1024*1024)
@@ -31,13 +46,14 @@ class Worker:
     async def receipt(self,task,fence,attempt,receipt):
         identity=await self.db('SELECT app.append_receipt($1,$2,$3,$4,$5)',task,attempt,receipt.provider_id,receipt.response_digest,receipt.polling_url)
         await self.db('SELECT app.apply_receipt($1,$2,$3,$4)',task,self.owner,fence,identity)
-        await self.db('SELECT app.record_fake_cost($1,$2,$3,$4)',task,self.owner,fence,attempt)
+        await self.cost(task,fence,attempt,'response')
     async def submit(self,task,fence,step,payload):
-        encoded=payload if isinstance(payload,bytes) else json.dumps(payload,sort_keys=True).encode()
+        encoded=payload if isinstance(payload,bytes) else json.dumps(payload,sort_keys=True,separators=(',',':'),allow_nan=False).encode()
         attempt=await self.db('SELECT app.record_intent($1,$2,$3,$4,$5)',task,self.owner,fence,step,hashlib.sha256(encoded).hexdigest())
+        await self.cost(task,fence,attempt,'intent')
         try:
             method=self.provider.submit_generate if step=='generate' else self.provider.submit_detect
-            result=await asyncio.to_thread(method,attempt,payload)
+            result=await self.call_provider(method,attempt,payload)
         except ProviderFailure:
             await self.db('SELECT app.record_attempt_failure($1,$2,$3,$4,$5)',task,self.owner,fence,attempt,'supplier_explicit_failure')
             await self.db('SELECT app.fail_task($1,$2,$3,$4,false)',task,self.owner,fence,'supplier_explicit_failure')
@@ -62,19 +78,25 @@ class Worker:
             for _ in range(12):
                 if heartbeat.done(): await heartbeat
                 ctx=await self.context(task,fence); generation=ctx['input_snapshot']['generation']; phase=ctx['phase']
+                execution=ctx['input_snapshot']['_execution']
+                if execution.get('provider_profile','offline')!=getattr(self.provider,'execution_profile','offline'):raise ValueError('locked_provider_profile_mismatch')
                 attempts={a['step']:a for a in ctx['attempts']}
                 if phase=='submitting':
                     # Validate fixed source bytes before creating a possibly paid intent.
-                    await self.read(ctx['source'])
+                    source=await self.read(ctx['source'])
                     if 'generate' in attempts:
                         await self.db('SELECT app.fail_task($1,$2,$3,$4,true)',task,self.owner,fence,'submission_outcome_unknown'); return 'uncertain'
-                    if not await self.submit(task,fence,'generate',generation): return 'stopped'
+                    payload=await self.call_provider(self.provider.prepare_generate,generation,source) if hasattr(self.provider,'prepare_generate') else generation
+                    if not await self.submit(task,fence,'generate',payload): return 'stopped'
                 elif phase in ('polling','archiving'):
                     attempt=attempts['generate']
-                    await self.db('SELECT app.record_fake_cost($1,$2,$3,$4)',task,self.owner,fence,UUID(attempt['id']))
+                    await self.cost(task,fence,UUID(attempt['id']),'response')
                     if not attempt['provider_id']: raise RuntimeError('known provider id required')
-                    data=await asyncio.to_thread(self.provider.fetch_image,attempt['provider_id'])
-                    canonical,meta=await decode(data,'image/png')
+                    if hasattr(self.provider,'retrieve_image'):
+                        artifact=await self.call_provider(self.provider.retrieve_image,attempt);data=artifact.data;mime=artifact.mime
+                    else:data=await self.call_provider(self.provider.fetch_image,attempt['provider_id']);mime='image/png'
+                    canonical,meta=await decode(data,mime)
+                    if (meta['width'],meta['height'])!=(generation['output']['width'],generation['output']['height']):raise ValueError('generated_dimensions_mismatch')
                     await self.asset(task,fence,ctx,'generated',canonical,meta)
                 elif phase=='protecting':
                     source=await self.read(ctx['source']); generated=await self.read(ctx['generated'])
@@ -88,7 +110,8 @@ class Worker:
                     attempt=attempts['detect']
                     if not attempt['provider_id']:
                         await self.db('SELECT app.fail_task($1,$2,$3,$4,true)',task,self.owner,fence,'detection_outcome_unknown'); return 'uncertain'
-                    payload=await asyncio.to_thread(self.provider.fetch_facts,attempt['provider_id'])
+                    await self.cost(task,fence,UUID(attempt['id']),'response')
+                    payload=await self.call_provider(self.provider.fetch_facts,attempt['provider_id'])
                     try:
                         facts=Facts.model_validate(payload['facts'])
                         if payload.get('final_sha256')!=final_hash or (facts.image_width,facts.image_height)!=(ctx['final']['width'],ctx['final']['height']): raise ValueError('facts mismatch')
@@ -101,7 +124,7 @@ class Worker:
                         {'width':ctx['final']['width'],'height':ctx['final']['height'],'byte_size':len(final)},sampling_selected=sampling)
                     for platform in check['per_platform']:
                         platform['checks'].extend([{'id':'local_decode','status':'passed'},{'id':'pixel_protection','status':'passed' if proof['pixel_exact_passed'] else 'not_applicable','evidence':proof}])
-                    report={'schema_version':1,'final_asset_version_id':ctx['final_version_id'],'final_sha256':final_hash,'facts':facts.model_dump(mode='json'),'per_platform':check['per_platform'],'auto_overall':check['auto_overall'],'pixel_protection':proof,'sampling_selected':sampling,'provider_profile':'offline_fake'}
+                    report={'schema_version':1,'final_asset_version_id':ctx['final_version_id'],'final_sha256':final_hash,'facts':facts.model_dump(mode='json'),'per_platform':check['per_platform'],'auto_overall':check['auto_overall'],'pixel_protection':proof,'sampling_selected':sampling,'provider_profile':getattr(self.provider,'report_profile','offline_fake')}
                     report_id=uuid5(task,'report'); key='private/'+ctx['user_id']+'/'+str(report_id)+'.json'; data=json.dumps(report,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()
                     storage_version=await asyncio.to_thread(self.storage.put_immutable,key,data,'application/json')
                     await self.db('SELECT app.record_report($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,$9,$10,$11,$12,$13)',task,self.owner,fence,report_id,final_hash,json.dumps(report['facts']),json.dumps(report['per_platform']),report['auto_overall'],report['sampling_selected'],hashlib.sha256(data).hexdigest(),self.storage.bucket,key,storage_version)
@@ -111,6 +134,14 @@ class Worker:
             raise RuntimeError('phase progress limit exceeded')
         except asyncpg.ObjectNotInPrerequisiteStateError:
             return 'lease_lost'
+        except (ProviderPending,ProviderUncertain):
+            # A known receipt permits only safe polling/archive retries, never another submit.
+            return 'retryable'
+        except ProviderFailure:
+            attempt=attempts['generate' if phase in ('polling','archiving') else 'detect']
+            await self.db('SELECT app.record_attempt_failure($1,$2,$3,$4,$5)',task,self.owner,fence,UUID(attempt['id']),'supplier_terminal_failure')
+            await self.db('SELECT app.fail_task($1,$2,$3,$4,false)',task,self.owner,fence,'supplier_terminal_failure')
+            return 'stopped'
         except (BotoCoreError,ClientError,StorageError,RuntimeError,OSError):
             return 'retryable'
         except ValueError:

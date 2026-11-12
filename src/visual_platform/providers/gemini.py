@@ -76,6 +76,7 @@ class GeminiProvider:
     def __init__(self,key,private_directory,*,transport=None):
         if not isinstance(key,str) or not key or any(ord(c)<33 or ord(c)>126 for c in key):raise ValueError('invalid Gemini key')
         self.directory=Path(private_directory);self.directory.mkdir(parents=True,exist_ok=True,mode=0o700)
+        self.offline_transport=isinstance(transport,httpx.MockTransport)
         async def guard(request):
             if request.url.scheme!='https' or request.url.host!='generativelanguage.googleapis.com' or request.url.port not in (None,443) or request.url.path!='/v1beta/models/'+MODEL+':generateContent' or request.url.query:
                 raise ProviderUncertain('Gemini SDK request destination rejected')

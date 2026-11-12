@@ -1,0 +1,20 @@
+{
+  "test": {
+    "head": "0024",
+    "function_hashes": {
+      "create_quote": "9e3bcdeec43b06b66d2de80cc429173c",
+      "record_intent": "3731a8889cac4dffcdcc011c96c1c9f6",
+      "worker_context": "ee22adc91cb124f171cd2a1300707c80",
+      "record_protocol_observation": "0d127911e9a3ef77b7e2838dd3b3708d"
+    }
+  },
+  "dev": {
+    "head": "0024",
+    "function_hashes": {
+      "create_quote": "9e3bcdeec43b06b66d2de80cc429173c",
+      "record_intent": "3731a8889cac4dffcdcc011c96c1c9f6",
+      "worker_context": "ee22adc91cb124f171cd2a1300707c80",
+      "record_protocol_observation": "0d127911e9a3ef77b7e2838dd3b3708d"
+    }
+  }
+}

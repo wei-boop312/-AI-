@@ -1,6 +1,6 @@
 # BFL FLUX 3 离线协议适配
 
-P4-01的协议模块为`src/visual_platform/providers/bfl.py`，离线入口：`python scripts/check.py task P4-01 --profile offline`。18项契约测试均使用httpx.MockTransport，不访问真实模型，无真实账户、费用或视觉质量结论。现有Worker仍只启用offline Fake；BFL模块尚未接入Worker的源图传递、真实成本落库和最终报告标识，不能把本模块称为可运行的真实模型流水线。
+P4-01的协议模块为`src/visual_platform/providers/bfl.py`，离线入口：`python scripts/check.py task P4-01 --profile offline`。18项契约测试均使用httpx.MockTransport，不访问真实模型，无真实账户、费用或视觉质量结论。默认Worker CLI仍只启用offline Fake；显式MockTransport下的源图/最终图组合、观察记录和独立报告标识已接入Worker，见[PROTOCOL_PIPELINE.md](PROTOCOL_PIPELINE.md)。真实传输、真实费用确认和完整真实模型流水线仍未启用。
 
 ## 字段映射
 
@@ -28,4 +28,4 @@ P4-01的协议模块为`src/visual_platform/providers/bfl.py`，离线入口：`
 
 `python scripts/check.py task P4-01 --profile offline`：18项通过；覆盖精确字段、严格schema、同UUID并发只有一次POST、实例重建后不重发、超时/HTTP拒绝/5xx/畸形响应、未知费用、已知回执保留、URL越权、鉴权与Cookie分离、大小限制、禁止重定向及压缩。日志bfl-contract-20261113.log。现有49项单元回归通过；uv锁文件离线一致性检查通过，httpx已列为运行依赖。
 
-真实API调用、账户可用性、输入图可读性实测、生成图尺寸/保护回贴、成本账单、Gemini检测及完整Worker组合：NOT_RUN。P4-03继续等待明确样本、调用次数/费用上限和安全密钥，不能标PROVIDER_VERIFIED或RELEASE_READY。
+真实传输下的API调用、账户可用性、输入图可读性实测、生成图尺寸/保护回贴、成本账单、Gemini检测及完整Worker组合：NOT_RUN。P4-03继续等待明确样本、调用次数/费用上限和安全密钥，不能标PROVIDER_VERIFIED或RELEASE_READY。

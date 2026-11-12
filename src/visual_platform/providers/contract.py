@@ -4,6 +4,7 @@ from uuid import UUID
 
 class ProviderFailure(Exception): pass
 class ProviderUncertain(Exception): pass
+class ProviderPending(Exception): pass
 @dataclass(frozen=True)
 class Receipt:
     provider_id: str

@@ -207,3 +207,15 @@ BFL仍未接入当前仅offline的Worker源图传递、真实成本DB和报告�
 python scripts/check.py task P4-02 --profile offline：19项真实SDK/MockTransport契约通过；49项现有单元、18项BFL契约回归通过。uv锁文件和已安装60包兼容性通过；无真实模型调用、无付费。日志gemini-contract/unit-regression/bfl-regression-20261113.log，说明GEMINI_PROTOCOL.md。
 
 周额度used35%、剩余65%，继续。组合Worker源图接线/最终PNG检测/真实成本记录与provider_profile报告仍待实现；完整task/all、CI/部署产物、P4-03外部真实验收未完成，不标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
+
+## 2026-11-13：官方协议组合的原生Worker闭环
+
+新增ProtocolProvider及0024迁移，显式offline_protocol_mock报价快照与bfl_mock/gemini_mock意图标签，默认API/CLI仍Fake。构造器拒绝真实或混合传输；Worker执行前核对锁定profile，协议请求构建前校验源图SHA和尺寸，实际BFL请求摘要绑定PG意图。支持同步Fake及异步SDK；BFL按DB既有id/polling_url只查询，Pending归还租约等待恢复，下载PNG/JPEG隔离canonical化、核验实际输出尺寸、本地保护回贴后将最终PNG完整字节交给Gemini。
+
+报告明确offline_protocol_mock。移除组合链路对record_fake_cost的调用；新增intent/response追加观察，保留credit/token与回执摘要，货币/金额NULL、unknown且来源标识模拟；内部模拟积分仍只结算一次。观察写入仅app_worker、有效lease/任务/attempt归属、回执摘要约束、同内容幂等、不同内容拒绝、不可覆写。已有PG观察和回执优先，丢本地BFL费用元数据不重发也不阻止只查询归档。
+
+9项原生PG/S3组合测试通过：JPEG→canonical→RGB回贴→最终PNG检测/报告/一次charge；BFL请求哈希、四条费用观察；Pending与重建、元数据丢失、归档失败安全恢复；生成/检测响应丢失冻结且零charge/refund、不再提交；明确终态一次释放、错误尺寸隔离且不检测；profile错配零调用；权限/fencing/不可变验证。完整样本protocol-pipeline.json及sample日志明确两供应商各1次假HTTP POST、真实PG17.11/S3和SDK3.3.0，零付费。
+
+49项单元、39项协议契约、83项真实PG/Rabbit/S3全回归（170.918秒）通过；新版本机Worker重启后3项生产preview浏览器通过（37.5秒），截图更新并目视检查手机布局。test/dev都在0024、四个函数定义摘要一致；最终监控MQ/S3 ready、无告警、财务异常全0。说明PROTOCOL_PIPELINE.md，日志protocol-unit/contract/native-full/browser-20261113.log。未重复无改动的60秒性能基准。
+
+周额度used37%、剩余63%，继续。协议假传输组合已完成本轮验证，但真正供应商传输、明确预算配置、真实任务报价/成本确认、P4-03样本/账户调用与完整task/all、CI/部署产物仍待完成；不标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。

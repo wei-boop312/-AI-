@@ -28,4 +28,4 @@ usage缺失保持null；金额与币种均null，不根据token数或原计划�
 
 日志`gemini-contract-20261113.log`：19项SDK契约通过；包括原始请求字段、最终PNG字节、schema一致性、一次提交/取消/并发/重建、重试和续发关闭、手动降级、usage未知、缓存损坏、环境不能更换主机/后端、大小/压缩/重定向保护。49项单元和18项BFL契约回归通过，日志gemini-unit-regression与gemini-bfl-regression-20261113.log。uv锁文件与已安装60包兼容性检查通过。
 
-当前Worker仍仅offline Fake，尚未接入BFL/Gemini组合、真实成本DB或报告provider_profile。真实图识别准确性、事实置信度校准、账户调用和费用核对均NOT_RUN；P4-03仍等待明确样本、次数/预算和安全密钥，不标PROVIDER_VERIFIED。网络未知结果保留冻结和对账的端到端接线仍需随后验证。
+默认Worker CLI仍仅offline Fake；显式MockTransport下的BFL/Gemini组合、未知成本观察及独立报告profile已验证，见[PROTOCOL_PIPELINE.md](PROTOCOL_PIPELINE.md)。真实图识别准确性、事实置信度校准、账户调用和费用核对均NOT_RUN；P4-03仍等待明确样本、次数/预算和安全密钥，不标PROVIDER_VERIFIED。真实传输、预算约束和真实成本确认仍需接线验收。

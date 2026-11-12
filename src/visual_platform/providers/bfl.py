@@ -88,6 +88,7 @@ class BflProvider:
     def __init__(self,key,private_directory,*,transport=None):
         if not isinstance(key,str) or not key or any(ord(c)<33 or ord(c)>126 for c in key):raise ValueError('invalid BFL key')
         self._key=key
+        self.offline_transport=isinstance(transport,httpx.MockTransport)
         self.directory=Path(private_directory);self.directory.mkdir(parents=True,exist_ok=True,mode=0o700)
         # No auth defaults, cookies from callers, environment proxy or redirects.
         self.client=httpx.Client(transport=transport,trust_env=False,follow_redirects=False,timeout=httpx.Timeout(30,connect=5))
