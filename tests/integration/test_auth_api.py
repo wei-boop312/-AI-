@@ -13,7 +13,7 @@ from visual_platform.core.settings import Settings
 from visual_platform.core.identity import hash_password
 
 @unittest.skipUnless(os.environ.get("TEST_DATABASE_URL"),"native PostgreSQL not configured")
-class AuthApiTests(unittest.TestCase):
+class AuthApiFixture(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.owner=os.environ["TEST_DATABASE_URL"]
@@ -47,6 +47,7 @@ class AuthApiTests(unittest.TestCase):
         return result
     def write_headers(self):
         return {'origin':self.settings.origin,'x-csrf-token':self.client.cookies['visual_csrf']}
+class AuthApiTests(AuthApiFixture):
     def test_login_logout_revokes_access(self):
         result=self.login(); cookie='; '.join(k+'='+v for k,v in self.client.cookies.items())
         self.assertIn('HttpOnly',result.headers.get_list('set-cookie')[0])

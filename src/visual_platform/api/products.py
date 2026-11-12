@@ -88,3 +88,14 @@ async def appearances(product_id: UUID,request: Request,user=Depends(current_use
         if not await c.fetchval("SELECT id FROM app.products WHERE id=$1",product_id): raise HTTPException(404,"not_found")
         rows=await c.fetch("SELECT id,name,config,revision,created_at FROM app.appearance_profiles WHERE product_id=$1 AND ($2::timestamptz IS NULL OR (created_at,id)<($2,$3::uuid)) ORDER BY created_at DESC,id DESC LIMIT $4",product_id,pos[0] if pos else None,pos[1] if pos else None,limit+1)
     return {"items":[{**dict(x),"config":json.loads(x["config"])} for x in rows[:limit]],"next_cursor":cursor_encode(rows[limit-1]) if len(rows)>limit else None}
+@router.patch('/{product_id}/appearances/{appearance_id}')
+async def appearance_update(product_id: UUID,appearance_id: UUID,body: AppearanceCreate,request: Request,if_match: str=Header(),user=Depends(current_user)):
+    try: revision=int(if_match.strip('"'))
+    except ValueError: raise HTTPException(422,'invalid_revision')
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        if not await c.fetchval('SELECT id FROM app.products WHERE id=$1 AND archived_at IS NULL FOR SHARE',product_id): raise HTTPException(404,'not_found')
+        old=await c.fetchrow('SELECT revision FROM app.appearance_profiles WHERE id=$1 AND product_id=$2 AND archived_at IS NULL FOR UPDATE',appearance_id,product_id)
+        if not old: raise HTTPException(404,'not_found')
+        if old['revision']!=revision: raise HTTPException(409,'revision_conflict')
+        row=await c.fetchrow('UPDATE app.appearance_profiles SET name=$2,config=$3::jsonb,revision=revision+1,updated_at=now() WHERE id=$1 RETURNING id,name,config,revision',appearance_id,body.name,body.config.model_dump_json())
+    return {**dict(row),'config':json.loads(row['config'])}

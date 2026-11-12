@@ -26,7 +26,7 @@ class AccountingTests(unittest.TestCase):
         with self.connect() as c:
             c.execute("SET SESSION AUTHORIZATION app_api")
             c.execute("SELECT set_config('app.user_id',%s,true)",(str(self.user),))
-            return c.execute("SELECT app.submit_task(%s,%s,%s,%s)",(uuid4(),self.quote,key,hash)).fetchone()[0]
+            return c.execute("SELECT app.submit_quoted_task(%s,%s,%s,%s,%s)",(uuid4(),self.quote,key,hash,'a'*64)).fetchone()[0]
     def test_concurrent_replay_one_freeze_and_outbox(self):
         with ThreadPoolExecutor(max_workers=8) as pool: ids=list(pool.map(lambda _:self.submit(),range(20)))
         self.assertEqual(len(set(ids)),1)

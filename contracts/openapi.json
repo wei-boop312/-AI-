@@ -475,6 +475,76 @@
         }
       }
     },
+    "/api/v1/products/{product_id}/appearances/{appearance_id}": {
+      "patch": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Appearance Update",
+        "operationId": "appearance_update_api_v1_products__product_id__appearances__appearance_id__patch",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "appearance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appearance Id"
+            }
+          },
+          {
+            "name": "if-match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppearanceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/credits/balance": {
       "get": {
         "tags": [
@@ -552,6 +622,325 @@
           }
         }
       }
+    },
+    "/api/v1/quotes": {
+      "post": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Quote",
+        "operationId": "quote_api_v1_quotes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Submit",
+        "operationId": "submit_api_v1_tasks_post",
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Listing",
+        "operationId": "listing_api_v1_tasks_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{task_id}": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Detail",
+        "operationId": "detail_api_v1_tasks__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{task_id}/cancel": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Cancel",
+        "operationId": "cancel_api_v1_tasks__task_id__cancel_post",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rules/platforms": {
+      "get": {
+        "tags": [
+          "rules"
+        ],
+        "summary": "Platforms",
+        "operationId": "platforms_api_v1_rules_platforms_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rules/{platform}": {
+      "get": {
+        "tags": [
+          "rules"
+        ],
+        "summary": "Rules",
+        "operationId": "rules_api_v1_rules__platform__get",
+        "parameters": [
+          {
+            "name": "platform",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Platform"
+            }
+          },
+          {
+            "name": "marketplace",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "US",
+              "title": "Marketplace"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "generic",
+              "title": "Category"
+            }
+          },
+          {
+            "name": "image_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "MAIN",
+              "title": "Image Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -605,6 +994,53 @@
         ],
         "title": "AppearanceCreate"
       },
+      "Generation": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "white_background",
+              "scene",
+              "lifestyle"
+            ],
+            "title": "Type"
+          },
+          "prompt": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Prompt"
+          },
+          "output": {
+            "$ref": "#/components/schemas/Output"
+          },
+          "protection_mode": {
+            "type": "string",
+            "enum": [
+              "pixel_exact",
+              "none"
+            ],
+            "title": "Protection Mode"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/Region"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Regions",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "prompt",
+          "output",
+          "protection_mode"
+        ],
+        "title": "Generation"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -640,6 +1076,35 @@
           "password"
         ],
         "title": "Login"
+      },
+      "Output": {
+        "properties": {
+          "width": {
+            "type": "integer",
+            "maximum": 4096.0,
+            "minimum": 1.0,
+            "title": "Width"
+          },
+          "height": {
+            "type": "integer",
+            "maximum": 4096.0,
+            "minimum": 1.0,
+            "title": "Height"
+          },
+          "format": {
+            "type": "string",
+            "const": "png",
+            "title": "Format",
+            "default": "png"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "width",
+          "height"
+        ],
+        "title": "Output"
       },
       "ProductCreate": {
         "properties": {
@@ -696,6 +1161,191 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ProductPatch"
+      },
+      "QuoteRequest": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "appearance_profile_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appearance Profile Id"
+          },
+          "source_asset_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Asset Version Id"
+          },
+          "generation": {
+            "$ref": "#/components/schemas/Generation"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Targets"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "product_id",
+          "source_asset_version_id",
+          "generation",
+          "targets"
+        ],
+        "title": "QuoteRequest"
+      },
+      "Region": {
+        "properties": {
+          "source_x": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Source X"
+          },
+          "source_y": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Source Y"
+          },
+          "width": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Width"
+          },
+          "height": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Height"
+          },
+          "target_x": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Target X"
+          },
+          "target_y": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Target Y"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source_x",
+          "source_y",
+          "width",
+          "height",
+          "target_x",
+          "target_y"
+        ],
+        "title": "Region"
+      },
+      "Target": {
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "amazon",
+              "ebay",
+              "shopify"
+            ],
+            "title": "Platform"
+          },
+          "marketplace": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Marketplace"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Category"
+          },
+          "image_type": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Image Type"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "platform",
+          "marketplace",
+          "category",
+          "image_type"
+        ],
+        "title": "Target"
+      },
+      "TaskRequest": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "appearance_profile_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appearance Profile Id"
+          },
+          "source_asset_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Asset Version Id"
+          },
+          "generation": {
+            "$ref": "#/components/schemas/Generation"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Targets"
+          },
+          "quote_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quote Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "product_id",
+          "source_asset_version_id",
+          "generation",
+          "targets",
+          "quote_id"
+        ],
+        "title": "TaskRequest"
       },
       "ValidationError": {
         "properties": {
