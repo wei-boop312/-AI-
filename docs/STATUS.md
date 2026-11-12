@@ -273,3 +273,11 @@ Actions 43319072663 在新增 Compose 阶段失败：S3 镜像非 root UID 无�
 P0-01 新增真实来源摘要检查并接入 CI。source-map 保留 12 份规范原始 SHA，补 Git blob SHA，严格只容许已记录换行规范化；本机 PASS。ADR 更新已验证原生服务范围及用户远端推送授权，原始计划文档保持不改。交付静态门槛仍 PASS：31 API 路径、188 依赖组件、268 法律文本引用。
 
 周额度 used48%、剩余52%，继续；完整 task/all、当前 Compose/镜像门槛及真实供应商/预算验收仍待完成，未标 OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
+
+## 2026-11-13：逐任务入口与综合离线证据门槛
+
+补齐 P0/P1/P2 的实际行为测试映射，严格拒绝无测试或 skipped；原执行包中的计划文件名与实际合并套件对照见 ACCEPTANCE.md。P1-01 仍要求独立 Compose 新库/上一版升级，P2-05 还需真实生产浏览器 CSS/像素证据，未降级为仅单元测试。
+
+P3-01..04 及 all --profile offline 现在核验当前提交完整原生/生产浏览器/性能/Compose/镜像/依赖证据，CI 增加该门槛；实现文件未提交或旧报告均拒绝。综合成功仅 OFFLINE_READY，明确排除真实供应商、P5-02 独立运维演练和发布。P4-03/P5-03 返回 WAITING_EXTERNAL，不做模型调用/部署。P5-02 增加当前 commit/schema 的恢复、重启、500 请求性能证据校验，Windows 演练开始写 commit，旧报告正确返回 BLOCKED_ENV。
+
+驱动验证：49 单元通过、P0-03 的 11 项通过、全部映射文件存在、AST 编译/差异检查通过。当前 Windows 缺 Docker，综合门槛返回 3；P5-02 现存旧恢复报告也返回 3。未把新增入口称为已全验收。提交 d04777b 的 CI 43321769038 正在原生/浏览器阶段，随后验证 Compose 权限修正。

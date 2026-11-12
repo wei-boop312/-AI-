@@ -81,6 +81,8 @@ try {
     $taskVerified=Invoke-TaskProbe verify
     $taskCleanup=Invoke-TaskProbe cleanup
     $taskResult=@{observed_at=[DateTimeOffset]::UtcNow.ToString('o');environment=@{postgres='17.11';rabbitmq='4.4.0';seaweedfs='4.53';scope='isolated Windows native loopback';mq_restart='stop_app/start_app; Erlang VM retained';s3_restart='process stop/new process; same data directory'};prepared=$taskPrepared;mq_down=$taskMqDown;s3_down=$taskS3Down;recovered=$taskAfter;verification=$taskVerified;cleanup=$taskCleanup;paid_calls=0}
+    $taskResult.base_commit=(& git -C $taskRepo rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) {throw 'Cannot bind restart evidence to current commit'}
     $taskResult | ConvertTo-Json -Depth 15 | Set-Content -Encoding utf8 docs/evidence/native-restart-drill.json
     Write-Output 'PASS: native MQ application and S3 process restart, alerts, durable redelivery, private immutable object persistence'
 } finally {

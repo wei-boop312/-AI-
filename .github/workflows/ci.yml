@@ -64,6 +64,8 @@ jobs:
           docker image inspect visual-api:ci visual-web:ci --format '{{json .}}' > work/ci-public/docker-images.jsonl
       - name: Verify current P5-01 build evidence
         run: uv run python scripts/check.py task P5-01
+      - name: Verify complete offline task evidence
+        run: uv run python scripts/check.py all --profile offline
       - name: Upload public evidence and static production assets
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

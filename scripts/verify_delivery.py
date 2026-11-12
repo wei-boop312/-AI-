@@ -66,6 +66,9 @@ def verify_static():
     return {'static':'PASS','legal_text_references':legal_files,'dependency_components':len(inventory['components']),'openapi_paths':len(create_app().openapi()['paths'])}
 
 def verify_run(evidence):
+    paths=['src','scripts','tests','migrations','apps/web/src','apps/web/e2e','.github','compose.yaml','Dockerfile','apps/web/Dockerfile','pyproject.toml','uv.lock','apps/web/package.json','apps/web/pnpm-lock.yaml','contracts','ops']
+    if subprocess.call(['git','diff','--quiet','HEAD','--',*paths],cwd=ROOT) or subprocess.check_output(['git','ls-files','--others','--exclude-standard','--',*paths],cwd=ROOT):
+        raise EnvironmentError('BLOCKED_ENV: commit implementation changes before validating current-commit build evidence')
     docker=shutil.which('docker')
     if not docker:raise EnvironmentError('BLOCKED_ENV: Docker engine and fresh CI build evidence required')
     result=subprocess.run([docker,'info','--format','{{.ServerVersion}}'],capture_output=True,text=True)

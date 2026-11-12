@@ -88,6 +88,9 @@ try {
     $taskTiming=@{rto_seconds=$taskRecoveryClock.Elapsed.TotalSeconds;snapshot_age_seconds_at_recovery_start=($taskRecoveryStarted-[DateTimeOffset]$taskManifest.snapshot_at).TotalSeconds;backup_seconds=([DateTimeOffset]$taskManifest.finished_at-[DateTimeOffset]$taskManifest.started_at).TotalSeconds;rpo_target='NOT_SET';rto_target='NOT_SET';scope='native cold destination initialization through verified API/artifact/safe known-id recovery; not a production SLA'}
     if ($taskTiming.snapshot_age_seconds_at_recovery_start -lt 0 -or $taskTiming.rto_seconds -lt 0) {throw 'Invalid recovery timing; clock normalization required'}
     $taskEvidence | Add-Member -NotePropertyName timing -NotePropertyValue $taskTiming
+    $taskCommit=(& git -C $taskRepo rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) {throw 'Cannot bind restore evidence to current commit'}
+    $taskEvidence | Add-Member -NotePropertyName base_commit -NotePropertyValue $taskCommit
     [IO.File]::WriteAllText($taskEvidenceFile,($taskEvidence | ConvertTo-Json -Depth 20))
     Invoke-TaskPython -TaskArguments @('scripts/verify_restore_drill.py','cleanup','--state',$taskState) -TaskLog (Join-Path $taskDir 'cleanup.log')
     $taskSourceCleaned=$true
