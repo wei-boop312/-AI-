@@ -227,3 +227,5 @@ python scripts/check.py task P4-02 --profile offline：19项真实SDK/MockTransp
 新增API/Worker及web多阶段Dockerfile、非root运行和白名单.dockerignore；基础镜像已从官方公开Registry核对并固定digest（ops/build-images.json）。web候选Nginx代理/api到api:8000。工作流contents只读，不含付费秘密或推镜像/部署步骤。
 
 本机无Docker，当前仅脚本AST、action SHA长度及diff检查通过；实际Linux安装、镜像构建、服务与浏览器CI尚未运行，不称CI绿或P5-01完成。下一步推送后观察实际Actions并修复；SBOM/NOTICE、依赖漏洞检查、Compose与完整task/all入口仍待补齐。保留此前周额度used37%、剩余63%，继续。
+
+CI首轮43311633840已实际通过Linux锁定安装、单元/契约、提交历史gitleaks与前端生产构建；两套PG迁移/初始化、原生集成均exit0，但独立API就绪等待超时，浏览器与镜像阶段未执行。当前尚无启动日志公开诊断，新增仅失败时脱敏输出启动尾部及最后ready响应，继续复跑定位；不把首轮失败改写成成功。SBOM/NOTICE与漏洞检查开发中，尚未阶段验收。

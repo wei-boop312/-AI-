@@ -79,7 +79,10 @@ def main():
             try:process.wait(timeout=15)
             except subprocess.TimeoutExpired:os.killpg(process.pid,signal.SIGKILL);process.wait(timeout=5)
     def http_ready(url):
-        with httpx.Client(trust_env=False,timeout=2) as client:return client.get(url).status_code==200
+        with httpx.Client(trust_env=False,timeout=2) as client:
+            response=client.get(url)
+            if url.endswith('/health/ready'):(public/'last-api-ready.json').write_text(json.dumps({'status':response.status_code,'body':response.json()}))
+            return response.status_code==200
     try:
         for name,port in (('pg-test',55432),('pg-dev',55433)):
             service(name,images['postgres']['image'],options=['-p',f'127.0.0.1:{port}:5432','-e','POSTGRES_USER=ci_owner','-e','POSTGRES_PASSWORD='+pg_password])
@@ -110,6 +113,15 @@ def main():
         build_manifest={'commit':os.environ.get('GITHUB_SHA'),'files':{str(p.relative_to(ROOT)) :hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT/'apps/web/dist').rglob('*')) if p.is_file()},'images':images,'steps':steps,'paid_calls':0,'result':'PASS'}
         (public/'native-result.json').write_text(json.dumps(build_manifest,indent=2)+'\n')
     except Exception:
+        import re
+        for path in private.glob('*.log'):
+            if path.name=='docker.log':continue
+            text=path.read_text(encoding='utf-8',errors='replace')[-20000:]
+            for value in (pg_password,mq_password,access,secret):text=text.replace(value,'[redacted]')
+            text=re.sub(r'(?:postgres(?:ql)?|amqps?|https?)://\S+','[redacted-url]',text)
+            text=re.sub(r'-----BEGIN .*?PRIVATE KEY-----.*?-----END .*?PRIVATE KEY-----','[redacted-private-key]',text,flags=re.S)
+            (public/('startup-'+path.name)).write_text(text,encoding='utf-8')
+        print('Private startup logs redacted into public diagnostic artifact',flush=True)
         (public/'native-result.json').write_text(json.dumps({'commit':os.environ.get('GITHUB_SHA'),'steps':steps,'result':'FAIL','paid_calls':0},indent=2)+'\n')
         raise
     finally:
