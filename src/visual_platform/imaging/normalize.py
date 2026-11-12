@@ -16,6 +16,7 @@ def normalize(data: bytes) -> bytes:
             if raw.width*raw.height>MAX_PIXELS: raise ValueError("pixel limit")
             raw.load()
             image=ImageOps.exif_transpose(raw)
+            if image.mode=="P" and "transparency" in image.info: image=image.convert("RGBA")
             alpha=image.getchannel("A") if "A" in image.getbands() else None
             if image.info.get("icc_profile"):
                 profile=ImageCms.ImageCmsProfile(BytesIO(image.info["icc_profile"]))

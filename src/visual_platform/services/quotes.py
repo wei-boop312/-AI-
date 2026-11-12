@@ -10,8 +10,8 @@ def hash_data(value):
 
 def db_conflict(exc):
     code=str(exc).split("\n")[0]
-    invisible={"quote_not_found","product_unavailable","source_unavailable","appearance_unavailable","task_not_found"}
-    known=invisible | {"insufficient_credits","idempotency_conflict","quote_consumed","quote_expired","quote_input_mismatch","inactive_user","already_started","source_hash_mismatch"}
+    invisible={"quote_not_found","product_unavailable","source_unavailable","appearance_unavailable","task_not_found","upload_not_found"}
+    known=invisible | {"insufficient_credits","idempotency_conflict","quote_consumed","quote_expired","quote_input_mismatch","inactive_user","already_started","source_hash_mismatch","upload_busy","upload_rejected","upload_expired","upload_lease_lost"}
     if code in known: raise HTTPException(404 if code in invisible else 409,code)
     raise exc
 

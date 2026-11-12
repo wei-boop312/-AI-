@@ -1,13 +1,15 @@
 from contextlib import asynccontextmanager
 from uuid import uuid4
 import os
+import asyncio
 import asyncpg
 from fastapi import FastAPI,Request,HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from visual_platform.core.settings import Settings
 from visual_platform.db.pool import open_pool
-from visual_platform.api import auth,products,credits,quotes,tasks,rules
+from visual_platform.storage.s3 import S3Storage
+from visual_platform.api import auth,products,credits,quotes,tasks,rules,assets
 
 
 def create_app(settings: Settings | None=None):
@@ -15,6 +17,8 @@ def create_app(settings: Settings | None=None):
     async def lifespan(app):
         configured=settings or (Settings.from_env() if os.environ.get("API_DATABASE_URL") else None)
         app.state.settings=configured
+        app.state.storage=S3Storage(configured) if configured and configured.s3_endpoint else None
+        app.state.decode_capacity=asyncio.Semaphore(2)
         app.state.api_pool=None; app.state.auth_pool=None
         if configured:
             app.state.api_pool=await open_pool(configured.api_database_url,"app_api")
@@ -25,6 +29,7 @@ def create_app(settings: Settings | None=None):
         finally:
             if app.state.api_pool: await app.state.api_pool.close()
             if app.state.auth_pool: await app.state.auth_pool.close()
+            if app.state.storage: app.state.storage.close()
 
     app=FastAPI(title="跨境电商 AI 视觉生产平台",version="0.1.0",lifespan=lifespan)
     def error(request,status,code):
@@ -58,7 +63,7 @@ def create_app(settings: Settings | None=None):
     def ready():
         # Storage, queue and worker readiness will be wired with their adapters.
         return JSONResponse(status_code=503,content={"status":"not_ready","reason":"complete native pipeline not configured"})
-    app.include_router(auth.router); app.include_router(products.router); app.include_router(credits.router); app.include_router(quotes.router); app.include_router(tasks.router); app.include_router(rules.router)
+    app.include_router(auth.router); app.include_router(products.router); app.include_router(credits.router); app.include_router(quotes.router); app.include_router(tasks.router); app.include_router(rules.router); app.include_router(assets.router)
     return app
 
 app=create_app()
