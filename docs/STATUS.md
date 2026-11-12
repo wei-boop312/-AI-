@@ -10,3 +10,5 @@ GitHub 连接器目标仓库返回404；直连代理不可用，待检查绕过�
 第二轮：已建立独立 venv、uv.lock；uv sync --locked 成功。新增严格请求schema及哈希、PNG/JPEG/WebP标准化、EXIF旋转与元数据清除、保守规则模块、live/ready API与实际OpenAPI。11项单元测试通过，日志 docs/evidence/unit-20261112.log。尚未实现数据库基础，未达到P0/P1完整验收。GitHub重试传输失败，未上传。
 
 GitHub授权已恢复：首次提交 d39a97b 已成功推送 origin/master。当前交付仍为基础实现，不代表MVP完成。
+
+持续实施阶段：周额度起始剩余96%。新增Alembic 0001数据库基线（users/auth/products/appearances/assets/versions/wallets）、复合归属外键、RLS及事务上下文。安装并锁定asyncpg/Alembic/psycopg/MQ/S3/认证依赖。离线SQL生成exit0、compileall exit0、11项单元测试通过。首次无MIGRATION_DATABASE_URL生成被拒，补离线占位URL后成功。真实PG未运行，P1-01/P1-02仍部分完成。下一步补任务/报价/账本/原子函数及真实服务验证。
