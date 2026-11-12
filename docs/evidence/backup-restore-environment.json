@@ -1,0 +1,10 @@
+{
+  "python": "3.14.6",
+  "os": "Windows-11-10.0.26200-SP0",
+  "postgres_tool": "pg_dump (PostgreSQL) 17.11",
+  "s3_tool": "version 30GB 4.53 4ab66fb76da83700739f5839e62fcaf15fb7d02a windows amd64",
+  "base_commit": "e86a22b16a7f4577402cbd87475fddf111558a99",
+  "command": "pwsh -File scripts/native_restore_drill.ps1 -PgBin <native-pg-bin> -WeedBinary <native-weed> -WorkersPaused",
+  "paid_provider_calls": 0,
+  "scope": "explicit local offline profile; fresh target PG and S3 daemons; private archive excluded from Git"
+}

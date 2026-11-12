@@ -1,0 +1,57 @@
+{
+  "backup_id": "97b57a38-7b9c-4d04-a4a2-d7dc856fcc99",
+  "restore_id": "eafdde0f-33dd-4392-9fea-d2d6e67e245d",
+  "started_at": "2026-11-13T03:44:47.636186+08:00",
+  "finished_at": "2026-11-13T03:44:58.037745+08:00",
+  "snapshot_at": "2026-11-13T03:44:36.716752+08:00",
+  "table_count": 25,
+  "object_references_verified": 183,
+  "fake_files_restored": 148,
+  "database_exact_before_recovery_guards": true,
+  "function_owners_preserved": true,
+  "old_logins_restored_as_nologin": true,
+  "sessions_revoked": true,
+  "quarantined_tasks": 3,
+  "before_invariants": {
+    "bad_wallets": 0,
+    "bad_ledger_totals": 0,
+    "duplicate_terminal_settlements": 0
+  },
+  "after_invariants": {
+    "bad_wallets": 0,
+    "bad_ledger_totals": 0,
+    "duplicate_terminal_settlements": 0
+  },
+  "schema_head": "0022",
+  "verification": {
+    "api_ready": true,
+    "old_access_rejected": true,
+    "post_snapshot_marker_absent": true,
+    "completed_report_review_and_download_hash_preserved": true,
+    "pixel_protection_preserved": true,
+    "three_fixture_tasks_quarantined": true,
+    "unknown_and_queued_cannot_submit": true,
+    "known_id_recovered_without_new_generate": true,
+    "balance_at_snapshot": {
+      "available": 136,
+      "reserved": 48,
+      "funded_total": 200,
+      "spent_total": 16
+    },
+    "balance_after_one_safe_recovery": {
+      "available": 136,
+      "reserved": 32,
+      "funded_total": 200,
+      "spent_total": 32
+    },
+    "verified_at": "2026-11-13T03:45:03.110609+08:00"
+  },
+  "timing": {
+    "backup_seconds": 1.105712,
+    "scope": "native cold destination initialization through verified API/artifact/safe known-id recovery; not a production SLA",
+    "rpo_target": "NOT_SET",
+    "rto_target": "NOT_SET",
+    "rto_seconds": 24.1523682,
+    "snapshot_age_seconds_at_recovery_start": 2.6275328
+  }
+}

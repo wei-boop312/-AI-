@@ -155,3 +155,15 @@ DurableFake late现保存图像/事实回执后丢失响应，允许对既有结
 完整常规流程含真实MQ闭环、断网/refresh、草稿/账号切换、报告版本及独立PNG像素验证、手机视口和性能。最新60.430秒/50对象帧间隔p95 12.1ms；20并发500请求均200，API p95 359.0ms/p99 583.0ms/最大818.0ms，原始尾部未过滤。增加render_performance_report.py使摘要跟随新证据，未据单项性能宣告综合完成。
 
 详见CONTROLLED_BROWSER.md、PERFORMANCE.md及browser-fault-*/browser-production-complete日志。周额度used27%、剩余73%。仍待完整任务/all命令及要求审计、备份恢复、CI/部署说明和供应商适配，未标OFFLINE_READY。
+
+## 2026-11-13：同步快照备份与独立PG/S3恢复
+
+新增backup.py create/restore、原生PowerShell演练及API/任务验证脚本。导出PG同步快照供pg_dump与逐表数量/内容摘要共用，复制DB引用的不可变原图/canonical/生成/最终图、报告、规则证据及离线Fake结果缓存。私有归档仅在忽略work/.local，数据文件校验与路径逃逸预检失败不会进入网络/写入；源角色密码/JWT私钥不入归档，运行身份恢复为NOLOGIN并重新签发新身份。
+
+恢复只接受不同PG system_identifier的空目标和独立空S3服务；保留函数所有者/ACL，避免--no-owner扩大SECURITY DEFINER权限。pg_restore单事务，原initdb public空命名空间经验证后无CASCADE重建。先核对DB精确指纹及全部对象SHA，再仅适配新的storage_version_id、撤销旧会话，并把全部queued/processing/uncertain隔离为uncertain/manual，保留冻结额度、fencing和审计，不自动计费或重发。快照之后可能已有供应商调用，不能把缺失意图当成从未提交。
+
+原生PG17.11/Seaweed4.53独立进程实测成功：25张表、183对象引用、148个Fake缓存文件校验；函数定义/所有者匹配，账本守恒/流水汇总/单一终态零异常。原成品/报告SHA、保护区RGB、人工复核和规则快照保留；三个未结束样本任务隔离，排队/未知Worker不能领取；已核验ID人工resume只查询归档、generate仍一次。源fixture正常结案且重复清理通过，临时目标进程已关闭，本地publisher/worker已恢复。
+
+快照后产品标记未恢复，演练恢复起点快照年龄2.63秒；备份1.11秒，冷目标初始化到API/下载/安全恢复验证RTO24.15秒。修正PowerShell UTC/本地时间混算，RTO采用Stopwatch，RPO年龄采用DateTimeOffset。RPO/RTO目标NOT_SET，本机小体积演练不代表生产SLA。43项单元通过；说明及脱敏结果见BACKUP_RESTORE.md、backup-restore-drill/environment.json和对应日志。
+
+周额度used30%、剩余70%。P5-02的重启/积压告警、完整task/all门槛、CI/部署说明和供应商适配仍未完成；未标OFFLINE_READY/RELEASE_READY。

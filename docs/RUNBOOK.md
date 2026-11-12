@@ -40,3 +40,6 @@ MQ入口：AMQP_URL（远程必须amqps，本机可amqp）、QUEUE_PREFIX（默�
 
 
 受控故障阶段使用scripts/run_fake_task.py --task UUID --mode failed/uncertain/late，只能针对本机offline profile，流程及恢复消费者要求见docs/CONTROLLED_BROWSER.md。unknown页面保持SSE，运营结案或晚到回执resume后自动更新；等待期间禁用同产品普通生成入口。
+
+
+DB+S3+规则恢复已在独立原生实例演练，命令与边界见docs/BACKUP_RESTORE.md。恢复端默认把未结束任务隔离为uncertain/manual，保留冻结额度；不能根据旧快照自动重发生成/检测。仅核验既有回执且确认源侧提交边界后，使用受限运营resume。旧会话撤销，服务账号与JWT重新签发；只有受信任私有归档可交给DDL恢复。

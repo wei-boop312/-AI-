@@ -56,3 +56,6 @@ API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md]
 
 
 受控故障浏览器配置与单任务Fake CLI见[docs/CONTROLLED_BROWSER.md](docs/CONTROLLED_BROWSER.md)。普通e2e和受控配置分别验收；后者要求显式离线标记并暂停本项目publisher/consumer，完成后恢复。
+
+
+原生同步快照备份、独立PG/S3恢复、会话撤销及未结束任务隔离见[docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md)。归档和私有profile只保存在忽略目录，Git中仅包含脱敏结果；生产RPO/RTO目标尚未设定。
