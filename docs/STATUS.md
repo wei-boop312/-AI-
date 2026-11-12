@@ -63,3 +63,13 @@ origin/master已连接，阶段成果持续推送。周额度阶段起始剩余9
 15项单元测试通过（含EXIF1..8与ICC/调色板透明）；原生PG+S3完整集成33项通过，另新增并发complete专项1项通过。证据docs/evidence/pg-s3-upload-20261113.log、s3-concurrent-complete-20261113.log。验证了原始字节与标准化PNG两版本、重复/并发完成仅两版本、EXIF清除/旋转、透明白底一致、动画及MIME伪造拒绝、已知他人资源404、匿名S3读取403、不可变对象条件写入保持原字节。
 
 未运行浏览器跨域上传；S3 CORS和完整本地初始化脚本待接线。Worker/MQ尚未把真实上传接成完整任务，不能标OFFLINE_READY。下一步实现fake Worker真实生成/回贴/检测/归档/结算与MQ投递。
+
+## 2026-11-13：真实PG/S3离线Worker闭环
+
+0013/0014加入Worker完整上下文、离线费用记录、持久阶段事件和安全释放租约。实现持久假供应商、受限进程回贴与保存后像素验证、严格视觉事实、阶段恢复Worker、20秒续租、只恢复查询/归档/本地处理、最终PNG与JSON报告私有下载。SSE支持持久游标重放/重置、授权复核、终态关闭，等待期间不占数据库连接。
+
+18项单元测试通过；完整PG/S3集成39项通过，之后新增独立Worker CLI进程专项1项通过。证据：docs/evidence/worker-full-pg-s3-20261113.log、offline-worker-pg-s3-20261113.log、worker-process-pg-s3-20261113.log。实际完成真实上传→假生成→S3归档→平移回贴→最终图事实检测→未验证规则人工复核→报告存储→单次结算→PNG/报告下载，下载字节hash及保护区域RGB一致。
+
+故障测试：归档失败后用新provider对象/连接池恢复，generate intent仍只有1；未知结果冻结且不重发；明确fake失败退款；恶意/错误结构事实不能自行判合规，交付manual_review。CLI专项确实运行独立Python进程；之前状态恢复测试是对象/连接池重建，不冒充强杀进程恢复。
+
+尚未接入RabbitMQ confirm/ack/DLX与恢复扫描，也未完成中文React/Konva界面及浏览器验证；因此仍不能标OFFLINE_BACKEND_READY或OFFLINE_READY。下一步接MQ和本地启动脚本，再完成前端。

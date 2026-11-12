@@ -10,7 +10,7 @@ from urllib.parse import urlsplit,urlunsplit
 from test_auth_api import AuthApiFixture
 
 @unittest.skipUnless(os.environ.get('TEST_S3_ENDPOINT'),'native S3 not configured')
-class AssetTests(AuthApiFixture):
+class AssetFixture(AuthApiFixture):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -29,6 +29,7 @@ class AssetTests(AuthApiFixture):
     def png(self):
         im=Image.new('RGBA',(10,20),(255,0,0,0)); exif=Image.Exif(); exif[274]=6; exif[270]='private location'
         b=BytesIO(); im.save(b,'PNG',exif=exif); return b.getvalue()
+class AssetTests(AssetFixture):
     def test_upload_normalize_private_download_and_replay(self):
         data=self.png(); info=self.upload(data); result=self.complete(info)
         self.assertEqual(result.status_code,200,result.text); version=result.json()

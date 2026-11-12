@@ -62,3 +62,62 @@ async def compliance(task_id: UUID,request: Request,user=Depends(current_user)):
         row=await c.fetchrow("SELECT c.id,c.final_version_id,c.final_sha256,c.facts,c.rule_snapshots,c.per_platform_results,c.auto_overall,c.sampling_selected,c.report_sha256,c.created_at FROM app.compliance_checks c JOIN app.generation_tasks t ON t.compliance_id=c.id AND t.user_id=c.user_id WHERE t.id=$1",task_id)
     if not row: raise HTTPException(404,'not_found')
     return {**dict(row),'facts':json.loads(row['facts']),'rule_snapshots':json.loads(row['rule_snapshots']),'per_platform_results':json.loads(row['per_platform_results'])}
+
+@router.get('/{task_id}/download')
+async def download_final(task_id: UUID,request: Request,user=Depends(current_user)):
+    import asyncio
+    from fastapi.responses import RedirectResponse
+    storage=request.app.state.storage
+    if storage is None: raise HTTPException(503,'storage_not_configured')
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        row=await c.fetchrow("SELECT v.bucket,v.object_key,v.storage_version_id FROM app.generation_tasks t JOIN app.asset_versions v ON v.id=t.final_version_id AND v.user_id=t.user_id WHERE t.id=$1 AND t.status='succeeded'",task_id)
+    if not row: raise HTTPException(404,'not_found')
+    if row['bucket']!=storage.bucket: raise HTTPException(503,'storage_bucket_unavailable')
+    return RedirectResponse(await asyncio.to_thread(storage.download_url,row['object_key'],row['storage_version_id'],'final.png'),status_code=302)
+
+@router.get('/{task_id}/report/download')
+async def download_report(task_id: UUID,request: Request,user=Depends(current_user)):
+    import asyncio
+    from fastapi.responses import RedirectResponse
+    storage=request.app.state.storage
+    if storage is None: raise HTTPException(503,'storage_not_configured')
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        row=await c.fetchrow("SELECT c.report_bucket,c.report_object_key,c.report_storage_version_id FROM app.generation_tasks t JOIN app.compliance_checks c ON c.id=t.compliance_id AND c.user_id=t.user_id WHERE t.id=$1 AND t.status='succeeded'",task_id)
+    if not row: raise HTTPException(404,'not_found')
+    if row['report_bucket']!=storage.bucket: raise HTTPException(503,'storage_bucket_unavailable')
+    return RedirectResponse(await asyncio.to_thread(storage.download_url,row['report_object_key'],row['report_storage_version_id'],'report.json'),status_code=302)
+
+@router.get('/{task_id}/events')
+async def events(task_id: UUID,request: Request,last_event_id: str | None=Header(default=None),user=Depends(current_user)):
+    import asyncio
+    from fastapi.responses import StreamingResponse
+    from fastapi.encoders import jsonable_encoder
+    try:
+        cursor=int(last_event_id or '0')
+        if cursor<0 or cursor>9223372036854775807: raise ValueError()
+    except ValueError: raise HTTPException(422,'invalid_event_cursor')
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        if not await c.fetchval('SELECT id FROM app.generation_tasks WHERE id=$1',task_id): raise HTTPException(404,'not_found')
+    async def stream():
+        nonlocal cursor
+        heartbeat=0
+        while not await request.is_disconnected():
+            try: await current_user(request)
+            except HTTPException: return
+            async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+                bounds=await c.fetchrow('SELECT min(id) AS first,max(id) AS last FROM app.task_events WHERE task_id=$1',task_id)
+                reset=bool(cursor and bounds['first'] and (cursor<bounds['first'] or cursor>bounds['last']))
+                if reset: cursor=0
+                rows=await c.fetch('SELECT id,type,payload FROM app.task_events WHERE task_id=$1 AND id>$2 ORDER BY id LIMIT 100',task_id,cursor)
+                status=await c.fetchval('SELECT status FROM app.generation_tasks WHERE id=$1',task_id)
+            # No connection or transaction is held while streaming or waiting.
+            if reset: yield 'event: stream.reset\ndata: {}\n\n'
+            for row in rows:
+                cursor=row['id']; payload=json.loads(row['payload'])
+                data={**payload,'task_id':str(task_id)}
+                yield 'id: '+str(cursor)+'\nevent: '+row['type']+'\ndata: '+json.dumps(jsonable_encoder(data),ensure_ascii=False)+'\n\n'
+            if status in ('succeeded','failed','cancelled') and len(rows)<100: return
+            heartbeat+=1
+            if heartbeat>=15: yield ': heartbeat\n\n'; heartbeat=0
+            await asyncio.sleep(1)
+    return StreamingResponse(stream(),media_type='text/event-stream',headers={'Cache-Control':'no-store','X-Accel-Buffering':'no'})

@@ -1,0 +1,12 @@
+C:\Users\MECHREVO\Documents\Codex\2026-11-12\ai\outputs\visual-production-platform\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_archive_failure_restarts_only_local_steps (test_offline_pipeline.OfflinePipelineTests.test_archive_failure_restarts_only_local_steps) ... ok
+test_explicit_supplier_failure_refunds (test_offline_pipeline.OfflinePipelineTests.test_explicit_supplier_failure_refunds) ... ok
+test_malformed_model_facts_require_review_and_still_deliver (test_offline_pipeline.OfflinePipelineTests.test_malformed_model_facts_require_review_and_still_deliver) ... ok
+test_real_upload_through_final_download_report_and_charge (test_offline_pipeline.OfflinePipelineTests.test_real_upload_through_final_download_report_and_charge) ... ok
+test_unknown_stays_reserved_and_never_resubmits (test_offline_pipeline.OfflinePipelineTests.test_unknown_stays_reserved_and_never_resubmits) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 6.087s
+
+OK
