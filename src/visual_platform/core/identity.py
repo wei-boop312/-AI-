@@ -15,12 +15,12 @@ def verify_password(encoded: str, candidate: str):
     try: return _hasher.verify(encoded,candidate)
     except VerificationError: return False
 
-def issue_access(user_id: UUID, private_key: str, *, issuer: str, audience: str):
+def issue_access(user_id: UUID, private_key: str, *, issuer: str, audience: str, family_id: UUID | None = None):
     now=datetime.now(timezone.utc)
-    return jwt.encode(dict(sub=str(user_id),iss=issuer,aud=audience,iat=now,exp=now+timedelta(minutes=15),jti=str(uuid4())),private_key,algorithm="RS256")
+    return jwt.encode(dict(sub=str(user_id),iss=issuer,aud=audience,iat=now,exp=now+timedelta(minutes=15),jti=str(uuid4()),sid=str(family_id or uuid4())),private_key,algorithm="RS256")
 def decode_access(token: str, public_key: str, *, issuer: str, audience: str):
-    claims=jwt.decode(token,public_key,algorithms=["RS256"],issuer=issuer,audience=audience,options={"require":["sub","iss","aud","iat","exp","jti"]})
-    UUID(claims["sub"]); UUID(claims["jti"])
+    claims=jwt.decode(token,public_key,algorithms=["RS256"],issuer=issuer,audience=audience,options={"require":["sub","iss","aud","iat","exp","jti","sid"]})
+    UUID(claims["sub"]); UUID(claims["jti"]); UUID(claims["sid"])
     return claims
 
 def new_refresh():
