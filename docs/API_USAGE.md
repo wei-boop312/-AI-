@@ -29,3 +29,7 @@ GET /api/v1/health/live只看API存活；ready只探测api/auth PG及S3，检查
 ## P5-01构建门槛
 
 `python scripts/check.py task P5-01`验证当前路由schema、镜像/Actions固定引用、法律文本SHA、SBOM锁文件摘要，并要求本次原生/浏览器/性能、依赖审计及两个实际镜像结果对应当前提交。缺Docker或新鲜记录返回BLOCKED_ENV，旧的已提交证据不能替代本次执行。工作流只读仓库，只构建测试和上传短期公开产物，不发布镜像、不部署。
+
+新增容器运行候选验收 `scripts/container_smoke.py`：在 Linux CI 建立独立临时 Compose 基础服务，运行刚构建的 API/Nginx/Publisher/Worker 四个非 root 容器，经过 Nginx 登录、私有上传、MQ 消费、最终图/报告下载、保护 RGB 和唯一结算检查。报告 container-runtime.json 绑定当前 commit 与两个实际镜像 ID，并纳入 P5-01；代码存在不等于该轮已通过，必须等待实际 CI。
+
+该演练采用 Linux host network 访问本机回环基础服务，Origin 为 http://127.0.0.1:8080，只是隔离 CI 拓扑；不提供生产网络/TLS 配置。每容器仅接收自身数据库角色，迁移/admin 凭据不传给容器；JWT 单文件只读挂载，宿主私有父目录 0700。临时服务和容器删除前验证所有权标签；不操作已有环境。离线 Fake 文件保存在一次性 Worker 容器可写层，故此项不证明供应商缓存持久性或容器重启恢复；正式运行必须为其配置受保护的持久目录，原生恢复另有 P5-02 实测。

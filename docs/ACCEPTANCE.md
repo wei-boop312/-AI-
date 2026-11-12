@@ -31,6 +31,6 @@
 
 P1/P2 原生入口需显式配置专用 `TEST_DATABASE_URL`；涉及存储/流水线的 P2 入口还需 `TEST_AMQP_URL` 和 `TEST_S3_*`。缺失返回 3，不跳过。不在共享日志打印凭据。P1-01 会另建临时 Compose 项目；不能在占用同端口的日常环境旁直接执行。
 
-`python scripts/check.py all --profile offline` 是本次证据综合门槛，而非一条隐式安装/启停命令。干净 Linux CI 依次进行锁定安装、单元/契约、依赖审计/SBOM、秘密扫描、生产构建、`ci_native.py`（原生服务与浏览器）、P0-02、两个镜像构建、P5-01，再执行 all。完整可复现命令以 `.github/workflows/ci.yml` 为准。只接受同一 commit、当前构建、无跳过的全量证据；实现文件未提交则拒绝验证。成功状态只为 OFFLINE_READY，范围 P0–P3、P4 mock 契约和 P5-01。P5-02 单独实测，P4-03/P5-03 仍待外部条件；OFFLINE_READY 不等于真实模型或发布验收。
+`python scripts/check.py all --profile offline` 是本次证据综合门槛，而非一条隐式安装/启停命令。干净 Linux CI 依次进行锁定安装、单元/契约、依赖审计/SBOM、秘密扫描、生产构建、`ci_native.py`（原生服务与浏览器）、P0-02、两个镜像构建、`container_smoke.py`（实际镜像离线任务闭环）、P5-01，再执行 all。完整可复现命令以 `.github/workflows/ci.yml` 为准。只接受同一 commit、当前构建、无跳过的全量证据；实现文件未提交则拒绝验证。成功状态只为 OFFLINE_READY，范围 P0–P3、P4 mock 契约和 P5-01。P5-02 单独实测，P4-03/P5-03 仍待外部条件；OFFLINE_READY 不等于真实模型或发布验收。
 
 P5-02 的 Windows 原生准备见 OPERATIONS_RECOVERY / BACKUP_RESTORE：专用 RuntimeRoot 重启演练、暂停本项目消费者后的独立恢复演练、恢复消费者和生产 preview 后执行 performance.spec.ts。两份演练写 base_commit，性能证据也绑定 commit；恢复 schema 必须等于当前 Alembic head。P5-02 不把单节点 stop_app/start_app 外推为 Rabbit 整机或生产集群容灾，不把未设定的 RPO/RTO 目标称为达标。

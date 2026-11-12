@@ -1,6 +1,8 @@
 # 实施状态
 
-2026-11-12；当前为开发阶段，未达到 OFFLINE_READY。
+当前摘要（2026-11-13，提交 35694a4 后）：中文前端、私有认证、真实 PG/MQ/S3 完整离线流水线已实现；49 单元、39 mock 契约、90 原生集成及 4+5 生产浏览器项目已实际通过。P5-02 在 9e8f247 完成当前迁移恢复/重启/性能实测。完整 CI 仍在复跑 Compose 最后清理修正，尚未宣告 OFFLINE_READY。真实供应商、目标环境和发布待外部条件。逐任务现状见 [TASK_STATUS.md](TASK_STATUS.md)，入口与范围见 [ACCEPTANCE.md](ACCEPTANCE.md)。
+
+以下是按时间追加的历史实施记录；早期“未接入/尚缺”描述只对应其记录阶段，最新结论见顶部摘要和末尾更新。
 
 ## 已实现并验证
 
@@ -291,3 +293,11 @@ P3-01..04 及 all --profile offline 现在核验当前提交完整原生/生产�
 CI43321769038 原生90项和全部9浏览器已通过；Compose 已达到新库/上一版升级、6角色验证和保卷重建后的 PG/S3/MQ 读取，但最后专用 quorum 测试队列 if_empty 条件删除被 Rabbit 拒绝，整体仍 failure。按官方问题记录 https://github.com/rabbitmq/rabbitmq-server/issues/10543 改为 ACK 后 passive 验证消息数为0，再无条件删除本临时项目专用队列；不操作业务队列。本机真实 Rabbit 相同流程已 PASS，日志 compose-quorum-cleanup-20261113.log。原轮失败诊断和来源保存 ci-43321769038，未将部分结果称为 Compose PASS，继续复跑。
 
 周额度 used49%、剩余51%。真实供应商及发布仍未授权/未验收；综合离线门槛待当前 CI 实际全绿，不标 OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
+
+## 2026-11-13：真实镜像运行闭环候选与现状索引
+
+新增 container_smoke.py 并接 CI 镜像构建后：独立临时基础服务及私有 bootstrap，实际刚构建 API/Nginx/Publisher/Worker 四容器均非 root，按服务只传对应非owner角色，JWT单文件只读挂载。经 Nginx 登录/上传/报价/提交、MQ实际消费、最终 PNG/报告 SHA 与保护RGB、manual_review、200→184且单一charge验收；报告绑定当前提交/两个镜像ID，P5-01新增必需证据。只使用offline Fake，Linux host network仅回环演练、不代表生产TLS拓扑；一次性容器可写层不证明缓存持久性。只清理随机owner标签相符的专用容器/临时卷。异常日志脱敏后公开，私有profile留忽略目录。
+
+本机 AST/静态交付检查通过，Windows入口正确exit3且未动原生服务；没有Docker，故此为待真实CI验收候选，不标容器任务闭环已通过。API_USAGE/ACCEPTANCE明确命令、权限及边界。新增TASK_STATUS逐项汇总并在STATUS顶部区分最新状态与历史日志，避免早期记录被误认为当前未实现功能。
+
+CI43323370220（35694a4）已实际通过新的Compose完整阶段，正在构建镜像及综合门槛；9e8f247旧运行在取消请求前已结束，因此无需取消。下一提交继续验证新增容器闭环，不提前宣告整项目完成。

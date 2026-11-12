@@ -66,7 +66,7 @@ def verify_static():
     return {'static':'PASS','legal_text_references':legal_files,'dependency_components':len(inventory['components']),'openapi_paths':len(create_app().openapi()['paths'])}
 
 def verify_run(evidence):
-    paths=['src','scripts','tests','migrations','apps/web/src','apps/web/e2e','.github','compose.yaml','Dockerfile','apps/web/Dockerfile','pyproject.toml','uv.lock','apps/web/package.json','apps/web/pnpm-lock.yaml','contracts','ops']
+    paths=['src','scripts','tests','migrations','apps/web','.github','.dockerignore','compose.yaml','Dockerfile','pyproject.toml','uv.lock','contracts','ops']
     if subprocess.call(['git','diff','--quiet','HEAD','--',*paths],cwd=ROOT) or subprocess.check_output(['git','ls-files','--others','--exclude-standard','--',*paths],cwd=ROOT):
         raise EnvironmentError('BLOCKED_ENV: commit implementation changes before validating current-commit build evidence')
     docker=shutil.which('docker')
@@ -115,6 +115,10 @@ def verify_run(evidence):
         require(image['Config']['User'] in ('10001:10001','101:101'),'runtime image runs as unexpected identity')
         actual=subprocess.check_output([docker,'image','inspect',image['Id'],'--format','{{.Id}}'],text=True).strip()
         require(actual==image['Id'],'built runtime image not available in this engine')
+    runtime=load(evidence/'container-runtime.json')
+    require(runtime['result']=='PASS' and runtime['commit']==commit and runtime['paid_calls']==0,'runtime container evidence stale or failed')
+    require(runtime['pixel_exact'] and runtime['report_bound_to_final'] and runtime['manual_review'],'container pipeline image/report checks missing')
+    require({x['id'] for x in runtime['runtime_images']}=={x['Id'] for x in inspections},'tested containers differ from built runtime images')
     return {'native_ci':'PASS','commit':commit,'docker_engine':result.stdout.strip(),'runtime_image_ids':[x['Id'] for x in inspections]}
 
 if __name__=='__main__':
