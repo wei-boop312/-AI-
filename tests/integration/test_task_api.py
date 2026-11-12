@@ -3,7 +3,7 @@ from uuid import uuid4
 import psycopg
 from test_auth_api import AuthApiFixture
 
-class TaskApiTests(AuthApiFixture):
+class TaskApiFixture(AuthApiFixture):
     def setUp(self):
         super().setUp(); self.login()
         self.product=self.client.post('/api/v1/products',json={'name':'test','category':'generic'},headers=self.write_headers()).json()['id']
@@ -20,6 +20,7 @@ class TaskApiTests(AuthApiFixture):
         return r.json()['quote_id']
     def submit(self,q,key='test',body=None):
         return self.client.post('/api/v1/tasks',json={**(body or self.body),'quote_id':q},headers={**self.write_headers(),'idempotency-key':key})
+class TaskApiTests(TaskApiFixture):
     def test_http_concurrent_replay_binding_cancel(self):
         q=self.quote()
         with ThreadPoolExecutor(max_workers=8) as pool: results=list(pool.map(lambda _:self.submit(q),range(20)))

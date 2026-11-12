@@ -9,11 +9,14 @@ from visual_platform.domain.schemas import QuoteRequest,TaskRequest,canonical_ha
 from visual_platform.services.quotes import db_conflict,hash_data
 router=APIRouter(prefix="/api/v1/tasks",tags=["tasks"])
 
-COLUMNS="id,status,phase,revision,credits_status,reserved_credits,created_at,updated_at,completed_at,error_code"
+COLUMNS="id,status,phase,revision,credits_status,reserved_credits,created_at,updated_at,completed_at,error_code,final_version_id,compliance_id,(SELECT sha256 FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_sha256,(SELECT width FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_width,(SELECT height FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_height,(SELECT auto_overall FROM app.compliance_checks WHERE id=generation_tasks.compliance_id) AS auto_overall"
 def serialize(row,replay=False):
     data=dict(row)
     data['credits']={"status":data.pop('credits_status'),"amount":data.pop('reserved_credits')}
-    data['result']=None; data['compliance']=None; data['idempotent_replay']=replay
+    version=data.pop('final_version_id'); check=data.pop('compliance_id'); sha=data.pop('final_sha256'); width=data.pop('final_width'); height=data.pop('final_height'); overall=data.pop('auto_overall')
+    data['result']={"asset_version_id":str(version),"sha256":sha,"width":width,"height":height,"download_endpoint":"/api/v1/tasks/"+str(data['id'])+"/download","report_id":str(check)} if data['status']=='succeeded' else None
+    data['compliance']={"auto_overall":overall,"report_id":str(check)} if check else None
+    data['idempotent_replay']=replay
     return data
 
 @router.post("",status_code=201)
@@ -52,3 +55,10 @@ async def cancel(task_id: UUID,request: Request,user=Depends(current_user)):
         except asyncpg.RaiseError as exc: db_conflict(exc)
         row=await c.fetchrow("SELECT "+COLUMNS+" FROM app.generation_tasks WHERE id=$1",task_id)
     return serialize(row)
+
+@router.get('/{task_id}/compliance')
+async def compliance(task_id: UUID,request: Request,user=Depends(current_user)):
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        row=await c.fetchrow("SELECT c.id,c.final_version_id,c.final_sha256,c.facts,c.rule_snapshots,c.per_platform_results,c.auto_overall,c.sampling_selected,c.report_sha256,c.created_at FROM app.compliance_checks c JOIN app.generation_tasks t ON t.compliance_id=c.id AND t.user_id=c.user_id WHERE t.id=$1",task_id)
+    if not row: raise HTTPException(404,'not_found')
+    return {**dict(row),'facts':json.loads(row['facts']),'rule_snapshots':json.loads(row['rule_snapshots']),'per_platform_results':json.loads(row['per_platform_results'])}

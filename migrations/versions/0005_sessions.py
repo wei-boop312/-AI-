@@ -1,4 +1,4 @@
-"""Task, quote, immutable ledger and persistent dispatch resources."""
+"""Session families and persistent login throttling."""
 from pathlib import Path
 from alembic import op
 revision="0005"

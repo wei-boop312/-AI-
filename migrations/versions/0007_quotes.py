@@ -1,4 +1,4 @@
-"""Task, quote, immutable ledger and persistent dispatch resources."""
+"""Immutable priced quotes and input-bound task submission."""
 from pathlib import Path
 from alembic import op
 revision="0007"

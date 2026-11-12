@@ -1,4 +1,4 @@
-"""Task, quote, immutable ledger and persistent dispatch resources."""
+"""Restricted private account provisioning."""
 from pathlib import Path
 from alembic import op
 revision="0006"
