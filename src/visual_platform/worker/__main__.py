@@ -9,6 +9,7 @@ from visual_platform.db.pool import open_pool
 from visual_platform.providers.fake import DurableFakeProvider
 from visual_platform.storage.s3 import S3Storage
 from visual_platform.worker.runner import Worker
+from visual_platform.services.heartbeat import service_heartbeat
 
 async def main():
     parser=argparse.ArgumentParser(); mode=parser.add_mutually_exclusive_group(required=True); mode.add_argument('--task',type=UUID); mode.add_argument('--consume',action='store_true'); parser.add_argument('--fake-mode',choices=['success','failed','uncertain','late'],default='success'); args=parser.parse_args()
@@ -22,7 +23,8 @@ async def main():
             from visual_platform.events.broker import Broker
             from visual_platform.worker.consumer import Consumer
             broker=await Broker.connect(os.environ['AMQP_URL'],os.environ.get('QUEUE_PREFIX','visual.v1'))
-            try: await Consumer(worker,broker).run()
+            try:
+                async with service_heartbeat(pool,'worker'):await Consumer(worker,broker).run()
             finally: await broker.close()
         else:
             result=await worker.run(args.task)

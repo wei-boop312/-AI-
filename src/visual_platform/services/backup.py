@@ -188,6 +188,7 @@ def restore_database(dsn,storage_settings,pg_bin,directory,fake_directory):
                 elif obj['kind']=='report':c.execute('UPDATE app.compliance_checks SET report_storage_version_id=%s WHERE id=%s',(version,obj['id']))
                 elif obj['kind']=='rule_evidence':c.execute('UPDATE app.platform_rules SET evidence_storage_version_id=%s WHERE id=%s',(version,obj['id']))
             c.execute('SET LOCAL session_replication_role=origin')
+            if c.execute("SELECT to_regclass('ops.service_heartbeats')").fetchone()[0]:c.execute('DELETE FROM ops.service_heartbeats')
             c.execute('UPDATE auth.session_families SET revoked_at=COALESCE(revoked_at,now())')
             c.execute('UPDATE auth.refresh_sessions SET revoked_at=COALESCE(revoked_at,now())')
             tasks=c.execute("SELECT id,status,credits_status FROM app.generation_tasks WHERE status IN ('queued','processing','uncertain') FOR UPDATE").fetchall()

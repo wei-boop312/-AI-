@@ -1,0 +1,12 @@
+C:\Users\MECHREVO\Documents\Codex\2026-11-12\ai\outputs\visual-production-platform\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_cli_sanitizes_and_rejects_owner_identity (test_monitoring.MonitoringTests.test_cli_sanitizes_and_rejects_owner_identity) ... ok
+test_financial_inconsistency_detected_and_rollback_clears_it (test_monitoring.MonitoringTests.test_financial_inconsistency_detected_and_rollback_clears_it) ... ok
+test_heartbeat_identity_staleness_and_background_cancellation (test_monitoring.MonitoringTests.test_heartbeat_identity_staleness_and_background_cancellation) ... ok
+test_only_aggregate_access_and_no_operator_or_business_writes (test_monitoring.MonitoringTests.test_only_aggregate_access_and_no_operator_or_business_writes) ... ok
+test_unknown_backlog_age_and_no_duplicate_financial_action (test_monitoring.MonitoringTests.test_unknown_backlog_age_and_no_duplicate_financial_action) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 9.413s
+
+OK

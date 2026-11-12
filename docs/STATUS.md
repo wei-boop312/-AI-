@@ -167,3 +167,11 @@ DurableFake late现保存图像/事实回执后丢失响应，允许对既有结
 快照后产品标记未恢复，演练恢复起点快照年龄2.63秒；备份1.11秒，冷目标初始化到API/下载/安全恢复验证RTO24.15秒。修正PowerShell UTC/本地时间混算，RTO采用Stopwatch，RPO年龄采用DateTimeOffset。RPO/RTO目标NOT_SET，本机小体积演练不代表生产SLA。43项单元通过；说明及脱敏结果见BACKUP_RESTORE.md、backup-restore-drill/environment.json和对应日志。
 
 周额度used30%、剩余70%。P5-02的重启/积压告警、完整task/all门槛、CI/部署说明和供应商适配仍未完成；未标OFFLINE_READY/RELEASE_READY。
+
+## 2026-11-13：只读全局监控与Worker心跳恢复
+
+0023新增ops_monitor及窄权限聚合SECURITY DEFINER函数，专用LOGIN仅能读取固定计数/年龄/耗时指标，无业务明细、凭据或写权限。连续publisher/worker每5秒心跳，默认15秒过期；单任务CLI不冒充常驻。监控CLI使用只读事务，独立有界MQ被动队列/S3 HeadBucket探测，输出JSON或Prometheus；ops/alerts.yml为未部署模板。财务异常严重、unknown/outbox积压警告，绝不自动改账或重发。恢复库在精确校验后清除历史心跳。
+
+49项单元、74项原生PG/Rabbit/S3全回归通过，含5项新增真实监控权限/异常/心跳测试。实际暂停本项目Worker，18.9秒心跳年龄触发critical；重启后心跳0.51秒、MQ/S3 ready、alerts空且财务异常全0。证据monitor-healthy/worker-stopped/worker-recovered.json及monitor-native-full-20261113.log。修正Prometheus unknown告警标签匹配on()，正常采集显式输出scrape_error=0。说明见MONITORING.md。
+
+周额度used32%、剩余68%，继续执行。MQ/S3真实重启、完整task/all门槛、CI/部署说明和供应商适配尚未完成；未标OFFLINE_READY/RELEASE_READY。
