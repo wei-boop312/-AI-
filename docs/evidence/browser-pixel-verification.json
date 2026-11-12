@@ -1,13 +1,14 @@
 {
+  "task_id": "f049a091-5442-42b0-a621-166521748fc9",
   "browser_download_sha256": "d709155da4d5e7888a6fc66cfefaf7483d7290197daddba14f195f006e3ef62c",
   "matches_database_final_sha256": true,
   "checks": [
     {
       "region": {
-        "width": 160,
-        "height": 160,
         "source_x": 98,
         "source_y": 100,
+        "width": 160,
+        "height": 160,
         "target_x": 300,
         "target_y": 200
       },

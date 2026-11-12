@@ -106,3 +106,10 @@ class AuthApiTests(AuthApiFixture):
                 c.execute("SELECT app.create_private_user(%s,%s,'forbidden',%s)",(uuid4(),'forbidden@test.invalid',hash_password(self.password)))
         self.email=email; self.login()
         self.assertEqual(self.client.get('/api/v1/credits/balance').json()['available'],100)
+
+    def test_ip_limit_is_shared_across_account_names(self):
+        from visual_platform.api.auth import digest
+        with psycopg.connect(self.owner) as c:
+            c.execute("INSERT INTO auth.login_limits(bucket,attempts) VALUES(%s,100)",('ip:'+digest('testclient'),))
+        response=self.client.post('/api/v1/auth/login',json=dict(email=self.email,password=self.password),headers={'origin':self.settings.origin})
+        self.assertEqual(response.status_code,429)

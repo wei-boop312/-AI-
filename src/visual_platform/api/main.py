@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from visual_platform.core.settings import Settings
 from visual_platform.db.pool import open_pool
 from visual_platform.storage.s3 import S3Storage
-from visual_platform.api import auth,products,credits,quotes,tasks,rules,assets
+from visual_platform.api import auth,products,credits,quotes,tasks,rules,assets,reviews
 
 
 def create_app(settings: Settings | None=None):
@@ -63,7 +63,7 @@ def create_app(settings: Settings | None=None):
     def ready():
         # Storage, queue and worker readiness will be wired with their adapters.
         return JSONResponse(status_code=503,content={"status":"not_ready","reason":"complete native pipeline not configured"})
-    app.include_router(auth.router); app.include_router(products.router); app.include_router(credits.router); app.include_router(quotes.router); app.include_router(tasks.router); app.include_router(rules.router); app.include_router(assets.router)
+    app.include_router(auth.router); app.include_router(products.router); app.include_router(credits.router); app.include_router(quotes.router); app.include_router(tasks.router); app.include_router(rules.router); app.include_router(assets.router); app.include_router(reviews.router)
     return app
 
 app=create_app()

@@ -1,10 +1,11 @@
 import {test,expect} from '@playwright/test';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';import {execFileSync} from 'node:child_process';import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-const account=JSON.parse(readFileSync(new URL('../../../.local/account.json',import.meta.url),'utf8'));
+const root=fileURLToPath(new URL('../../../',import.meta.url));const py=path.join(root,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
 const fixture=fileURLToPath(new URL('./fixtures/product.png',import.meta.url));
 const evidence=fileURLToPath(new URL('../../../docs/evidence/',import.meta.url));
 test('真实服务：登录、产品、上传、Konva选区、生成、报告及移动端',async({page})=>{
+ const provision=JSON.parse(execFileSync(py,['scripts/create_e2e_account.py'],{cwd:root,encoding:'utf8'}));const account=JSON.parse(readFileSync(provision.account_file,'utf8'));
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/');await expect(page.getByRole('heading',{name:'登录你的工作台'})).toBeVisible();
  await page.screenshot({path:evidence+'browser-login.png'});
@@ -25,11 +26,15 @@ test('真实服务：登录、产品、上传、Konva选区、生成、报告及
  const tolerance=Math.ceil(1/tf);expect(Math.abs(Number(await page.getByLabel('区域1目标X').inputValue())-(initialTX+200))).toBeLessThanOrEqual(tolerance);expect(Math.abs(Number(await page.getByLabel('区域1目标Y').inputValue())-(initialTY+100))).toBeLessThanOrEqual(tolerance);
  await page.getByLabel('区域1目标X').fill('300');await page.getByLabel('区域1目标X').press('Enter');await page.getByLabel('区域1目标Y').fill('200');await page.getByLabel('区域1目标Y').press('Enter');
  await expect(page.getByLabel('区域1目标X')).toHaveValue('300');await expect(page.getByLabel('区域1目标Y')).toHaveValue('200');
+ await page.getByLabel('画面描述').fill('草稿恢复验证：柔和自然光线');
+ await page.reload();await expect(page.getByLabel('画面描述')).toHaveValue('草稿恢复验证：柔和自然光线');await expect(page.getByLabel('区域1目标X')).toHaveValue('300');await expect(page.getByLabel('区域1目标Y')).toHaveValue('200');
+ const oldTask=await page.locator('.progress-card').count()?await page.locator('.progress-card').getAttribute('data-task-id'):null;
  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:evidence+'browser-workspace.png',fullPage:true});
- await page.getByRole('button',{name:'获取报价并继续'}).click();const confirm=page.getByRole('dialog',{name:'确认本次生成'});await expect(confirm).toBeVisible();await confirm.getByRole('button',{name:'确认并创建任务'}).click();
+ await page.getByRole('button',{name:'获取报价并继续'}).click();const confirm=page.getByRole('dialog',{name:'确认本次生成'});await expect(confirm).toBeVisible();const created=page.waitForResponse(r=>r.url().endsWith('/api/v1/tasks')&&r.request().method()==='POST'&&r.status()===201);await confirm.getByRole('button',{name:'确认并创建任务'}).click();const creation=await created;const task=await creation.json();const submitted=creation.request().postDataJSON();if(oldTask)await expect(page.locator('.progress-card')).not.toHaveAttribute('data-task-id',oldTask);
  await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible({timeout:45000});
  await page.getByRole('button',{name:'查看检查报告'}).click();const report=page.getByRole('dialog',{name:'最终成品检查报告'});await expect(report.getByText('需要人工复核',{exact:true})).toBeVisible();await expect(report.getByText('像素保护 · 已通过')).toBeVisible();await report.getByRole('button',{name:'关闭',exact:true}).click();
  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('link',{name:'下载 PNG'}).click()]);expect(download.suggestedFilename()).toBe('final.png');await download.saveAs(fileURLToPath(new URL('../../../work/browser-final.png',import.meta.url)));
+ const completed=await(await page.request.get('/api/v1/tasks/'+task.id)).json();writeFileSync(path.join(root,'work/browser-input.json'),JSON.stringify({task_id:task.id,regions:submitted.generation.regions,final_sha256:completed.result.sha256}));execFileSync(py,['scripts/verify_browser_png.py'],{cwd:root});
  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:evidence+'browser-result.png',fullPage:true});
  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:evidence+'browser-mobile.png',fullPage:true});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();

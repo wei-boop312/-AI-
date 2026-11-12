@@ -19,3 +19,15 @@ S3配置：S3_ENDPOINT、S3_ACCESS_KEY、S3_SECRET_KEY、S3_BUCKET（默认visua
 独立Worker单任务入口：设置WORKER_DATABASE_URL（仅app_worker权限组）、上述S3配置、PROVIDER_PROFILE=offline，执行`uv run python -m visual_platform.worker --task TASK_UUID`（PYTHONPATH=src）。FAKE_PROVIDER_DIR可设置持久fake结果目录，默认项目work/fake-provider。当前只支持offline，不应改成真实供应商或复用旧密钥。MQ消费入口尚待加入。Worker结果retryable表示仅可恢复安全步骤；uncertain/stopped需查看数据库状态和对账，不能新建同意图调用。
 
 MQ入口：AMQP_URL（远程必须amqps，本机可amqp）、QUEUE_PREFIX（默认visual.v1）。设置DISPATCH_DATABASE_URL（仅ops_dispatcher权限组）后运行`uv run python -m visual_platform.events`，--once可单轮发布/恢复。Worker改用`uv run python -m visual_platform.worker --consume`长期消费。两进程仍需要PYTHONPATH=src，Worker还需S3/WORKER_DATABASE_URL/PROVIDER_PROFILE=offline。恢复超过5次进入QUEUE_PREFIX.manual供人工处理，不授权新付费调用。原生MQ测试额外设置TEST_AMQP_URL。
+
+运营CLI（ADMIN_DATABASE_URL，仅ops_admin LOGIN）：
+
+- `python scripts/admin.py inspect --task UUID`：读取对账所需任务/attempt/receipt摘要，不返回polling URL或凭据。
+- `python scripts/admin.py review --task UUID --check UUID --reviewer USER_UUID --decision approved --reason "核验理由" --evidence-json refs.json --operation-id UUID`：refs.json为证据引用字符串数组，决定可approved/rejected/needs_review。自动报告不改写。
+- `python scripts/admin.py accept-receipt --task UUID --attempt UUID --provider-id ID --response-digest SHA256 --reason "核验来源" --evidence-digest SHA256 --operation-id UUID`：只接纳人工核验的既有供应商回执，不发模型请求。
+- `python scripts/admin.py reconcile --task UUID --action resume --receipt RECEIPT_UUID --reason "核验结论" --evidence-digest SHA256 --operation-id UUID`：只恢复已知回执；无回执不能resume。
+- action=fail（不传receipt）为有记录的内部无法交付结案，释放用户冻结额度，不表示供应商费用已退款或已知。
+
+操作重试必须复用原operation-id和同一payload。证据摘要仅是记录绑定，实际资料仍由运营者核验。Cookie注销/停用立即拒绝访问；人工通过结果标记human_review，与未核验自动规则分开展示。
+
+浏览器验收会通过create_e2e_account.py在显式本机offline profile创建独立临时账号，使用work目录保存随机凭据；不再依赖共用demo账号。verify_browser_png.py独立校验下载文件与原图fixture的保护像素，结果保存在docs/evidence/browser-pixel-verification.json。

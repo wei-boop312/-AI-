@@ -18,7 +18,7 @@ export function errorText(error:unknown){return error instanceof ApiError?(error
 export type User={id:string,email:string,display_name:string};
 export type Product={id:string,name:string,category:string,revision:number,archived_at:string|null};
 export type AssetVersion={version_id:string,asset_id:string,width:number,height:number,sha256:string,canonical:boolean};
-export type Task={id:string,source:{asset_id:string,version_id:string},status:'queued'|'processing'|'succeeded'|'failed'|'cancelled'|'uncertain',phase:string,revision:number,credits:{status:string,amount:number},created_at:string,error_code:string|null,result:null|{asset_version_id:string,sha256:string,width:number,height:number,download_endpoint:string,report_id:string},compliance:null|{auto_overall:string,report_id:string}};
+export type Task={id:string,product_id:string,source:{asset_id:string,version_id:string},status:'queued'|'processing'|'succeeded'|'failed'|'cancelled'|'uncertain',phase:string,revision:number,credits:{status:string,amount:number},created_at:string,error_code:string|null,result:null|{asset_version_id:string,sha256:string,width:number,height:number,download_endpoint:string,report_id:string},compliance:null|{auto_overall:string,report_id:string}};
 export type Page<T>={items:T[],next_cursor:string|null};
 export type Balance={available:number,reserved:number,funded_total:number,spent_total:number};
 export type Region={source_x:number,source_y:number,width:number,height:number,target_x:number,target_y:number};

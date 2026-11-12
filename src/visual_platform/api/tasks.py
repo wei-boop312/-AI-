@@ -9,7 +9,7 @@ from visual_platform.domain.schemas import QuoteRequest,TaskRequest,canonical_ha
 from visual_platform.services.quotes import db_conflict,hash_data
 router=APIRouter(prefix="/api/v1/tasks",tags=["tasks"])
 
-COLUMNS="source_asset_version_id,(SELECT asset_id FROM app.asset_versions WHERE id=generation_tasks.source_asset_version_id) AS source_asset_id,id,status,phase,revision,credits_status,reserved_credits,created_at,updated_at,completed_at,error_code,final_version_id,compliance_id,(SELECT sha256 FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_sha256,(SELECT width FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_width,(SELECT height FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_height,(SELECT auto_overall FROM app.compliance_checks WHERE id=generation_tasks.compliance_id) AS auto_overall"
+COLUMNS="product_id,source_asset_version_id,(SELECT asset_id FROM app.asset_versions WHERE id=generation_tasks.source_asset_version_id) AS source_asset_id,id,status,phase,revision,credits_status,reserved_credits,created_at,updated_at,completed_at,error_code,final_version_id,compliance_id,(SELECT sha256 FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_sha256,(SELECT width FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_width,(SELECT height FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_height,(SELECT auto_overall FROM app.compliance_checks WHERE id=generation_tasks.compliance_id) AS auto_overall"
 def serialize(row,replay=False):
     data=dict(row)
     data['source']={'asset_id':str(data.pop('source_asset_id')),'version_id':str(data.pop('source_asset_version_id'))}
@@ -62,7 +62,10 @@ async def compliance(task_id: UUID,request: Request,user=Depends(current_user)):
     async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
         row=await c.fetchrow("SELECT c.id,c.final_version_id,c.final_sha256,c.facts,c.rule_snapshots,c.per_platform_results,c.auto_overall,c.sampling_selected,c.report_sha256,c.created_at FROM app.compliance_checks c JOIN app.generation_tasks t ON t.compliance_id=c.id AND t.user_id=c.user_id WHERE t.id=$1",task_id)
     if not row: raise HTTPException(404,'not_found')
-    return {**dict(row),'facts':json.loads(row['facts']),'rule_snapshots':json.loads(row['rule_snapshots']),'per_platform_results':json.loads(row['per_platform_results'])}
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        review=await c.fetchrow('SELECT id,reviewer_id,decision,reason,evidence_refs,created_at FROM app.compliance_reviews WHERE check_id=$1 ORDER BY created_at DESC,id DESC LIMIT 1',row['id'])
+    effective={'approved':'compliant','rejected':'non_compliant','needs_review':'manual_review'}[review['decision']] if review else row['auto_overall']
+    return {'effective_overall':effective,'effective_source':'human_review' if review else 'automatic','latest_review':{**dict(review),'evidence_refs':json.loads(review['evidence_refs'])} if review else None,**dict(row),'facts':json.loads(row['facts']),'rule_snapshots':json.loads(row['rule_snapshots']),'per_platform_results':json.loads(row['per_platform_results'])}
 
 @router.get('/{task_id}/download')
 async def download_final(task_id: UUID,request: Request,user=Depends(current_user)):
@@ -107,7 +110,7 @@ async def events(task_id: UUID,request: Request,last_event_id: str | None=Header
             except HTTPException: return
             async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
                 bounds=await c.fetchrow('SELECT min(id) AS first,max(id) AS last FROM app.task_events WHERE task_id=$1',task_id)
-                reset=bool(cursor and bounds['first'] and (cursor<bounds['first'] or cursor>bounds['last']))
+                reset=bool(cursor and (not bounds['first'] or cursor<bounds['first'] or cursor>bounds['last']))
                 if reset: cursor=0
                 rows=await c.fetch('SELECT id,type,payload FROM app.task_events WHERE task_id=$1 AND id>$2 ORDER BY id LIMIT 100',task_id,cursor)
                 status=await c.fetchval('SELECT status FROM app.generation_tasks WHERE id=$1',task_id)
@@ -122,3 +125,11 @@ async def events(task_id: UUID,request: Request,last_event_id: str | None=Header
             if heartbeat>=15: yield ': heartbeat\n\n'; heartbeat=0
             await asyncio.sleep(1)
     return StreamingResponse(stream(),media_type='text/event-stream',headers={'Cache-Control':'no-store','X-Accel-Buffering':'no'})
+
+@router.get('/{task_id}/input')
+async def task_input(task_id: UUID,request: Request,user=Depends(current_user)):
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        snapshot=await c.fetchval('SELECT input_snapshot FROM app.generation_tasks WHERE id=$1',task_id)
+    if snapshot is None: raise HTTPException(404,'not_found')
+    result=json.loads(snapshot);result.pop('_execution',None)
+    return result

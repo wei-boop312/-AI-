@@ -55,14 +55,14 @@ class Login(StrictModel):
 async def rate_limit(pool, buckets):
     async with pool.acquire() as c:
         async with c.transaction():
-            for bucket in sorted(buckets):
+            for bucket,limit in sorted(buckets):
                 count=await c.fetchval("""INSERT INTO auth.login_limits(bucket,attempts) VALUES($1,1)
                 ON CONFLICT(bucket) DO UPDATE SET
                 attempts=CASE WHEN auth.login_limits.window_start<now()-interval '15 minutes' THEN 1 ELSE auth.login_limits.attempts+1 END,
                 window_start=CASE WHEN auth.login_limits.window_start<now()-interval '15 minutes' THEN now() ELSE auth.login_limits.window_start END
                 RETURNING attempts""",bucket)
                 # Commit counters before reporting rejection.
-                if count>10: return False
+                if count>limit: return False
     return True
 
 @router.post("/login")
@@ -70,7 +70,7 @@ async def login(body: Login, request: Request, response: Response):
     origin_check(request)
     email=body.email.strip().casefold()
     ip=request.client.host if request.client else "unknown"
-    if not await rate_limit(request.app.state.auth_pool,["email:"+digest(email),"ip:"+digest(ip)]): raise HTTPException(429,"login_rate_limited")
+    if not await rate_limit(request.app.state.auth_pool,[("email:"+digest(email),10),("ip:"+digest(ip),100)]): raise HTTPException(429,"login_rate_limited")
     async with request.app.state.auth_pool.acquire() as c:
         row=await c.fetchrow("""SELECT u.id,u.email_normalized,u.display_name,u.status,c.password_hash
              FROM app.users u JOIN auth.credentials c ON c.user_id=u.id WHERE u.email_normalized=$1""",email)

@@ -93,3 +93,15 @@ setup_local.py在新的专属PG实例55433完成0001–0016迁移、独立服务
 TypeScript和生产构建exit0；18项单元、47项PG/Rabbit/S3回归通过。真实Chrome E2E通过：登录→产品→跨域S3上传→Konva实际鼠标框选/目标拖动→数值定位→报价确认→MQ/Worker→报告→浏览器下载→390px手机无横向溢出，未捕获页面JS异常。缩小视口下指针按物理像素量化，测试按拖动起点验证位移误差≤一个显示像素，随后数值输入精确设定目标。下载文件另用Python核对DB文件hash和保护区RGB逐像素一致，证据browser-pixel-verification.json。
 
 已视觉检查登录、画布与手机截图，截图与browser-e2e-20261113.log位于docs/evidence。生产bundle当前约1.46MB（gzip462KB），有antd use-client和chunk体积警告，尚待性能拆包。浏览器断线/refresh重放/多账号切换、完整复核与重算、干净部署/备份恢复、CI/SBOM/供应商适配仍未全部验收；未标OFFLINE_READY。
+
+## 2026-11-13：人工复核、对账与客户端恢复
+
+0017–0019增加只追加人工复核、受限运营回执接纳、unknown恢复/人工结案、操作编号幂等及审计。新增scripts/admin.py的inspect/review/accept-receipt/reconcile，仅专用ops_admin LOGIN可用。人工复核提供effective来源，原auto结果、报告hash及下载JSON保持不变；网页没有开放管理员写路由。晚到已知回执恢复原attempt查询，禁止重新generate；内部积分释放不冒称供应商退款。
+
+真实测试暴露审计表WITH CHECK策略不提供SELECT，导致对账重放未读到历史；0019补充仅NOLOGIN执行角色的审计读取策略后复测通过。复核并发同operation只追加一次，旧终态回执不能被当成未知步骤恢复。
+
+前端按用户/产品保存sessionStorage草稿和最后产品，恢复前校验服务端原图归属/版本/边界；账号变化先清空界面并等待新资料，异步旧请求不能回填主要列表。刷新恢复最近任务，源图比较绑定任务固定版本。SSE保留原生EventSource重连与Last-Event-ID语义，5秒故障转3秒轮询，Cookie过期通过refresh恢复。事件清理至空也发送reset。
+
+18项单元、54项真实PG/Rabbit/S3集成通过。新增3个管理/对账测试和3个事件游标/清理重置测试；登录限流为每账号10次/15分钟、每IP100次/15分钟（避免共享IP跨账号误锁），负例已覆盖。证据reviews-events-full-20261113.log。
+
+3个真实Chrome用例通过（browser-comprehensive-20261113.log）：完整指针生产流程+刷新草稿+下载独立像素验证；断网/轮询/恢复/丢失access Cookie后的refresh、CLI人工复核展示及同一页面账号切换隔离；产品A/B草稿隔离、刷新保留选择、编辑只访问本机且没有任务。各用例创建独立私有测试账号，密码不入日志或Git。仍需生产构建浏览器与50对象基准、重算规则/报告版本、运维恢复、CI及真实供应商门槛，未标OFFLINE_READY。

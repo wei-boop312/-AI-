@@ -71,6 +71,7 @@ class Worker:
                     if not await self.submit(task,fence,'generate',generation): return 'stopped'
                 elif phase in ('polling','archiving'):
                     attempt=attempts['generate']
+                    await self.db('SELECT app.record_fake_cost($1,$2,$3,$4)',task,self.owner,fence,UUID(attempt['id']))
                     if not attempt['provider_id']: raise RuntimeError('known provider id required')
                     data=await asyncio.to_thread(self.provider.fetch_image,attempt['provider_id'])
                     canonical,meta=await decode(data,'image/png')
