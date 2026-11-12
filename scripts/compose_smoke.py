@@ -13,6 +13,8 @@ from types import SimpleNamespace
 from uuid import uuid4
 import aio_pika
 import psycopg
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from compose_runtime import ComposeRuntime
 from visual_platform.storage.s3 import S3Storage
@@ -21,8 +23,8 @@ def main():
     folder=ROOT/'work'/('compose-smoke-'+uuid4().hex)
     runtime=ComposeRuntime(folder,ephemeral=True);env={**runtime.env,'PYTHONPATH':str(ROOT/'src')};private=folder/'logs';private.mkdir()
     public=ROOT/'work/ci-public';public.mkdir(parents=True,exist_ok=True)
-    def command(args,name):
-        with (private/(name+'.log')).open('wb') as log:result=subprocess.run([sys.executable,*args],cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT)
+    def command(args,name,child_env=None):
+        with (private/(name+'.log')).open('wb') as log:result=subprocess.run([sys.executable,*args],cwd=ROOT,env=child_env or env,stdout=log,stderr=subprocess.STDOUT)
         if result.returncode:raise RuntimeError(name+' failed; private diagnostics retained')
     async def fixture(phase):
         connection=await aio_pika.connect(env['AMQP_URL'],timeout=5)
@@ -42,6 +44,12 @@ def main():
     clock=time.monotonic()
     try:
         runtime.up();summary=runtime.config_summary()
+        script=ScriptDirectory.from_config(Config(str(ROOT/'alembic.ini')));head=script.get_current_head();previous=script.get_revision(head).down_revision
+        test_env={**env,'MIGRATION_DATABASE_URL':env['MIGRATION_DATABASE_URL'].replace(':'+str(runtime.state['ports']['dev'])+'/',':'+str(runtime.state['ports']['test'])+'/')}
+        command(['-m','alembic','upgrade','head'],'empty-test-upgrade',test_env)
+        command(['-m','alembic','upgrade',previous],'previous-dev-upgrade')
+        with psycopg.connect(env['MIGRATION_DATABASE_URL']) as c:
+            if c.execute('SELECT version_num FROM alembic_version').fetchone()[0]!=previous:raise ValueError('previous migration setup failed')
         command(['scripts/dev.py','bootstrap','--compose-profile',str(folder),'--profile-dir',str(folder/'profile'),'--demo-account'],'setup')
         command(['scripts/verify_bootstrap.py','--profile-dir',str(folder/'profile')],'bootstrap-verification')
         before=pg_identity();data=b'compose-private-object-survives-container-recreation';version=storage.put_immutable('compose-smoke/persist',data,'application/octet-stream')
@@ -52,7 +60,7 @@ def main():
         if read!=data:raise ValueError('S3 content changed across container recreation')
         asyncio.run(fixture('verify'))
         bootstrap=json.loads((ROOT/'docs/evidence/bootstrap-health-readonly.json').read_text())
-        result={'observed_at':datetime.now(timezone.utc).isoformat(),'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'compose':summary,'fresh_bootstrap':bootstrap,'postgres_system_identifier_preserved':True,'postgres_user_count_preserved':before[1],'private_s3_sha256':hashlib.sha256(read).hexdigest(),'rabbit_quorum_message_preserved':True,'recreated_container_services':True,'seconds':round(time.monotonic()-clock,3),'paid_calls':0,'result':'PASS'}
+        result={'observed_at':datetime.now(timezone.utc).isoformat(),'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'compose':summary,'fresh_bootstrap':bootstrap,'empty_upgrade_to_head':head,'previous_upgrade_from':previous,'previous_upgrade_to':bootstrap['migration_head'],'postgres_system_identifier_preserved':True,'postgres_user_count_preserved':before[1],'private_s3_sha256':hashlib.sha256(read).hexdigest(),'rabbit_quorum_message_preserved':True,'recreated_container_services':True,'seconds':round(time.monotonic()-clock,3),'paid_calls':0,'result':'PASS'}
         (ROOT/'docs/evidence/compose-smoke.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8');(public/'compose-smoke.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
         print(json.dumps({'result':'PASS','services':summary['services'],'data_survived_down_up':True,'migration_head':bootstrap['migration_head'],'paid_calls':0}))
     except Exception:

@@ -26,6 +26,7 @@ class ComposeRuntime:
         if checked.returncode:raise EnvironmentError('BLOCKED_ENV: Docker engine unavailable')
         if ephemeral and not self.folder.is_relative_to(ROOT/'work'):raise ValueError('volume-removing test profiles are restricted to isolated work directories')
         self.folder.mkdir(parents=True,exist_ok=True,mode=0o700)
+        os.chmod(self.folder,0o700)
         state_file=self.folder/'state.json'
         if state_file.exists():
             self.state=json.loads(state_file.read_text())
@@ -37,6 +38,10 @@ class ComposeRuntime:
         s=self.state;p=s['ports'];owner=hashlib.sha256(str(ROOT).encode()).hexdigest()
         config=self.folder/'s3.json'
         self.write_private(config,json.dumps({'identities':[{'name':'visual_local','credentials':[{'accessKey':s['s3_access'],'secretKey':s['s3_secret']}],'actions':['Admin','Read','Write','List','Tagging']}]}))
+        # The image uses a non-root UID. A read-only file bind bypasses the private
+        # host parent directory, so permit reads inside that container while the
+        # 0700 host directory still prevents other local users traversing it.
+        os.chmod(config,0o644)
         values={'VISUAL_OWNER':s['owner'],'VISUAL_WORKSPACE':owner,'PG_BOOTSTRAP_USER':s['pg_user'],'PG_BOOTSTRAP_PASSWORD':s['pg_password'],'MQ_BOOTSTRAP_USER':s['mq_user'],'MQ_BOOTSTRAP_PASSWORD':s['mq_password'],'S3_CONFIG_FILE':config.as_posix(),'PG_TEST_PORT':p['test'],'PG_DEV_PORT':p['dev'],'MQ_PORT':p['mq'],'S3_PORT':p['s3']}
         self.write_private(self.folder/'compose.env','\n'.join(k+'='+json.dumps(str(v),ensure_ascii=False) for k,v in values.items())+'\n')
         self.env={**os.environ,'MIGRATION_DATABASE_URL':'postgresql://'+s['pg_user']+':'+quote(s['pg_password'],safe='')+'@127.0.0.1:'+str(p['dev'])+'/postgres','AMQP_URL':'amqp://'+s['mq_user']+':'+quote(s['mq_password'],safe='')+'@127.0.0.1:'+str(p['mq'])+'/visual-test','S3_ENDPOINT':'http://127.0.0.1:'+str(p['s3']),'S3_ACCESS_KEY':s['s3_access'],'S3_SECRET_KEY':s['s3_secret'],'S3_BUCKET':'visual-compose-private','S3_REGION':'us-east-1','PROVIDER_PROFILE':'offline'}

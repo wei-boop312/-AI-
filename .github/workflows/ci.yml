@@ -38,6 +38,7 @@ jobs:
       - name: Unit and offline supplier HTTP contracts
         run: |
           mkdir -p work/ci-public
+          uv run python scripts/check.py task P0-01 > work/ci-public/source-provenance.log 2>&1
           uv run python scripts/check.py unit > work/ci-public/unit.log 2>&1
           uv run python -m unittest discover -s tests/contract -v > work/ci-public/contracts.log 2>&1
       - name: Dependency advisories SBOM and actual legal texts

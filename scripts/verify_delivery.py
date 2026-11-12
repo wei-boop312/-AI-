@@ -84,6 +84,10 @@ def verify_run(evidence):
     require(bool(run['files']),'empty production asset inventory')
     compose=load(evidence/'compose-smoke.json')
     require(compose['result']=='PASS' and compose['commit']==commit and compose['paid_calls']==0,'Compose smoke evidence stale or failed')
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+    migrations=ScriptDirectory.from_config(Config(str(ROOT/'alembic.ini')));head=migrations.get_current_head()
+    require(compose.get('empty_upgrade_to_head')==head and compose.get('previous_upgrade_to')==head and compose.get('previous_upgrade_from')==migrations.get_revision(head).down_revision,'empty/previous migration upgrade evidence missing or stale')
     require(compose['postgres_system_identifier_preserved'] and compose['rabbit_quorum_message_preserved'] and compose['recreated_container_services'],'Compose persistence not verified')
     for folder,log_name in (('unit','unit'),('contract','contracts'),('integration','native-integration')):
         text=(evidence/(log_name+'.log')).read_text(encoding='utf-8-sig')

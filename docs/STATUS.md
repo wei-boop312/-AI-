@@ -263,3 +263,13 @@ P0-02入口新增独立work项目Compose演练：fresh bootstrap全部迁移/6�
 上一轮CI43316645913原生/常规性能通过，但受控取消竞争用例撤销路由时在途handler仍await，出现Route is already handled导致该轮失败，未到镜像/最终门槛。按Playwright unrouteAll behavior=wait在释放barrier后等待当前handler完成，不忽略错误、不改业务断言。该竞争用例本机重复5次全通过（约1分钟），随后完整5受控用例通过（38.1秒）；日志controlled-route-race-repeat/full-20261113.log，截图/案例证据更新。独立账号/本项目消费者暂停后已恢复，最终monitor无告警、所有财务异常0。
 
 当前周额度used45%、剩余55%，继续。下一轮真实CI继续镜像/交付门槛及新增Compose验证；完整task/all与真实供应商/预算验收仍待完成，未标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
+
+## 2026-11-13：原生验收补齐与 Compose 配置权限修正
+
+审计将账务及 HTTP 幂等提交改为 Barrier 同步起跑的 20 请求，新增同一钱包、不同产品竞争仅够一单余额的验收。补充 4 项跨租户/产品/资产版本外键及状态/财务删除约束负例、2 项迁移实体/FORCE RLS/重复升级不变检查。针对 18 项全通过；完整原生 PG/MQ/S3 共 90 项通过（168.694 秒，无跳过），证据 acceptance-db-gaps-20261113.log 与 acceptance-native-90-20261113.log。协议流水线证据随实际重跑刷新；未调用付费模型。
+
+Actions 43319072663 在新增 Compose 阶段失败：S3 镜像非 root UID 无法读取宿主 0600 配置。修复为 0700 私有目录下只读绑定 0644 S3 文件；其他 state/env 保持 0600，不改容器为 root。Compose 另补空库升级 head、上一 revision 升级 head，并由交付门槛核对 revision。当前 Windows 无 Docker，等待下一轮 Linux CI 实际验收，尚未宣告 Compose 或最终门槛通过。
+
+P0-01 新增真实来源摘要检查并接入 CI。source-map 保留 12 份规范原始 SHA，补 Git blob SHA，严格只容许已记录换行规范化；本机 PASS。ADR 更新已验证原生服务范围及用户远端推送授权，原始计划文档保持不改。交付静态门槛仍 PASS：31 API 路径、188 依赖组件、268 法律文本引用。
+
+周额度 used48%、剩余52%，继续；完整 task/all、当前 Compose/镜像门槛及真实供应商/预算验收仍待完成，未标 OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。

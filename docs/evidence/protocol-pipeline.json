@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-11-12T21:25:49.343095+00:00",
+  "observed_at": "2026-11-12T22:36:49.108177+00:00",
   "profile": "offline_protocol_mock",
   "suppliers": "httpx.MockTransport; official Gemini SDK",
   "postgres": "17.11",

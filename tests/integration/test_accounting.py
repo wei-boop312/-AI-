@@ -1,6 +1,7 @@
 import os
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 from uuid import uuid4
 import psycopg
 from psycopg.types.json import Jsonb
@@ -28,7 +29,9 @@ class AccountingTests(unittest.TestCase):
             c.execute("SELECT set_config('app.user_id',%s,true)",(str(self.user),))
             return c.execute("SELECT app.submit_quoted_task(%s,%s,%s,%s,%s)",(uuid4(),self.quote,key,hash,'a'*64)).fetchone()[0]
     def test_concurrent_replay_one_freeze_and_outbox(self):
-        with ThreadPoolExecutor(max_workers=8) as pool: ids=list(pool.map(lambda _:self.submit(),range(20)))
+        barrier=Barrier(20)
+        def compete(_):barrier.wait(timeout=10);return self.submit()
+        with ThreadPoolExecutor(max_workers=20) as pool: ids=list(pool.map(compete,range(20)))
         self.assertEqual(len(set(ids)),1)
         with self.connect() as c:
             self.assertEqual(c.execute("SELECT available,reserved FROM app.wallets WHERE user_id=%s",(self.user,)).fetchone(),(84,16))

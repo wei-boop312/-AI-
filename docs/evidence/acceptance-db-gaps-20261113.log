@@ -1,0 +1,25 @@
+test_minimum_entities_and_head_exist_with_forced_rls (test_migrations.MigrationTests.test_minimum_entities_and_head_exist_with_forced_rls) ... C:\Users\MECHREVO\Documents\Codex\2026-11-12\ai\outputs\visual-production-platform\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+  util.warn_deprecated(
+ok
+test_upgrade_head_is_idempotent_for_tables_functions_and_constraints (test_migrations.MigrationTests.test_upgrade_head_is_idempotent_for_tables_functions_and_constraints) ... ok
+test_asset_version_rejects_cross_user_and_product (test_foreign_keys.ForeignKeyTests.test_asset_version_rejects_cross_user_and_product) ... ok
+test_current_pointer_cannot_use_another_asset_same_product (test_foreign_keys.ForeignKeyTests.test_current_pointer_cannot_use_another_asset_same_product) ... ok
+test_invalid_task_status_rejected_and_history_has_no_cascade (test_foreign_keys.ForeignKeyTests.test_invalid_task_status_rejected_and_history_has_no_cascade) ... ok
+test_task_source_and_final_must_belong_to_same_user_product (test_foreign_keys.ForeignKeyTests.test_task_source_and_final_must_belong_to_same_user_product) ... ok
+test_cancel_refund_once (test_accounting.AccountingTests.test_cancel_refund_once) ... ok
+test_concurrent_replay_one_freeze_and_outbox (test_accounting.AccountingTests.test_concurrent_replay_one_freeze_and_outbox) ... ok
+test_cross_user_reference_rejected (test_accounting.AccountingTests.test_cross_user_reference_rejected) ... ok
+test_quote_consumption_and_append_only (test_accounting.AccountingTests.test_quote_consumption_and_append_only) ... ok
+test_rls_and_financial_permissions (test_accounting.AccountingTests.test_rls_and_financial_permissions) ... ok
+test_appearance_snapshot_survives_edit (test_task_api.TaskApiTests.test_appearance_snapshot_survives_edit) ... ok
+test_expired_quote_replay_immutability (test_task_api.TaskApiTests.test_expired_quote_replay_immutability) ... ok
+test_http_concurrent_replay_binding_cancel (test_task_api.TaskApiTests.test_http_concurrent_replay_binding_cancel) ... ok
+test_outbox_failure_rolls_back_task_wallet_quote (test_task_api.TaskApiTests.test_outbox_failure_rolls_back_task_wallet_quote) ... ok
+test_racing_quotes (test_task_api.TaskApiTests.test_racing_quotes) ... ok
+test_size_and_archive (test_task_api.TaskApiTests.test_size_and_archive) ... ok
+test_two_products_compete_for_one_wallet_reservation (test_task_api.TaskApiTests.test_two_products_compete_for_one_wallet_reservation) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 16.428s
+
+OK

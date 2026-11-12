@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 from uuid import uuid4
 import psycopg
 from test_auth_api import AuthApiFixture
@@ -23,7 +24,9 @@ class TaskApiFixture(AuthApiFixture):
 class TaskApiTests(TaskApiFixture):
     def test_http_concurrent_replay_binding_cancel(self):
         q=self.quote()
-        with ThreadPoolExecutor(max_workers=8) as pool: results=list(pool.map(lambda _:self.submit(q),range(20)))
+        barrier=Barrier(20)
+        def compete(_):barrier.wait(timeout=10);return self.submit(q)
+        with ThreadPoolExecutor(max_workers=20) as pool: results=list(pool.map(compete,range(20)))
         self.assertTrue(all(r.status_code in (200,201) for r in results),[r.text for r in results])
         self.assertEqual(sum(r.status_code==201 for r in results),1)
         ids={r.json()['id'] for r in results}; self.assertEqual(len(ids),1)
@@ -45,6 +48,26 @@ class TaskApiTests(TaskApiFixture):
         qs=[self.quote(),self.quote()]
         with ThreadPoolExecutor(max_workers=2) as pool: results=list(pool.map(lambda q:self.submit(q,key=q),qs))
         self.assertEqual(sorted(r.status_code for r in results),[201,409])
+    def test_two_products_compete_for_one_wallet_reservation(self):
+        other=self.client.post('/api/v1/products',json={'name':'independent wallet contender','category':'generic'},headers=self.write_headers()).json()['id']
+        asset=uuid4();version=uuid4()
+        with psycopg.connect(self.owner) as c:
+            c.execute("INSERT INTO app.assets(id,user_id,product_id,kind,status) VALUES(%s,%s,%s,'original','uploading')",(asset,self.user,other))
+            c.execute("INSERT INTO app.asset_versions(id,user_id,product_id,asset_id,version_number,bucket,object_key,sha256,mime,width,height,byte_size,color_space,canonical) VALUES(%s,%s,%s,%s,1,'test',%s,%s,'image/png',10,10,100,'sRGB',true)",(version,self.user,other,asset,str(uuid4()),'a'*64))
+            c.execute("UPDATE app.assets SET status='ready',current_version_id=%s WHERE id=%s",(version,asset))
+        first=self.quote();body={**self.body,'product_id':other,'source_asset_version_id':str(version)}
+        quoted=self.client.post('/api/v1/quotes',json=body,headers=self.write_headers());self.assertEqual(quoted.status_code,201,quoted.text)
+        attempts=[(first,self.body),(quoted.json()['quote_id'],body)];barrier=Barrier(2)
+        def compete(item):barrier.wait(timeout=10);return self.submit(item[0],key=item[0],body=item[1])
+        with ThreadPoolExecutor(max_workers=2) as pool:results=list(pool.map(compete,attempts))
+        self.assertEqual(sorted(r.status_code for r in results),[201,409])
+        rejected=next(r for r in results if r.status_code==409);self.assertEqual(rejected.json()['error']['code'],'insufficient_credits')
+        balance=self.client.get('/api/v1/credits/balance').json();self.assertEqual((balance['available'],balance['reserved']),(0,16))
+        accepted=next(r.json()['id'] for r in results if r.status_code==201)
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(c.execute("SELECT count(*) FROM app.credit_transactions WHERE user_id=%s AND type='freeze'",(self.user,)).fetchone()[0],1)
+        self.assertEqual(self.client.post('/api/v1/tasks/'+accepted+'/cancel',headers=self.write_headers()).status_code,200)
+        balance=self.client.get('/api/v1/credits/balance').json();self.assertEqual((balance['available'],balance['reserved']),(16,0))
     def test_size_and_archive(self):
         self.body['generation']['output']['width']=11
         self.assertEqual(self.client.post('/api/v1/quotes',json=self.body,headers=self.write_headers()).status_code,422)

@@ -24,6 +24,8 @@ up生成私有state.json、compose.env、S3身份文件，项目名由该profile
 
 down保留全部命名卷，不重置数据或凭据；不要用全局prune清理此项目。PG bootstrap超级用户只用于迁移/初始化，API、认证、Worker、发布器和只读视图各用独立运行身份。随机值和原始日志只在忽略.local/work，Windows文件ACL仍由运行者配置，不能把chmod当作完整Windows ACL隔离。
 
+Linux私有profile目录为0700，state/env为0600。S3身份文件在该私有目录内设0644并只读绑定给非root容器；宿主其他用户仍无法穿过0700父目录，容器进程则能读取挂载文件。首轮Compose曾因该文件0600与容器UID不一致而读取被拒，已修正，保留实际失败记录。
+
 Rabbit固定容器hostname以便重建后仍能读取原Mnesia数据；S3工作目录和master/volume/filer元数据放入/data命名卷，身份文件只读挂载。API、MQ、S3密钥不写进镜像或Git。若手工调用Compose，所有私有变量均必填，.env.example故意留空；推荐使用dev入口而不是把示例当生产凭据。
 
 ## 原生Compose验收
