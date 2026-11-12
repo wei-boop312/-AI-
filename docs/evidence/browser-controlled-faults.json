@@ -1,7 +1,7 @@
 {
-  "started_at": "2026-11-12T19:13:13.220Z",
-  "finished_at": "2026-11-12T19:13:54.060Z",
-  "base_commit": "9a796416dfdd41558135333702777865b597dd2c",
+  "started_at": "2026-11-12T22:14:55.046Z",
+  "finished_at": "2026-11-12T22:15:30.345Z",
+  "base_commit": "ec3b8fd1df7776b569f0c21e32874e8b5aea0064",
   "command": "CONTROLLED_FAKE_BROWSER=1 pnpm --dir apps/web exec playwright test -c playwright.faults.config.ts",
   "environment": {
     "node": "v24.22.1",
@@ -9,7 +9,7 @@
     "browser": "157.0.8103.50",
     "profile": "loopback/offline"
   },
-  "test_sha256": "b7aa2d49c613825268adfc556d75bfa03f3545d1344258e4f9d9c8572f90b4b8",
+  "test_sha256": "719808b22408aedf11fab67397bb1bf6a4abf7bf63f55f1f9b824c5794097f4d",
   "production_assets": [
     {
       "name": "index-D9e80hb4.js",

@@ -53,7 +53,7 @@ test('已创建意图的取消竞争返回409，未知保持冻结并接收运�
  try{
   expect(worker(task.id,'uncertain').result).toBe('stopped');
   const refused=page.waitForResponse(r=>r.url().endsWith('/'+task.id+'/cancel')&&r.status()===409);await page.getByRole('button',{name:'取消排队任务',exact:true}).click();await refused;await expect(page.getByText('任务已开始，暂不支持取消',{exact:true})).toBeVisible();
- }finally{release();await page.unroute(exact)}
+ }finally{release();await page.unrouteAll({behavior:'wait'})}
  await expect(page.getByText('结果或费用尚未确认，积分保持冻结。请等待管理员对账，勿重复创建同一生成请求。',{exact:true})).toBeVisible();
  const b=await balance(page);expect([b.available,b.reserved,b.spent_total]).toEqual([184,16,0]);expect(worker(task.id,'success').result).toBe('not_claimed');
  await page.reload();await expect(page.getByRole('button',{name:'等待对账后再生成'})).toBeDisabled();expect(await page.getByRole('button',{name:/重试/}).count()).toBe(0);await capture(page,'uncertain');

@@ -253,3 +253,13 @@ Actions43314133380实际通过89包锁定安装、49单元/39协议契约、Linu
 周额度最近used41%、剩余59%。CI镜像与新增门槛待复跑；Compose、完整task/all与外部真实供应商/预算验收仍未完成，不标P5-01完成或OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
 
 CI43315437241已实际通过全部原生/浏览器/性能及两个镜像构建、非root导入/Nginx校验；最终新P5-01脚本因在同进程发现unit/integration重名test_monitoring模块而失败。已修复为各套件独立解释器发现，本机正确统计49/39/83；不跳过测试或放松证据绑定。该轮公开原生/镜像证据与失败门槛原样保存docs/evidence/ci-43315437241，provenance明确整体failure。继续完整复跑至新门槛实际通过，尚不宣告P5-01完成。
+
+## 2026-11-13：Compose启停候选与受控测试路由生命周期修复
+
+新增compose.yaml及compose_runtime.py：两个独立PG17.11、Rabbit4.4.0、Seaweed4.53固定digest，必要端口仅回环；私有随机bootstrap凭据、路径派生项目名+随机owner、容器/卷/网络标签核对。dev up/down/bootstrap及migrate --compose-profile入口补齐，日常down保留卷，已有profile拒绝覆盖；run_local支持显式忽略目录profile，doctor报告Linux镜像支持。Rabbit固定hostname，S3在/data保存filer/master/volume状态；无默认生产密码或应用迁移owner复用。
+
+P0-02入口新增独立work项目Compose演练：fresh bootstrap全部迁移/6角色/RLS/API/只读、写S3对象与quorum消息、保卷down/up比较PG身份/用户数、S3SHA及消息，最终仅清理该临时项目和测试卷。P5-01要求本次Compose证据。Windows无Docker，实际P0-02/P5-01本机均exit3 BLOCKED_ENV，YAML/AST及49单元通过；尚未把候选称为Compose已验收，待Linux CI首次运行。说明COMPOSE.md，私有日志失败时脱敏后供诊断。
+
+上一轮CI43316645913原生/常规性能通过，但受控取消竞争用例撤销路由时在途handler仍await，出现Route is already handled导致该轮失败，未到镜像/最终门槛。按Playwright unrouteAll behavior=wait在释放barrier后等待当前handler完成，不忽略错误、不改业务断言。该竞争用例本机重复5次全通过（约1分钟），随后完整5受控用例通过（38.1秒）；日志controlled-route-race-repeat/full-20261113.log，截图/案例证据更新。独立账号/本项目消费者暂停后已恢复，最终monitor无告警、所有财务异常0。
+
+当前周额度used45%、剩余55%，继续。下一轮真实CI继续镜像/交付门槛及新增Compose验证；完整task/all与真实供应商/预算验收仍待完成，未标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。

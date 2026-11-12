@@ -1,0 +1,1 @@
+{"observed_at": "2026-11-12T22:16:21.264185+00:00", "scope": "P5-01 local/CI build candidate; no release or deployment approval", "static": "PASS", "legal_text_references": 268, "dependency_components": 188, "openapi_paths": 31, "result": "BLOCKED_ENV", "reason": "BLOCKED_ENV: Docker engine and fresh CI build evidence required"}

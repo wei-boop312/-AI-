@@ -38,6 +38,12 @@ def verify_static():
         text=(ROOT/path).read_text()
         for key in keys:require(images[key]['image'] in text,'Dockerfile base disagrees with verified image inventory')
         require('USER ' in text and 'USER root' not in text,'runtime Dockerfile must select non-root identity')
+    compose=yaml.safe_load((ROOT/'compose.yaml').read_text())
+    require(set(compose['services'])=={'postgres-test','postgres-dev','rabbitmq','s3'},'Compose infrastructure service set differs')
+    for name,service in compose['services'].items():
+        expected=images['postgres' if name.startswith('postgres') else 'seaweedfs' if name=='s3' else 'rabbitmq']['image']
+        require(service['image']==expected,'Compose image inventory differs')
+        require(all(str(port).startswith('127.0.0.1:') for port in service['ports']),'Compose exposes non-loopback port')
     require(load(ROOT/'contracts/openapi.json')==create_app().openapi(),'checked-in OpenAPI must match current routes and schemas')
     inventory=load(ROOT/'third_party/inventory.json')
     require(not inventory['missing_packaged_texts'],'unresolved legal text inventory')
@@ -76,6 +82,9 @@ def verify_run(evidence):
         require(path.is_relative_to(ROOT/'apps/web/dist'),'build asset path escapes dist')
         require(path.is_file() and sha(path)==digest,'production assets changed after browser acceptance')
     require(bool(run['files']),'empty production asset inventory')
+    compose=load(evidence/'compose-smoke.json')
+    require(compose['result']=='PASS' and compose['commit']==commit and compose['paid_calls']==0,'Compose smoke evidence stale or failed')
+    require(compose['postgres_system_identifier_preserved'] and compose['rabbit_quorum_message_preserved'] and compose['recreated_container_services'],'Compose persistence not verified')
     for folder,log_name in (('unit','unit'),('contract','contracts'),('integration','native-integration')):
         text=(evidence/(log_name+'.log')).read_text(encoding='utf-8-sig')
         match=re.search(r'Ran (\d+) tests? in ',text)

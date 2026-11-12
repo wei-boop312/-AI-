@@ -52,6 +52,8 @@ jobs:
           pnpm --dir apps/web exec playwright install --with-deps chromium
       - name: Native PG MQ S3 and production browser acceptance
         run: uv run python scripts/ci_native.py
+      - name: Compose fresh bootstrap and volume persistence
+        run: uv run python scripts/check.py task P0-02
       - name: Build runtime images without publishing
         run: |
           docker build --no-cache --build-arg VCS_REF="$GITHUB_SHA" -t visual-api:ci .
@@ -76,5 +78,7 @@ jobs:
             docs/evidence/browser-pixel-verification.json
             docs/evidence/performance-production.json
             docs/evidence/protocol-pipeline.json
+            docs/evidence/compose-smoke.json
+            docs/evidence/bootstrap-health-readonly.json
             sbom/
             third_party/
