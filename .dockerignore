@@ -23,3 +23,5 @@
 !apps/web/src/**
 !ops/
 !ops/nginx.conf
+!third_party/
+!third_party/**

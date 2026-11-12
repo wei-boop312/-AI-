@@ -69,3 +69,5 @@ BFL官方协议的离线传输契约与字段映射见[docs/BFL_PROTOCOL.md](doc
 Gemini官方SDK一次检测和严格事实校验见[docs/GEMINI_PROTOCOL.md](docs/GEMINI_PROTOCOL.md)：`python scripts/check.py task P4-02 --profile offline`。SDK重试及自动续发均关闭；真实供应商调用及其Worker接线仍未验收。
 
 两种官方协议经Worker、PG和私有S3的离线组合闭环见[docs/PROTOCOL_PIPELINE.md](docs/PROTOCOL_PIPELINE.md)。该模式强制双方MockTransport并显式标记协议模拟；真实传输仍未启用。
+
+锁定构建、依赖审计、SBOM与实际第三方许可文本见[docs/SUPPLY_CHAIN.md](docs/SUPPLY_CHAIN.md)。CI和容器候选仍在实测修复中，不能据已有文件宣称发布就绪。

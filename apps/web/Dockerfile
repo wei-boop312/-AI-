@@ -11,6 +11,7 @@ ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="Cross Studio web" org.opencontainers.image.revision=$VCS_REF
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY ops/nginx.conf /etc/nginx/nginx.conf
+COPY third_party /usr/share/nginx/html/third_party
 USER 101:101
 EXPOSE 8080
 ENTRYPOINT ["nginx"]

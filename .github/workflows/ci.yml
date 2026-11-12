@@ -40,6 +40,10 @@ jobs:
           mkdir -p work/ci-public
           uv run python scripts/check.py unit > work/ci-public/unit.log 2>&1
           uv run python -m unittest discover -s tests/contract -v > work/ci-public/contracts.log 2>&1
+      - name: Dependency advisories SBOM and actual legal texts
+        run: |
+          uv run python scripts/dependency_audit.py
+          uv run python scripts/dependency_artifacts.py
       - name: Scan committed history for secrets
         run: docker run --rm -v "$PWD:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --redact --log-opts="--all" /repo
       - name: Build production frontend and install browser
@@ -70,3 +74,5 @@ jobs:
             docs/evidence/browser-pixel-verification.json
             docs/evidence/performance-production.json
             docs/evidence/protocol-pipeline.json
+            sbom/
+            third_party/

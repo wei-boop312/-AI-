@@ -12,7 +12,7 @@
 
 测试：`uv run python scripts/check.py unit`。原生PG测试需在已迁移的独立测试实例设置TEST_DATABASE_URL（专用测试owner，允许创建测试LOGIN），再运行`uv run python scripts/check.py integration`。集成测试会建立随机账号和角色，不能连接生产数据库。该入口已覆盖真实PG/MQ/S3用例，浏览器闭环另行在生产预览执行。
 
-/health/ready检查有限API依赖（PG api/auth与S3），就绪200、不可用503；scope为api_dependencies，具有短超时、缓存和单轮并发探测。/health/live仅表示进程存活。MQ/Worker及供应商健康另行判断，不能由API就绪推导OFFLINE_READY。详见READINESS_AND_ROLES.md。
+/api/v1/health/ready检查有限API依赖（PG api/auth与S3），就绪200、不可用503；scope为api_dependencies，具有短超时、缓存和单轮并发探测。/api/v1/health/live仅表示进程存活。MQ/Worker及供应商健康另行判断，不能由API就绪推导OFFLINE_READY。详见READINESS_AND_ROLES.md。
 
 S3配置：S3_ENDPOINT、S3_ACCESS_KEY、S3_SECRET_KEY、S3_BUCKET（默认visual-private）、S3_REGION（默认us-east-1）。远程endpoint必须HTTPS，本机可HTTP。请提前创建私有bucket。原生S3测试另设TEST_S3_ENDPOINT/TEST_S3_ACCESS_KEY/TEST_S3_SECRET_KEY/TEST_S3_BUCKET；没有这些变量时S3用例会明确skip，不代表集成通过。临时解码文件在项目work目录并自动删除，已加入gitignore。
 

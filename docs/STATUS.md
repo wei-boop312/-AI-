@@ -229,3 +229,15 @@ python scripts/check.py task P4-02 --profile offline：19项真实SDK/MockTransp
 本机无Docker，当前仅脚本AST、action SHA长度及diff检查通过；实际Linux安装、镜像构建、服务与浏览器CI尚未运行，不称CI绿或P5-01完成。下一步推送后观察实际Actions并修复；SBOM/NOTICE、依赖漏洞检查、Compose与完整task/all入口仍待补齐。保留此前周额度used37%、剩余63%，继续。
 
 CI首轮43311633840已实际通过Linux锁定安装、单元/契约、提交历史gitleaks与前端生产构建；两套PG迁移/初始化、原生集成均exit0，但独立API就绪等待超时，浏览器与镜像阶段未执行。当前尚无启动日志公开诊断，新增仅失败时脱敏输出启动尾部及最后ready响应，继续复跑定位；不把首轮失败改写成成功。SBOM/NOTICE与漏洞检查开发中，尚未阶段验收。
+
+## 2026-11-13：依赖审计、实际许可文本与CI探针修复
+
+pip-audit2.10.1、PyYAML6.0.3、jsonschema4.26.0纳入开发锁文件；新增dependency_audit.py和dependency_artifacts.py。已安装88 Python与100 npm组件生成CycloneDX1.6并严格schema校验，清单明确当前Windows构建环境/含开发工具/不含基础OS或未安装平台变体；绑定两个锁文件SHA，不冒充完整Linux镜像SBOM。保留上游实际许可声明与逐文件原文/SHA；不是将全部组件归MIT/Apache，也不替自有代码授开源许可。
+
+初次缺5项法律文本已核实处理：pip-requirements-parser的mit.LICENSE后缀、packageurl-python已校验sdist内mit.LICENSE、icons-svg npm gitHead固定源码根LICENSE、is-mobile发布README完整MIT段、rolldown平台绑定同版本父包LICENSE/THIRD-PARTY-LICENSE。清单逐项注明来源、supplements/sources.json记录外部原件及摘要；目前缺原文数0。添加gitattributes保证法律文本字节不被换行转换破坏SHA。镜像候选复制第三方文本，CI在实际Linux环境重新生成并上传。LGPL/MPL和基础OS再分发义务仍需发布前核对，不宣称完成法律审查。说明SUPPLY_CHAIN.md。
+
+本机pip-audit与pnpm audit均exit0：88项Python无已知漏洞、无跳过包，npm各级0；结果绑定锁文件，不能证明未知漏洞不存在。49项单元回归、uv锁文件/包兼容性和脚本/YAML检查通过，证据dependency-audit.json及相关日志。
+
+两轮真实Actions（43311633840、43312752792）已通过干净Linux锁定安装、单元/契约、全历史gitleaks和前端构建；两套PG初始化及原生集成都exit0。后者脱敏诊断确认API已正常启动，但CI误用/health/ready得到404。已修正为实际/api/v1/health/ready，并更正RUNBOOK/OPERATIONS_RECOVERY的路径；本机该URL实际200、三项依赖ready。下一轮继续验证浏览器、性能、镜像构建；此前失败保留，不标CI绿/P5-01完成。
+
+当前周额度used41%、剩余59%，继续。完整task/all、Compose、镜像完整审计/API交付说明及真实供应商授权/预算验收仍未完成；未标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。

@@ -17,6 +17,7 @@ COPY alembic.ini ./
 COPY rules ./rules
 COPY contracts ./contracts
 COPY scripts ./scripts
+COPY third_party ./third_party
 USER 10001:10001
 EXPOSE 8000
 CMD ["uvicorn","visual_platform.api.main:app","--host","0.0.0.0","--port","8000"]

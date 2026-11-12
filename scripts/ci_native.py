@@ -102,7 +102,7 @@ def main():
         command([sys.executable,'scripts/setup_local.py'],name='bootstrap-dev')
         command([sys.executable,'scripts/check.py','integration'],name='native-integration')
         start('api');publisher=start('publisher');worker=start('worker');start('preview')
-        wait(lambda:http_ready('http://127.0.0.1:8000/health/ready'),'API')
+        wait(lambda:http_ready('http://127.0.0.1:8000/api/v1/health/ready'),'API')
         wait(lambda:http_ready('http://127.0.0.1:5173/'),'production preview')
         command(['pnpm','--dir','apps/web','exec','playwright','test'],name='browser-production')
         stop(worker);stop(publisher)

@@ -6,7 +6,7 @@
 
 先启动独立PG、MQ、私有S3，升级迁移，再分别运行`python scripts/run_local.py api`、`publisher`、`worker`。前端先构建，再运行`python scripts/run_local.py preview`。生产构建以5173端口验收；开发服务不作为生产构建性能证据。六个数据库运行角色、独立初始化与API健康检查见[READINESS_AND_ROLES.md](READINESS_AND_ROLES.md)。
 
-`GET /health/live`仅表示API进程存活；`GET /health/ready`检查PG api/auth连接池及S3 HeadBucket，可能有短缓存。`python scripts/run_local.py monitor`补充MQ队列、Publisher/Worker心跳、任务积压与财务计数。HeadBucket成功不保证已有对象可立即读取：本次S3重启遇到master/volume定位恢复窗口，应再验证已知私有对象的SHA和带签名下载。不要通过重复生成新任务测试存储恢复。
+`GET /api/v1/health/live`仅表示API进程存活；`GET /api/v1/health/ready`检查PG api/auth连接池及S3 HeadBucket，可能有短缓存。`python scripts/run_local.py monitor`补充MQ队列、Publisher/Worker心跳、任务积压与财务计数。HeadBucket成功不保证已有对象可立即读取：本次S3重启遇到master/volume定位恢复窗口，应再验证已知私有对象的SHA和带签名下载。不要通过重复生成新任务测试存储恢复。
 
 ## 故障分流
 
