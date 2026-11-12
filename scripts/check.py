@@ -7,6 +7,8 @@ ROOT=Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 os.environ['PYTHONPATH']=str(ROOT/'src')
 mode=sys.argv[1:]
+if mode==['task','P5-01']:
+    raise SystemExit(subprocess.call([sys.executable,'scripts/verify_delivery.py']))
 if mode==['task','P4-02','--profile','offline']:
     raise SystemExit(subprocess.call([sys.executable,'-m','unittest','discover','-s','tests/contract','-p','test_gemini.py','-v']))
 if mode==['task','P4-01','--profile','offline']:

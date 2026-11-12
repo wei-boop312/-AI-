@@ -241,3 +241,13 @@ pip-audit2.10.1、PyYAML6.0.3、jsonschema4.26.0纳入开发锁文件；新增de
 两轮真实Actions（43311633840、43312752792）已通过干净Linux锁定安装、单元/契约、全历史gitleaks和前端构建；两套PG初始化及原生集成都exit0。后者脱敏诊断确认API已正常启动，但CI误用/health/ready得到404。已修正为实际/api/v1/health/ready，并更正RUNBOOK/OPERATIONS_RECOVERY的路径；本机该URL实际200、三项依赖ready。下一轮继续验证浏览器、性能、镜像构建；此前失败保留，不标CI绿/P5-01完成。
 
 当前周额度used41%、剩余59%，继续。完整task/all、Compose、镜像完整审计/API交付说明及真实供应商授权/预算验收仍未完成；未标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
+
+## 2026-11-13：Linux完整原生/浏览器通过，前端镜像构建修复
+
+Actions43314133380实际通过89包锁定安装、49单元/39协议契约、Linux依赖审计/SBOM与全历史gitleaks、前端生产构建；83项真实PG/MQ/S3集成和4常规/性能+5受控浏览器全部通过，重启消费者后监控exit0。CI设备画布60.484秒/帧p95 16.7ms，500请求均200、APIp95 104.28ms，均保留失败样本与原始证据。后端Docker镜像已构建，但前端镜像pnpm build触发非交互依赖清理错误，整体仍failure，不称CI全绿。
+
+日志确认前端Docker上下文177.54MB，原忽略规则目录重包含会带入主机node_modules。已明确末尾排除所有node_modules/dist/tsbuildinfo及.git/.local/work，并设前端builder CI=true；继续真实构建验证，不绕过pnpm锁定检查。
+
+刷新当前31路径OpenAPI；新增API_USAGE.md及P5-01可执行门槛verify_delivery.py/check.py task P5-01：校验API schema、镜像/Actions固定引用、268法律文本引用SHA、188组件SBOM及锁摘要，再要求当前提交的新鲜原生/全部浏览器/性能、审计和实际非root镜像结果。当前Windows无Docker，本机门槛正确返回exit3 BLOCKED_ENV，静态检查PASS；不会用历史已提交报告假通过。新门槛已加入后续CI。
+
+周额度最近used41%、剩余59%。CI镜像与新增门槛待复跑；Compose、完整task/all与外部真实供应商/预算验收仍未完成，不标P5-01完成或OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。

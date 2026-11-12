@@ -25,3 +25,9 @@
 !ops/nginx.conf
 !third_party/
 !third_party/**
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+.git
+.local
+work

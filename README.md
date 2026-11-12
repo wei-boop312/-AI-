@@ -71,3 +71,5 @@ Gemini官方SDK一次检测和严格事实校验见[docs/GEMINI_PROTOCOL.md](doc
 两种官方协议经Worker、PG和私有S3的离线组合闭环见[docs/PROTOCOL_PIPELINE.md](docs/PROTOCOL_PIPELINE.md)。该模式强制双方MockTransport并显式标记协议模拟；真实传输仍未启用。
 
 锁定构建、依赖审计、SBOM与实际第三方许可文本见[docs/SUPPLY_CHAIN.md](docs/SUPPLY_CHAIN.md)。CI和容器候选仍在实测修复中，不能据已有文件宣称发布就绪。
+
+当前31条API路径、Cookie/CSRF与幂等提交、容器候选和P5-01构建门槛见[docs/API_USAGE.md](docs/API_USAGE.md)。缺Docker或本次完整证据时验收返回BLOCKED_ENV。

@@ -1,0 +1,108 @@
+"""P5-01 build/CI evidence gate. Never substitutes checked-in old evidence for a run."""
+from datetime import datetime,timezone
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import unittest
+import yaml
+from cyclonedx.schema import SchemaVersion
+from cyclonedx.validation.json import JsonStrictValidator
+ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
+
+def require(condition,description):
+    if not condition:raise ValueError(description)
+
+def load(path):return json.loads(path.read_text(encoding='utf-8-sig'))
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def verify_static():
+    from visual_platform.api.main import create_app
+    workflow=yaml.load((ROOT/'.github/workflows/ci.yml').read_text(),Loader=yaml.BaseLoader)
+    require(workflow['permissions']=={'contents':'read'},'CI permissions must remain read-only')
+    steps=workflow['jobs']['offline-native']['steps']
+    for step in steps:
+        if 'uses' in step:require(re.fullmatch('[^@]+@[0-9a-f]{40}',step['uses']) is not None,'action must be pinned to commit SHA')
+        if 'run' in step:require('docker push' not in step['run'] and 'secrets.' not in step['run'],'build gate cannot publish or require paid secrets')
+    images=load(ROOT/'ops/build-images.json')['images']
+    for image in images.values():require(re.search('@sha256:[0-9a-f]{64}$',image['image']) is not None,'base image must have immutable digest')
+    for path,keys in (('Dockerfile',('python',)),('apps/web/Dockerfile',('node','nginx'))):
+        text=(ROOT/path).read_text()
+        for key in keys:require(images[key]['image'] in text,'Dockerfile base disagrees with verified image inventory')
+        require('USER ' in text and 'USER root' not in text,'runtime Dockerfile must select non-root identity')
+    require(load(ROOT/'contracts/openapi.json')==create_app().openapi(),'checked-in OpenAPI must match current routes and schemas')
+    inventory=load(ROOT/'third_party/inventory.json')
+    require(not inventory['missing_packaged_texts'],'unresolved legal text inventory')
+    require(bool(inventory['components']),'empty dependency inventory')
+    legal_files=0
+    for component in inventory['components']:
+        require(bool(component['texts']),'component legal texts missing')
+        for item in component['texts']:
+            path=(ROOT/item['file']).resolve()
+            require(path.is_relative_to((ROOT/'third_party/licenses').resolve()),'legal text path escapes inventory')
+            require(path.is_file() and sha(path)==item['sha256'],'legal text checksum mismatch')
+            legal_files+=1
+    validator=JsonStrictValidator(SchemaVersion.V1_6)
+    for name in ('python','npm'):
+        path=ROOT/'sbom'/(name+'.cdx.json');text=path.read_text(encoding='utf-8-sig');bom=json.loads(text)
+        require(validator.validate_str(text) is None,'invalid CycloneDX schema')
+        require(len(bom['components'])==sum(x['ecosystem']==name for x in inventory['components']),'SBOM/inventory count mismatch')
+        properties={x['name']:x['value'] for x in bom['metadata']['properties']}
+        for lock in ('uv.lock','apps/web/pnpm-lock.yaml'):require(properties.get('lock_sha256:'+lock)==sha(ROOT/lock),'SBOM lock digest stale')
+    return {'static':'PASS','legal_text_references':legal_files,'dependency_components':len(inventory['components']),'openapi_paths':len(create_app().openapi()['paths'])}
+
+def verify_run(evidence):
+    docker=shutil.which('docker')
+    if not docker:raise EnvironmentError('BLOCKED_ENV: Docker engine and fresh CI build evidence required')
+    result=subprocess.run([docker,'info','--format','{{.ServerVersion}}'],capture_output=True,text=True)
+    if result.returncode:raise EnvironmentError('BLOCKED_ENV: Docker engine unavailable')
+    commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    if not (evidence/'native-result.json').is_file():raise EnvironmentError('BLOCKED_ENV: current native/browser build run is missing')
+    run=load(evidence/'native-result.json')
+    require(run['result']=='PASS' and run['commit']==commit and run['paid_calls']==0,'native evidence failed, stale, or not offline')
+    required={'migrate-test','bootstrap-dev','native-integration','browser-production','browser-controlled-faults','monitor-after-recovery'}
+    require(required<={x['name'] for x in run['steps']},'native build stages missing')
+    require(all(x['exit_code']==0 for x in run['steps']),'native stage failed')
+    for relative,digest in run['files'].items():
+        path=(ROOT/relative).resolve()
+        require(path.is_relative_to(ROOT/'apps/web/dist'),'build asset path escapes dist')
+        require(path.is_file() and sha(path)==digest,'production assets changed after browser acceptance')
+    require(bool(run['files']),'empty production asset inventory')
+    for folder,log_name in (('unit','unit'),('contract','contracts'),('integration','native-integration')):
+        text=(evidence/(log_name+'.log')).read_text(encoding='utf-8-sig')
+        match=re.search(r'Ran (\d+) tests? in ',text)
+        expected=unittest.TestLoader().discover(str(ROOT/'tests'/folder)).countTestCases()
+        require(match is not None and int(match.group(1))==expected,'test count differs from current suite')
+        require(re.search(r'^OK\s*$',text,re.M) is not None and 'skipped=' not in text,'unittest failure or skipped coverage')
+    for name,count in (('browser-production',4),('browser-controlled-faults',5)):
+        text=(evidence/(name+'.log')).read_text(encoding='utf-8-sig')
+        require(re.search(r'\b'+str(count)+r' passed\b',text) is not None,'browser suite incomplete')
+    for filename in ('performance-production.json','browser-controlled-faults.json'):
+        item=load(ROOT/'docs/evidence'/filename)
+        require(item.get('passed') is True and item.get('base_commit')==commit,'browser evidence stale or failed')
+    audit=load(evidence/'dependency-audit.json')
+    require(audit['result']=='PASS' and audit['python_exit_code']==0 and audit['npm_exit_code']==0,'dependency advisory check failed')
+    for lock,digest in audit['lock_sha256'].items():require(sha(ROOT/lock)==digest,'audit lock digest stale')
+    inspections=[json.loads(x) for x in (evidence/'docker-images.jsonl').read_text().splitlines() if x.strip()]
+    require(len(inspections)==2,'runtime image build results missing')
+    for image in inspections:
+        require(re.fullmatch('sha256:[0-9a-f]{64}',image['Id']) is not None,'runtime image ID invalid')
+        require(image['Config']['Labels'].get('org.opencontainers.image.revision')==commit,'runtime image revision stale')
+        require(image['Config']['User'] in ('10001:10001','101:101'),'runtime image runs as unexpected identity')
+        actual=subprocess.check_output([docker,'image','inspect',image['Id'],'--format','{{.Id}}'],text=True).strip()
+        require(actual==image['Id'],'built runtime image not available in this engine')
+    return {'native_ci':'PASS','commit':commit,'docker_engine':result.stdout.strip(),'runtime_image_ids':[x['Id'] for x in inspections]}
+
+if __name__=='__main__':
+    evidence=ROOT/'work/ci-public';evidence.mkdir(parents=True,exist_ok=True)
+    report={'observed_at':datetime.now(timezone.utc).isoformat(),'scope':'P5-01 local/CI build candidate; no release or deployment approval'}
+    try:
+        report.update(verify_static());report.update(verify_run(evidence));report['result']='PASS';code=0
+    except EnvironmentError as error:report.update(result='BLOCKED_ENV',reason=str(error));code=3
+    except Exception as error:report.update(result='FAIL',reason=str(error));code=1
+    (evidence/'delivery-gate.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+    print(json.dumps(report));raise SystemExit(code)
