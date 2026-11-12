@@ -1,29 +1,29 @@
 # 本机生产构建性能基准
 
-基准命令：`pnpm --dir apps/web exec playwright test performance.spec.ts`，exit 0。运行时间2026-11-12T18:25:28.789Z至2026-11-12T18:26:36.868Z，应用基础commit `aa28b9fe7e50257343b1d6f9f2c10a99984ea567`；被测dist资源名和SHA256、原始样本及设备字段保存在[evidence/performance-production.json](evidence/performance-production.json)。运行日志为performance-production-20261113.log，截图为browser-performance-50-objects.png。相应测试与合成fixture生成脚本随本阶段提交。
+记录命令：`pnpm --dir apps/web e2e`，性能项结果通过。起止时间2026-11-12T19:08:35.517Z至2026-11-12T19:09:44.766Z，应用基础commit `9a796416dfdd41558135333702777865b597dd2c`。dist文件/hash、全部原始样本和设备记录见[evidence/performance-production.json](evidence/performance-production.json)，运行日志为performance-production-20261113.log。
 
 ## 环境与负载
 
-13th Gen Intel(R) Core(TM) i7-13620H，16逻辑CPU，31.7GiB RAM，Windows 10.0.26200，Chrome 157.0.8103.50（headless），视口1920×1200、DPR 1。本机原生PG 17、RabbitMQ 4、私有S3、Python API与Vite静态生产预览，服务已启动预热；单独测量API与画布阶段。
+13th Gen Intel(R) Core(TM) i7-13620H，16逻辑CPU、31.7GiB RAM，Windows 10.0.26200，Chrome 157.0.8103.50 headless，1920×1200、DPR 1。本机PG/RabbitMQ/S3、API及静态生产预览均已启动。API与画布阶段分开测量。
 
-通过真实API上传2000×2000、4MP的确定性合成PNG，并以普通界面控件和鼠标在缩放、平移后的原图创建12个ROI。50对象定义为双画布共2个Image、24个Rect、24个Text，不把Stage/Layer/Group计入，也不宣称有50个独立保护区域（业务上限20区域）。Konva对象只作只读观测，没有通过内部store注入区域或替代交互。按缩放比例验证框选坐标误差，实际指针受显示像素量化；结束后验证源坐标不变、目标宽高不变且坐标为整数。
+通过真实API上传2000×2000合成PNG，普通界面鼠标在缩放/平移后的原图创建12个ROI。50个绘制对象为双画布2个Image、24个Rect和24个Text，不计Stage/Layer/Group，也不是50个独立保护区域（业务最多20区域）。Konva仅用于只读计数/坐标/事件观测，没有通过store注入区域。
 
-随后连续60.636秒执行滚轮缩放、源画布平移和目标ROI拖动；观测到4587个画布输入事件，最大事件间隔169.1ms（阈值1000ms）。矩形实际最大位移123.7 canonical像素，画布组位移25.1显示像素，绝对缩放范围0.1522–0.2577。
+连续操作60.430秒，4587个输入，最大输入间隔268.6ms。实际矩形最大位移123.7 canonical像素、画布组位移25.1显示像素；缩放范围0.1522–0.2577。验证源坐标未改变，目标宽高不变、坐标为整数。
 
 ## 结果
 
 | 指标 | p50 | p95 | p99 | 最大 | 目标 |
 |---|---:|---:|---:|---:|---|
-| RAF帧间隔（8834样本） | 6.1ms | 12.1ms | 24.4ms | 48.8ms | p95<33ms，通过 |
-| Layer场景绘制CPU（4257样本） | 0.4ms | 1.3ms | 2.2ms | 5.5ms | 单独诊断 |
-| 非模型API（500样本） | 100.0ms | 141.9ms | 219.7ms | 234.9ms | p95<500ms，通过 |
+| RAF帧间隔（9051样本） | 6.1ms | 12.1ms | 18.3ms | 85.0ms | p95<33ms |
+| Layer场景绘制CPU（4257样本） | 0.4ms | 1.2ms | 2.0ms | 4.0ms | 单独诊断 |
+| 非模型API（500样本） | 127.0ms | 359.0ms | 583.0ms | 818.0ms | p95<500ms |
 
-API使用同一隔离账号、20并发、500次已登录GET，混合产品列表/详情、任务列表、余额、平台规则和当前用户，包含本机HTTP代理、认证和真实PG查询，读取完响应体后记耗时。所有500次HTTP 200；5xx、非200、超时和网络失败均保留在样本与分位数总体中并使验收失败，不过滤失败样本。文件传输、模型等待不在此负载中。
+API为同一隔离账号、20并发、500次已登录混合GET（产品列表/详情、任务、余额、规则、当前用户），包含HTTP代理、认证、PG查询及读完响应体。状态分布：`{"200": 500}`。非200、5xx、超时和网络失败均留在分位数总体并使验收失败；不排除高延迟尾部。文件传输和模型等待另行衡量。
 
-CDP JSHeapUsedSize从15.45MiB变为19.46MiB，JSHeapTotalSize从48.63MiB变为84.63MiB；Documents仍为1，DOM Nodes从1204变为1212。保留全部RAF/绘制/输入样本会占内存，本次没有强制GC，不能据单次堆差额判定有无泄漏。记录到一次53ms长任务，原始时间点保留在JSON。没有任务POST、账号下任务数为0、页面异常和远程host均为0。
+CDP JSHeapUsedSize从15.45MiB变为37.66MiB，JSHeapTotalSize从48.63MiB变为78.13MiB；DOM Nodes从1204至1208。探针保留原始数组且没有强制GC，单次堆差额不能判定是否泄漏。长任务记录：`[{"start_ms": 193.29999995231628, "duration_ms": 50}]`。
 
 ## 解释边界与复跑
 
-RAF测量的是浏览器回调间隔和主线程停顿；beforeDraw到draw仅为Konva场景绘制的CPU时间。数据不包含完整GPU呈现、物理屏幕延迟或整个浏览器进程RSS。API结果适用于本机已预热服务、单账号只读混合负载；公网、冷启动、多租户写入和生产部署容量需在对应环境另测。合成图不是商品质量评估样本。
+RAF是回调间隔/主线程停顿；beforeDraw至draw只计Konva场景绘制CPU，不代表完整GPU呈现、物理显示延迟或浏览器进程RSS。本机预热、单账号只读负载不能外推公网、冷启动、多租户写入或其他设备容量。合成图不是商品质量样本。
 
-先运行API/publisher/worker，再`pnpm --dir apps/web build`，停止开发web后用`python scripts/run_local.py preview`在5173启动生产预览。Chrome与.local/runtime.json必须可用；测试自动新建本机离线隔离账号。基准明确检查HTML含哈希静态资源且没有Vite开发客户端。每次复跑会更新同名JSON/PNG/log，应在Git提交或另存后再进行后续比较。完整OFFLINE_READY还需要其他P0–P3门槛，不能仅凭本基准宣告完成。
+启动API/publisher/worker；构建web后停止开发web，改用`python scripts/run_local.py preview`。单项命令`pnpm --dir apps/web exec playwright test performance.spec.ts`，完整常规浏览器命令`pnpm --dir apps/web e2e`。测试核对哈希静态资源及无Vite开发客户端，自动创建本机离线账号。复跑更新同名证据，完成后用本脚本按实际命令刷新摘要。完整OFFLINE_READY仍需其他P0–P3门槛。

@@ -1,0 +1,86 @@
+{
+  "started_at": "2026-11-12T19:13:13.220Z",
+  "finished_at": "2026-11-12T19:13:54.060Z",
+  "base_commit": "9a796416dfdd41558135333702777865b597dd2c",
+  "command": "CONTROLLED_FAKE_BROWSER=1 pnpm --dir apps/web exec playwright test -c playwright.faults.config.ts",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "win32",
+    "browser": "157.0.8103.50",
+    "profile": "loopback/offline"
+  },
+  "test_sha256": "b7aa2d49c613825268adfc556d75bfa03f3545d1344258e4f9d9c8572f90b4b8",
+  "production_assets": [
+    {
+      "name": "index-D9e80hb4.js",
+      "sha256": "3c83a9bf27eb3715bb6878dc9d416e815e570bd7c629c3d80dcbf9d9aadc8c76"
+    }
+  ],
+  "expected_cases": 5,
+  "passed": true,
+  "cases": [
+    {
+      "case": "queued_cancel",
+      "one_freeze": true,
+      "one_refund": true,
+      "provider_attempts": 0,
+      "balance": {
+        "available": 200,
+        "reserved": 0,
+        "funded_total": 200,
+        "spent_total": 0
+      }
+    },
+    {
+      "case": "explicit_failure",
+      "task_posts": 1,
+      "one_refund": true,
+      "no_charge": true,
+      "balance": {
+        "available": 200,
+        "reserved": 0,
+        "funded_total": 200,
+        "spent_total": 0
+      }
+    },
+    {
+      "case": "unknown_cancel_race",
+      "cancel_status": 409,
+      "unknown_balance": {
+        "available": 184,
+        "reserved": 16,
+        "funded_total": 200,
+        "spent_total": 0
+      },
+      "after_manual_close": {
+        "available": 200,
+        "reserved": 0,
+        "funded_total": 200,
+        "spent_total": 0
+      },
+      "no_resubmit": true,
+      "live_admin_update_without_reload": true
+    },
+    {
+      "case": "late_receipt",
+      "generate_attempts": 1,
+      "detect_attempts": 1,
+      "one_charge": true,
+      "balance": {
+        "available": 184,
+        "reserved": 0,
+        "funded_total": 200,
+        "spent_total": 16
+      },
+      "live_admin_update_without_reload": true
+    },
+    {
+      "case": "lost_submit_response",
+      "http_replay_status": 200,
+      "same_idempotency_key": true,
+      "unique_tasks": 1,
+      "one_freeze": true,
+      "one_charge": true
+    }
+  ]
+}

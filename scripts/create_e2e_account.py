@@ -1,4 +1,5 @@
 """Provision an isolated local-browser-test identity without printing its password."""
+import argparse
 import json
 from pathlib import Path
 import secrets
@@ -8,7 +9,10 @@ import sys
 import psycopg
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from visual_platform.core.identity import hash_password
-profile=json.loads((ROOT/'.local/runtime.json').read_text(encoding='utf-8'))
+p=argparse.ArgumentParser();p.add_argument('--profile-dir',type=Path,default=ROOT/'.local');args=p.parse_args()
+folder=args.profile_dir.resolve()
+if not any(folder.is_relative_to((ROOT/name).resolve()) for name in ('.local','work')):raise SystemExit('profile must be inside ignored local/work directory')
+profile=json.loads((folder/'runtime.json').read_text(encoding='utf-8'))
 if profile.get('PROVIDER_PROFILE')!='offline' or urlsplit(profile['APP_ORIGIN']).hostname not in ('127.0.0.1','localhost') or urlsplit(profile['ADMIN_DATABASE_URL']).hostname not in ('127.0.0.1','localhost'):
     raise SystemExit('E2E provisioning is limited to the explicit local offline profile')
 uid=uuid4();password=secrets.token_urlsafe(20);email='browser-'+uuid4().hex[:12]+'@example.invalid'

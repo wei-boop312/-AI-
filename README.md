@@ -53,3 +53,6 @@ pnpm --dir apps/web e2e
 
 
 API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md](docs/READINESS_AND_ROLES.md)。原生PG角色专项入口：`python scripts/check.py task P1-02`；尚未实现的其他task/all入口会明确NOT_RUN。
+
+
+受控故障浏览器配置与单任务Fake CLI见[docs/CONTROLLED_BROWSER.md](docs/CONTROLLED_BROWSER.md)。普通e2e和受控配置分别验收；后者要求显式离线标记并暂停本项目publisher/consumer，完成后恢复。

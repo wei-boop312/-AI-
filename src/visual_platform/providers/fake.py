@@ -45,6 +45,7 @@ class DurableFakeProvider:
         stream=BytesIO(); image.save(stream,'PNG'); data=stream.getvalue(); png.write_bytes(data)
         record={'provider_id':key,'sha256':hashlib.sha256(data).hexdigest(),'offline':True}
         encoded=json.dumps(record,sort_keys=True); meta.write_text(encoded,encoding='utf-8')
+        if self.mode=='late':raise ProviderUncertain('fake response lost; persisted result can be reconciled later')
         return Receipt(key,hashlib.sha256(encoded.encode()).hexdigest())
     def _read(self,provider_id):
         step,identity=provider_id.split('-',1)
@@ -61,6 +62,7 @@ class DurableFakeProvider:
         facts={'schema_version':1,'analysis_complete':False,'image_width':width,'image_height':height,'text_items':[],'logo_items':[],'watermark_items':[],'background':{'classification':'unknown','confidence':0.0},'product_extent':None,'uncertainties':['offline_fake_has_no_visual_recognition']}
         record={'provider_id':key,'final_sha256':hashlib.sha256(final_image).hexdigest(),'facts':facts,'offline':True}
         encoded=json.dumps(record,sort_keys=True); meta.write_text(encoded,encoding='utf-8')
+        if self.mode=='late':raise ProviderUncertain('fake response lost; persisted result can be reconciled later')
         return Receipt(key,hashlib.sha256(encoded.encode()).hexdigest())
     def fetch_facts(self,provider_id):
         return self._read(provider_id)[0]

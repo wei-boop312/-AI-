@@ -11,13 +11,13 @@ from visual_platform.storage.s3 import S3Storage
 from visual_platform.worker.runner import Worker
 
 async def main():
-    parser=argparse.ArgumentParser(); mode=parser.add_mutually_exclusive_group(required=True); mode.add_argument('--task',type=UUID); mode.add_argument('--consume',action='store_true'); args=parser.parse_args()
+    parser=argparse.ArgumentParser(); mode=parser.add_mutually_exclusive_group(required=True); mode.add_argument('--task',type=UUID); mode.add_argument('--consume',action='store_true'); parser.add_argument('--fake-mode',choices=['success','failed','uncertain','late'],default='success'); args=parser.parse_args()
     if os.environ.get('PROVIDER_PROFILE','offline')!='offline': raise SystemExit('Only offline provider is enabled')
     settings=SimpleNamespace(**{name.lower():os.environ[name] for name in ('S3_ENDPOINT','S3_ACCESS_KEY','S3_SECRET_KEY','S3_BUCKET')},s3_region=os.environ.get('S3_REGION','us-east-1'))
     pool=await open_pool(os.environ['WORKER_DATABASE_URL'],'app_worker'); storage=S3Storage(settings)
     directory=Path(os.environ.get('FAKE_PROVIDER_DIR',str(Path(__file__).resolve().parents[3]/'work'/'fake-provider')))
     try:
-        worker=Worker(pool,storage,DurableFakeProvider(directory))
+        worker=Worker(pool,storage,DurableFakeProvider(directory,mode=args.fake_mode))
         if args.consume:
             from visual_platform.events.broker import Broker
             from visual_platform.worker.consumer import Consumer

@@ -143,3 +143,15 @@ README修正浏览器必须使用生产preview及隔离账号；基准加入常�
 setup_local新建6个非owner LOGIN并支持忽略目录内独立--profile-dir；verify_bootstrap.py在新建且独立PG17.11集群实际验证0001–0022、24个表FORCE RLS、6角色、重复upgrade schema不变、真登录/授额/产品写入/只读过滤。临时PG已关闭；凭据和profile只在忽略目录，证据bootstrap-health-readonly.json。完整说明及日志清单见READINESS_AND_ROLES.md。
 
 周额度used24%、剩余76%。仍需完整task/all门槛、故障/unknown浏览器场景、运营备份恢复、CI/部署产物和供应商适配，未标OFFLINE_READY。
+
+## 2026-11-13：受控故障浏览器与未知状态恢复
+
+前端unknown不再作为SSE终态，持续接收运营结案和回执resume；同产品待对账禁用普通生成入口，其他产品可独立编辑。取消按钮加忙碌保护，提交防连点与异步用户归属保护；取消/失败明确指内部积分释放，成品提示按auto_overall显示。
+
+DurableFake late现保存图像/事实回执后丢失响应，允许对既有结果人工接纳/查询，禁止重发。Worker增加仅offline的CLI --fake-mode，run_fake_task.py严格读取本机忽略profile；HTTP业务请求没有故障参数。受控配置独立于常规e2e，无skip冒充验收。
+
+37项单元和69项真实PG/Rabbit/S3回归通过。Chrome生产构建4常规+5受控通过：排队重复取消一次refund；明确失败刷新不重试；已创建意图取消409、unknown冻结184/16且普通入口禁用；运营结案无刷新释放；晚到回执无刷新完成且generate/detect各一次；创建响应丢失后同key HTTP200重放、唯一task/freeze/charge。截图和带时间/命令/版本/hash的browser-controlled-faults.json已保留。专属故障阶段暂停了本项目发布/消费进程，测试完成已恢复。
+
+完整常规流程含真实MQ闭环、断网/refresh、草稿/账号切换、报告版本及独立PNG像素验证、手机视口和性能。最新60.430秒/50对象帧间隔p95 12.1ms；20并发500请求均200，API p95 359.0ms/p99 583.0ms/最大818.0ms，原始尾部未过滤。增加render_performance_report.py使摘要跟随新证据，未据单项性能宣告综合完成。
+
+详见CONTROLLED_BROWSER.md、PERFORMANCE.md及browser-fault-*/browser-production-complete日志。周额度used27%、剩余73%。仍待完整任务/all命令及要求审计、备份恢复、CI/部署说明和供应商适配，未标OFFLINE_READY。

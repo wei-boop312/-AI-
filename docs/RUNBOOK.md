@@ -37,3 +37,6 @@ MQ入口：AMQP_URL（远程必须amqps，本机可amqp）、QUEUE_PREFIX（默�
 
 
 只读视图、运行角色和隔离新实例初始化验证见docs/READINESS_AND_ROLES.md。新初始化会生成第6个只读LOGIN及READONLY_DATABASE_URL，既有profile不自动覆盖；--profile-dir仅允许.local或work内目录。
+
+
+受控故障阶段使用scripts/run_fake_task.py --task UUID --mode failed/uncertain/late，只能针对本机offline profile，流程及恢复消费者要求见docs/CONTROLLED_BROWSER.md。unknown页面保持SSE，运营结案或晚到回执resume后自动更新；等待期间禁用同产品普通生成入口。
