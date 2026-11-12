@@ -1,13 +1,13 @@
 # V4 实现与验收现状
 
-截至提交 `35694a4`。本文件为实现状态，原始 tasks.json 保留规划快照。PASS 只代表表述范围和对应提交的实测；代码变更后综合门槛要求新 CI，不能沿用历史 PASS 宣称当前提交全绿。
+基线 `35694a4` 在 [CI 43323370220](https://github.com/wei-boop312/-AI-/actions/runs/43323370220) 首次全绿并通过 OFFLINE_READY。`ec2a155` 新增实际容器任务闭环，当前仍待新 CI；不把它混入早先结果。本文件为实现状态，原始 tasks.json 保留规划快照。PASS 只代表表述范围和对应提交的实测；代码变更后综合门槛要求新 CI，不能沿用历史 PASS 宣称当前提交全绿。
 
 | 任务 | 已有实际结果 | 尚需满足 |
 | --- | --- | --- |
 | P0-01 | 12 份来源摘要核对通过；独立工程，无旧项目源码移植 | 新提交继续 CI 校验 |
-| P0-02 | 锁定安装及四个 Linux 原生服务通过；Compose 已 bootstrap 及保卷读取 | 修正 Quorum fixture 清理后完整 Compose PASS |
+| P0-02 | 35694a4 锁定安装及四个 Linux 服务、完整 Compose PASS | 后续变更继续 CI |
 | P0-03 | 严格 schema/Fake/未知/事实隔离测试通过 | 随当前 CI 回归 |
-| P1-01 | 0024 实际迁移、重复 upgrade、FK/状态/财务约束通过；CI 新库及上一版升级已执行 | Compose 整体结束并生成 PASS 证据 |
+| P1-01 | 35694a4 的0024迁移、重复upgrade、FK/状态/财务约束、新库及0023→0024升级均 PASS | 后续变更继续 CI |
 | P1-02 | 6 非 owner LOGIN、FORCE RLS、readonly/事务上下文和取消/超时隔离通过 | 随当前 CI 回归 |
 | P1-03 | 私有认证、轮换/重放、停用/退出、CSRF/Origin/限流通过 | 随当前 CI 回归 |
 | P1-04 | 真实账本/终态竞争/余额守恒；20 同步请求及不同产品竞争通过 | 随当前 CI 回归 |
@@ -22,14 +22,14 @@
 | P3-01 | 中文页面、草稿、缩放/平移/框选、报价/任务通过 | 当前提交综合门槛 |
 | P3-02 | SSE 游标、重放/乱序/reset、refresh/轮询恢复通过 | 当前提交综合门槛 |
 | P3-03 | 取消竞争、复核追加、未知无普通重试、版本/最终下载通过 | 当前提交综合门槛 |
-| P3-04 | 4 常规/性能 +5 受控浏览器实际通过；9e8f247 本机性能复测通过 | 最新完整 CI，尚不标 OFFLINE_READY |
+| P3-04 | 35694a4 完整 CI/综合门槛 OFFLINE_READY；4常规/性能+5受控浏览器通过；9e8f247本机性能复测通过 | ec2a155 新容器运行要求待验 |
 | P4-01 | 18 BFL HTTP mock 契约及组合 Worker 流水线通过 | 真实传输/账户/生成结果/费用 NOT_RUN |
 | P4-02 | 19 Gemini SDK mock 契约及组合 Worker 流水线通过 | 真实识别质量/置信度/费用 NOT_RUN |
 | P4-03 | WAITING_EXTERNAL，零付费调用 | 明确样本、次数/费用上限、安全密钥及真实测试授权；实时 Worker 传输/预算接线待验收 |
-| P5-01 | 历史 CI 两个非 root 镜像构建及原生/浏览器/依赖/秘密扫描通过；最终门槛已实现 | 最新 Compose、镜像与综合门槛全部通过 |
+| P5-01 | 35694a4 两个非root镜像/Compose/原生/浏览器/依赖/秘密扫描及最终门槛全部 PASS | ec2a155 新容器运行要求待验 |
 | P5-02 | 9e8f247 实际 PASS，见 operations-gate-9e8f247.json | 生产 RPO/RTO 目标未设；仅单节点演练，目标环境需另验 |
 | P5-03 | WAITING_EXTERNAL，无部署 | 目标服务器/地区/域名、真实费用、政策/素材权属和发布决定 |
 
 当前周额度最近剩余 51%，未触及用户 20% 停止线；不因测试阶段完成就称整个项目完成。代码持续上传到用户指定仓库。尚无付费模型请求、生产部署或旧用户数据库迁移。
 
-主要证据：acceptance-native-90-20261113.log、ci-43321769038（整体 failure，保留失败）、backup-restore-drill.json、native-restart-drill.json、performance-production.json、operations-gate-9e8f247.json、acceptance-operations-final-monitor.json。完整来源和范围见各文件及 STATUS，不混淆原生验证、mock 协议和真实供应商验证。
+主要证据：ci-43323370220（整体 success，含19份原始公开报告和下载归档摘要）、acceptance-native-90-20261113.log、ci-43321769038（整体 failure，保留失败）、backup-restore-drill.json、native-restart-drill.json、performance-production.json、operations-gate-9e8f247.json、acceptance-operations-final-monitor.json。完整来源和范围见各文件及 STATUS，不混淆原生验证、mock 协议和真实供应商验证。

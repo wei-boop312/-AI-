@@ -1,0 +1,1 @@
+{"status": 200, "body": {"status": "ready", "scope": "api_dependencies", "checks": {"database": "ready", "authentication": "ready", "storage": "ready"}}}

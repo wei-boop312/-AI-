@@ -1,0 +1,16 @@
+{
+  "observed_at": "2026-11-12T22:55:51.353081+00:00",
+  "scope": "P5-01 local/CI build candidate; no release or deployment approval",
+  "static": "PASS",
+  "legal_text_references": 264,
+  "dependency_components": 186,
+  "openapi_paths": 31,
+  "native_ci": "PASS",
+  "commit": "35694a432a591a01821e8c69ad7e51def692a79c",
+  "docker_engine": "28.0.4",
+  "runtime_image_ids": [
+    "sha256:3f8e7026d389232d0eaa254fbce807545befe9cda97d8e7b4ba96496949a2013",
+    "sha256:ac018b0c8a8bd6e1c853229a3ead2e821850741339938c890b8b360784367631"
+  ],
+  "result": "PASS"
+}
