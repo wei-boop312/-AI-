@@ -64,6 +64,10 @@ class OfflinePipelineTests(PipelineFixture):
         report=httpx.get(report_url,timeout=10).json()
         self.assertEqual(report['final_sha256'],hashlib.sha256(final).hexdigest()); self.assertTrue(report['pixel_protection']['pixel_exact_passed'])
         self.assertEqual(report['auto_overall'],'manual_review'); self.assertFalse(report['facts']['analysis_complete'])
+        platform=report['per_platform'][0]
+        self.assertIn('rule_evidence_unverified',[r['code'] for r in platform['reasons']])
+        self.assertIn('analysis_incomplete',[r['code'] for r in platform['reasons']])
+        self.assertIn('pixel_protection',[c['id'] for c in platform['checks']])
         self.assertEqual(self.client.get('/api/v1/credits/balance').json()['available'],84)
         stream=self.client.get('/api/v1/tasks/'+task+'/events')
         self.assertEqual(stream.status_code,200,stream.text)

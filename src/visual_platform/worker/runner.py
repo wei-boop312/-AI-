@@ -7,7 +7,7 @@ import asyncpg
 from botocore.exceptions import BotoCoreError,ClientError
 from visual_platform.providers.contract import ProviderFailure,ProviderUncertain
 from visual_platform.domain.facts import Facts
-from visual_platform.domain.compliance import evaluate
+from visual_platform.domain.compliance import evaluate_rules
 from visual_platform.services.upload import decode
 from visual_platform.services.image_job import transform
 from visual_platform.storage.s3 import StorageError
@@ -96,10 +96,12 @@ class Worker:
                         facts=Facts.model_validate({'schema_version':1,'analysis_complete':False,'image_width':ctx['final']['width'],'image_height':ctx['final']['height'],'text_items':[],'logo_items':[],'watermark_items':[],'background':{'classification':'unknown','confidence':0.0},'product_extent':None,'uncertainties':['facts_invalid_or_final_image_mismatch']})
                     source=await self.read(ctx['source']); _,proof=await transform(source,final,generation,verify=True)
                     rules=ctx['input_snapshot']['_execution']['rules']
-                    check=evaluate(final_hash,[r['platform'] for r in rules],analysis_complete=facts.analysis_complete)
-                    for platform,rule in zip(check['per_platform'],rules):
-                        platform.update({'marketplace':rule['marketplace'],'image_type':rule['image_type'],'rule_version':rule['version'],'evidence_status':rule['evidence_status'],'checks':[{'id':'local_decode','status':'passed'},{'id':'pixel_protection','status':'passed' if proof['pixel_exact_passed'] else 'not_applicable','evidence':proof}]})
-                    report={'schema_version':1,'final_asset_version_id':ctx['final_version_id'],'final_sha256':final_hash,'facts':facts.model_dump(mode='json'),'per_platform':check['per_platform'],'auto_overall':'manual_review','pixel_protection':proof,'sampling_selected':int(hashlib.sha256(str(task).encode()).hexdigest()[:8],16)%20==0,'provider_profile':'offline_fake'}
+                    sampling=int(hashlib.sha256(str(task).encode()).hexdigest()[:8],16)%20==0
+                    check=evaluate_rules(final_hash,rules,facts.model_dump(mode='json'),
+                        {'width':ctx['final']['width'],'height':ctx['final']['height'],'byte_size':len(final)},sampling_selected=sampling)
+                    for platform in check['per_platform']:
+                        platform['checks'].extend([{'id':'local_decode','status':'passed'},{'id':'pixel_protection','status':'passed' if proof['pixel_exact_passed'] else 'not_applicable','evidence':proof}])
+                    report={'schema_version':1,'final_asset_version_id':ctx['final_version_id'],'final_sha256':final_hash,'facts':facts.model_dump(mode='json'),'per_platform':check['per_platform'],'auto_overall':check['auto_overall'],'pixel_protection':proof,'sampling_selected':sampling,'provider_profile':'offline_fake'}
                     report_id=uuid5(task,'report'); key='private/'+ctx['user_id']+'/'+str(report_id)+'.json'; data=json.dumps(report,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()
                     storage_version=await asyncio.to_thread(self.storage.put_immutable,key,data,'application/json')
                     await self.db('SELECT app.record_report($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,$9,$10,$11,$12,$13)',task,self.owner,fence,report_id,final_hash,json.dumps(report['facts']),json.dumps(report['per_platform']),report['auto_overall'],report['sampling_selected'],hashlib.sha256(data).hexdigest(),self.storage.bucket,key,storage_version)

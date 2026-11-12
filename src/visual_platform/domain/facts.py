@@ -14,7 +14,7 @@ class Extent(StrictModel):
     bbox: tuple[Pixel,Pixel,Pixel,Pixel]
     confidence: Confidence
 class Facts(StrictModel):
-    schema_version: Literal[1]
+    schema_version: Annotated[int,Field(strict=True,ge=1,le=1)]
     analysis_complete: bool = Field(strict=True)
     image_width: Positive
     image_height: Positive
