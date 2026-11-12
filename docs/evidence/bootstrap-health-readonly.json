@@ -1,0 +1,54 @@
+{
+  "verified_at": "2026-11-12T18:43:11.554816+00:00",
+  "postgres_version": "17.11",
+  "migration_head": "0022",
+  "repeat_upgrade_exit_code": 0,
+  "schema_unchanged_on_repeat": true,
+  "schema_fingerprint_sha256": "e1b908c14563e4f23802cede22d1b92c534652bbe745232753d430f81a225769",
+  "forced_rls_table_count": 24,
+  "roles": {
+    "app_api": {
+      "unprivileged": true,
+      "owns_application_objects": false
+    },
+    "app_auth": {
+      "unprivileged": true,
+      "owns_application_objects": false
+    },
+    "ops_admin": {
+      "unprivileged": true,
+      "owns_application_objects": false
+    },
+    "app_worker": {
+      "unprivileged": true,
+      "owns_application_objects": false
+    },
+    "ops_dispatcher": {
+      "unprivileged": true,
+      "owns_application_objects": false
+    },
+    "app_readonly": {
+      "unprivileged": true,
+      "owns_application_objects": false
+    }
+  },
+  "checks": {
+    "api_ready": {
+      "status": "ready",
+      "scope": "api_dependencies",
+      "checks": {
+        "database": "ready",
+        "authentication": "ready",
+        "storage": "ready"
+      }
+    },
+    "private_login": true,
+    "private_product_create": true,
+    "initial_credits": 200,
+    "readonly_own_context": true,
+    "readonly_no_context_empty": true,
+    "secret_column_denied": true
+  },
+  "model_calls": 0,
+  "scope": "fresh isolated local bootstrap; MQ consumption and backup restore are separate gates"
+}

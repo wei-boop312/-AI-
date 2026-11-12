@@ -19,7 +19,7 @@ pnpm --dir apps/web install --frozen-lockfile
 uv run python scripts/setup_local.py --demo-account
 ```
 
-该命令迁移并创建5个独立非owner LOGIN、JWT密钥、S3 CORS和本地体验账号；不安装系统服务。角色为集群级，不要对日常业务实例运行。秘密只写被忽略的.local目录；账号在.local/account.json，不应上传。已有profile不会覆盖。
+该命令迁移并创建6个独立非owner LOGIN（含只读权限组）、JWT密钥、S3 CORS和本地体验账号；不安装系统服务。角色为集群级，不要对日常业务实例运行。秘密只写被忽略的.local目录；账号在.local/account.json，不应上传。已有profile不会覆盖。
 
 分别在四个终端启动：
 
@@ -50,3 +50,6 @@ pnpm --dir apps/web e2e
 
 
 单独重跑生产性能基准：`pnpm --dir apps/web exec playwright test performance.spec.ts`。包含4MP合成原图、双画布50个绘制对象（2图像+24矩形+24标签）、60秒真实指针缩放/平移/区域拖动，以及20并发500次已登录只读API请求。完整原始样本与设备记录写入docs/evidence/performance-production.json，目标为帧间隔p95<33ms、API p95<500ms，失败请求也计入分位数。此基准不代表真实商品视觉质量或生产集群容量。
+
+
+API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md](docs/READINESS_AND_ROLES.md)。原生PG角色专项入口：`python scripts/check.py task P1-02`；尚未实现的其他task/all入口会明确NOT_RUN。

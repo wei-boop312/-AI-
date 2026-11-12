@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from visual_platform.core.settings import Settings
 from visual_platform.db.pool import open_pool
 from visual_platform.storage.s3 import S3Storage
+from visual_platform.services.readiness import Readiness
 from visual_platform.api import auth,products,credits,quotes,tasks,rules,assets,reviews
 
 
@@ -17,16 +18,20 @@ def create_app(settings: Settings | None=None):
     async def lifespan(app):
         configured=settings or (Settings.from_env() if os.environ.get("API_DATABASE_URL") else None)
         app.state.settings=configured
-        app.state.storage=S3Storage(configured) if configured and configured.s3_endpoint else None
+        app.state.storage=None
+        app.state.api_pool=None
+        app.state.auth_pool=None
+        app.state.readiness=None
         app.state.decode_capacity=asyncio.Semaphore(2)
-        app.state.api_pool=None; app.state.auth_pool=None
-        if configured:
-            app.state.api_pool=await open_pool(configured.api_database_url,"app_api")
-            try: app.state.auth_pool=await open_pool(configured.auth_database_url,"app_auth")
-            except BaseException:
-                await app.state.api_pool.close(); raise
-        try: yield
+        try:
+            app.state.storage=S3Storage(configured) if configured and configured.s3_endpoint else None
+            if configured:
+                app.state.api_pool=await open_pool(configured.api_database_url,"app_api")
+                app.state.auth_pool=await open_pool(configured.auth_database_url,"app_auth")
+            app.state.readiness=Readiness(app.state.api_pool,app.state.auth_pool,app.state.storage)
+            yield
         finally:
+            if app.state.readiness: await app.state.readiness.close()
             if app.state.api_pool: await app.state.api_pool.close()
             if app.state.auth_pool: await app.state.auth_pool.close()
             if app.state.storage: app.state.storage.close()
@@ -60,9 +65,9 @@ def create_app(settings: Settings | None=None):
     @app.get("/api/v1/health/live")
     def live(): return {"status":"alive"}
     @app.get("/api/v1/health/ready")
-    def ready():
-        # Storage, queue and worker readiness will be wired with their adapters.
-        return JSONResponse(status_code=503,content={"status":"not_ready","reason":"complete native pipeline not configured"})
+    async def ready():
+        result=await app.state.readiness.check()
+        return JSONResponse(status_code=200 if result["status"]=="ready" else 503,content=result)
     app.include_router(auth.router); app.include_router(products.router); app.include_router(credits.router); app.include_router(quotes.router); app.include_router(tasks.router); app.include_router(rules.router); app.include_router(assets.router); app.include_router(reviews.router)
     return app
 

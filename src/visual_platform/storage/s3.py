@@ -7,8 +7,11 @@ class StorageError(Exception): pass
 class S3Storage:
     def __init__(self,settings):
         self.bucket=settings.s3_bucket
-        self.client=boto3.client('s3',endpoint_url=settings.s3_endpoint,aws_access_key_id=settings.s3_access_key,aws_secret_access_key=settings.s3_secret_key,region_name=settings.s3_region,
-          config=Config(signature_version='s3v4',s3={'addressing_style':'path'},connect_timeout=3,read_timeout=8,retries={'max_attempts':2,'mode':'standard'}))
+        params=dict(endpoint_url=settings.s3_endpoint,aws_access_key_id=settings.s3_access_key,aws_secret_access_key=settings.s3_secret_key,region_name=settings.s3_region)
+        self.client=boto3.client('s3',**params,config=Config(signature_version='s3v4',s3={'addressing_style':'path'},connect_timeout=3,read_timeout=8,retries={'max_attempts':2,'mode':'standard'}))
+        self.probe_client=boto3.client('s3',**params,config=Config(signature_version='s3v4',s3={'addressing_style':'path'},connect_timeout=0.5,read_timeout=0.75,retries={'total_max_attempts':1}))
+    def probe(self):
+        self.probe_client.head_bucket(Bucket=self.bucket)
     def upload_url(self,key,mime,size):
         return self.client.generate_presigned_url('put_object',Params={'Bucket':self.bucket,'Key':key,'ContentType':mime,'ContentLength':size},ExpiresIn=900)
     def download_url(self,key,version=None,filename='image.png'):
@@ -36,4 +39,6 @@ class S3Storage:
         stored,_,actual_version=self.get(key,version=version,limit=max(len(data),1))
         if hashlib.sha256(stored).hexdigest()!=sha: raise StorageError('immutable_object_conflict')
         return actual_version or version
-    def close(self): self.client.close()
+    def close(self):
+        self.client.close()
+        self.probe_client.close()

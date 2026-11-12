@@ -17,17 +17,19 @@ sys.path.insert(0,str(ROOT/'src')); os.chdir(ROOT)
 from visual_platform.core.identity import hash_password
 from visual_platform.storage.s3 import S3Storage
 from types import SimpleNamespace
-p=argparse.ArgumentParser();p.add_argument('--origin',default='http://127.0.0.1:5173');p.add_argument('--demo-account',action='store_true');args=p.parse_args()
-folder=ROOT/'.local';folder.mkdir(exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--origin',default='http://127.0.0.1:5173');p.add_argument('--demo-account',action='store_true');p.add_argument('--profile-dir',type=Path,default=ROOT/'.local');args=p.parse_args()
+folder=args.profile_dir.resolve()
+if not any(folder.is_relative_to((ROOT/name).resolve()) for name in ('.local','work')):p.error('profile directory must stay inside ignored .local or work')
+folder.mkdir(parents=True,exist_ok=True)
 file=folder/'runtime.json'
-if file.exists(): raise SystemExit('Local profile already exists. Reuse .local/runtime.json; no roles or secrets overwritten.')
+if file.exists(): raise SystemExit('Local profile already exists; no roles or secrets overwritten.')
 owner=os.environ.get('MIGRATION_DATABASE_URL','')
 u=urlsplit(owner.replace('postgresql+psycopg://','postgresql://'))
 if u.hostname not in ('127.0.0.1','localhost'): raise SystemExit('Local setup requires an explicitly configured loopback migration database')
 if subprocess.call([sys.executable,'-m','alembic','upgrade','head']): raise SystemExit('Migration failed; profile not created')
 values={}
 with psycopg.connect(owner.replace('postgresql+psycopg://','postgresql://')) as c:
-    for group,key in [('app_api','API_DATABASE_URL'),('app_auth','AUTH_DATABASE_URL'),('ops_admin','ADMIN_DATABASE_URL'),('app_worker','WORKER_DATABASE_URL'),('ops_dispatcher','DISPATCH_DATABASE_URL')]:
+    for group,key in [('app_api','API_DATABASE_URL'),('app_auth','AUTH_DATABASE_URL'),('ops_admin','ADMIN_DATABASE_URL'),('app_worker','WORKER_DATABASE_URL'),('ops_dispatcher','DISPATCH_DATABASE_URL'),('app_readonly','READONLY_DATABASE_URL')]:
         name='vp_'+group+'_'+uuid4().hex[:10];password=secrets.token_urlsafe(32)
         c.execute(sql.SQL('CREATE ROLE {} LOGIN PASSWORD {} NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE').format(sql.Identifier(name),sql.Literal(password)))
         c.execute(sql.SQL('GRANT {} TO {}').format(sql.Identifier(group),sql.Identifier(name)))
@@ -53,4 +55,4 @@ if args.demo_account:
         c.execute("SELECT app.create_private_user(%s,%s,'本地体验账号',%s)",(uid,email,hash_password(password)))
         c.execute("SELECT app.grant_credits(%s,%s,200,'local offline demo credits')",(uid,uuid4()))
     (folder/'account.json').write_text(json.dumps({'email':email,'password':password,'user_id':str(uid)}),encoding='utf-8')
-print(json.dumps({'profile':'.local/runtime.json','account_file':'.local/account.json' if args.demo_account else None,'status':'created; secrets were not printed'}))
+print(json.dumps({'profile':str(file.relative_to(ROOT)),'account_file':str((folder/'account.json').relative_to(ROOT)) if args.demo_account else None,'status':'created; secrets were not printed'}))

@@ -131,3 +131,15 @@ TypeScript和生产构建exit0；18项单元、47项PG/Rabbit/S3回归通过。�
 完整原始帧/绘制/API样本、设备、静态dist hash及CDP堆内存记录在performance-production.json，日志/截图已保存并视觉检查。单次JS堆从15.45MiB至19.46MiB，保留探针样本且未强制GC，不据此宣称无泄漏；53ms长任务也保留。环境为i7-13620H/16逻辑CPU/约31.7GiB、Windows、Chrome157 headless/DPR1/1920×1200，不能外推到公网部署或其他设备。详见PERFORMANCE.md。
 
 README修正浏览器必须使用生产preview及隔离账号；基准加入常规E2E。周额度used22%、剩余78%。性能目标本机通过，仍缺完整检查命令/故障浏览器/健康就绪/只读视图及运维发布准备，未标OFFLINE_READY。
+
+## 2026-11-13：有限API就绪、只读角色与干净实例
+
+0022新增10个显式列security_invoker/security_barrier视图，逐列授权app_readonly；无密码、邮箱、会话、S3定位、输入/模型payload，无写权限或自定义SECURITY DEFINER权限。原生LOGIN测试证明当前受信任租户上下文只读、无上下文0行、越权UUID不可见，行安全关闭/角色提升/修改积分均拒绝。共享DB角色的GUC由受信任服务设定，不是直接给终端用户的数据库隔离账号。
+
+/health/ready从占位503改为PG api/auth与S3 HeadBucket实测，scope api_dependencies。单项1.5秒async预算、S3原生短超时单次尝试、3秒健康/0.5秒失败缓存、single-flight；请求取消或超时保留并复用仍在执行的唯一存储探测。live仍只表示存活，MQ/Worker/供应商不由该响应证明。实际本机API更新并返回200，dev实例升级0022。
+
+35项单元、68项真实PG/Rabbit/S3全回归通过，最终生命周期再跑3个健康用例通过；覆盖连接池耗尽有界503后恢复、S3拒绝访问仅storage失败、并发健康探测缓存、请求取消/线程复用、readonly并发/取消/语句超时复用清空GUC。P1-02 task入口补齐AST/模块导入及8个原生PG专项检查；其他未实现gate保持NOT_RUN。
+
+setup_local新建6个非owner LOGIN并支持忽略目录内独立--profile-dir；verify_bootstrap.py在新建且独立PG17.11集群实际验证0001–0022、24个表FORCE RLS、6角色、重复upgrade schema不变、真登录/授额/产品写入/只读过滤。临时PG已关闭；凭据和profile只在忽略目录，证据bootstrap-health-readonly.json。完整说明及日志清单见READINESS_AND_ROLES.md。
+
+周额度used24%、剩余76%。仍需完整task/all门槛、故障/unknown浏览器场景、运营备份恢复、CI/部署产物和供应商适配，未标OFFLINE_READY。
