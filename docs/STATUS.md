@@ -219,3 +219,11 @@ python scripts/check.py task P4-02 --profile offline：19项真实SDK/MockTransp
 49项单元、39项协议契约、83项真实PG/Rabbit/S3全回归（170.918秒）通过；新版本机Worker重启后3项生产preview浏览器通过（37.5秒），截图更新并目视检查手机布局。test/dev都在0024、四个函数定义摘要一致；最终监控MQ/S3 ready、无告警、财务异常全0。说明PROTOCOL_PIPELINE.md，日志protocol-unit/contract/native-full/browser-20261113.log。未重复无改动的60秒性能基准。
 
 周额度used37%、剩余63%，继续。协议假传输组合已完成本轮验证，但真正供应商传输、明确预算配置、真实任务报价/成本确认、P4-03样本/账户调用与完整task/all、CI/部署产物仍待完成；不标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
+
+## 2026-11-13：CI与容器构建候选（等待实际运行）
+
+新增GitHub Actions offline-native：固定Actions提交SHA、Python3.13/Node24.22.1/uv0.13.7/pnpm11.25.0，锁文件安装、单元/协议契约、gitleaks提交历史扫描、生产前端构建、原生服务及浏览器、无发布的容器构建。ci_native.py仅在Linux CI且无既有profile/端口占用时创建专属两PG集群、MQ及S3容器，随机临时凭据只留忽略.local，按唯一标签核对并清理。运行真实集成、常规/性能及暂停消费者后的受控浏览器；产出公开结果/构建hash，不上传私有profile或服务日志。
+
+新增API/Worker及web多阶段Dockerfile、非root运行和白名单.dockerignore；基础镜像已从官方公开Registry核对并固定digest（ops/build-images.json）。web候选Nginx代理/api到api:8000。工作流contents只读，不含付费秘密或推镜像/部署步骤。
+
+本机无Docker，当前仅脚本AST、action SHA长度及diff检查通过；实际Linux安装、镜像构建、服务与浏览器CI尚未运行，不称CI绿或P5-01完成。下一步推送后观察实际Actions并修复；SBOM/NOTICE、依赖漏洞检查、Compose与完整task/all入口仍待补齐。保留此前周额度used37%、剩余63%，继续。

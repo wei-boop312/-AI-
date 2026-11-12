@@ -1,0 +1,72 @@
+name: Offline native acceptance
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: offline-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: src
+      UV_PYTHON: '3.13'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.22.1'
+      - name: Install locked toolchain and dependencies
+        run: |
+          python -m pip install uv==0.13.7
+          uv sync --locked
+          npm install --global pnpm@11.25.0
+          pnpm --dir apps/web install --frozen-lockfile
+          uv pip check
+          uv lock --check --offline
+      - name: Unit and offline supplier HTTP contracts
+        run: |
+          mkdir -p work/ci-public
+          uv run python scripts/check.py unit > work/ci-public/unit.log 2>&1
+          uv run python -m unittest discover -s tests/contract -v > work/ci-public/contracts.log 2>&1
+      - name: Scan committed history for secrets
+        run: docker run --rm -v "$PWD:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f git --redact --log-opts="--all" /repo
+      - name: Build production frontend and install browser
+        run: |
+          pnpm --dir apps/web build
+          pnpm --dir apps/web exec playwright install --with-deps chromium
+      - name: Native PG MQ S3 and production browser acceptance
+        run: uv run python scripts/ci_native.py
+      - name: Build runtime images without publishing
+        run: |
+          docker build --no-cache --build-arg VCS_REF="$GITHUB_SHA" -t visual-api:ci .
+          docker build --no-cache --build-arg VCS_REF="$GITHUB_SHA" -f apps/web/Dockerfile -t visual-web:ci .
+          docker run --rm visual-api:ci python -c "import os,visual_platform.api.main,visual_platform.worker.runner; assert os.getuid()==10001; print('Non-root backend imports OK')"
+          docker run --rm --add-host api:127.0.0.1 visual-web:ci -t
+          docker image inspect visual-api:ci visual-web:ci --format '{{json .}}' > work/ci-public/docker-images.jsonl
+      - name: Upload public evidence and static production assets
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: offline-${{ github.sha }}
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            work/ci-public/
+            apps/web/dist/
+            docs/evidence/browser-*.png
+            docs/evidence/browser-controlled-faults.json
+            docs/evidence/browser-pixel-verification.json
+            docs/evidence/performance-production.json
+            docs/evidence/protocol-pipeline.json
