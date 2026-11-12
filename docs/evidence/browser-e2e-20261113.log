@@ -1,0 +1,8 @@
+
+Running 1 test using 1 worker
+
+(node:56688) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 (6.7s)
+
+  1 passed (7.9s)

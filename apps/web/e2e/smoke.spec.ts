@@ -1,0 +1,37 @@
+import {test,expect} from '@playwright/test';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const account=JSON.parse(readFileSync(new URL('../../../.local/account.json',import.meta.url),'utf8'));
+const fixture=fileURLToPath(new URL('./fixtures/product.png',import.meta.url));
+const evidence=fileURLToPath(new URL('../../../docs/evidence/',import.meta.url));
+test('真实服务：登录、产品、上传、Konva选区、生成、报告及移动端',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('/');await expect(page.getByRole('heading',{name:'登录你的工作台'})).toBeVisible();
+ await page.screenshot({path:evidence+'browser-login.png'});
+ await page.getByLabel('邮箱',{exact:true}).fill(account.email);await page.getByLabel('密码',{exact:true}).fill(account.password);
+ await page.getByRole('button',{name:'进入工作台'}).click();await expect(page.getByRole('heading',{name:'视觉工作台',exact:true})).toBeVisible();await page.screenshot({path:evidence+'browser-empty.png'});
+ await page.getByRole('button',{name:/新建产品/}).click();
+ const dialog=page.getByRole('dialog',{name:'新建产品'});await dialog.getByLabel('产品名称').fill('浏览器验收 · 原色产品');await dialog.getByRole('button',{name:'创建产品',exact:true}).click();await expect(dialog).not.toBeVisible();
+ await page.locator('input[type=file]').first().setInputFiles(fixture);
+ await expect(page.getByText('已归档原图',{exact:true})).toBeVisible({timeout:30000});
+ await expect(page.getByTestId('canvas-source').locator('canvas')).toBeVisible();
+ const a=(await page.getByTestId('canvas-source').boundingBox())!;const fit=Math.min((a.width-40)/640,320/480);const ox=(a.width-640*fit)/2,oy=(360-480*fit)/2;
+ await page.mouse.move(a.x+ox+100*fit,a.y+oy+100*fit);await page.mouse.down();await page.mouse.move(a.x+ox+260*fit,a.y+oy+260*fit,{steps:10});await page.mouse.up();
+ await expect(page.getByText('1 个保护区域',{exact:true})).toBeVisible();
+ const initialTX=Number(await page.getByLabel('区域1目标X').inputValue()),initialTY=Number(await page.getByLabel('区域1目标Y').inputValue());
+ const b=(await page.getByTestId('canvas-target').boundingBox())!;const tf=Math.min((b.width-40)/640,320/480),tx=(b.width-640*tf)/2,ty=(360-480*tf)/2;
+ await page.mouse.move(b.x+tx+180*tf,b.y+ty+180*tf);await page.mouse.down();await page.mouse.move(b.x+tx+380*tf,b.y+ty+280*tf,{steps:10});await page.mouse.up();
+ // A fitted canvas can map one physical mouse pixel to multiple source pixels.
+ const tolerance=Math.ceil(1/tf);expect(Math.abs(Number(await page.getByLabel('区域1目标X').inputValue())-(initialTX+200))).toBeLessThanOrEqual(tolerance);expect(Math.abs(Number(await page.getByLabel('区域1目标Y').inputValue())-(initialTY+100))).toBeLessThanOrEqual(tolerance);
+ await page.getByLabel('区域1目标X').fill('300');await page.getByLabel('区域1目标X').press('Enter');await page.getByLabel('区域1目标Y').fill('200');await page.getByLabel('区域1目标Y').press('Enter');
+ await expect(page.getByLabel('区域1目标X')).toHaveValue('300');await expect(page.getByLabel('区域1目标Y')).toHaveValue('200');
+ await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:evidence+'browser-workspace.png',fullPage:true});
+ await page.getByRole('button',{name:'获取报价并继续'}).click();const confirm=page.getByRole('dialog',{name:'确认本次生成'});await expect(confirm).toBeVisible();await confirm.getByRole('button',{name:'确认并创建任务'}).click();
+ await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible({timeout:45000});
+ await page.getByRole('button',{name:'查看检查报告'}).click();const report=page.getByRole('dialog',{name:'最终成品检查报告'});await expect(report.getByText('需要人工复核',{exact:true})).toBeVisible();await expect(report.getByText('像素保护 · 已通过')).toBeVisible();await report.getByRole('button',{name:'关闭',exact:true}).click();
+ const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('link',{name:'下载 PNG'}).click()]);expect(download.suggestedFilename()).toBe('final.png');await download.saveAs(fileURLToPath(new URL('../../../work/browser-final.png',import.meta.url)));
+ await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:evidence+'browser-result.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:evidence+'browser-mobile.png',fullPage:true});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
+ expect(errors).toEqual([]);
+});

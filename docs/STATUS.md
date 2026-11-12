@@ -83,3 +83,13 @@ RabbitMQ 4.4.0 / Erlang 29.1.2 ZIP在任务work内启动，未安装系统服务
 18项单元、47项真实PG/RabbitMQ/S3集成通过，完整证据docs/evidence/full-pg-rabbit-s3-20261113.log。覆盖并发publisher唯一claim、真实确认/持久消费完整生成闭环、确认丢失重复投递不重发/重扣、无路由时保留outbox、非法消息DLX、超过5次恢复入人工队列、完成事务后ACK丢失重投、ACK后归档失败由DB扫描恢复。人工队列首次测试发现内部dispatch UPDATE RLS使FOR UPDATE扫描为空，0016前向修复并复测。
 
 离线后端关键链路已有真实服务证据，但尚缺完整运维/迁移干净实例和综合安全验收，未正式宣布阶段门槛。中文React/Konva、浏览器断线恢复/选区/对比尚未实现，仍非OFFLINE_READY。下一步完成本地初始化与前端。
+
+## 2026-11-13：中文React/Konva工作台与浏览器闭环
+
+新增React/TypeScript/Vite、Ant Design、Konva与Zustand及pnpm锁文件。页面连接真实API，实现登录、产品/外观创建、原图上传/重新校验、原图切换、缩放/平移/矩形框选、独立目标映射、整数目标坐标微调、报价确认、SSE/轮询代码、当前任务/历史、原图与成品对比、检查报告及积分流水。列表新增原图查询，任务返回固定源版本以保证历史对比使用正确原图。
+
+setup_local.py在新的专属PG实例55433完成0001–0016迁移、独立服务LOGIN、JWT、S3私有bucket CORS及随机本地体验账号；run_local.py可启动API/publisher/worker/web。秘密.local及work均确认被Git忽略。
+
+TypeScript和生产构建exit0；18项单元、47项PG/Rabbit/S3回归通过。真实Chrome E2E通过：登录→产品→跨域S3上传→Konva实际鼠标框选/目标拖动→数值定位→报价确认→MQ/Worker→报告→浏览器下载→390px手机无横向溢出，未捕获页面JS异常。缩小视口下指针按物理像素量化，测试按拖动起点验证位移误差≤一个显示像素，随后数值输入精确设定目标。下载文件另用Python核对DB文件hash和保护区RGB逐像素一致，证据browser-pixel-verification.json。
+
+已视觉检查登录、画布与手机截图，截图与browser-e2e-20261113.log位于docs/evidence。生产bundle当前约1.46MB（gzip462KB），有antd use-client和chunk体积警告，尚待性能拆包。浏览器断线/refresh重放/多账号切换、完整复核与重算、干净部署/备份恢复、CI/SBOM/供应商适配仍未全部验收；未标OFFLINE_READY。

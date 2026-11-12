@@ -1,0 +1,54 @@
+C:\Users\MECHREVO\Documents\Codex\2026-11-12\ai\outputs\visual-production-platform\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_cancel_refund_once (test_accounting.AccountingTests.test_cancel_refund_once) ... ok
+test_concurrent_replay_one_freeze_and_outbox (test_accounting.AccountingTests.test_concurrent_replay_one_freeze_and_outbox) ... ok
+test_cross_user_reference_rejected (test_accounting.AccountingTests.test_cross_user_reference_rejected) ... ok
+test_quote_consumption_and_append_only (test_accounting.AccountingTests.test_quote_consumption_and_append_only) ... ok
+test_rls_and_financial_permissions (test_accounting.AccountingTests.test_rls_and_financial_permissions) ... ok
+test_animation_rejected (test_assets.AssetTests.test_animation_rejected) ... ok
+test_concurrent_complete_only_two_versions (test_assets.AssetTests.test_concurrent_complete_only_two_versions) ... ok
+test_cross_user_upload_intent_hidden (test_assets.AssetTests.test_cross_user_upload_intent_hidden) ... ok
+test_declared_upload_limits (test_assets.AssetTests.test_declared_upload_limits) ... ok
+test_invalid_decode_and_mime_are_rejected (test_assets.AssetTests.test_invalid_decode_and_mime_are_rejected) ... ok
+test_known_other_user_asset_and_intent_are_hidden (test_assets.AssetTests.test_known_other_user_asset_and_intent_are_hidden) ... ok
+test_storage_conditional_put_preserves_original (test_assets.AssetTests.test_storage_conditional_put_preserves_original) ... ok
+test_upload_normalize_private_download_and_replay (test_assets.AssetTests.test_upload_normalize_private_download_and_replay) ... ok
+test_disabled_access_immediate (test_auth_api.AuthApiTests.test_disabled_access_immediate) ... ok
+test_disabled_account_and_rate_limit (test_auth_api.AuthApiTests.test_disabled_account_and_rate_limit) ... ok
+test_login_logout_revokes_access (test_auth_api.AuthApiTests.test_login_logout_revokes_access) ... ok
+test_origin_csrf_and_extra_identity (test_auth_api.AuthApiTests.test_origin_csrf_and_extra_identity) ... ok
+test_private_account_creation_only_admin (test_auth_api.AuthApiTests.test_private_account_creation_only_admin) ... ok
+test_products_pagination_revision_archive_and_isolation (test_auth_api.AuthApiTests.test_products_pagination_revision_archive_and_isolation) ... ok
+test_rotation_replay_revokes_family (test_auth_api.AuthApiTests.test_rotation_replay_revokes_family) ... ok
+test_ack_after_recoverable_archive_failure_uses_db_scanner (test_broker.BrokerTests.test_ack_after_recoverable_archive_failure_uses_db_scanner) ... ok
+test_commit_before_ack_redelivery_does_not_repeat_charge (test_broker.BrokerTests.test_commit_before_ack_redelivery_does_not_repeat_charge) ... ok
+test_confirmed_persistent_delivery_runs_full_pipeline (test_broker.BrokerTests.test_confirmed_persistent_delivery_runs_full_pipeline) ... ok
+test_invalid_body_is_dead_lettered (test_broker.BrokerTests.test_invalid_body_is_dead_lettered) ... ok
+test_lost_confirmation_duplicate_does_not_regenerate (test_broker.BrokerTests.test_lost_confirmation_duplicate_does_not_regenerate) ... ok
+test_recovery_limit_persists_manual_queue_message (test_broker.BrokerTests.test_recovery_limit_persists_manual_queue_message) ... ok
+test_unroutable_publish_keeps_outbox_pending (test_broker.BrokerTests.test_unroutable_publish_keeps_outbox_pending) ... ok
+test_rls_catalog (test_native.NativeTests.test_rls_catalog) ... ok
+test_archive_failure_restarts_only_local_steps (test_offline_pipeline.OfflinePipelineTests.test_archive_failure_restarts_only_local_steps) ... ok
+test_explicit_supplier_failure_refunds (test_offline_pipeline.OfflinePipelineTests.test_explicit_supplier_failure_refunds) ... ok
+test_malformed_model_facts_require_review_and_still_deliver (test_offline_pipeline.OfflinePipelineTests.test_malformed_model_facts_require_review_and_still_deliver) ... ok
+test_real_upload_through_final_download_report_and_charge (test_offline_pipeline.OfflinePipelineTests.test_real_upload_through_final_download_report_and_charge) ... ok
+test_unknown_stays_reserved_and_never_resubmits (test_offline_pipeline.OfflinePipelineTests.test_unknown_stays_reserved_and_never_resubmits) ... ok
+test_worker_cli_runs_in_independent_process (test_offline_pipeline.OfflinePipelineTests.test_worker_cli_runs_in_independent_process) ... ok
+test_concurrent_context_exception_and_cancel (test_pool_context.PoolTests.test_concurrent_context_exception_and_cancel) ... ok
+test_reject_owner_pool (test_pool_context.PoolTests.test_reject_owner_pool) ... ok
+test_appearance_snapshot_survives_edit (test_task_api.TaskApiTests.test_appearance_snapshot_survives_edit) ... ok
+test_expired_quote_replay_immutability (test_task_api.TaskApiTests.test_expired_quote_replay_immutability) ... ok
+test_http_concurrent_replay_binding_cancel (test_task_api.TaskApiTests.test_http_concurrent_replay_binding_cancel) ... ok
+test_outbox_failure_rolls_back_task_wallet_quote (test_task_api.TaskApiTests.test_outbox_failure_rolls_back_task_wallet_quote) ... ok
+test_racing_quotes (test_task_api.TaskApiTests.test_racing_quotes) ... ok
+test_size_and_archive (test_task_api.TaskApiTests.test_size_and_archive) ... ok
+test_charge_refund_race_has_single_terminal_ledger (test_worker_db.WorkerDbTests.test_charge_refund_race_has_single_terminal_ledger) ... ok
+test_concurrent_claim_fencing_and_null_token_rejection (test_worker_db.WorkerDbTests.test_concurrent_claim_fencing_and_null_token_rejection) ... ok
+test_delivery_settles_once_manual_review_allowed (test_worker_db.WorkerDbTests.test_delivery_settles_once_manual_review_allowed) ... ok
+test_no_report_no_settlement_and_definite_failure_refunds (test_worker_db.WorkerDbTests.test_no_report_no_settlement_and_definite_failure_refunds) ... ok
+test_unknown_never_reclaimed_and_late_receipt_append_only (test_worker_db.WorkerDbTests.test_unknown_never_reclaimed_and_late_receipt_append_only) ... ok
+
+----------------------------------------------------------------------
+Ran 47 tests in 37.526s
+
+OK

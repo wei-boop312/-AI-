@@ -67,3 +67,10 @@ async def versions(asset_id: UUID,request: Request,cursor: str | None=None,user=
         if not await c.fetchval('SELECT id FROM app.assets WHERE id=$1',asset_id): raise HTTPException(404,'not_found')
         rows=await c.fetch('SELECT id,version_number,mime,width,height,sha256,byte_size,canonical,created_at FROM app.asset_versions WHERE asset_id=$1 AND ($2::timestamptz IS NULL OR (created_at,id)<($2,$3::uuid)) ORDER BY created_at DESC,id DESC LIMIT 21',asset_id,pos[0] if pos else None,pos[1] if pos else None)
     return {'items':[dict(x) for x in rows[:20]],'next_cursor':cursor_encode(rows[19]) if len(rows)>20 else None}
+@router.get('')
+async def listing(request: Request,product_id: UUID,cursor: str | None=None,user=Depends(current_user)):
+    pos=cursor_decode(cursor) if cursor else None
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        if not await c.fetchval('SELECT id FROM app.products WHERE id=$1',product_id): raise HTTPException(404,'not_found')
+        rows=await c.fetch("SELECT a.id,a.kind,a.status,a.created_at,v.id AS version_id,v.width,v.height,v.sha256 FROM app.assets a LEFT JOIN app.asset_versions v ON v.id=a.current_version_id AND v.user_id=a.user_id WHERE a.product_id=$1 AND a.kind='original' AND ($2::timestamptz IS NULL OR (a.created_at,a.id)<($2,$3::uuid)) ORDER BY a.created_at DESC,a.id DESC LIMIT 21",product_id,pos[0] if pos else None,pos[1] if pos else None)
+    return {'items':[dict(x) for x in rows[:20]],'next_cursor':cursor_encode(rows[19]) if len(rows)>20 else None}
