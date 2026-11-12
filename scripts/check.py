@@ -7,6 +7,9 @@ ROOT=Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 os.environ['PYTHONPATH']=str(ROOT/'src')
 mode=sys.argv[1:]
+if mode==['task','P4-01','--profile','offline']:
+    # Contract-only gate: always injects a local HTTP transport, never a real API key.
+    raise SystemExit(subprocess.call([sys.executable,'-m','unittest','discover','-s','tests/contract','-p','test_bfl.py','-v']))
 if mode==['task','P1-02']:
     if not os.environ.get('TEST_DATABASE_URL'):raise SystemExit('BLOCKED_ENV: isolated TEST_DATABASE_URL required')
     files=[p for folder in ('src','scripts') for p in (ROOT/folder).rglob('*.py')]

@@ -1,0 +1,31 @@
+{
+  "observed_at": "2026-11-12T20:42:36.539886+00:00",
+  "source": "https://api.bfl.ai/openapi.json",
+  "sha256": "ea458c661ef8b0e03d72ee6b29267451f5a04ae65f35e55ea8a87e53645ef670",
+  "endpoint": "/v1/flux-3-image",
+  "schema": "Flux3ImageInputs",
+  "required": [
+    "prompt"
+  ],
+  "additional_properties": false,
+  "properties": [
+    "user",
+    "prompt",
+    "images",
+    "aspect_ratio",
+    "resolution",
+    "width",
+    "height",
+    "safety_tolerance",
+    "grounding",
+    "version"
+  ],
+  "width_height_from_live_schema": true,
+  "response_required": [
+    "id",
+    "polling_url"
+  ],
+  "cost_unit": "credits",
+  "account_access": "NOT_RUN",
+  "paid_calls": 0
+}

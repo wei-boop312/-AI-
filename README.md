@@ -63,3 +63,5 @@ API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md]
 只读聚合监控、常驻进程心跳与告警模板见[docs/MONITORING.md](docs/MONITORING.md)。`python scripts/run_local.py monitor`同时探测本机MQ/S3；尚未部署告警采集与通知服务。
 
 故障分流、原生MQ/S3重启演练及安全恢复顺序见[docs/RUNBOOK.md](docs/RUNBOOK.md)。演练固定为独立本机服务，不用于操作其他环境。
+
+BFL官方协议的离线传输契约与字段映射见[docs/BFL_PROTOCOL.md](docs/BFL_PROTOCOL.md)：`python scripts/check.py task P4-01 --profile offline`。该模块未启用真实Worker调用，不能作为真实模型验收。

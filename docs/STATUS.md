@@ -185,3 +185,13 @@ DurableFake late现保存图像/事实回执后丢失响应，允许对既有结
 不重启常驻Publisher/Worker，重连后生产preview三项浏览器流程通过（36.6秒），包含新任务真实MQ闭环、报告/下载像素/移动端、会话/版本/隔离。随后74项真实PG/Rabbit/S3全回归通过（147.746秒）；最终monitor空告警、全部财务异常0、pending outbox 0，完成任务从28增至30。日志restart-browser/native-full-20261113.log及restart-final-monitor.json。截图更新并目视检查成品页。
 
 周额度used33%、剩余67%，继续。P5-02实际演练证据已补充，但完整task/all可执行门槛、CI/部署产物、供应商离线适配及外部真实验证仍未完成；未宣告OFFLINE_READY/RELEASE_READY。
+
+## 2026-11-13：BFL FLUX 3 官方协议离线契约
+
+新增providers/bfl.py及tests/contract/test_bfl.py，独立验收入口python scripts/check.py task P4-01 --profile offline。重新读取官方生成/编辑/集成指南及当前OpenAPI；schema现列精确width/height，不照搬第三方width拒绝描述。脱敏源URL/时间/完整schema响应SHA在bfl-official-contract.json。httpx升为运行依赖，uv锁文件离线检查一致。
+
+请求严格映射prompt/images/base64 canonical PNG/width/height/grounding=false，不泄露私有S3定位或内部用户/ROI/积分字段。固定官方POST，API主机轮询与delivery下载隔离，HTTPS/路径/id校验、无重定向、无环境代理、无压缩HTTP正文、大小上限；独立下载客户端不带API key或API Cookie。返回原图字节/MIME/SHA，隔离解码/实际尺寸与回贴仍由调用方完成。
+
+PG意图之前提保持，额外本机UUID.intent排他fsync防并发/重建后重复提交；超时、5xx、畸形回执与429均不自动重发。已知回执私有留存；cost畸形保留id待对账，数量只记供应商BFL_CREDIT，currency/money未知，不伪造法币或混同用户积分。18项离线MockTransport契约测试通过，49项单元回归通过；日志bfl-contract/unit-regression-20261113.log。覆盖真实HTTP请求对象及响应处理，不是源码字符串断言，也不是账户调用证明。
+
+BFL仍未接入当前仅offline的Worker源图传递、真实成本DB和报告标识；P4-02 Gemini与组合适配、P4-03明确授权真实调用仍待完成，不能标PROVIDER_VERIFIED。说明见BFL_PROTOCOL.md。周额度used34%、剩余66%，继续。完整task/all、CI/部署产物及外部样本/费用验证仍未完成，未标OFFLINE_READY/RELEASE_READY。
