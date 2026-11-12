@@ -251,3 +251,5 @@ Actions43314133380实际通过89包锁定安装、49单元/39协议契约、Linu
 刷新当前31路径OpenAPI；新增API_USAGE.md及P5-01可执行门槛verify_delivery.py/check.py task P5-01：校验API schema、镜像/Actions固定引用、268法律文本引用SHA、188组件SBOM及锁摘要，再要求当前提交的新鲜原生/全部浏览器/性能、审计和实际非root镜像结果。当前Windows无Docker，本机门槛正确返回exit3 BLOCKED_ENV，静态检查PASS；不会用历史已提交报告假通过。新门槛已加入后续CI。
 
 周额度最近used41%、剩余59%。CI镜像与新增门槛待复跑；Compose、完整task/all与外部真实供应商/预算验收仍未完成，不标P5-01完成或OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。
+
+CI43315437241已实际通过全部原生/浏览器/性能及两个镜像构建、非root导入/Nginx校验；最终新P5-01脚本因在同进程发现unit/integration重名test_monitoring模块而失败。已修复为各套件独立解释器发现，本机正确统计49/39/83；不跳过测试或放松证据绑定。该轮公开原生/镜像证据与失败门槛原样保存docs/evidence/ci-43315437241，provenance明确整体failure。继续完整复跑至新门槛实际通过，尚不宣告P5-01完成。

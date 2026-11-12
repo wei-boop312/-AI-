@@ -8,7 +8,6 @@ import re
 import shutil
 import subprocess
 import sys
-import unittest
 import yaml
 from cyclonedx.schema import SchemaVersion
 from cyclonedx.validation.json import JsonStrictValidator
@@ -19,6 +18,11 @@ def require(condition,description):
 
 def load(path):return json.loads(path.read_text(encoding='utf-8-sig'))
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def suite_size(folder):
+    # Suites intentionally contain repeated module basenames (e.g. test_monitoring).
+    # Discover each in its own interpreter so sys.modules cannot cross-contaminate.
+    return int(subprocess.check_output([sys.executable,'-c','import sys,unittest; print(unittest.TestLoader().discover(sys.argv[1]).countTestCases())',str(folder)],cwd=ROOT,text=True))
 
 def verify_static():
     from visual_platform.api.main import create_app
@@ -75,7 +79,7 @@ def verify_run(evidence):
     for folder,log_name in (('unit','unit'),('contract','contracts'),('integration','native-integration')):
         text=(evidence/(log_name+'.log')).read_text(encoding='utf-8-sig')
         match=re.search(r'Ran (\d+) tests? in ',text)
-        expected=unittest.TestLoader().discover(str(ROOT/'tests'/folder)).countTestCases()
+        expected=suite_size(ROOT/'tests'/folder)
         require(match is not None and int(match.group(1))==expected,'test count differs from current suite')
         require(re.search(r'^OK\s*$',text,re.M) is not None and 'skipped=' not in text,'unittest failure or skipped coverage')
     for name,count in (('browser-production',4),('browser-controlled-faults',5)):

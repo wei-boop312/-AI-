@@ -1,0 +1,61 @@
+/home/runner/work/-AI-/-AI-/.venv/lib/python3.13/site-packages/google/genai/types.py:18308: SyntaxWarning: invalid escape sequence '\/'
+  description="""Output only. The original name of the uploaded file, taken from the `Content-Disposition` header on upload. Between 1 and 255 characters. Control characters and the characters `<>:"|?*\/` are not accepted.""",
+/home/runner/work/-AI-/-AI-/.venv/lib/python3.13/site-packages/google/genai/types.py:18346: SyntaxWarning: invalid escape sequence '\/'
+  """Output only. The original name of the uploaded file, taken from the `Content-Disposition` header on upload. Between 1 and 255 characters. Control characters and the characters `<>:"|?*\/` are not accepted."""
+test_canonical_mapping_omits_local_regions_and_internal_fields (test_bfl.BflContracts.test_canonical_mapping_omits_local_regions_and_internal_fields) ... ok
+test_compressed_http_body_is_rejected_before_reading (test_bfl.BflContracts.test_compressed_http_body_is_rejected_before_reading) ... ok
+test_concurrent_intent_exclusive_and_one_post (test_bfl.BflContracts.test_concurrent_intent_exclusive_and_one_post) ... ok
+test_contract_transport_never_opens_socket (test_bfl.BflContracts.test_contract_transport_never_opens_socket) ... ok
+test_download_redirect_mime_empty_and_size_rejected (test_bfl.BflContracts.test_download_redirect_mime_empty_and_size_rejected) ... ok
+test_invalid_receipts_are_unknown_and_never_resubmitted (test_bfl.BflContracts.test_invalid_receipts_are_unknown_and_never_resubmitted) ... ok
+test_malformed_cost_preserves_known_receipt_for_reconciliation (test_bfl.BflContracts.test_malformed_cost_preserves_known_receipt_for_reconciliation) ... ok
+test_missing_cost_stays_unknown (test_bfl.BflContracts.test_missing_cost_stays_unknown) ... ok
+test_oversized_json_and_malformed_ready_rejected (test_bfl.BflContracts.test_oversized_json_and_malformed_ready_rejected) ... ok
+test_pending_poll_uses_exact_returned_url_and_no_post (test_bfl.BflContracts.test_pending_poll_uses_exact_returned_url_and_no_post) ... ok
+test_ready_download_isolated_from_key_and_api_cookie (test_bfl.BflContracts.test_ready_download_isolated_from_key_and_api_cookie) ... ok
+test_recreated_adapter_cannot_submit_same_intent (test_bfl.BflContracts.test_recreated_adapter_cannot_submit_same_intent) ... ok
+test_rejections_and_server_errors_single_attempt (test_bfl.BflContracts.test_rejections_and_server_errors_single_attempt) ... ok
+test_request_schema_rejects_extra_url_reference_and_bad_geometry (test_bfl.BflContracts.test_request_schema_rejects_extra_url_reference_and_bad_geometry) ... ok
+test_submit_exact_endpoint_fields_auth_and_cost_provenance (test_bfl.BflContracts.test_submit_exact_endpoint_fields_auth_and_cost_provenance) ... ok
+test_terminal_and_unknown_status (test_bfl.BflContracts.test_terminal_and_unknown_status) ... ok
+test_timeout_never_reposts_even_after_restart (test_bfl.BflContracts.test_timeout_never_reposts_even_after_restart) ... ok
+test_unsafe_poll_hosts_paths_ids_and_download_urls (test_bfl.BflContracts.test_unsafe_poll_hosts_paths_ids_and_download_urls) ... ok
+test_cancel_after_request_prevents_resubmit (test_gemini.GeminiContracts.test_cancel_after_request_prevents_resubmit) ... ok
+test_checked_in_schema_matches_sdk_request_contract (test_gemini.GeminiContracts.test_checked_in_schema_matches_sdk_request_contract) ... ok
+test_concurrent_same_intent_and_restart_only_one_post (test_gemini.GeminiContracts.test_concurrent_same_intent_and_restart_only_one_post) ... ok
+test_environment_cannot_redirect_key_or_switch_backend (test_gemini.GeminiContracts.test_environment_cannot_redirect_key_or_switch_backend) ... ok
+test_fetch_is_local_and_corrupt_archive_never_calls_again (test_gemini.GeminiContracts.test_fetch_is_local_and_corrupt_archive_never_calls_again) ... ok
+test_low_confidence_preserves_observations_but_degrades (test_gemini.GeminiContracts.test_low_confidence_preserves_observations_but_degrades) ... Executing <Task finished name='Task-58' coro=<GeminiContracts.test_low_confidence_preserves_observations_but_degrades() done, defined at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:81> result=None created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.216 seconds
+ok
+test_malformed_json_and_function_call_degrade (test_gemini.GeminiContracts.test_malformed_json_and_function_call_degrade) ... Executing <Task pending name='Task-67' coro=<GeminiContracts.test_malformed_json_and_function_call_degrade() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:89> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.121 seconds
+Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+Executing <Task finished name='Task-67' coro=<GeminiContracts.test_malformed_json_and_function_call_degrade() done, defined at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:85> result=None created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.195 seconds
+ok
+test_multiple_candidates_and_unspecified_prompt_feedback (test_gemini.GeminiContracts.test_multiple_candidates_and_unspecified_prompt_feedback) ... there are 2 candidates, returning text result from the first candidate. Access response.candidates directly to get the result from other candidates.
+Executing <Task pending name='Task-80' coro=<GeminiContracts.test_multiple_candidates_and_unspecified_prompt_feedback() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:132> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.568 seconds
+ok
+test_oversized_and_compressed_body_fail_without_retry (test_gemini.GeminiContracts.test_oversized_and_compressed_body_fail_without_retry) ... ok
+test_preflight_hash_dimensions_and_non_png_do_not_submit (test_gemini.GeminiContracts.test_preflight_hash_dimensions_and_non_png_do_not_submit) ... ok
+test_prompt_block_and_missing_candidate_degrade (test_gemini.GeminiContracts.test_prompt_block_and_missing_candidate_degrade) ... Executing <Task pending name='Task-121' coro=<GeminiContracts.test_prompt_block_and_missing_candidate_degrade() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.164 seconds
+Executing <Task pending name='Task-121' coro=<GeminiContracts.test_prompt_block_and_missing_candidate_degrade() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.249 seconds
+ok
+test_real_sdk_request_model_final_bytes_schema_and_usage (test_gemini.GeminiContracts.test_real_sdk_request_model_final_bytes_schema_and_usage) ... ok
+test_redirect_is_not_followed (test_gemini.GeminiContracts.test_redirect_is_not_followed) ... Executing <Task finished name='Task-147' coro=<GeminiContracts.test_redirect_is_not_followed() done, defined at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:111> result=None created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.143 seconds
+ok
+test_schema_missing_extra_compliance_and_invalid_bbox_degrade (test_gemini.GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade) ... Executing <Task pending name='Task-156' coro=<GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:79> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.204 seconds
+Executing <Task pending name='Task-156' coro=<GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:79> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.390 seconds
+Executing <Task pending name='Task-156' coro=<GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:79> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.317 seconds
+Executing <Task pending name='Task-156' coro=<GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade() running at /home/runner/work/-AI-/-AI-/tests/contract/test_gemini.py:79> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/base_events.py:181] created at /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/asyncio/runners.py:101> took 0.137 seconds
+ok
+test_sdk_429_and_503_never_retry (test_gemini.GeminiContracts.test_sdk_429_and_503_never_retry) ... ok
+test_sdk_continuation_does_not_issue_second_request (test_gemini.GeminiContracts.test_sdk_continuation_does_not_issue_second_request) ... ok
+test_sdk_timeout_retains_intent_and_sanitizes (test_gemini.GeminiContracts.test_sdk_timeout_retains_intent_and_sanitizes) ... ok
+test_truncated_and_safety_results_degrade (test_gemini.GeminiContracts.test_truncated_and_safety_results_degrade) ... ok
+test_unknown_usage_and_no_response_id_not_invented (test_gemini.GeminiContracts.test_unknown_usage_and_no_response_id_not_invented) ... ok
+test_live_transports_cannot_activate_composition (test_pipeline.ProtocolActivationContracts.test_live_transports_cannot_activate_composition) ... ok
+test_mixed_transport_cannot_activate_composition (test_pipeline.ProtocolActivationContracts.test_mixed_transport_cannot_activate_composition) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 6.195s
+
+OK

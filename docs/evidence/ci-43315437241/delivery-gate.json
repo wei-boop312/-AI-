@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-11-12T22:03:35.910070+00:00",
+  "scope": "P5-01 local/CI build candidate; no release or deployment approval",
+  "static": "PASS",
+  "legal_text_references": 264,
+  "dependency_components": 186,
+  "openapi_paths": 31,
+  "result": "FAIL",
+  "reason": "'test_monitoring' module incorrectly imported from '/home/runner/work/-AI-/-AI-/tests/unit'. Expected '/home/runner/work/-AI-/-AI-/tests/integration'. Is this module globally installed?"
+}
