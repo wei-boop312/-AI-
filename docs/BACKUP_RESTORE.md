@@ -49,6 +49,6 @@ pwsh -File scripts/native_restore_drill.ps1 -PgBin <PostgreSQL-bin> -WeedBinary 
 
 最新演练绑定 `9e8f247`、schema 0024：26张表指纹精确一致、函数定义/所有者一致，244个对象引用和196个Fake缓存文件恢复校验；账本守恒、余额与流水汇总、单一终态结算检查均零异常。原已交付PNG/报告SHA、保护区RGB、人工复核及规则快照保留。三个未结束测试任务全部隔离，排队/未知尝试运行Worker不能提交；人工核验后已知ID恢复，只保留一次generate。
 
-演练冷目标RTO **25.40秒**，包括PG/S3初始化至API/下载及一次已知ID安全恢复验证；备份耗时1.88秒。演练恢复起点距离快照 **3.39秒**，快照之后创建的产品标记确实未被恢复。RTO使用Stopwatch单调计时，RPO年龄统一DateTimeOffset，避免UTC/本地时间混算。后者是本次快照年龄观测，不是持续WAL/PITR或生产备份周期保障。RPO/RTO目标均NOT_SET，不能宣称达到生产SLA。小体积单机离线数据不能外推大库/公网恢复速度。
+前轮演练冷目标RTO **25.40秒**，包括PG/S3初始化至API/下载及一次已知ID安全恢复验证；备份耗时1.88秒。演练恢复起点距离快照 **3.39秒**，快照之后创建的产品标记确实未被恢复。RTO使用Stopwatch单调计时，RPO年龄统一DateTimeOffset，避免UTC/本地时间混算。后者是本次快照年龄观测，不是持续WAL/PITR或生产备份周期保障。旧报告写NOT_SET遗漏了主计划§13原有的初始演练RPO24h/RTO4h；原始报告不回填，新代码从ops/recovery-objectives.json读取并按本轮测量评估，待新演练证据。即使单次演练满足初始目标，也不证明生产备份频率或SLA；小体积单机离线数据不能外推大库/公网恢复速度。
 
 本轮证据为 backup-restore-drill.json，结合 native-restart-drill.json 和当前性能记录，P5-02 在 `9e8f247` 实际通过，结果 operations-gate-9e8f247.json；最终监控 acceptance-operations-final-monitor.json 无告警、账务异常为零。原生服务/临时恢复凭据和完整日志仍只留忽略 work。早期演练日志保留历史范围，不把新结果回填旧日志。

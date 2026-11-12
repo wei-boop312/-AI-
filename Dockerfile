@@ -17,6 +17,7 @@ COPY alembic.ini ./
 COPY rules ./rules
 COPY contracts ./contracts
 COPY scripts ./scripts
+COPY ops/recovery-objectives.json ./ops/recovery-objectives.json
 COPY third_party ./third_party
 USER 10001:10001
 EXPOSE 8000

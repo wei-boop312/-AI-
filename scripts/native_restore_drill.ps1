@@ -85,8 +85,13 @@ try {
     $taskManifest=Get-Content -Raw (Join-Path $taskBackup 'manifest.json') | ConvertFrom-Json
     $taskEvidenceFile=Join-Path $taskRepo 'docs/evidence/backup-restore-drill.json'
     $taskEvidence=Get-Content -Raw $taskEvidenceFile | ConvertFrom-Json
-    $taskTiming=@{rto_seconds=$taskRecoveryClock.Elapsed.TotalSeconds;snapshot_age_seconds_at_recovery_start=($taskRecoveryStarted-[DateTimeOffset]$taskManifest.snapshot_at).TotalSeconds;backup_seconds=([DateTimeOffset]$taskManifest.finished_at-[DateTimeOffset]$taskManifest.started_at).TotalSeconds;rpo_target='NOT_SET';rto_target='NOT_SET';scope='native cold destination initialization through verified API/artifact/safe known-id recovery; not a production SLA'}
+    $taskTiming=@{rto_seconds=$taskRecoveryClock.Elapsed.TotalSeconds;snapshot_age_seconds_at_recovery_start=($taskRecoveryStarted-[DateTimeOffset]$taskManifest.snapshot_at).TotalSeconds;backup_seconds=([DateTimeOffset]$taskManifest.finished_at-[DateTimeOffset]$taskManifest.started_at).TotalSeconds;scope='native cold destination initialization through verified API/artifact/safe known-id recovery; not a production SLA'}
     if ($taskTiming.snapshot_age_seconds_at_recovery_start -lt 0 -or $taskTiming.rto_seconds -lt 0) {throw 'Invalid recovery timing; clock normalization required'}
+    $taskRto=$taskTiming.rto_seconds.ToString('R',[Globalization.CultureInfo]::InvariantCulture)
+    $taskAge=$taskTiming.snapshot_age_seconds_at_recovery_start.ToString('R',[Globalization.CultureInfo]::InvariantCulture)
+    $taskAssessment=Join-Path $taskDir 'objectives.json'
+    Invoke-TaskPython -TaskArguments @('scripts/assess_recovery.py','--rto-seconds',$taskRto,'--snapshot-age-seconds',$taskAge) -TaskLog $taskAssessment
+    $taskTiming.objectives=Get-Content -Raw $taskAssessment | ConvertFrom-Json
     $taskEvidence | Add-Member -NotePropertyName timing -NotePropertyValue $taskTiming
     $taskCommit=(& git -C $taskRepo rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0) {throw 'Cannot bind restore evidence to current commit'}

@@ -3,10 +3,13 @@ from datetime import datetime,timezone
 import json
 from pathlib import Path
 import subprocess
+import sys
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'src'))
+from visual_platform.services.recovery_objectives import assess_recovery
 
 def main():
     commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
@@ -25,12 +28,16 @@ def main():
         verification=restore['verification']
         for field in ('api_ready','old_access_rejected','post_snapshot_marker_absent','completed_report_review_and_download_hash_preserved','pixel_protection_preserved','three_fixture_tasks_quarantined','unknown_and_queued_cannot_submit','known_id_recovered_without_new_generate'):require(verification[field] is True,'recovery guard failed: '+field)
         require(restore['timing']['rto_seconds']>0 and restore['timing']['snapshot_age_seconds_at_recovery_start']>=0,'missing measured RPO/RTO')
+        objectives=assess_recovery(restore['timing']['rto_seconds'],restore['timing']['snapshot_age_seconds_at_recovery_start'],json.loads((ROOT/'ops/recovery-objectives.json').read_text(encoding='utf-8-sig')))
+        report['recovery_objectives']=objectives
+        require(restore['timing'].get('objectives')==objectives,'recovery target evidence missing or changed')
+        require(objectives['rehearsal_rpo_met'] and objectives['rehearsal_rto_met'],'initial plan RPO/RTO rehearsal objective exceeded')
         for field in ('mq_persistent_redelivery','mq_fixture_queue_empty_after_ack','s3_sha256_preserved','s3_immutable_conflict_rejected','signed_download','anonymous_denied'):require(restart['verification'][field] is True,'restart verification failed: '+field)
         require(restart['paid_calls']==0 and not restart['recovered']['alerts'],'restart did not recover')
         require('mq_unavailable' in [x['code'] for x in restart['mq_down']['alerts']] and 'storage_unavailable' in [x['code'] for x in restart['s3_down']['alerts']],'fault injection not observed')
         require(performance['passed'] is True and performance['api']['concurrency']==20 and performance['api']['requested']==500,'production load test incomplete')
         require(performance['api']['status_counts']=={'200':500} and performance['safety']['task_posts']==0 and not performance['safety']['remote_hosts'],'unexpected failed requests or paid/remote activity')
-        report.update(result='PASS',rto_seconds=restore['timing']['rto_seconds'],snapshot_age_seconds=restore['timing']['snapshot_age_seconds_at_recovery_start'],rto_target=restore['timing']['rto_target'],rpo_target=restore['timing']['rpo_target']);code=0
+        report.update(result='PASS',rto_seconds=restore['timing']['rto_seconds'],snapshot_age_seconds=restore['timing']['snapshot_age_seconds_at_recovery_start']);code=0
     except EnvironmentError as error:report.update(result='BLOCKED_ENV',reason=str(error));code=3
     except Exception as error:report.update(result='FAIL',reason=str(error));code=1
     target=ROOT/'work/ci-public';target.mkdir(parents=True,exist_ok=True)

@@ -2,7 +2,7 @@
 
 原始 `specification/CODEX_EXECUTION/tasks.json` 是规划快照，不修改其中 TODO。实现状态以当前提交的真实测试、CI 和 STATUS 为准；命令存在不等于任务通过。退出 0 为指定范围通过，1 为失败（含缺失测试和跳过），3 为环境/本次证据不足，4 为等待外部授权或发布条件。
 
-所有 Python 命令使用项目 `.venv`（或 `uv run`），工作目录为仓库根。默认离线，不需要供应商 API 密钥，不执行付费模型调用。
+所有 Python 命令使用项目 `.venv`（或 `uv run`），工作目录为仓库根。默认离线，不需要供应商 API 密钥，不执行付费模型调用。`check.py all`等同`all --profile offline`；`check.py e2e`要求本项目离线5173 profile、生产dist及已运行原生服务，再执行常规生产浏览器全套，不隐式暂停消费者。
 
 | 入口 | 实际验证及实现映射 |
 | --- | --- |
@@ -33,4 +33,4 @@ P1/P2 原生入口需显式配置专用 `TEST_DATABASE_URL`；涉及存储/流�
 
 `python scripts/check.py all --profile offline` 是本次证据综合门槛，而非一条隐式安装/启停命令。干净 Linux CI 依次进行锁定安装、单元/契约、依赖审计/SBOM、秘密扫描、生产构建、`ci_native.py`（原生服务与浏览器）、P0-02、两个镜像构建、`container_smoke.py`（实际镜像离线任务闭环）、P5-01，再执行 all。完整可复现命令以 `.github/workflows/ci.yml` 为准。只接受同一 commit、当前构建、无跳过的全量证据；实现文件未提交则拒绝验证。成功状态只为 OFFLINE_READY，范围 P0–P3、P4 mock 契约和 P5-01。P5-02 单独实测，P4-03/P5-03 仍待外部条件；OFFLINE_READY 不等于真实模型或发布验收。
 
-P5-02 的 Windows 原生准备见 OPERATIONS_RECOVERY / BACKUP_RESTORE：专用 RuntimeRoot 重启演练、暂停本项目消费者后的独立恢复演练、恢复消费者和生产 preview 后执行 performance.spec.ts。两份演练写 base_commit，性能证据也绑定 commit；恢复 schema 必须等于当前 Alembic head。P5-02 不把单节点 stop_app/start_app 外推为 Rabbit 整机或生产集群容灾，不把未设定的 RPO/RTO 目标称为达标。
+P5-02 的 Windows 原生准备见 OPERATIONS_RECOVERY / BACKUP_RESTORE：专用 RuntimeRoot 重启演练、暂停本项目消费者后的独立恢复演练、恢复消费者和生产 preview 后执行 performance.spec.ts。两份演练写 base_commit，性能证据也绑定 commit；恢复 schema 必须等于当前 Alembic head。`ops/recovery-objectives.json`记录主计划§13原有的初始演练RPO24h/RTO4h及来源SHA；新恢复报告记录规范化目标摘要和逐项目标结果，门槛重新计算并拒绝超标或旧目标报告。P5-02 不把单节点 stop_app/start_app 外推为 Rabbit 整机或生产集群容灾；单次快照年龄不证明生产备份频率或SLA。

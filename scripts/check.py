@@ -1,12 +1,24 @@
 import ast
+import json
 import os
 from pathlib import Path
 import subprocess
 import sys
+import shutil
+from urllib.parse import urlsplit
 ROOT=Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 os.environ['PYTHONPATH']=str(ROOT/'src')
 mode=sys.argv[1:]
+if mode==['all']:mode=['all','--profile','offline']
+if mode==['e2e']:
+    profile=ROOT/'.local/runtime.json';pnpm=shutil.which('pnpm')
+    if not profile.is_file() or not pnpm or not (ROOT/'apps/web/dist/index.html').is_file():
+        print('BLOCKED_ENV: isolated local offline profile, pnpm and production build required');raise SystemExit(3)
+    values=json.loads(profile.read_text(encoding='utf-8-sig'));origin=urlsplit(values['APP_ORIGIN'])
+    if values.get('PROVIDER_PROFILE')!='offline' or origin.hostname!='127.0.0.1' or origin.port!=5173:
+        print('BLOCKED_ENV: browser checks require the explicit offline loopback 5173 profile');raise SystemExit(3)
+    raise SystemExit(subprocess.call([pnpm,'--dir','apps/web','exec','playwright','test'],env={**os.environ,'REQUIRE_PRODUCTION_BUILD':'1'}))
 if mode==['task','P5-02']:
     raise SystemExit(subprocess.call([sys.executable,'scripts/verify_operations.py']))
 from task_checks import SUITES

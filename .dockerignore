@@ -23,6 +23,7 @@
 !apps/web/src/**
 !ops/
 !ops/nginx.conf
+!ops/recovery-objectives.json
 !third_party/
 !third_party/**
 **/node_modules
