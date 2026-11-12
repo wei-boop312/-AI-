@@ -309,3 +309,11 @@ CI43323370220（35694a4）已实际通过新的Compose完整阶段，正在构�
 该轮Compose38.909秒。API镜像sha256:3f8e7026d389232d0eaa254fbce807545befe9cda97d8e7b4ba96496949a2013，web镜像sha256:ac018b0c8a8bd6e1c853229a3ead2e821850741339938c890b8b360784367631，revision均绑定35694a4；只构建未发布。19份公开原始报告与下载归档SHA/来源保存ci-43323370220，artifact私有下载包留忽略目录，避免三天保留期后只剩叙述。旧失败记录保留。
 
 该轮不包含后续ec2a155新增的实际容器任务闭环，不能把较早绿灯扩展到新要求；ec2a155的CI43324484300正在原生/浏览器阶段。STATUS顶部/TASK_STATUS按已验范围更新。真实供应商/预算、规则适用范围完整证据和目标发布仍未验收；不标PROVIDER_VERIFIED/RELEASE_READY，不将离线MVP完成冒充整个项目完成。周额度最近剩余51%，继续。
+
+## 2026-11-13：受控丢失响应同步与公共签名指纹扫描误报
+
+CI43324484300实际通过90原生/4常规浏览器，受控第5项等待按钮恢复失败，未到容器闭环。原测试在handler刚进入时就递增intercepted，在真实POST201及abort完成前开始5秒UI断言，存在时序缺口。改为等待实际201/解析任务ID/abort完成的lossInjected，再严格检查只拦截1次、手工再次确认返回200、相同key/ID、唯一task/freeze/charge；不重试整个用例、不改业务断言。该用例本机连续10次通过（1.2分钟），完整5项通过（36.8秒），日志controlled-lost-response-repeat/full-20261113.log。原轮失败保留ci-43324484300；仍待Linux证实修正，未声称CI已恢复。测试仅暂停本项目消费者，之后恢复，最终monitor空告警/财务异常全0。
+
+另CI43324941200在扫描新增原始Docker检查证据时失败。固定版本Gitleaks本机定位唯一命中为公共Python镜像GPG签名指纹，官方Dockerfile明确用于下载公钥验证Python源包，不是API密码/私钥。新增.gitleaks.toml继承全部默认规则，唯一allowlist限定generic-api-key、确切指纹和归档docker-images路径AND匹配；其他情况仍扫描。通过官方发行包digest/checksums验证的8.30.1真实全历史34提交扫描无其他命中；4个正负范围用例全部符合预期。CI显式配置并保存redacted JSON，不移除原始证据或重写历史；SUPPLY_CHAIN写明依据和边界。
+
+静态交付门槛PASS（31路径、188组件、268法律引用），差异检查通过；当前尚无新容器运行验收结果。周额度最近used51%、剩余49%，继续。

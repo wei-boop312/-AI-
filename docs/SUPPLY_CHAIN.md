@@ -10,6 +10,10 @@
 
 `python scripts/dependency_audit.py --output work/dependency-audit`调用pip-audit及pnpm audit，不自动fix、不忽略具体漏洞；在线源不可用、工具失败、跳过包、缺少可解析结果或已知漏洞均返回失败。摘要绑定两个锁文件SHA，查询结果只表示该时刻已知advisory，不能证明不存在未知漏洞。本机本轮88项Python已安装依赖、npm各级已知漏洞均0；证据dependency-audit-20261113.log。当前生成清单88 Python/100 npm、未缺法律文本，见dependency-artifacts-20261113.log。
 
-CI另以固定digest的Gitleaks8.30.1扫描全部提交历史并redact，首轮实际通过。工作流只读仓库、构建/测试，不上传私有.local、运行凭据、JWT私钥或备份；构建产物与公开证据短期保存，不推镜像、不部署。首轮API探针漏/api/v1导致404，已定位并修正，完整镜像/浏览器CI结果仍需等待后续运行；不提前标P5-01通过。
+CI以固定digest的Gitleaks8.30.1扫描全部提交历史并redact。35694a4完整CI/P5-01已通过，原始报告保留ci-43323370220；后续新增容器运行闭环仍待新CI。工作流只读仓库、构建/测试，不上传私有.local、运行凭据、JWT私钥或备份；构建产物与公开证据短期保存，不推镜像、不部署。
+
+归档原始 docker inspect 后，generic-api-key 将 Python 基础镜像公开 GPG 签名指纹判为一条命中，导致43324941200扫描失败。已依据[官方 Python 镜像 Dockerfile](https://raw.githubusercontent.com/docker-library/python/master/3.13/slim-bookworm/Dockerfile)核对它用于下载 Python 签名公钥，不是私钥或 API 凭据。`.gitleaks.toml`继承全部默认规则，只为归档 docker-images.jsonl 路径 AND 该确切 GPG_KEY 匹配增加目标规则例外；不忽略文件、目录、提交或一般凭据。
+
+使用[官方 Gitleaks8.30.1 Windows 发行包](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1)，SHA同时核对 release asset digest 和官方checksums，实际扫描34个提交后无其他命中。4项范围实测：确切公钥/正确路径通过，同值其他路径、其他值同路径、其他凭据同路径均被检出。证据gitleaks-public-fingerprint-scope-20261113.json。CI显式指定同配置，并保存redacted JSON报告供失败定位；不会因为扫描失败就把默认规则关闭。
 
 官方依据：[Docker多阶段构建](https://docs.docker.com/get-started/docker-concepts/building-images/multi-stage-builds/)、[GitHub构建产物](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts)、[Gitleaks](https://github.com/gitleaks/gitleaks)、[pip-audit](https://github.com/pypa/pip-audit)、[CycloneDX 1.6](https://cyclonedx.org/docs/1.6/json/)。

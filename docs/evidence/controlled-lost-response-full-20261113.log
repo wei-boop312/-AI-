@@ -1,0 +1,12 @@
+
+Running 5 tests using 1 worker
+
+(node:98608) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e-controlled\faults.spec.ts:32:1 › 排队取消和重复点击只释放一次积分 (3.6s)
+  ok 2 e2e-controlled\faults.spec.ts:41:1 › 明确供应商失败释放积分，刷新不自动重试 (6.5s)
+  ok 3 e2e-controlled\faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 (9.2s)
+  ok 4 e2e-controlled\faults.spec.ts:65:1 › 晚到回执恢复查询和归档，原生成意图不重发 (10.1s)
+  ok 5 e2e-controlled\faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (6.0s)
+
+  5 passed (36.8s)

@@ -72,12 +72,15 @@ test('晚到回执恢复查询和归档，原生成意图不重发',async({page}
 });
 
 test('提交响应丢失后再次确认沿用同一幂等键',async({page})=>{
- await setup(page);let first:any;const keys:string[]=[];let intercepted=0;
+ await setup(page);let first:any;const keys:string[]=[];let intercepted=0;let lossInjected=false;
  await page.route('**/api/v1/tasks',async route=>{
   if(route.request().method()!=='POST'){await route.continue();return}keys.push(route.request().headers()['idempotency-key']);intercepted++;
-  if(intercepted===1){const response=await route.fetch();expect(response.status()).toBe(201);first=await response.json();await route.abort('failed')}else await route.continue();
+  if(intercepted===1){const response=await route.fetch();expect(response.status()).toBe(201);first=await response.json();await route.abort('failed');lossInjected=true}else await route.continue();
  });
- await page.getByRole('button',{name:'获取报价并继续'}).click();const dialog=page.getByRole('dialog',{name:'确认本次生成'});const confirm=dialog.getByRole('button',{name:'确认并创建任务',exact:true});await confirm.click();await expect.poll(()=>intercepted).toBe(1);await expect(confirm).not.toHaveClass(/ant-btn-loading/);
+ await page.getByRole('button',{name:'获取报价并继续'}).click();const dialog=page.getByRole('dialog',{name:'确认本次生成'});const confirm=dialog.getByRole('button',{name:'确认并创建任务',exact:true});await confirm.click();
+ // Interception starts before the real POST commits. Wait for the injected loss,
+ // not just interception, before measuring the UI's recovery from that loss.
+ await expect.poll(()=>lossInjected,{timeout:30000}).toBe(true);expect(first.id).toBeTruthy();expect(intercepted).toBe(1);await expect(confirm).not.toHaveClass(/ant-btn-loading/);
  const replay=page.waitForResponse(r=>r.url().endsWith('/api/v1/tasks')&&r.request().method()==='POST'&&r.status()===200);await confirm.click();const recovered=await(await replay).json();expect(recovered.id).toBe(first.id);expect(keys).toHaveLength(2);expect(keys[0]).toBe(keys[1]);
  expect(worker(recovered.id,'success').result).toBe('succeeded');await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible();const rows=await ledger(page,recovered.id);expect(rows.filter((r:any)=>r.type==='freeze')).toHaveLength(1);expect(rows.filter((r:any)=>r.type==='charge')).toHaveLength(1);expect((await(await page.request.get('/api/v1/tasks')).json()).items).toHaveLength(1);
  evidence.push({case:'lost_submit_response',http_replay_status:200,same_idempotency_key:true,unique_tasks:1,one_freeze:true,one_charge:true});

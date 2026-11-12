@@ -1,0 +1,40 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 e2e-controlled/faults.spec.ts:32:1 › 排队取消和重复点击只释放一次积分 (2.5s)
+  ✓  2 e2e-controlled/faults.spec.ts:41:1 › 明确供应商失败释放积分，刷新不自动重试 (3.9s)
+  ✓  3 e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 (5.2s)
+  ✓  4 e2e-controlled/faults.spec.ts:65:1 › 晚到回执恢复查询和归档，原生成意图不重发 (5.4s)
+  ✘  5 e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (6.8s)
+
+
+  1) e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 ───────────────────────────────────────
+
+    Error: expect(locator).not.toHaveClass(expected) failed
+
+    Locator: getByRole('dialog', { name: '确认本次生成' }).getByRole('button', { name: '确认并创建任务', exact: true })
+    Expected pattern: not /ant-btn-loading/
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "not toHaveClass" getByRole('dialog', { name: '确认本次生成' }).getByRole('button', { name: '确认并创建任务', exact: true }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: '确认本次生成' }).getByRole('button', { name: '确认并创建任务', exact: true })
+
+
+      78 |   if(intercepted===1){const response=await route.fetch();expect(response.status()).toBe(201);first=await response.json();await route.abort('failed')}else await route.continue();
+      79 |  });
+    > 80 |  await page.getByRole('button',{name:'获取报价并继续'}).click();const dialog=page.getByRole('dialog',{name:'确认本次生成'});const confirm=dialog.getByRole('button',{name:'确认并创建任务',exact:true});await confirm.click();await expect.poll(()=>intercepted).toBe(1);await expect(confirm).not.toHaveClass(/ant-btn-loading/);
+         |                                                                                                                                                                                                                                                                                ^
+      81 |  const replay=page.waitForResponse(r=>r.url().endsWith('/api/v1/tasks')&&r.request().method()==='POST'&&r.status()===200);await confirm.click();const recovered=await(await replay).json();expect(recovered.id).toBe(first.id);expect(keys).toHaveLength(2);expect(keys[0]).toBe(keys[1]);
+      82 |  expect(worker(recovered.id,'success').result).toBe('succeeded');await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible();const rows=await ledger(page,recovered.id);expect(rows.filter((r:any)=>r.type==='freeze')).toHaveLength(1);expect(rows.filter((r:any)=>r.type==='charge')).toHaveLength(1);expect((await(await page.request.get('/api/v1/tasks')).json()).items).toHaveLength(1);
+      83 |  evidence.push({case:'lost_submit_response',http_replay_status:200,same_idempotency_key:true,unique_tasks:1,one_freeze:true,one_charge:true});
+        at /home/runner/work/-AI-/-AI-/apps/web/e2e-controlled/faults.spec.ts:80:272
+
+    Error Context: ../../work/browser-test-results/faults-提交响应丢失后再次确认沿用同一幂等键/error-context.md
+
+    Error Context: ../../work/browser-test-results/faults-提交响应丢失后再次确认沿用同一幂等键/error-context.md
+
+  1 failed
+    e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 ────────────────────────────────────────
+  4 passed (24.6s)

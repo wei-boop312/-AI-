@@ -1,0 +1,8 @@
+{
+  "run_id": 43324484300,
+  "commit": "ec2a155",
+  "overall": "failure",
+  "failed_stage": "controlled lost-submit-response browser assertion",
+  "scope": "native90 and regular4 passed; controlled4/5; did not reach runtime containers",
+  "paid_calls": 0
+}
