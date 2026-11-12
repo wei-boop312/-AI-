@@ -1,0 +1,14 @@
+
+Running 3 tests using 1 worker
+
+(node:34796) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e-controlled\faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (9.8s)
+(node:63872) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 e2e-controlled\faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (5.0s)
+(node:44796) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 e2e-controlled\faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (5.0s)
+
+  3 passed (33.6s)

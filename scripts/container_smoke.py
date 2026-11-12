@@ -82,11 +82,15 @@ def main():
         s3=['S3_ENDPOINT','S3_ACCESS_KEY','S3_SECRET_KEY','S3_BUCKET','S3_REGION']
         # Each container receives only its service role; admin/DDL remain host-only.
         api_keys=['API_DATABASE_URL','AUTH_DATABASE_URL','JWT_PRIVATE_KEY_FILE','JWT_PUBLIC_KEY_FILE','APP_ORIGIN','COOKIE_SECURE',*s3]
-        api=launch('api','visual-api:ci',{k:profile[k] for k in api_keys},mounts=mounts)
+        api=launch('api','visual-api:ci',{k:profile[k] for k in api_keys},['uvicorn','visual_platform.api.main:app','--host','127.0.0.1','--port','8000'],mounts=mounts)
         launch('publisher','visual-api:ci',{k:profile[k] for k in ('DISPATCH_DATABASE_URL','AMQP_URL','QUEUE_PREFIX')},['python','-m','visual_platform.events'])
         worker_keys=['WORKER_DATABASE_URL','AMQP_URL','QUEUE_PREFIX','PROVIDER_PROFILE',*s3]
         launch('worker','visual-api:ci',{**{k:profile[k] for k in worker_keys},'FAKE_PROVIDER_DIR':'/app/work/fake-runtime'},['python','-m','visual_platform.worker','--consume'])
-        launch('web','visual-web:ci',options=['--add-host','api:127.0.0.1'])
+        nginx=(ROOT/'ops/nginx.conf').read_text()
+        require(nginx.count('listen 8080;')==1,'unexpected Nginx listener configuration')
+        nginx_path=folder/'nginx-loopback.conf'
+        runtime.write_private(nginx_path,nginx.replace('listen 8080;','listen 127.0.0.1:8080;'));os.chmod(nginx_path,0o644)
+        launch('web','visual-web:ci',mounts=[(nginx_path,'/etc/nginx/nginx.conf')],options=['--add-host','api:127.0.0.1'])
         with httpx.Client(base_url='http://127.0.0.1:8080',trust_env=False,timeout=10,follow_redirects=False) as client:
             wait(lambda:client.get('/api/v1/health/ready').status_code==200,'proxied API')
             html=client.get('/');require(html.status_code==200 and '<div id="root">' in html.text,'Nginx static application missing')

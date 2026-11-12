@@ -13,7 +13,7 @@ from visual_platform.services.recovery_objectives import assess_recovery
 
 def main():
     commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
-    report={'observed_at':datetime.now(timezone.utc).isoformat(),'commit':commit,'scope':'P5-02 native single-node drill; no production SLA','paid_calls':0}
+    report={'observed_at':datetime.now(timezone.utc).isoformat(),'commit':commit,'scope':'P5-02 native recovery/restart/performance and runtime metrics; no production SLA','paid_calls':0}
     def require(value,message):
         if not value:raise ValueError(message)
     try:
@@ -37,7 +37,14 @@ def main():
         require('mq_unavailable' in [x['code'] for x in restart['mq_down']['alerts']] and 'storage_unavailable' in [x['code'] for x in restart['s3_down']['alerts']],'fault injection not observed')
         require(performance['passed'] is True and performance['api']['concurrency']==20 and performance['api']['requested']==500,'production load test incomplete')
         require(performance['api']['status_counts']=={'200':500} and performance['safety']['task_posts']==0 and not performance['safety']['remote_hosts'],'unexpected failed requests or paid/remote activity')
-        report.update(result='PASS',rto_seconds=restore['timing']['rto_seconds'],snapshot_age_seconds=restore['timing']['snapshot_age_seconds_at_recovery_start']);code=0
+        report.update(drill_verification='PASS',rto_seconds=restore['timing']['rto_seconds'],snapshot_age_seconds=restore['timing']['snapshot_age_seconds_at_recovery_start'])
+        metrics_path=ROOT/'work/ci-public/runtime-metrics.json'
+        if not metrics_path.is_file():raise EnvironmentError('BLOCKED_ENV: full plan runtime metrics evidence missing; drill passed, see docs/PLAN_GAPS.md')
+        metrics=json.loads(metrics_path.read_text(encoding='utf-8-sig'))
+        require(metrics.get('result')=='PASS' and metrics.get('commit')==commit and metrics.get('paid_calls')==0,'runtime metrics evidence failed or stale')
+        required={'api_p95_ms','api_5xx_count','task_stage_duration','archive_failure_count','provider_submission_count','provider_cost_by_currency','provider_cost_unknown_records','rule_manual_review_rate'}
+        require(required<=set(metrics.get('metrics',{})),'full plan runtime metrics coverage incomplete')
+        report.update(result='PASS',runtime_metrics='PASS');code=0
     except EnvironmentError as error:report.update(result='BLOCKED_ENV',reason=str(error));code=3
     except Exception as error:report.update(result='FAIL',reason=str(error));code=1
     target=ROOT/'work/ci-public';target.mkdir(parents=True,exist_ok=True)

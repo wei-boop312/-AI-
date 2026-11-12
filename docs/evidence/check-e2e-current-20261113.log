@@ -1,0 +1,13 @@
+
+Running 4 tests using 1 worker
+
+(node:30120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"canvas_frame_p95_ms":12.099999999998545,"canvas_duration_ms":60451.89999997616,"api_p95_ms":201.53720000000067,"status_counts":{"200":500},"passed":true}
+  ok 1 e2e\performance.spec.ts:14:1 › 生产构建：4MP、50绘制对象、60秒真实指针及20并发500次非模型API (1.2m)
+  ok 2 e2e\recovery.spec.ts:8:1 › 断线恢复、规则报告版本、Cookie刷新和账号隔离 (18.5s)
+  ok 3 e2e\recovery.spec.ts:47:1 › 不同产品草稿隔离，刷新恢复当前产品且编辑不创建模型任务 (4.9s)
+
+  ok 4 e2e\smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 (9.8s)
+
+  4 passed (1.8m)

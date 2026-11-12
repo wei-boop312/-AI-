@@ -1,0 +1,8 @@
+{
+  "run_id": 43327560427,
+  "commit": "f4aea8a",
+  "overall": "failure",
+  "failed_stage": "Compose persisted S3 object volume availability after recreation",
+  "scope": "native90 and browser4+5 passed; runtime containers not reached",
+  "paid_calls": 0
+}

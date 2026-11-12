@@ -34,3 +34,7 @@ P1/P2 原生入口需显式配置专用 `TEST_DATABASE_URL`；涉及存储/流�
 `python scripts/check.py all --profile offline` 是本次证据综合门槛，而非一条隐式安装/启停命令。干净 Linux CI 依次进行锁定安装、单元/契约、依赖审计/SBOM、秘密扫描、生产构建、`ci_native.py`（原生服务与浏览器）、P0-02、两个镜像构建、`container_smoke.py`（实际镜像离线任务闭环）、P5-01，再执行 all。完整可复现命令以 `.github/workflows/ci.yml` 为准。只接受同一 commit、当前构建、无跳过的全量证据；实现文件未提交则拒绝验证。成功状态只为 OFFLINE_READY，范围 P0–P3、P4 mock 契约和 P5-01。P5-02 单独实测，P4-03/P5-03 仍待外部条件；OFFLINE_READY 不等于真实模型或发布验收。
 
 P5-02 的 Windows 原生准备见 OPERATIONS_RECOVERY / BACKUP_RESTORE：专用 RuntimeRoot 重启演练、暂停本项目消费者后的独立恢复演练、恢复消费者和生产 preview 后执行 performance.spec.ts。两份演练写 base_commit，性能证据也绑定 commit；恢复 schema 必须等于当前 Alembic head。`ops/recovery-objectives.json`记录主计划§13原有的初始演练RPO24h/RTO4h及来源SHA；新恢复报告记录规范化目标摘要和逐项目标结果，门槛重新计算并拒绝超标或旧目标报告。P5-02 不把单节点 stop_app/start_app 外推为 Rabbit 整机或生产集群容灾；单次快照年龄不证明生产备份频率或SLA。
+
+完整主计划复核后，all/P3综合门槛还要求本次application-compose.json证明api/worker/publisher/web完整Compose、回环限制、健康检查、资源限制、优雅退出及回执缓存重建保持。当前此部分待实现，缺少返回BLOCKED_ENV，不能继续依据较早较窄门槛的绿灯返回完整OFFLINE_READY。具体剩余工作见PLAN_GAPS。
+
+P5-02同样区分已通过的恢复/重启/性能演练与完整运维任务。新门槛保留drill_verification=PASS，但仍要求本次runtime-metrics.json覆盖主计划列举的API/阶段耗时/归档/供应商费用/规则人工率；缺失返回3，不能以局部演练关闭完整任务。f4aea8a旧范围结果与新增完整门槛BLOCKED_ENV都保留原始证据。

@@ -23,6 +23,16 @@ def main(task):
     try:
         report['source_provenance']=verify()
         report.update(verify_static());report.update(verify_run(evidence))
+        # The plan explicitly requires application Compose orchestration as well
+        # as the infrastructure. The earlier core gate did not prove this scope.
+        application_path=evidence/'application-compose.json'
+        if not application_path.is_file():raise EnvironmentError('BLOCKED_ENV: full application Compose evidence missing; see docs/PLAN_GAPS.md')
+        application=json.loads(application_path.read_text(encoding='utf-8-sig'))
+        if application.get('result')!='PASS' or application.get('commit')!=report['commit'] or application.get('paid_calls')!=0:raise ValueError('application Compose evidence failed or stale')
+        if set(application.get('application_services',[]))!={'api','worker','publisher','web'}:raise ValueError('application Compose service coverage incomplete')
+        for key in ('loopback_only','healthchecks_ready','resources_enforced','graceful_shutdown_verified','fake_receipts_survive_recreation'):
+            if application.get(key) is not True:raise ValueError('application Compose acceptance missing: '+key)
+        report['application_compose']='PASS'
         plan=json.loads((ROOT/'docs/specification/CODEX_EXECUTION/tasks.json').read_text(encoding='utf-8-sig'))
         report['verified_tasks']=[x['id'] for x in plan['tasks'] if x['phase'] in ('P0','P1','P2','P3')]+['P4-01 (mock HTTP)','P4-02 (mock SDK HTTP)','P5-01']
         report['result']='OFFLINE_READY';code=0

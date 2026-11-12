@@ -1,0 +1,163 @@
+rabbitmq-1       | 2026-11-12 23:23:13.056035+00:00 [info] <0.209.0> Running boot step rabbit_observer_cli_classic_queues defined by app rabbit[0m
+postgres-test-1  | 
+rabbitmq-1       | 2026-11-12 23:23:13.056117+00:00 [info] <0.209.0> Running boot step rabbit_observer_cli_quorum_queues defined by app rabbit[0m
+postgres-test-1  | PostgreSQL Database directory appears to contain a database; Skipping initialization
+rabbitmq-1       | 2026-11-12 23:23:13.056160+00:00 [info] <0.209.0> Running boot step routing_ready defined by app rabbit[0m
+postgres-test-1  | 
+rabbitmq-1       | 2026-11-12 23:23:13.056189+00:00 [info] <0.209.0> Running boot step pre_flight defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.056214+00:00 [info] <0.209.0> Running boot step direct_client defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.056282+00:00 [info] <0.209.0> Running boot step cluster_tags defined by app rabbit[0m
+postgres-dev-1   | 
+rabbitmq-1       | 2026-11-12 23:23:13.057208+00:00 [info] <0.209.0> Running boot step notify_cluster defined by app rabbit[0m
+postgres-dev-1   | PostgreSQL Database directory appears to contain a database; Skipping initialization
+rabbitmq-1       | 2026-11-12 23:23:13.057262+00:00 [info] <0.209.0> Running boot step networking defined by app rabbit[0m
+postgres-dev-1   | 
+rabbitmq-1       | 2026-11-12 23:23:13.057302+00:00 [info] <0.209.0> Running boot step rabbit_quorum_queue_periodic_membership_reconciliation defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.057465+00:00 [info] <0.209.0> Running boot step definition_import_worker_pool defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.057506+00:00 [info] <0.542.0> Starting worker pool 'definition_import_pool' with 2 processes in it[0m
+rabbitmq-1       | 2026-11-12 23:23:13.057720+00:00 [info] <0.209.0> Running boot step cluster_name defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.057764+00:00 [info] <0.209.0> Running boot step virtual_host_reconciliation defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.057936+00:00 [info] <0.209.0> Running boot step logger_exchange defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.058016+00:00 [info] <0.209.0> Running boot step queue_type_registrations defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 23:23:13.058094+00:00 [info] <0.693.0> Resetting node maintenance status[0m
+rabbitmq-1       | 2026-11-12 23:23:13.088702+00:00 [info] <0.716.0> Prometheus metrics: HTTP (non-TLS) listener started on port 15692[0m
+rabbitmq-1       | 2026-11-12 23:23:13.088852+00:00 [info] <0.693.0> Ready to start client connection listeners[0m
+rabbitmq-1       | 2026-11-12 23:23:13.090139+00:00 [info] <0.760.0> started TCP listener on [::]:5672[0m
+rabbitmq-1       |  completed with 3 plugins.
+rabbitmq-1       | 2026-11-12 23:23:13.144903+00:00 [info] <0.693.0> Server startup complete; 3 plugins started.[0m
+rabbitmq-1       | 2026-11-12 23:23:13.144903+00:00 [info] <0.693.0>  * rabbitmq_prometheus[0m
+rabbitmq-1       | 2026-11-12 23:23:13.144903+00:00 [info] <0.693.0>  * rabbitmq_management_agent[0m
+rabbitmq-1       | 2026-11-12 23:23:13.144903+00:00 [info] <0.693.0>  * rabbitmq_web_dispatch[0m
+rabbitmq-1       | 2026-11-12 23:23:13.259499+00:00 [info] <0.10.0> Time to start RabbitMQ: 2618 ms[0m
+rabbitmq-1       | [38;5;87m2026-11-12 23:23:13.401684+00:00 [notice] <0.678.0> queue 'compose-persist' in vhost 'visual-test': candidate -> leader in term: 2 machine version: 9, last applied 5[0m
+rabbitmq-1       | 2026-11-12 23:23:14.286561+00:00 [info] <0.771.0> accepting AMQP connection 172.18.0.1:57684 -> 172.18.0.4:5672[0m
+rabbitmq-1       | 2026-11-12 23:23:14.288759+00:00 [info] <0.771.0> User 'vp_mq' authenticated successfully[0m
+rabbitmq-1       | 2026-11-12 23:23:14.289649+00:00 [info] <0.771.0> connection 172.18.0.1:57684 -> 172.18.0.4:5672: user 'vp_mq' authenticated and granted access to vhost 'visual-test'[0m
+rabbitmq-1       | 2026-11-12 23:23:14.292937+00:00 [info] <0.771.0> closing AMQP connection (172.18.0.1:57684 -> 172.18.0.4:5672, vhost: 'visual-test', user: 'vp_mq', duration: '6ms')[0m
+postgres-dev-1   | 2026-11-12 23:23:10.376 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+postgres-dev-1   | 2026-11-12 23:23:10.376 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+postgres-dev-1   | 2026-11-12 23:23:10.376 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres-dev-1   | 2026-11-12 23:23:10.378 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres-dev-1   | 2026-11-12 23:23:10.386 UTC [29] LOG:  database system was shut down at 2026-11-12 23:22:59 UTC
+postgres-dev-1   | 2026-11-12 23:23:10.405 UTC [1] LOG:  database system is ready to accept connections
+s3-1             | I1112 23:23:29.715062 master_server.go:320 [127.0.0.1:9333.19333] 127.0.0.1:9333.19333 becomes leader.
+s3-1             | E1112 23:23:30.367290 reader_at.go:270 fetching chunk {FileId:6,01af499cdf OffsetInChunk:0 ViewSize:52 ViewOffset:0 ChunkSize:52 IsGzipped:false ModifiedTsNs:1794525778648733730}: context canceled
+s3-1             | I1112 23:23:30.380952 volume_grpc_client_to_master.go:286 Heartbeat to: 127.0.0.1:9333
+s3-1             | I1112 23:23:30.381290 node.go:539 topo adds child DefaultDataCenter
+s3-1             | I1112 23:23:30.381319 node.go:539 topo:DefaultDataCenter adds child DefaultRack
+s3-1             | I1112 23:23:30.381328 node.go:539 topo:DefaultDataCenter:DefaultRack adds child 127.0.0.1:8080
+s3-1             | I1112 23:23:30.381342 node.go:539 topo:DefaultDataCenter:DefaultRack:127.0.0.1:8080 adds child 
+s3-1             | I1112 23:23:30.381391 master_grpc_server.go:269 added volume server 0: 127.0.0.1:8080 (id=127.0.0.1:8080, ip=127.0.0.1:8080) [051b7c40-29a1-4df4-afbe-d2742f588f45]
+s3-1             | I1112 23:23:30.381407 master_grpc_server.go:77 found new uuid:127.0.0.1:8080 [051b7c40-29a1-4df4-afbe-d2742f588f45] , map[127.0.0.1:8080:[051b7c40-29a1-4df4-afbe-d2742f588f45]]
+s3-1             | I1112 23:23:30.572828 masterclient.go:791 .s3 masterClient reconnection attempt #18
+s3-1             | I1112 23:23:30.573503 master_grpc_server.go:729 + client .s3@127.0.0.1:18333
+s3-1             | I1112 23:23:30.573781 masterclient.go:465 + s3@127.0.0.1:18333 noticed .s3 127.0.0.1:18333
+s3-1             | I1112 23:23:30.583908 masterclient.go:791 .master masterClient reconnection attempt #20
+s3-1             | I1112 23:23:30.584434 master_grpc_server.go:729 + client .master@127.0.0.1:9333.19333
+s3-1             | I1112 23:23:30.584576 masterclient.go:465 + s3@127.0.0.1:18333 noticed .master 127.0.0.1:9333.19333
+s3-1             | I1112 23:23:30.584605 masterclient.go:465 + master@127.0.0.1:9333 noticed .master 127.0.0.1:9333.19333
+s3-1             | I1112 23:23:30.670732 master_client.go:27 the cluster has 0 filers
+s3-1             | I1112 23:23:30.677893 masterclient.go:791 .filer masterClient reconnection attempt #19
+s3-1             | I1112 23:23:30.678518 master_grpc_server.go:729 + client .filer@127.0.0.1:8888.18888
+s3-1             | I1112 23:23:30.678646 masterclient.go:465 + master@127.0.0.1:9333 noticed .filer 127.0.0.1:8888.18888
+s3-1             | I1112 23:23:30.678700 masterclient.go:465 + s3@127.0.0.1:18333 noticed .filer 127.0.0.1:8888.18888
+s3-1             | I1112 23:23:30.678729 filer_client.go:526 FilerClient: discovered 1 new filer(s) in group '': [127.0.0.1:8888]
+s3-1             | I1112 23:23:30.678736 masterclient.go:465 + filer@127.0.0.1:8888 noticed .filer 127.0.0.1:8888.18888
+s3-1             | I1112 23:23:30.678762 masterclient.go:465 + filer@127.0.0.1:8888 noticed .filer 127.0.0.1:8888.18888
+s3-1             | E1112 23:23:30.706480 reader_at.go:270 fetching chunk {FileId:6,01af499cdf OffsetInChunk:0 ViewSize:52 ViewOffset:0 ChunkSize:52 IsGzipped:false ModifiedTsNs:1794525778648733730}: operation LookupFileId 6,01af499cdf failed, err: volume 6 not found for fileId 6,01af499cdf: provider lookup failed: all 2 filer(s) failed after 3 attempts, last error: filer.LookupVolume failed: rpc error: code = DeadlineExceeded desc = context deadline exceeded
+s3-1             | volume 6 not found
+s3-1             | E1112 23:23:30.706544 s3api_object_handlers.go:1433 streamFromVolumeServers: first read of visual-compose-private/compose-smoke/persist failed: operation LookupFileId 6,01af499cdf failed, err: volume 6 not found for fileId 6,01af499cdf: provider lookup failed: all 2 filer(s) failed after 3 attempts, last error: filer.LookupVolume failed: rpc error: code = DeadlineExceeded desc = context deadline exceeded
+s3-1             | volume 6 not found
+s3-1             | E1112 23:23:30.706727 s3api_object_handlers.go:1135 GetObjectHandler: failed to stream visual-compose-private/compose-smoke/persist from volume servers: operation LookupFileId 6,01af499cdf failed, err: volume 6 not found for fileId 6,01af499cdf: provider lookup failed: all 2 filer(s) failed after 3 attempts, last error: filer.LookupVolume failed: rpc error: code = DeadlineExceeded desc = context deadline exceeded
+s3-1             | volume 6 not found
+postgres-test-1  | 2026-11-12 23:23:10.300 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+postgres-test-1  | 2026-11-12 23:23:10.302 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+postgres-test-1  | 2026-11-12 23:23:10.303 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres-test-1  | 2026-11-12 23:23:10.304 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres-test-1  | 2026-11-12 23:23:10.316 UTC [28] LOG:  database system was shut down at 2026-11-12 23:22:59 UTC
+postgres-test-1  | 2026-11-12 23:23:10.345 UTC [1] LOG:  database system is ready to accept connections
+
+ Network visual-679637a887fad333_default  Creating
+ Network visual-679637a887fad333_default  Created
+ Volume "visual-679637a887fad333_pg-dev"  Creating
+ Volume "visual-679637a887fad333_pg-dev"  Created
+ Volume "visual-679637a887fad333_rabbit-data"  Creating
+ Volume "visual-679637a887fad333_rabbit-data"  Created
+ Volume "visual-679637a887fad333_s3-data"  Creating
+ Volume "visual-679637a887fad333_s3-data"  Created
+ Volume "visual-679637a887fad333_pg-test"  Creating
+ Volume "visual-679637a887fad333_pg-test"  Created
+ Container visual-679637a887fad333-postgres-test-1  Creating
+ Container visual-679637a887fad333-postgres-dev-1  Creating
+ Container visual-679637a887fad333-s3-1  Creating
+ Container visual-679637a887fad333-rabbitmq-1  Creating
+ Container visual-679637a887fad333-s3-1  Created
+ Container visual-679637a887fad333-postgres-test-1  Created
+ Container visual-679637a887fad333-postgres-dev-1  Created
+ Container visual-679637a887fad333-rabbitmq-1  Created
+ Container visual-679637a887fad333-s3-1  Starting
+ Container visual-679637a887fad333-postgres-test-1  Starting
+ Container visual-679637a887fad333-postgres-dev-1  Starting
+ Container visual-679637a887fad333-rabbitmq-1  Starting
+ Container visual-679637a887fad333-postgres-dev-1  Started
+ Container visual-679637a887fad333-postgres-test-1  Started
+ Container visual-679637a887fad333-s3-1  Started
+ Container visual-679637a887fad333-rabbitmq-1  Started
+ Container visual-679637a887fad333-s3-1  Waiting
+ Container visual-679637a887fad333-postgres-test-1  Waiting
+ Container visual-679637a887fad333-postgres-dev-1  Waiting
+ Container visual-679637a887fad333-rabbitmq-1  Waiting
+ Container visual-679637a887fad333-s3-1  Healthy
+ Container visual-679637a887fad333-postgres-dev-1  Healthy
+ Container visual-679637a887fad333-rabbitmq-1  Healthy
+ Container visual-679637a887fad333-postgres-test-1  Healthy
+ Container visual-679637a887fad333-postgres-test-1  Stopping
+ Container visual-679637a887fad333-postgres-dev-1  Stopping
+ Container visual-679637a887fad333-rabbitmq-1  Stopping
+ Container visual-679637a887fad333-s3-1  Stopping
+ Container visual-679637a887fad333-rabbitmq-1  Stopped
+ Container visual-679637a887fad333-rabbitmq-1  Removing
+ Container visual-679637a887fad333-postgres-test-1  Stopped
+ Container visual-679637a887fad333-postgres-test-1  Removing
+ Container visual-679637a887fad333-rabbitmq-1  Removed
+ Container visual-679637a887fad333-postgres-test-1  Removed
+ Container visual-679637a887fad333-postgres-dev-1  Stopped
+ Container visual-679637a887fad333-postgres-dev-1  Removing
+ Container visual-679637a887fad333-postgres-dev-1  Removed
+ Container visual-679637a887fad333-s3-1  Stopped
+ Container visual-679637a887fad333-s3-1  Removing
+ Container visual-679637a887fad333-s3-1  Removed
+ Network visual-679637a887fad333_default  Removing
+ Network visual-679637a887fad333_default  Removed
+ Network visual-679637a887fad333_default  Creating
+ Network visual-679637a887fad333_default  Created
+ Container visual-679637a887fad333-s3-1  Creating
+ Container visual-679637a887fad333-postgres-dev-1  Creating
+ Container visual-679637a887fad333-postgres-test-1  Creating
+ Container visual-679637a887fad333-rabbitmq-1  Creating
+ Container visual-679637a887fad333-s3-1  Created
+ Container visual-679637a887fad333-postgres-dev-1  Created
+ Container visual-679637a887fad333-rabbitmq-1  Created
+ Container visual-679637a887fad333-postgres-test-1  Created
+ Container visual-679637a887fad333-s3-1  Starting
+ Container visual-679637a887fad333-postgres-test-1  Starting
+ Container visual-679637a887fad333-postgres-dev-1  Starting
+ Container visual-679637a887fad333-rabbitmq-1  Starting
+ Container visual-679637a887fad333-s3-1  Started
+ Container visual-679637a887fad333-postgres-test-1  Started
+ Container visual-679637a887fad333-rabbitmq-1  Started
+ Container visual-679637a887fad333-postgres-dev-1  Started
+ Container visual-679637a887fad333-postgres-test-1  Waiting
+ Container visual-679637a887fad333-postgres-dev-1  Waiting
+ Container visual-679637a887fad333-rabbitmq-1  Waiting
+ Container visual-679637a887fad333-s3-1  Waiting
+ Container visual-679637a887fad333-s3-1  Healthy
+ Container visual-679637a887fad333-postgres-test-1  Healthy
+ Container visual-679637a887fad333-postgres-dev-1  Healthy
+ Container visual-679637a887fad333-rabbitmq-1  Healthy
+
+{"migration_head": "0024", "runtime_roles": 6, "status": "bootstrap verified; no secrets printed"}
+
+{"profile": "work/compose-smoke-80ace98433d14323aedaa61fa7ecbcf3/profile/runtime.json", "account_file": "work/compose-smoke-80ace98433d14323aedaa61fa7ecbcf3/profile/account.json", "status": "created; secrets were not printed"}
+
+

@@ -327,3 +327,13 @@ CI43324484300实际通过90原生/4常规浏览器，受控第5项等待按钮�
 补主计划命令check.py all默认offline别名、受保护check.py e2e（本项目offline回环5173 profile/生产dist/真实浏览器），default all本机正确因未提交代码/缺新证据返回3。e2e真实入口待后续实际运行。
 
 新增PLAN_GAPS：完整应用Compose（不只是4个基础服务或手写docker run）、持久缓存/资源/健康/优雅退出、主计划列举的全量运行指标、后端格式/类型门槛和真实供应商预算/Worker接线尚未闭合。不能只凭早期较窄gate绿灯认定完整V4。STATUS顶部/TASK_STATUS明确范围，继续按完整主计划制作，没有把差距改为可选或声称项目完成。
+
+## 2026-11-13：初始恢复目标实际通过、正式e2e入口及存储重建就绪修正
+
+提交f4aea8a上按新目标格式实际恢复：26表、321对象引用、269个Fake缓存文件及安全恢复/会话/未知隔离检查通过；RTO25.139675秒、恢复起点快照年龄3.6623545秒、备份1.943236秒。报告绑定主计划§13和规范化目标摘要，RPO24h/RTO4h两项初始演练目标均满足，明确production_backup_cadence_verified/production_sla_verified=false。再执行本项目MQ应用/S3进程重启及check.py e2e正式入口4项全通过（1.8分钟）；60.452秒画布p95 12.1ms，20并发500请求全200、APIp95 201.54ms。原范围恢复/重启/性能结果operations-gate-f4aea8a.json；完整P5-02因缺主计划全量运行指标现在正确返回BLOCKED_ENV并保留drill_verification=PASS，结果operations-full-gate-f4aea8a-blocked.json，不把局部演练冒充完整运维验收。
+
+CI43326433820的90原生/常规浏览器通过，受控丢失响应仍在按钮定位失败，说明上一同步修正不足以证明问题解决。新增失败时安全诊断（请求失败、pageerror、是否登录、对话框按钮状态及测试截图），保留真实abort/201/人工重放/同key/单task冻结结算断言。安装Playwright锁定Chromium158.0.8127.18于忽略work（与CI版本相同）；该用例本机3次通过（33.6秒）、完整5受控通过（33.9秒），不宣称Linux间歇失败已彻底解决。测试后本项目消费者恢复，最终monitor空告警、财务异常0。
+
+CI43327560427（f4aea8a）52单元/90原生/全部4+5浏览器实际通过，但Compose保卷重建后S3对象读取失败。真实日志显示桶元数据可读时volume6尚未重新注册（LookupVolume deadline/volume not found），不能用ListBuckets就绪当已存对象可读。演练改为短超时/单次SDK尝试客户端，在90秒恢复窗口反复读取那个实际持久对象；任意成功读取字节不同立即失败，不延迟掩盖损坏；记录尝试/异常类型/耗时。失败也写当前commit/阶段/恢复统计并扩充脱敏日志。当前本机真实S3读取、错误字节立即失败、实际不可达端点有界失败均PASS，证据compose-object-readiness-20261113.json；保卷重建完整修正仍待Linux验证。原CI失败保留ci-43327560427。
+
+完整all门槛现要求真实application-compose.json证明4应用服务、回环/健康/资源/优雅退出/缓存持久性；缺少不会再次标完整OFFLINE_READY。完整P5-02还需runtime-metrics.json，当前缺失明确阻断。下一步按PLAN_GAPS补完整应用Compose、服务退出/缓存重建、全部运行指标、配置版本备份及后端质量门槛；并非整个项目完成。手写Docker候选的host network监听已显式改为API127.0.0.1/Nginx127.0.0.1，不把容器默认0.0.0.0带到宿主公网。静态检查和AST通过；周额度used54%、剩余46%，继续，不调用付费模型或部署。

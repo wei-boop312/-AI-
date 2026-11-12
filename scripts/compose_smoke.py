@@ -13,11 +13,36 @@ from types import SimpleNamespace
 from uuid import uuid4
 import aio_pika
 import psycopg
+from botocore.exceptions import BotoCoreError,ClientError
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from compose_runtime import ComposeRuntime
 from visual_platform.storage.s3 import S3Storage
+
+def restored_object(storage,key,version,expected,stats,seconds=90):
+    # Bucket metadata can be readable before Seaweed re-registers existing volumes.
+    # Probe the actual persisted bytes with a single-attempt, short-timeout client.
+    # Missing/unavailable storage is retried only within this recovery window;
+    # a successful read with different bytes is corruption and fails immediately.
+    started=time.monotonic();deadline=started+seconds
+    params={'Bucket':storage.bucket,'Key':key}
+    if version:params['VersionId']=version
+    stats.update(attempts=0,transient_errors=[])
+    try:
+        while time.monotonic()<deadline:
+            stats['attempts']+=1
+            try:
+                response=storage.probe_client.get_object(**params)
+                try:data=response['Body'].read(len(expected)+1)
+                finally:response['Body'].close()
+                if data!=expected:raise ValueError('S3 content changed across container recreation')
+                return data
+            except (BotoCoreError,ClientError,OSError) as error:
+                stats['transient_errors'].append(type(error).__name__)
+                time.sleep(.25)
+        raise RuntimeError('Persisted S3 object not readable within recovery deadline')
+    finally:stats['seconds']=round(time.monotonic()-started,3)
 
 def main():
     folder=ROOT/'work'/('compose-smoke-'+uuid4().hex)
@@ -46,7 +71,7 @@ def main():
             identity=str(c.execute('SELECT system_identifier FROM pg_control_system()').fetchone()[0]);users=c.execute('SELECT count(*) FROM app.users').fetchone()[0]
         return identity,users
     storage=S3Storage(SimpleNamespace(**{k.lower():env[k] for k in ('S3_ENDPOINT','S3_ACCESS_KEY','S3_SECRET_KEY','S3_BUCKET','S3_REGION')}))
-    clock=time.monotonic()
+    clock=time.monotonic();storage_recovery={};stage='initializing'
     try:
         runtime.up();summary=runtime.config_summary()
         script=ScriptDirectory.from_config(Config(str(ROOT/'alembic.ini')));head=script.get_current_head();previous=script.get_revision(head).down_revision
@@ -59,20 +84,22 @@ def main():
         command(['scripts/verify_bootstrap.py','--profile-dir',str(folder/'profile')],'bootstrap-verification')
         before=pg_identity();data=b'compose-private-object-survives-container-recreation';version=storage.put_immutable('compose-smoke/persist',data,'application/octet-stream')
         asyncio.run(fixture('prepare'))
-        runtime.down();runtime.up()
+        stage='recreating_containers';runtime.down();runtime.up()
         if pg_identity()!=before:raise ValueError('PG identity/data changed across volume-preserving down/up')
-        read,_,_=storage.get('compose-smoke/persist',version=version)
-        if read!=data:raise ValueError('S3 content changed across container recreation')
+        stage='reading_preserved_object'
+        read=restored_object(storage,'compose-smoke/persist',version,data,storage_recovery)
         asyncio.run(fixture('verify'))
         bootstrap=json.loads((ROOT/'docs/evidence/bootstrap-health-readonly.json').read_text())
         result={'observed_at':datetime.now(timezone.utc).isoformat(),'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'compose':summary,'fresh_bootstrap':bootstrap,'empty_upgrade_to_head':head,'previous_upgrade_from':previous,'previous_upgrade_to':bootstrap['migration_head'],'postgres_system_identifier_preserved':True,'postgres_user_count_preserved':before[1],'private_s3_sha256':hashlib.sha256(read).hexdigest(),'rabbit_quorum_message_preserved':True,'recreated_container_services':True,'seconds':round(time.monotonic()-clock,3),'paid_calls':0,'result':'PASS'}
+        result['s3_object_recovery']=storage_recovery
         (ROOT/'docs/evidence/compose-smoke.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8');(public/'compose-smoke.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
         print(json.dumps({'result':'PASS','services':summary['services'],'data_survived_down_up':True,'migration_head':bootstrap['migration_head'],'paid_calls':0}))
-    except Exception:
+    except Exception as error:
+        (public/'compose-smoke.json').write_text(json.dumps({'result':'FAIL','stage':stage,'exception':type(error).__name__,'s3_object_recovery':storage_recovery,'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'paid_calls':0},indent=2)+'\n',encoding='utf-8')
         logs=[]
         try:
             runtime.owned_resources()
-            output=subprocess.run([*runtime.prefix,'logs','--no-color','--tail','30'],capture_output=True,text=True)
+            output=subprocess.run([*runtime.prefix,'logs','--no-color','--tail','120'],capture_output=True,text=True)
             logs.append(output.stdout+output.stderr)
         except Exception:logs.append('Owned container diagnostics unavailable')
         for path in [folder/'compose.log',*private.glob('*.log')]:

@@ -1,0 +1,1 @@
+{"result": "PASS", "real_s3_match": true, "wrong_bytes_immediate_failure": true, "unavailable_bounded_failure": true, "recovery_attempts": 1, "unavailable_seconds": 0.754, "paid_calls": 0}
