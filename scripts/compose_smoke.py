@@ -34,7 +34,12 @@ def main():
             else:
                 message=await queue.get(timeout=5)
                 if message.body!=b'compose-persistent-message':raise ValueError('MQ message content lost across recreation')
-                await message.ack();await queue.delete(if_unused=False,if_empty=True)
+                await message.ack()
+                observed=await channel.declare_queue(queue.name,passive=True)
+                if observed.declaration_result.message_count!=0:raise ValueError('Compose fixture queue not empty after ACK')
+                # Quorum queues reject conditional if-empty/if-unused deletion.
+                # This queue belongs exclusively to this disposable project.
+                await queue.delete(if_unused=False,if_empty=False)
         finally:await connection.close()
     def pg_identity():
         with psycopg.connect(env['MIGRATION_DATABASE_URL']) as c:

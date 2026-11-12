@@ -1,0 +1,11 @@
+{
+  "observed_at": "2026-11-12T22:47:50.129379+00:00",
+  "commit": "9e8f247acc2656e6ab345788a651f4d78062d617",
+  "scope": "P5-02 native single-node drill; no production SLA",
+  "paid_calls": 0,
+  "result": "PASS",
+  "rto_seconds": 25.3959871,
+  "snapshot_age_seconds": 3.3873484,
+  "rto_target": "NOT_SET",
+  "rpo_target": "NOT_SET"
+}

@@ -281,3 +281,13 @@ P0-01 新增真实来源摘要检查并接入 CI。source-map 保留 12 份规�
 P3-01..04 及 all --profile offline 现在核验当前提交完整原生/生产浏览器/性能/Compose/镜像/依赖证据，CI 增加该门槛；实现文件未提交或旧报告均拒绝。综合成功仅 OFFLINE_READY，明确排除真实供应商、P5-02 独立运维演练和发布。P4-03/P5-03 返回 WAITING_EXTERNAL，不做模型调用/部署。P5-02 增加当前 commit/schema 的恢复、重启、500 请求性能证据校验，Windows 演练开始写 commit，旧报告正确返回 BLOCKED_ENV。
 
 驱动验证：49 单元通过、P0-03 的 11 项通过、全部映射文件存在、AST 编译/差异检查通过。当前 Windows 缺 Docker，综合门槛返回 3；P5-02 现存旧恢复报告也返回 3。未把新增入口称为已全验收。提交 d04777b 的 CI 43321769038 正在原生/浏览器阶段，随后验证 Compose 权限修正。
+
+## 2026-11-13：当前迁移原生恢复/重启/性能与 P5-02 通过
+
+在提交 9e8f247 上暂停本项目发布器/Worker，实际将 schema 0024 的 26 张表、244 个 S3 对象引用和 196 个 Fake 缓存文件恢复到独立 PG/S3。函数所有者/表指纹、已交付 SHA/保护 RGB、规则/人工复核、会话撤销、3 个未结束任务隔离、未知/排队不可提交和已知 ID 仅查询恢复均通过。冷目标 RTO25.40 秒，快照年龄3.39 秒，备份1.88 秒；生产 RPO/RTO 目标仍 NOT_SET。临时恢复进程关闭、测试 fixture 结案后恢复本项目发布器/Worker。
+
+继续原生 Rabbit stop_app/start_app 及 S3 硬停止/新进程重启，MQ/S3 故障告警和恢复、持久消息重投、S3 SHA/不可覆写/私有签名下载与匿名拒绝全通过。随后当前提交生产性能：60.393 秒真实指针操作、50 绘制对象；帧 p95 12.1ms，20 并发500请求均200，API p95 239.89ms。P5-02 门槛实际 PASS，结果 operations-gate-9e8f247.json；最终监控无告警、各账务异常0。报告严格说明单节点和未知生产目标，不外推高可用/SLA。PERFORMANCE/BACKUP_RESTORE 摘要按本轮原始数据更新。
+
+CI43321769038 原生90项和全部9浏览器已通过；Compose 已达到新库/上一版升级、6角色验证和保卷重建后的 PG/S3/MQ 读取，但最后专用 quorum 测试队列 if_empty 条件删除被 Rabbit 拒绝，整体仍 failure。按官方问题记录 https://github.com/rabbitmq/rabbitmq-server/issues/10543 改为 ACK 后 passive 验证消息数为0，再无条件删除本临时项目专用队列；不操作业务队列。本机真实 Rabbit 相同流程已 PASS，日志 compose-quorum-cleanup-20261113.log。原轮失败诊断和来源保存 ci-43321769038，未将部分结果称为 Compose PASS，继续复跑。
+
+周额度 used49%、剩余51%。真实供应商及发布仍未授权/未验收；综合离线门槛待当前 CI 实际全绿，不标 OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。

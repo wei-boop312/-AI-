@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--command',default='pnpm --dir apps/web exec playwright test performance.spec.ts')
+p.add_argument('--log',default='performance-production-20261113.log')
 args=p.parse_args()
 e=json.loads((ROOT/'docs/evidence/performance-production.json').read_text())
 c=e['canvas'];a=e['api'];env=e['environment'];f=c['frame_interval']
@@ -13,7 +14,7 @@ def heap(values,name):return next(x['value'] for x in values if x['name']==name)
 def row(name,s,target):return f"| {name}（{s['count']}样本） | {s['p50_ms']:.1f}ms | {s['p95_ms']:.1f}ms | {s['p99_ms']:.1f}ms | {s['max_ms']:.1f}ms | {target} |"
 text=f'''# 本机生产构建性能基准
 
-记录命令：`{args.command}`，性能项结果{'通过' if e['passed'] else '未通过'}。起止时间{e['started_at']}至{e['finished_at']}，应用基础commit `{e['base_commit']}`。dist文件/hash、全部原始样本和设备记录见[evidence/performance-production.json](evidence/performance-production.json)，运行日志为performance-production-20261113.log。
+记录命令：`{args.command}`，性能项结果{'通过' if e['passed'] else '未通过'}。起止时间{e['started_at']}至{e['finished_at']}，应用基础commit `{e['base_commit']}`。dist文件/hash、全部原始样本和设备记录见[evidence/performance-production.json](evidence/performance-production.json)，运行日志为{args.log}。
 
 ## 环境与负载
 

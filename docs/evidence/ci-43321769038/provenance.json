@@ -1,0 +1,9 @@
+{
+  "run_id": 43321769038,
+  "commit": "d04777b783c3143f55cbfccbec20480277ddc4cf",
+  "overall": "failure",
+  "failed_stage": "Compose fixture quorum queue conditional deletion",
+  "native_and_browser": "passed",
+  "compose_summary": "bootstrap and preserved volumes reached; fixture cleanup failed; not PASS",
+  "paid_calls": 0
+}

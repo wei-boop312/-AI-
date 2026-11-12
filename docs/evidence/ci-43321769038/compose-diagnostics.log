@@ -1,0 +1,163 @@
+rabbitmq-1  | 2026-11-12 22:43:50.623534+00:00 [info] <0.209.0> Running boot step notify_cluster defined by app rabbit[0m
+rabbitmq-1  | 2026-11-12 22:43:50.623563+00:00 [info] <0.209.0> Running boot step networking defined by app rabbit[0m
+rabbitmq-1  | 2026-11-12 22:43:50.623596+00:00 [info] <0.209.0> Running boot step rabbit_quorum_queue_periodic_membership_reconciliation defined by app rabbit[0m
+rabbitmq-1  | 2026-11-12 22:43:50.623724+00:00 [info] <0.209.0> Running boot step definition_import_worker_pool defined by app rabbit[0m
+rabbitmq-1  | 2026-11-12 22:43:50.623766+00:00 [info] <0.542.0> Starting worker pool 'definition_import_pool' with 2 processes in it[0m
+rabbitmq-1  | 2026-11-12 22:43:50.623898+00:00 [info] <0.209.0> Running boot step cluster_name defined by app rabbit[0m
+postgres-test-1  | 
+postgres-test-1  | PostgreSQL Database directory appears to contain a database; Skipping initialization
+postgres-test-1  | 
+postgres-test-1  | 2026-11-12 22:43:48.544 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+postgres-test-1  | 2026-11-12 22:43:48.545 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+postgres-test-1  | 2026-11-12 22:43:48.545 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres-test-1  | 2026-11-12 22:43:48.545 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres-test-1  | 2026-11-12 22:43:48.550 UTC [28] LOG:  database system was shut down at 2026-11-12 22:43:37 UTC
+postgres-test-1  | 2026-11-12 22:43:48.575 UTC [1] LOG:  database system is ready to accept connections
+s3-1        | I1112 22:44:04.705307 masterclient.go:405 .s3 masterClient failed to receive from 127.0.0.1:9333: rpc error: code = Unknown desc = raft.Server: Not current leader
+s3-1             | I1112 22:44:04.708529 masterclient.go:791 .master masterClient reconnection attempt #16
+s3-1             | I1112 22:44:04.708907 masterclient.go:405 .master masterClient failed to receive from 127.0.0.1:9333: rpc error: code = Unknown desc = raft.Server: Not current leader
+s3-1             | I1112 22:44:04.770660 masterclient.go:791 .filer masterClient reconnection attempt #15
+s3-1             | I1112 22:44:04.771309 masterclient.go:405 .filer masterClient failed to receive from 127.0.0.1:9333: rpc error: code = Unknown desc = raft.Server: Not current leader
+s3-1             | I1112 22:44:04.959323 master_server.go:317 leader change event:  => 127.0.0.1:9333.19333
+s3-1             | I1112 22:44:04.959346 master_server.go:320 [127.0.0.1:9333.19333] 127.0.0.1:9333.19333 becomes leader.
+s3-1             | I1112 22:44:05.506680 volume_grpc_client_to_master.go:286 Heartbeat to: 127.0.0.1:9333
+rabbitmq-1       | 2026-11-12 22:43:50.623918+00:00 [info] <0.209.0> Running boot step virtual_host_reconciliation defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 22:43:50.624050+00:00 [info] <0.209.0> Running boot step logger_exchange defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 22:43:50.624123+00:00 [info] <0.209.0> Running boot step queue_type_registrations defined by app rabbit[0m
+rabbitmq-1       | 2026-11-12 22:43:50.624176+00:00 [info] <0.693.0> Resetting node maintenance status[0m
+postgres-dev-1   | 
+s3-1             | I1112 22:44:05.506991 node.go:539 topo adds child DefaultDataCenter
+postgres-dev-1   | PostgreSQL Database directory appears to contain a database; Skipping initialization
+s3-1             | I1112 22:44:05.507004 node.go:539 topo:DefaultDataCenter adds child DefaultRack
+postgres-dev-1   | 
+s3-1             | I1112 22:44:05.507016 node.go:539 topo:DefaultDataCenter:DefaultRack adds child 127.0.0.1:8080
+s3-1             | I1112 22:44:05.507023 node.go:539 topo:DefaultDataCenter:DefaultRack:127.0.0.1:8080 adds child 
+postgres-dev-1   | 2026-11-12 22:43:48.568 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+s3-1             | I1112 22:44:05.507029 master_grpc_server.go:269 added volume server 0: 127.0.0.1:8080 (id=127.0.0.1:8080, ip=127.0.0.1:8080) [fd845327-35fe-4771-a2fd-9c217a094309]
+s3-1             | I1112 22:44:05.507038 master_grpc_server.go:77 found new uuid:127.0.0.1:8080 [fd845327-35fe-4771-a2fd-9c217a094309] , map[127.0.0.1:8080:[fd845327-35fe-4771-a2fd-9c217a094309]]
+s3-1             | I1112 22:44:05.706175 masterclient.go:791 .s3 masterClient reconnection attempt #15
+s3-1             | I1112 22:44:05.706707 master_grpc_server.go:729 + client .s3@127.0.0.1:18333
+s3-1             | I1112 22:44:05.706994 masterclient.go:465 + s3@127.0.0.1:18333 noticed .s3 127.0.0.1:18333
+s3-1             | I1112 22:44:05.709169 masterclient.go:791 .master masterClient reconnection attempt #17
+s3-1             | I1112 22:44:05.709471 master_grpc_server.go:729 + client .master@127.0.0.1:9333.19333
+s3-1             | I1112 22:44:05.709544 masterclient.go:465 + s3@127.0.0.1:18333 noticed .master 127.0.0.1:9333.19333
+postgres-dev-1   | 2026-11-12 22:43:48.568 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+rabbitmq-1       | 2026-11-12 22:43:50.649184+00:00 [info] <0.716.0> Prometheus metrics: HTTP (non-TLS) listener started on port 15692[0m
+postgres-dev-1   | 2026-11-12 22:43:48.568 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres-dev-1   | 2026-11-12 22:43:48.571 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres-dev-1   | 2026-11-12 22:43:48.573 UTC [28] LOG:  database system was shut down at 2026-11-12 22:43:37 UTC
+postgres-dev-1   | 2026-11-12 22:43:48.588 UTC [1] LOG:  database system is ready to accept connections
+rabbitmq-1       | 2026-11-12 22:43:50.649286+00:00 [info] <0.693.0> Ready to start client connection listeners[0m
+rabbitmq-1       | 2026-11-12 22:43:50.650232+00:00 [info] <0.760.0> started TCP listener on [::]:5672[0m
+rabbitmq-1       |  completed with 3 plugins.
+rabbitmq-1       | 2026-11-12 22:43:50.677000+00:00 [info] <0.693.0> Server startup complete; 3 plugins started.[0m
+rabbitmq-1       | 2026-11-12 22:43:50.677000+00:00 [info] <0.693.0>  * rabbitmq_prometheus[0m
+rabbitmq-1       | 2026-11-12 22:43:50.677000+00:00 [info] <0.693.0>  * rabbitmq_management_agent[0m
+rabbitmq-1       | 2026-11-12 22:43:50.677000+00:00 [info] <0.693.0>  * rabbitmq_web_dispatch[0m
+rabbitmq-1       | 2026-11-12 22:43:50.824822+00:00 [info] <0.10.0> Time to start RabbitMQ: 2065 ms[0m
+rabbitmq-1       | [38;5;87m2026-11-12 22:43:51.053655+00:00 [notice] <0.678.0> queue 'compose-persist' in vhost 'visual-test': candidate -> leader in term: 2 machine version: 9, last applied 5[0m
+rabbitmq-1       | 2026-11-12 22:43:52.011099+00:00 [info] <0.771.0> accepting AMQP connection 172.18.0.1:38222 -> 172.18.0.2:5672[0m
+rabbitmq-1       | 2026-11-12 22:43:52.012317+00:00 [info] <0.771.0> User 'vp_mq' authenticated successfully[0m
+rabbitmq-1       | 2026-11-12 22:43:52.012886+00:00 [info] <0.771.0> connection 172.18.0.1:38222 -> 172.18.0.2:5672: user 'vp_mq' authenticated and granted access to vhost 'visual-test'[0m
+rabbitmq-1       | 2026-11-12 22:43:52.013421+00:00 [info] <0.771.0> closing AMQP connection (172.18.0.1:38222 -> 172.18.0.2:5672, vhost: 'visual-test', user: 'vp_mq', duration: '3ms')[0m
+rabbitmq-1       | 2026-11-12 22:44:05.840756+00:00 [info] <0.796.0> accepting AMQP connection 172.18.0.1:53132 -> 172.18.0.2:5672[0m
+rabbitmq-1       | 2026-11-12 22:44:05.841964+00:00 [info] <0.796.0> User 'vp_mq' authenticated successfully[0m
+rabbitmq-1       | 2026-11-12 22:44:05.842546+00:00 [info] <0.796.0> connection 172.18.0.1:53132 -> 172.18.0.2:5672: user 'vp_mq' authenticated and granted access to vhost 'visual-test'[0m
+rabbitmq-1       | [38;5;160m2026-11-12 22:44:05.847605+00:00 [error] <0.796.0> Error on AMQP connection <0.796.0> (172.18.0.1:53132 -> 172.18.0.2:5672, vhost: 'visual-test', user: 'vp_mq', state: running), channel 1:[0m
+rabbitmq-1       | [38;5;160m2026-11-12 22:44:05.847605+00:00 [error] <0.796.0>  operation queue.delete caused a connection exception not_implemented: "cannot delete queue 'compose-persist' in vhost 'visual-test'. queue.delete operations with if-empty flag set are not supported by quorum queues"[0m
+rabbitmq-1       | 2026-11-12 22:44:05.848860+00:00 [info] <0.796.0> closing AMQP connection (172.18.0.1:53132 -> 172.18.0.2:5672, vhost: 'visual-test', user: 'vp_mq', duration: '8ms')[0m
+s3-1             | I1112 22:44:05.709573 masterclient.go:465 + master@127.0.0.1:9333 noticed .master 127.0.0.1:9333.19333
+s3-1             | I1112 22:44:05.771966 masterclient.go:791 .filer masterClient reconnection attempt #16
+s3-1             | I1112 22:44:05.772682 master_grpc_server.go:729 + client .filer@127.0.0.1:8888.18888
+s3-1             | I1112 22:44:05.772824 masterclient.go:465 + s3@127.0.0.1:18333 noticed .filer 127.0.0.1:8888.18888
+s3-1             | I1112 22:44:05.772841 filer_client.go:526 FilerClient: discovered 1 new filer(s) in group '': [127.0.0.1:8888]
+s3-1             | I1112 22:44:05.772851 masterclient.go:465 + master@127.0.0.1:9333 noticed .filer 127.0.0.1:8888.18888
+s3-1             | I1112 22:44:05.772879 masterclient.go:465 + filer@127.0.0.1:8888 noticed .filer 127.0.0.1:8888.18888
+s3-1             | I1112 22:44:05.772885 masterclient.go:465 + filer@127.0.0.1:8888 noticed .filer 127.0.0.1:8888.18888
+s3-1             | I1112 22:44:05.855303 master_client.go:27 the cluster has 1 filer
+s3-1             | I1112 22:44:05.855416 filer_client.go:523 FilerClient: removed 1 filer(s) no longer in group '': [127.0.0.1:8888]
+
+ Network visual-c830ed48233542e3_default  Creating
+ Network visual-c830ed48233542e3_default  Created
+ Volume "visual-c830ed48233542e3_pg-dev"  Creating
+ Volume "visual-c830ed48233542e3_pg-dev"  Created
+ Volume "visual-c830ed48233542e3_rabbit-data"  Creating
+ Volume "visual-c830ed48233542e3_rabbit-data"  Created
+ Volume "visual-c830ed48233542e3_s3-data"  Creating
+ Volume "visual-c830ed48233542e3_s3-data"  Created
+ Volume "visual-c830ed48233542e3_pg-test"  Creating
+ Volume "visual-c830ed48233542e3_pg-test"  Created
+ Container visual-c830ed48233542e3-postgres-dev-1  Creating
+ Container visual-c830ed48233542e3-rabbitmq-1  Creating
+ Container visual-c830ed48233542e3-s3-1  Creating
+ Container visual-c830ed48233542e3-postgres-test-1  Creating
+ Container visual-c830ed48233542e3-rabbitmq-1  Created
+ Container visual-c830ed48233542e3-postgres-test-1  Created
+ Container visual-c830ed48233542e3-postgres-dev-1  Created
+ Container visual-c830ed48233542e3-s3-1  Created
+ Container visual-c830ed48233542e3-postgres-dev-1  Starting
+ Container visual-c830ed48233542e3-rabbitmq-1  Starting
+ Container visual-c830ed48233542e3-s3-1  Starting
+ Container visual-c830ed48233542e3-postgres-test-1  Starting
+ Container visual-c830ed48233542e3-postgres-dev-1  Started
+ Container visual-c830ed48233542e3-postgres-test-1  Started
+ Container visual-c830ed48233542e3-s3-1  Started
+ Container visual-c830ed48233542e3-rabbitmq-1  Started
+ Container visual-c830ed48233542e3-rabbitmq-1  Waiting
+ Container visual-c830ed48233542e3-s3-1  Waiting
+ Container visual-c830ed48233542e3-postgres-test-1  Waiting
+ Container visual-c830ed48233542e3-postgres-dev-1  Waiting
+ Container visual-c830ed48233542e3-s3-1  Healthy
+ Container visual-c830ed48233542e3-postgres-test-1  Healthy
+ Container visual-c830ed48233542e3-postgres-dev-1  Healthy
+ Container visual-c830ed48233542e3-rabbitmq-1  Healthy
+ Container visual-c830ed48233542e3-postgres-test-1  Stopping
+ Container visual-c830ed48233542e3-postgres-dev-1  Stopping
+ Container visual-c830ed48233542e3-rabbitmq-1  Stopping
+ Container visual-c830ed48233542e3-s3-1  Stopping
+ Container visual-c830ed48233542e3-postgres-test-1  Stopped
+ Container visual-c830ed48233542e3-postgres-test-1  Removing
+ Container visual-c830ed48233542e3-postgres-dev-1  Stopped
+ Container visual-c830ed48233542e3-postgres-dev-1  Removing
+ Container visual-c830ed48233542e3-postgres-dev-1  Removed
+ Container visual-c830ed48233542e3-postgres-test-1  Removed
+ Container visual-c830ed48233542e3-rabbitmq-1  Stopped
+ Container visual-c830ed48233542e3-rabbitmq-1  Removing
+ Container visual-c830ed48233542e3-rabbitmq-1  Removed
+ Container visual-c830ed48233542e3-s3-1  Stopped
+ Container visual-c830ed48233542e3-s3-1  Removing
+ Container visual-c830ed48233542e3-s3-1  Removed
+ Network visual-c830ed48233542e3_default  Removing
+ Network visual-c830ed48233542e3_default  Removed
+ Network visual-c830ed48233542e3_default  Creating
+ Network visual-c830ed48233542e3_default  Created
+ Container visual-c830ed48233542e3-postgres-dev-1  Creating
+ Container visual-c830ed48233542e3-rabbitmq-1  Creating
+ Container visual-c830ed48233542e3-s3-1  Creating
+ Container visual-c830ed48233542e3-postgres-test-1  Creating
+ Container visual-c830ed48233542e3-s3-1  Created
+ Container visual-c830ed48233542e3-rabbitmq-1  Created
+ Container visual-c830ed48233542e3-postgres-test-1  Created
+ Container visual-c830ed48233542e3-postgres-dev-1  Created
+ Container visual-c830ed48233542e3-postgres-dev-1  Starting
+ Container visual-c830ed48233542e3-rabbitmq-1  Starting
+ Container visual-c830ed48233542e3-s3-1  Starting
+ Container visual-c830ed48233542e3-postgres-test-1  Starting
+ Container visual-c830ed48233542e3-rabbitmq-1  Started
+ Container visual-c830ed48233542e3-postgres-test-1  Started
+ Container visual-c830ed48233542e3-s3-1  Started
+ Container visual-c830ed48233542e3-postgres-dev-1  Started
+ Container visual-c830ed48233542e3-rabbitmq-1  Waiting
+ Container visual-c830ed48233542e3-s3-1  Waiting
+ Container visual-c830ed48233542e3-postgres-test-1  Waiting
+ Container visual-c830ed48233542e3-postgres-dev-1  Waiting
+ Container visual-c830ed48233542e3-s3-1  Healthy
+ Container visual-c830ed48233542e3-postgres-dev-1  Healthy
+ Container visual-c830ed48233542e3-postgres-test-1  Healthy
+ Container visual-c830ed48233542e3-rabbitmq-1  Healthy
+
+
+{"migration_head": "0024", "runtime_roles": 6, "status": "bootstrap verified; no secrets printed"}
+
+
+{"profile": "work/compose-smoke-46cb77ee89dc4ca4a7549f4c3db17916/profile/runtime.json", "account_file": "work/compose-smoke-46cb77ee89dc4ca4a7549f4c3db17916/profile/account.json", "status": "created; secrets were not printed"}

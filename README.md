@@ -75,3 +75,5 @@ Gemini官方SDK一次检测和严格事实校验见[docs/GEMINI_PROTOCOL.md](doc
 当前31条API路径、Cookie/CSRF与幂等提交、容器候选和P5-01构建门槛见[docs/API_USAGE.md](docs/API_USAGE.md)。缺Docker或本次完整证据时验收返回BLOCKED_ENV。
 
 独立Compose基础服务、保卷启停及全新实例持久性演练见[docs/COMPOSE.md](docs/COMPOSE.md)。`dev.py up/down/bootstrap`不会覆盖既有profile或接管其他服务；Compose候选仍以实际CI结果为准。
+
+逐任务命令、合并实现映射、综合离线门槛及外部待验条件见[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。`check.py all --profile offline`验证当前 CI 证据，不会隐式启动服务；成功仅代表离线范围，不代表真实模型或生产发布。

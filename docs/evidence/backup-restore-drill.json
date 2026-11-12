@@ -1,12 +1,12 @@
 {
-  "backup_id": "97b57a38-7b9c-4d04-a4a2-d7dc856fcc99",
-  "restore_id": "eafdde0f-33dd-4392-9fea-d2d6e67e245d",
-  "started_at": "2026-11-13T03:44:47.636186+08:00",
-  "finished_at": "2026-11-13T03:44:58.037745+08:00",
-  "snapshot_at": "2026-11-13T03:44:36.716752+08:00",
-  "table_count": 25,
-  "object_references_verified": 183,
-  "fake_files_restored": 148,
+  "backup_id": "f0b3fc72-18f4-4c94-97ff-fef78ffe272b",
+  "restore_id": "8e3ee2fa-442b-4867-b6b0-defee3d406e7",
+  "started_at": "2026-11-13T06:44:01.394321+08:00",
+  "finished_at": "2026-11-13T06:44:12.932679+08:00",
+  "snapshot_at": "2026-11-13T06:43:50.026187+08:00",
+  "table_count": 26,
+  "object_references_verified": 244,
+  "fake_files_restored": 196,
   "database_exact_before_recovery_guards": true,
   "function_owners_preserved": true,
   "old_logins_restored_as_nologin": true,
@@ -22,7 +22,7 @@
     "bad_ledger_totals": 0,
     "duplicate_terminal_settlements": 0
   },
-  "schema_head": "0022",
+  "schema_head": "0024",
   "verification": {
     "api_ready": true,
     "old_access_rejected": true,
@@ -44,14 +44,15 @@
       "funded_total": 200,
       "spent_total": 32
     },
-    "verified_at": "2026-11-13T03:45:03.110609+08:00"
+    "verified_at": "2026-11-13T06:44:18.382484+08:00"
   },
   "timing": {
-    "backup_seconds": 1.105712,
+    "rto_target": "NOT_SET",
     "scope": "native cold destination initialization through verified API/artifact/safe known-id recovery; not a production SLA",
     "rpo_target": "NOT_SET",
-    "rto_target": "NOT_SET",
-    "rto_seconds": 24.1523682,
-    "snapshot_age_seconds_at_recovery_start": 2.6275328
-  }
+    "rto_seconds": 25.3959871,
+    "snapshot_age_seconds_at_recovery_start": 3.3873484,
+    "backup_seconds": 1.875001
+  },
+  "base_commit": "9e8f247acc2656e6ab345788a651f4d78062d617"
 }

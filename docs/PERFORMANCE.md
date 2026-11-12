@@ -1,6 +1,6 @@
 # 本机生产构建性能基准
 
-记录命令：`pnpm --dir apps/web e2e`，性能项结果通过。起止时间2026-11-12T19:08:35.517Z至2026-11-12T19:09:44.766Z，应用基础commit `9a796416dfdd41558135333702777865b597dd2c`。dist文件/hash、全部原始样本和设备记录见[evidence/performance-production.json](evidence/performance-production.json)，运行日志为performance-production-20261113.log。
+记录命令：`pnpm --dir apps/web exec playwright test performance.spec.ts`，性能项结果通过。起止时间2026-11-12T22:46:29.566Z至2026-11-12T22:47:38.235Z，应用基础commit `9e8f247acc2656e6ab345788a651f4d78062d617`。dist文件/hash、全部原始样本和设备记录见[evidence/performance-production.json](evidence/performance-production.json)，运行日志为acceptance-current-performance-20261113.log。
 
 ## 环境与负载
 
@@ -8,19 +8,19 @@
 
 通过真实API上传2000×2000合成PNG，普通界面鼠标在缩放/平移后的原图创建12个ROI。50个绘制对象为双画布2个Image、24个Rect和24个Text，不计Stage/Layer/Group，也不是50个独立保护区域（业务最多20区域）。Konva仅用于只读计数/坐标/事件观测，没有通过store注入区域。
 
-连续操作60.430秒，4587个输入，最大输入间隔268.6ms。实际矩形最大位移123.7 canonical像素、画布组位移25.1显示像素；缩放范围0.1522–0.2577。验证源坐标未改变，目标宽高不变、坐标为整数。
+连续操作60.393秒，4528个输入，最大输入间隔216.0ms。实际矩形最大位移123.7 canonical像素、画布组位移25.1显示像素；缩放范围0.1522–0.2577。验证源坐标未改变，目标宽高不变、坐标为整数。
 
 ## 结果
 
 | 指标 | p50 | p95 | p99 | 最大 | 目标 |
 |---|---:|---:|---:|---:|---|
-| RAF帧间隔（9051样本） | 6.1ms | 12.1ms | 18.3ms | 85.0ms | p95<33ms |
-| Layer场景绘制CPU（4257样本） | 0.4ms | 1.2ms | 2.0ms | 4.0ms | 单独诊断 |
-| 非模型API（500样本） | 127.0ms | 359.0ms | 583.0ms | 818.0ms | p95<500ms |
+| RAF帧间隔（9101样本） | 6.1ms | 12.1ms | 18.2ms | 48.3ms | p95<33ms |
+| Layer场景绘制CPU（4203样本） | 0.4ms | 1.2ms | 1.8ms | 3.4ms | 单独诊断 |
+| 非模型API（500样本） | 105.9ms | 239.9ms | 725.6ms | 1056.3ms | p95<500ms |
 
 API为同一隔离账号、20并发、500次已登录混合GET（产品列表/详情、任务、余额、规则、当前用户），包含HTTP代理、认证、PG查询及读完响应体。状态分布：`{"200": 500}`。非200、5xx、超时和网络失败均留在分位数总体并使验收失败；不排除高延迟尾部。文件传输和模型等待另行衡量。
 
-CDP JSHeapUsedSize从15.45MiB变为37.66MiB，JSHeapTotalSize从48.63MiB变为78.13MiB；DOM Nodes从1204至1208。探针保留原始数组且没有强制GC，单次堆差额不能判定是否泄漏。长任务记录：`[{"start_ms": 193.29999995231628, "duration_ms": 50}]`。
+CDP JSHeapUsedSize从12.70MiB变为45.57MiB，JSHeapTotalSize从48.13MiB变为85.13MiB；DOM Nodes从1204至1218。探针保留原始数组且没有强制GC，单次堆差额不能判定是否泄漏。长任务记录：`[]`。
 
 ## 解释边界与复跑
 
