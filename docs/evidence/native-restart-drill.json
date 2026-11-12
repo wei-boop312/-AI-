@@ -1,0 +1,142 @@
+{
+  "observed_at": "2026-11-12T20:31:11.4943652+00:00",
+  "prepared": {
+    "prepared": true,
+    "persistent_quorum_delivery": true,
+    "unacknowledged": true
+  },
+  "environment": {
+    "scope": "isolated Windows native loopback",
+    "mq_restart": "stop_app/start_app; Erlang VM retained",
+    "postgres": "17.11",
+    "seaweedfs": "4.53",
+    "rabbitmq": "4.4.0",
+    "s3_restart": "process stop/new process; same data directory"
+  },
+  "recovered": {
+    "snapshot": {
+      "tasks": {
+        "failed": 10,
+        "cancelled": 7,
+        "succeeded": 28
+      },
+      "observed_at": "2026-11-13T04:30:56.418218+08:00",
+      "expired_leases": 0,
+      "outbox_pending": 0,
+      "manual_dispatch": 0,
+      "task_duration_24h": {
+        "samples": 45,
+        "p95_seconds": 159.7018361999999
+      },
+      "ledger_total_errors": 0,
+      "heartbeat_age_seconds": {
+        "worker": 4.425686,
+        "publisher": 0.891767
+      },
+      "outbox_oldest_seconds": 0,
+      "queued_oldest_seconds": 0,
+      "unknown_oldest_seconds": 0,
+      "wallet_equation_errors": 0,
+      "reservation_link_errors": 0,
+      "task_credit_state_errors": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "dependencies": {
+      "mq": "ready",
+      "storage": "ready"
+    },
+    "alerts": []
+  },
+  "s3_down": {
+    "snapshot": {
+      "tasks": {
+        "failed": 10,
+        "cancelled": 7,
+        "succeeded": 28
+      },
+      "observed_at": "2026-11-13T04:30:52.307847+08:00",
+      "expired_leases": 0,
+      "outbox_pending": 0,
+      "manual_dispatch": 0,
+      "task_duration_24h": {
+        "samples": 45,
+        "p95_seconds": 159.7018361999999
+      },
+      "ledger_total_errors": 0,
+      "heartbeat_age_seconds": {
+        "worker": 0.315315,
+        "publisher": 1.788666
+      },
+      "outbox_oldest_seconds": 0,
+      "queued_oldest_seconds": 0,
+      "unknown_oldest_seconds": 0,
+      "wallet_equation_errors": 0,
+      "reservation_link_errors": 0,
+      "task_credit_state_errors": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "dependencies": {
+      "mq": "ready",
+      "storage": "unavailable"
+    },
+    "alerts": [
+      {
+        "code": "storage_unavailable",
+        "severity": "critical"
+      }
+    ]
+  },
+  "cleanup": {
+    "fixture_cleanup": true
+  },
+  "paid_calls": 0,
+  "mq_down": {
+    "snapshot": {
+      "tasks": {
+        "failed": 10,
+        "cancelled": 7,
+        "succeeded": 28
+      },
+      "observed_at": "2026-11-13T04:30:43.411754+08:00",
+      "expired_leases": 0,
+      "outbox_pending": 0,
+      "manual_dispatch": 0,
+      "task_duration_24h": {
+        "samples": 45,
+        "p95_seconds": 159.7018361999999
+      },
+      "ledger_total_errors": 0,
+      "heartbeat_age_seconds": {
+        "worker": 1.435544,
+        "publisher": 2.905239
+      },
+      "outbox_oldest_seconds": 0,
+      "queued_oldest_seconds": 0,
+      "unknown_oldest_seconds": 0,
+      "wallet_equation_errors": 0,
+      "reservation_link_errors": 0,
+      "task_credit_state_errors": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "dependencies": {
+      "mq": "unavailable",
+      "storage": "ready"
+    },
+    "alerts": [
+      {
+        "code": "mq_unavailable",
+        "severity": "critical"
+      }
+    ]
+  },
+  "verification": {
+    "mq_persistent_redelivery": true,
+    "mq_fixture_queue_empty_after_ack": true,
+    "s3_sha256_preserved": true,
+    "s3_immutable_conflict_rejected": true,
+    "signed_download": true,
+    "anonymous_denied": true,
+    "s3_object_verification_seconds": 13.101,
+    "s3_get_calls": 1
+  }
+}

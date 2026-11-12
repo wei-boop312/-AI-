@@ -1,0 +1,11 @@
+
+Running 3 tests using 1 worker
+
+(node:93056) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\recovery.spec.ts:8:1 › 断线恢复、规则报告版本、Cookie刷新和账号隔离 (21.0s)
+  ok 2 e2e\recovery.spec.ts:47:1 › 不同产品草稿隔离，刷新恢复当前产品且编辑不创建模型任务 (4.6s)
+
+  ok 3 e2e\smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 (9.9s)
+
+  3 passed (36.6s)

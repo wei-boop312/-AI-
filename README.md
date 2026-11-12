@@ -61,3 +61,5 @@ API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md]
 原生同步快照备份、独立PG/S3恢复、会话撤销及未结束任务隔离见[docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md)。归档和私有profile只保存在忽略目录，Git中仅包含脱敏结果；生产RPO/RTO目标尚未设定。
 
 只读聚合监控、常驻进程心跳与告警模板见[docs/MONITORING.md](docs/MONITORING.md)。`python scripts/run_local.py monitor`同时探测本机MQ/S3；尚未部署告警采集与通知服务。
+
+故障分流、原生MQ/S3重启演练及安全恢复顺序见[docs/RUNBOOK.md](docs/RUNBOOK.md)。演练固定为独立本机服务，不用于操作其他环境。

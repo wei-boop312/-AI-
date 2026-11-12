@@ -175,3 +175,13 @@ DurableFake late现保存图像/事实回执后丢失响应，允许对既有结
 49项单元、74项原生PG/Rabbit/S3全回归通过，含5项新增真实监控权限/异常/心跳测试。实际暂停本项目Worker，18.9秒心跳年龄触发critical；重启后心跳0.51秒、MQ/S3 ready、alerts空且财务异常全0。证据monitor-healthy/worker-stopped/worker-recovered.json及monitor-native-full-20261113.log。修正Prometheus unknown告警标签匹配on()，正常采集显式输出scrape_error=0。说明见MONITORING.md。
 
 周额度used32%、剩余68%，继续执行。MQ/S3真实重启、完整task/all门槛、CI/部署说明和供应商适配尚未完成；未标OFFLINE_READY/RELEASE_READY。
+
+## 2026-11-13：原生MQ/S3重启与常驻进程恢复
+
+新增native_restart_drill.ps1及restart_probe.py，固定隔离节点/端口、停止S3前核对监听PID/路径/数据目录/创建时间。真实Rabbit stop_app/start_app（保留Erlang VM）期间mq_unavailable严重告警；真实S3硬停止并新进程复用同数据目录期间storage_unavailable严重告警。恢复后持久化quorum消息redelivered、ack后fixture队列空；对象SHA保留、等长冲突覆写拒绝、签名下载成功且匿名拒绝。专用fixture已清理，既有业务队列与资产保留，零付费模型调用。
+
+保留早期失败：第一轮短覆写收到file_size异常，fixture已清理并改等长；第二轮HeadBucket已成功但master/volume尚未可读，GET超时。第三轮加入有界实际对象读恢复后通过，对象读取至全部对象检查13.101秒，应用GET调用1次（SDK可内部重试），不宣称完整服务RTO。脱敏证据native-restart-drill.json；私有状态与诊断仅在忽略work。RUNBOOK保留原有开发配置说明并链接新增OPERATIONS_RECOVERY.md，覆盖告警分流、对账禁重发、备份/恢复与故障演练边界。
+
+不重启常驻Publisher/Worker，重连后生产preview三项浏览器流程通过（36.6秒），包含新任务真实MQ闭环、报告/下载像素/移动端、会话/版本/隔离。随后74项真实PG/Rabbit/S3全回归通过（147.746秒）；最终monitor空告警、全部财务异常0、pending outbox 0，完成任务从28增至30。日志restart-browser/native-full-20261113.log及restart-final-monitor.json。截图更新并目视检查成品页。
+
+周额度used33%、剩余67%，继续。P5-02实际演练证据已补充，但完整task/all可执行门槛、CI/部署产物、供应商离线适配及外部真实验证仍未完成；未宣告OFFLINE_READY/RELEASE_READY。
