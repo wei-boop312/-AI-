@@ -1,0 +1,29 @@
+{
+  "observed_at": "2026-11-12T20:53:35.279485+00:00",
+  "sdk": "google-genai",
+  "sdk_version": "3.3.0",
+  "model": "gemini-3.8-flash",
+  "sources": [
+    {
+      "url": "https://aistudio.google.com/docs/models/gemini-3.8-flash",
+      "sha256": "c61d2a686d486598f31f6746a4fbacf71b8293295d54ec0cd004a15b898f0099"
+    },
+    {
+      "url": "https://aistudio.google.com/docs/structured-output",
+      "sha256": "9efe894bfc2fbf4fc5acc9dab45786a240584360b9d5f648b0ea6aa7034a13fe"
+    },
+    {
+      "url": "https://googleapis.github.io/python-genai/",
+      "sha256": "569f97e93f7f93efd252cafa84f9ca2f509f83eb104fe990207765cdca135a91"
+    }
+  ],
+  "sdk_retry_attempts": 1,
+  "sdk_automatic_continuation": false,
+  "sdk_automatic_function_calling": false,
+  "facts_schema_sha256": "641b3d25244e47de161d3059ac88577ca03458cb9220bd8c94fc08118f6e967c",
+  "system_prompt_sha256": "09b74b27f79273ca6ddfd2fdb32f4583329db5e6472a0cbd34b75c02ea9b87ce",
+  "transport": "official SDK with offline httpx.MockTransport",
+  "contract_tests": 19,
+  "real_account_calls": "NOT_RUN",
+  "paid_calls": 0
+}

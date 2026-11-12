@@ -65,3 +65,5 @@ API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md]
 故障分流、原生MQ/S3重启演练及安全恢复顺序见[docs/RUNBOOK.md](docs/RUNBOOK.md)。演练固定为独立本机服务，不用于操作其他环境。
 
 BFL官方协议的离线传输契约与字段映射见[docs/BFL_PROTOCOL.md](docs/BFL_PROTOCOL.md)：`python scripts/check.py task P4-01 --profile offline`。该模块未启用真实Worker调用，不能作为真实模型验收。
+
+Gemini官方SDK一次检测和严格事实校验见[docs/GEMINI_PROTOCOL.md](docs/GEMINI_PROTOCOL.md)：`python scripts/check.py task P4-02 --profile offline`。SDK重试及自动续发均关闭；真实调用和组合Worker接线仍未验收。

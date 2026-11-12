@@ -1,0 +1,29 @@
+test_cancel_after_request_prevents_resubmit (test_gemini.GeminiContracts.test_cancel_after_request_prevents_resubmit) ... ok
+test_checked_in_schema_matches_sdk_request_contract (test_gemini.GeminiContracts.test_checked_in_schema_matches_sdk_request_contract) ... ok
+test_concurrent_same_intent_and_restart_only_one_post (test_gemini.GeminiContracts.test_concurrent_same_intent_and_restart_only_one_post) ... ok
+test_environment_cannot_redirect_key_or_switch_backend (test_gemini.GeminiContracts.test_environment_cannot_redirect_key_or_switch_backend) ... ok
+test_fetch_is_local_and_corrupt_archive_never_calls_again (test_gemini.GeminiContracts.test_fetch_is_local_and_corrupt_archive_never_calls_again) ... ok
+test_low_confidence_preserves_observations_but_degrades (test_gemini.GeminiContracts.test_low_confidence_preserves_observations_but_degrades) ... ok
+test_malformed_json_and_function_call_degrade (test_gemini.GeminiContracts.test_malformed_json_and_function_call_degrade) ... Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+ok
+test_multiple_candidates_and_unspecified_prompt_feedback (test_gemini.GeminiContracts.test_multiple_candidates_and_unspecified_prompt_feedback) ... there are 2 candidates, returning text result from the first candidate. Access response.candidates directly to get the result from other candidates.
+ok
+test_oversized_and_compressed_body_fail_without_retry (test_gemini.GeminiContracts.test_oversized_and_compressed_body_fail_without_retry) ... ok
+test_preflight_hash_dimensions_and_non_png_do_not_submit (test_gemini.GeminiContracts.test_preflight_hash_dimensions_and_non_png_do_not_submit) ... ok
+test_prompt_block_and_missing_candidate_degrade (test_gemini.GeminiContracts.test_prompt_block_and_missing_candidate_degrade) ... Executing <Task pending name='Task-121' coro=<GeminiContracts.test_prompt_block_and_missing_candidate_degrade() running at C:\Users\MECHREVO\Documents\Codex\2026-11-12\ai\outputs\visual-production-platform\tests\contract\test_gemini.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at D:\python\Lib\asyncio\base_events.py:459> cb=[_run_until_complete_cb() at D:\python\Lib\asyncio\base_events.py:181] created at D:\python\Lib\asyncio\runners.py:110> took 0.218 seconds
+ok
+test_real_sdk_request_model_final_bytes_schema_and_usage (test_gemini.GeminiContracts.test_real_sdk_request_model_final_bytes_schema_and_usage) ... ok
+test_redirect_is_not_followed (test_gemini.GeminiContracts.test_redirect_is_not_followed) ... ok
+test_schema_missing_extra_compliance_and_invalid_bbox_degrade (test_gemini.GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade) ... Executing <Task pending name='Task-156' coro=<GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade() running at C:\Users\MECHREVO\Documents\Codex\2026-11-12\ai\outputs\visual-production-platform\tests\contract\test_gemini.py:79> wait_for=<Future pending cb=[Task.task_wakeup()] created at D:\python\Lib\asyncio\base_events.py:459> cb=[_run_until_complete_cb() at D:\python\Lib\asyncio\base_events.py:181] created at D:\python\Lib\asyncio\runners.py:110> took 0.138 seconds
+Executing <Task pending name='Task-156' coro=<GeminiContracts.test_schema_missing_extra_compliance_and_invalid_bbox_degrade() running at C:\Users\MECHREVO\Documents\Codex\2026-11-12\ai\outputs\visual-production-platform\tests\contract\test_gemini.py:79> wait_for=<Future pending cb=[Task.task_wakeup()] created at D:\python\Lib\asyncio\base_events.py:459> cb=[_run_until_complete_cb() at D:\python\Lib\asyncio\base_events.py:181] created at D:\python\Lib\asyncio\runners.py:110> took 0.105 seconds
+ok
+test_sdk_429_and_503_never_retry (test_gemini.GeminiContracts.test_sdk_429_and_503_never_retry) ... ok
+test_sdk_continuation_does_not_issue_second_request (test_gemini.GeminiContracts.test_sdk_continuation_does_not_issue_second_request) ... ok
+test_sdk_timeout_retains_intent_and_sanitizes (test_gemini.GeminiContracts.test_sdk_timeout_retains_intent_and_sanitizes) ... ok
+test_truncated_and_safety_results_degrade (test_gemini.GeminiContracts.test_truncated_and_safety_results_degrade) ... ok
+test_unknown_usage_and_no_response_id_not_invented (test_gemini.GeminiContracts.test_unknown_usage_and_no_response_id_not_invented) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 8.151s
+
+OK

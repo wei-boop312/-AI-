@@ -195,3 +195,15 @@ DurableFake late现保存图像/事实回执后丢失响应，允许对既有结
 PG意图之前提保持，额外本机UUID.intent排他fsync防并发/重建后重复提交；超时、5xx、畸形回执与429均不自动重发。已知回执私有留存；cost畸形保留id待对账，数量只记供应商BFL_CREDIT，currency/money未知，不伪造法币或混同用户积分。18项离线MockTransport契约测试通过，49项单元回归通过；日志bfl-contract/unit-regression-20261113.log。覆盖真实HTTP请求对象及响应处理，不是源码字符串断言，也不是账户调用证明。
 
 BFL仍未接入当前仅offline的Worker源图传递、真实成本DB和报告标识；P4-02 Gemini与组合适配、P4-03明确授权真实调用仍待完成，不能标PROVIDER_VERIFIED。说明见BFL_PROTOCOL.md。周额度used34%、剩余66%，继续。完整task/all、CI/部署产物及外部样本/费用验证仍未完成，未标OFFLINE_READY/RELEASE_READY。
+
+## 2026-11-13：Gemini官方SDK一次检测与结构化事实
+
+新增providers/gemini.py及test_gemini.py，SDK精确锁定google-genai3.3.0和uv依赖哈希，模型保留gemini-3.8-flash。官方模型/结构化输出/SDK文档响应SHA与schema/提示摘要在gemini-sdk-contract.json。当前SDK默认5次尝试且自动CONTINUATION续发；明确attempts=1、automatic_continuation=false、禁用自动工具/函数调用，真实SDK加离线HTTP计数证明429/503/超时/续发场景仅一次POST。
+
+提交前校验最终PNG SHA并用既有隔离子进程验证MIME/实际尺寸；SDK inlineData的mime_type/URL-safe base64按实际锁定编码解码后与全部最终字节一致，不传原图URL/用户生成提示/平台规则。固定Google HTTPS API及模型路径，环境不能改主机或Vertex/Enterprise后端；无代理/重定向，响应1MiB上限、拒绝压缩HTTP正文。PG意图仍为前提，额外本机排他fsync防重复；取消后保留意图。
+
+单候选STOP纯文本JSON仍经Facts严格校验；截断/阻止/缺候选/工具调用/畸形或缺字段/额外compliant/越界框/非法置信度/尺寸不符均人工降级。低于0.75保留观察但analysis_complete=false及uncertainties，不宣称校准准确率。SDK/schema/提示摘要、真实response_id或null、最终SHA和实际usage落私有归档；本地gemini-UUID仅缓存标识，fetch_facts不重检测。缺usage及法币金额/币种保持null，不猜价格。Facts schema快照统一为min/max=1与原const=1等价，并加入一致性测试。
+
+python scripts/check.py task P4-02 --profile offline：19项真实SDK/MockTransport契约通过；49项现有单元、18项BFL契约回归通过。uv锁文件和已安装60包兼容性通过；无真实模型调用、无付费。日志gemini-contract/unit-regression/bfl-regression-20261113.log，说明GEMINI_PROTOCOL.md。
+
+周额度used35%、剩余65%，继续。组合Worker源图接线/最终PNG检测/真实成本记录与provider_profile报告仍待实现；完整task/all、CI/部署产物、P4-03外部真实验收未完成，不标OFFLINE_READY/PROVIDER_VERIFIED/RELEASE_READY。

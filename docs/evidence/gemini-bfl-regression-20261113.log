@@ -1,0 +1,23 @@
+test_canonical_mapping_omits_local_regions_and_internal_fields (test_bfl.BflContracts.test_canonical_mapping_omits_local_regions_and_internal_fields) ... ok
+test_compressed_http_body_is_rejected_before_reading (test_bfl.BflContracts.test_compressed_http_body_is_rejected_before_reading) ... ok
+test_concurrent_intent_exclusive_and_one_post (test_bfl.BflContracts.test_concurrent_intent_exclusive_and_one_post) ... ok
+test_contract_transport_never_opens_socket (test_bfl.BflContracts.test_contract_transport_never_opens_socket) ... ok
+test_download_redirect_mime_empty_and_size_rejected (test_bfl.BflContracts.test_download_redirect_mime_empty_and_size_rejected) ... ok
+test_invalid_receipts_are_unknown_and_never_resubmitted (test_bfl.BflContracts.test_invalid_receipts_are_unknown_and_never_resubmitted) ... ok
+test_malformed_cost_preserves_known_receipt_for_reconciliation (test_bfl.BflContracts.test_malformed_cost_preserves_known_receipt_for_reconciliation) ... ok
+test_missing_cost_stays_unknown (test_bfl.BflContracts.test_missing_cost_stays_unknown) ... ok
+test_oversized_json_and_malformed_ready_rejected (test_bfl.BflContracts.test_oversized_json_and_malformed_ready_rejected) ... ok
+test_pending_poll_uses_exact_returned_url_and_no_post (test_bfl.BflContracts.test_pending_poll_uses_exact_returned_url_and_no_post) ... ok
+test_ready_download_isolated_from_key_and_api_cookie (test_bfl.BflContracts.test_ready_download_isolated_from_key_and_api_cookie) ... ok
+test_recreated_adapter_cannot_submit_same_intent (test_bfl.BflContracts.test_recreated_adapter_cannot_submit_same_intent) ... ok
+test_rejections_and_server_errors_single_attempt (test_bfl.BflContracts.test_rejections_and_server_errors_single_attempt) ... ok
+test_request_schema_rejects_extra_url_reference_and_bad_geometry (test_bfl.BflContracts.test_request_schema_rejects_extra_url_reference_and_bad_geometry) ... ok
+test_submit_exact_endpoint_fields_auth_and_cost_provenance (test_bfl.BflContracts.test_submit_exact_endpoint_fields_auth_and_cost_provenance) ... ok
+test_terminal_and_unknown_status (test_bfl.BflContracts.test_terminal_and_unknown_status) ... ok
+test_timeout_never_reposts_even_after_restart (test_bfl.BflContracts.test_timeout_never_reposts_even_after_restart) ... ok
+test_unsafe_poll_hosts_paths_ids_and_download_urls (test_bfl.BflContracts.test_unsafe_poll_hosts_paths_ids_and_download_urls) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.219s
+
+OK
