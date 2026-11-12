@@ -1,0 +1,9 @@
+
+Running 1 test using 1 worker
+
+(node:83568) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"canvas_frame_p95_ms":12.099999999998545,"canvas_duration_ms":60636,"api_p95_ms":141.86340000000018,"status_counts":{"200":500},"passed":true}
+  ok 1 e2e\performance.spec.ts:14:1 › 生产构建：4MP、50绘制对象、60秒真实指针及20并发500次非模型API (1.1m)
+
+  1 passed (1.2m)

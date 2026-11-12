@@ -130,4 +130,3 @@ END $$;
 ALTER FUNCTION ops.record_recheck(uuid,uuid,uuid[],uuid,uuid,jsonb,text,text,text,text,text,text) OWNER TO app_executor;
 REVOKE ALL ON FUNCTION ops.record_recheck(uuid,uuid,uuid[],uuid,uuid,jsonb,text,text,text,text,text,text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION ops.record_recheck(uuid,uuid,uuid[],uuid,uuid,jsonb,text,text,text,text,text,text) TO ops_admin;
-

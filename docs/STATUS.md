@@ -121,3 +121,13 @@ TypeScript和生产构建exit0；18项单元、47项PG/Rabbit/S3回归通过。�
 30项单元和61项真实PG/Rabbit/S3集成通过：发布/重算并发幂等、不可改写/版本冲突、证据私有403、坏摘要/错范围拒绝、跨用户已知ID 404、原复核与重算隔离、无新增intent/扣费。Chrome对实际生产dist验证3个完整用例及2个恢复/版本复跑，含规则CLI→版本切换→下载指向和余额不变，已视觉检查。浏览器改用run_local.py preview固定5173；API/Worker已更新，dev PG升级至0021。证据rule-versions-*.log、browser-production-rule-versions*.log。
 
 周额度查询used21%，剩余79%。仍待50对象性能基准、完整运行门槛/健康检查/只读运维视图、干净部署备份恢复、CI及真实供应商适配，未标OFFLINE_READY。
+
+## 2026-11-13：生产构建画布与非模型API性能
+
+新增performance.spec.ts及确定性4MP合成PNG生成脚本。通过真实上传/普通界面鼠标在缩放平移后创建12个ROI；双画布50个绘制叶对象（2图像+24矩形+24标签，不计容器）持续缩放、平移、目标拖动60.636秒，结束验证源坐标不变、目标等尺寸整数平移。只读Konva观测证明实际Rect/Group位移及缩放变化，无内部store注入。
+
+最终实测8834个RAF帧间隔，p95 12.1ms（目标<33ms），p99 24.4ms、最大48.8ms；4257次场景绘制CPU p95 1.3ms。20并发500次已登录混合只读API均200，包含所有失败样本的p95 141.9ms（目标<500ms）、p99 219.7ms、最大234.9ms。4500余个画布输入、最大间隔169.1ms；无任务创建、页面异常或远程host。
+
+完整原始帧/绘制/API样本、设备、静态dist hash及CDP堆内存记录在performance-production.json，日志/截图已保存并视觉检查。单次JS堆从15.45MiB至19.46MiB，保留探针样本且未强制GC，不据此宣称无泄漏；53ms长任务也保留。环境为i7-13620H/16逻辑CPU/约31.7GiB、Windows、Chrome157 headless/DPR1/1920×1200，不能外推到公网部署或其他设备。详见PERFORMANCE.md。
+
+README修正浏览器必须使用生产preview及隔离账号；基准加入常规E2E。周额度used22%、剩余78%。性能目标本机通过，仍缺完整检查命令/故障浏览器/健康就绪/只读视图及运维发布准备，未标OFFLINE_READY。

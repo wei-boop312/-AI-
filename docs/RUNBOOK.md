@@ -10,13 +10,13 @@
 
 登录POST /api/v1/auth/login需要精确Origin，其他写请求还需要visual_csrf Cookie对应的X-CSRF-Token头。HttpOnly的access/refresh Cookie不会暴露给脚本。refresh轮换一次；旧refresh重放会提交会话族撤销，旧access也随即失效。退出/账号停用同样使访问令牌失效。
 
-测试：`uv run python scripts/check.py unit`。原生PG测试需在已迁移的独立测试实例设置TEST_DATABASE_URL（专用测试owner，允许创建测试LOGIN），再运行`uv run python scripts/check.py integration`。集成测试会建立随机账号和角色，不能连接生产数据库。该测试入口尚未覆盖MQ/S3/浏览器完整闭环。
+测试：`uv run python scripts/check.py unit`。原生PG测试需在已迁移的独立测试实例设置TEST_DATABASE_URL（专用测试owner，允许创建测试LOGIN），再运行`uv run python scripts/check.py integration`。集成测试会建立随机账号和角色，不能连接生产数据库。该入口已覆盖真实PG/MQ/S3用例，浏览器闭环另行在生产预览执行。
 
 /health/ready当前仍返回503，表示完整生产链路尚未就绪；/health/live只表示API进程存活。不会据此声称MVP可用。
 
 S3配置：S3_ENDPOINT、S3_ACCESS_KEY、S3_SECRET_KEY、S3_BUCKET（默认visual-private）、S3_REGION（默认us-east-1）。远程endpoint必须HTTPS，本机可HTTP。请提前创建私有bucket。原生S3测试另设TEST_S3_ENDPOINT/TEST_S3_ACCESS_KEY/TEST_S3_SECRET_KEY/TEST_S3_BUCKET；没有这些变量时S3用例会明确skip，不代表集成通过。临时解码文件在项目work目录并自动删除，已加入gitignore。
 
-独立Worker单任务入口：设置WORKER_DATABASE_URL（仅app_worker权限组）、上述S3配置、PROVIDER_PROFILE=offline，执行`uv run python -m visual_platform.worker --task TASK_UUID`（PYTHONPATH=src）。FAKE_PROVIDER_DIR可设置持久fake结果目录，默认项目work/fake-provider。当前只支持offline，不应改成真实供应商或复用旧密钥。MQ消费入口尚待加入。Worker结果retryable表示仅可恢复安全步骤；uncertain/stopped需查看数据库状态和对账，不能新建同意图调用。
+独立Worker单任务入口：设置WORKER_DATABASE_URL（仅app_worker权限组）、上述S3配置、PROVIDER_PROFILE=offline，执行`uv run python -m visual_platform.worker --task TASK_UUID`（PYTHONPATH=src）。FAKE_PROVIDER_DIR可设置持久fake结果目录，默认项目work/fake-provider。当前只支持offline，不应改成真实供应商或复用旧密钥。MQ消费入口见下文。Worker结果retryable表示仅可恢复安全步骤；uncertain/stopped需查看数据库状态和对账，不能新建同意图调用。
 
 MQ入口：AMQP_URL（远程必须amqps，本机可amqp）、QUEUE_PREFIX（默认visual.v1）。设置DISPATCH_DATABASE_URL（仅ops_dispatcher权限组）后运行`uv run python -m visual_platform.events`，--once可单轮发布/恢复。Worker改用`uv run python -m visual_platform.worker --consume`长期消费。两进程仍需要PYTHONPATH=src，Worker还需S3/WORKER_DATABASE_URL/PROVIDER_PROFILE=offline。恢复超过5次进入QUEUE_PREFIX.manual供人工处理，不授权新付费调用。原生MQ测试额外设置TEST_AMQP_URL。
 
@@ -31,3 +31,6 @@ MQ入口：AMQP_URL（远程必须amqps，本机可amqp）、QUEUE_PREFIX（默�
 操作重试必须复用原operation-id和同一payload。证据摘要仅是记录绑定，实际资料仍由运营者核验。Cookie注销/停用立即拒绝访问；人工通过结果标记human_review，与未核验自动规则分开展示。
 
 浏览器验收会通过create_e2e_account.py在显式本机offline profile创建独立临时账号，使用work目录保存随机凭据；不再依赖共用demo账号。verify_browser_png.py独立校验下载文件与原图fixture的保护像素，结果保存在docs/evidence/browser-pixel-verification.json。
+
+
+生产浏览器验收改用build后的5173 preview，不能同时运行同端口开发web。50对象/4MP/60秒与20并发500请求基准见docs/PERFORMANCE.md；只读性能测试不调用模型或创建任务。

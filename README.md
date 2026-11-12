@@ -38,9 +38,15 @@ uv run python scripts/run_local.py web
 uv run python scripts/check.py unit
 uv run python scripts/check.py integration
 pnpm --dir apps/web build
+# 停止开发web进程；另一个终端启动生产预览，再执行浏览器验收
+uv run python scripts/run_local.py preview
+# 另一个终端
 pnpm --dir apps/web e2e
 ```
 
-原生集成需要TEST_DATABASE_URL，以及TEST_S3_ENDPOINT/TEST_S3_ACCESS_KEY/TEST_S3_SECRET_KEY/TEST_S3_BUCKET和TEST_AMQP_URL，必须使用可建测试角色的隔离实例。E2E需要上述本地四进程、.local账号与Chrome；可用PLAYWRIGHT_CHANNEL指定另一个已安装的Playwright浏览器。没有配置的集成会明确skip，不能作验收证据。测试不调用真实付费模型。
+原生集成需要TEST_DATABASE_URL，以及TEST_S3_ENDPOINT/TEST_S3_ACCESS_KEY/TEST_S3_SECRET_KEY/TEST_S3_BUCKET和TEST_AMQP_URL，必须使用可建测试角色的隔离实例。E2E需要API/publisher/worker和5173生产预览、.local/runtime.json与Chrome；测试自动创建隔离账号，不复用体验账号。不能让开发web与preview同时占用5173。可用PLAYWRIGHT_CHANNEL指定另一个已安装的Playwright浏览器。没有配置的集成会明确skip，不能作验收证据。测试不调用真实付费模型。
 
 实际状态和缺口见docs/STATUS.md；运维细节见docs/RUNBOOK.md；V4规格保留在docs/specification。
+
+
+单独重跑生产性能基准：`pnpm --dir apps/web exec playwright test performance.spec.ts`。包含4MP合成原图、双画布50个绘制对象（2图像+24矩形+24标签）、60秒真实指针缩放/平移/区域拖动，以及20并发500次已登录只读API请求。完整原始样本与设备记录写入docs/evidence/performance-production.json，目标为帧间隔p95<33ms、API p95<500ms，失败请求也计入分位数。此基准不代表真实商品视觉质量或生产集群容量。
