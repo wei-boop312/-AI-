@@ -1,0 +1,11 @@
+test_cancel_refund_once (test_accounting.AccountingTests.test_cancel_refund_once) ... ok
+test_concurrent_replay_one_freeze_and_outbox (test_accounting.AccountingTests.test_concurrent_replay_one_freeze_and_outbox) ... ok
+test_cross_user_reference_rejected (test_accounting.AccountingTests.test_cross_user_reference_rejected) ... ok
+test_quote_consumption_and_append_only (test_accounting.AccountingTests.test_quote_consumption_and_append_only) ... ok
+test_rls_and_financial_permissions (test_accounting.AccountingTests.test_rls_and_financial_permissions) ... ok
+test_rls_catalog (test_native.NativeTests.test_rls_catalog) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.776s
+
+OK

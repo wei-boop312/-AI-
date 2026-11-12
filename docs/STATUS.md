@@ -1,14 +1,29 @@
 # 实施状态
-2026-11-12：首轮基础实现，未达到 OFFLINE_READY。
 
-P0-01 工程隔离与规格归档已建立。P0-02 部分：doctor 已实现，缺 Docker/npm/依赖锁，服务未启动。P0-03 部分：fake 已实现，严格完整业务 schema 尚未实现。P2-05 部分：独立精确回贴实现，尚缺 EXIF/ICC 标准化与浏览器映射。
+2026-11-12；当前为开发阶段，未达到 OFFLINE_READY。
 
-数据库迁移、认证、持久钱包、outbox、Worker、S3、React 页面尚未实现。PG/MQ/S3/浏览器/真实模型验收均 NOT_RUN。无付费调用、无部署。
+## 已实现并验证
 
-GitHub 连接器目标仓库返回404；直连代理不可用，待检查绕过代理结果。下一步：锁依赖及基础服务、严格 schema、数据库安全迁移。
+- 隔离工程、规格归档、来源哈希、Python虚拟环境及uv.lock。
+- 严格请求schema、规范化业务哈希、RGB精确矩形回贴、图像标准化、保守规则、假供应商防重复提交。
+- Argon2密码及固定RS256令牌模块；refresh仅生成与摘要，持久会话轮换尚未接入。
+- Alembic 0001–0004：产品/外观/资产/版本/认证/钱包、quote/task/账本/events/outbox/dispatch/audit/provider attempt。
+- NOBYPASSRLS权限组、租户RLS、复合外键、不可变账本；受控授额、原子任务创建/冻结及取消退款函数。
+- 13项单元测试通过；原生PostgreSQL 17.11上6项集成测试通过，包括20并发同键只创建1任务/冻结/outbox、幂等冲突、跨用户外键、RLS、API不可写余额/账本/凭据及不可切换executor角色、取消仅退款一次。
 
-第二轮：已建立独立 venv、uv.lock；uv sync --locked 成功。新增严格请求schema及哈希、PNG/JPEG/WebP标准化、EXIF旋转与元数据清除、保守规则模块、live/ready API与实际OpenAPI。11项单元测试通过，日志 docs/evidence/unit-20261112.log。尚未实现数据库基础，未达到P0/P1完整验收。GitHub重试传输失败，未上传。
+## 证据与已发现问题
 
-GitHub授权已恢复：首次提交 d39a97b 已成功推送 origin/master。当前交付仍为基础实现，不代表MVP完成。
+- docs/evidence/native-pg-20261112.log。数据库运行在本任务work/pg-data，127.0.0.1:55432；随机密码不进仓库。
+- 真实迁移发现`:queued`被SQLAlchemy误识别为参数，已转义；真实锁检查发现缺少列权限，0004补充UPDATE(archived_at)给不可登录executor。目录测试排除索引。
+- uv sync --locked、compileall和离线Alembic生成通过。基线首次缺迁移URL被拒属于预期保护。
 
-持续实施阶段：周额度起始剩余96%。新增Alembic 0001数据库基线（users/auth/products/appearances/assets/versions/wallets）、复合归属外键、RLS及事务上下文。安装并锁定asyncpg/Alembic/psycopg/MQ/S3/认证依赖。离线SQL生成exit0、compileall exit0、11项单元测试通过。首次无MIGRATION_DATABASE_URL生成被拒，补离线占位URL后成功。真实PG未运行，P1-01/P1-02仍部分完成。下一步补任务/报价/账本/原子函数及真实服务验证。
+## 未完成与下一步
+
+P0-02/P0-03/P1整体均未全部验收。尚缺upload/rules/cost/compliance实体、数据库结算与fencing、完整认证与会话、API业务路由、S3/MQ/worker/前端及浏览器验收。
+真实PG已可用；RabbitMQ/S3尚未运行。测试角色采用SET SESSION AUTHORIZATION模拟真实权限，服务LOGIN凭据及连接池隔离仍待验证。
+没有付费模型调用、部署或用户数据迁移。不能称PROVIDER_VERIFIED/RELEASE_READY。
+下一步：剩余实体与结算函数，连接池隔离，认证会话及CLI。
+
+## GitHub与额度
+
+origin/master已连接，阶段成果持续推送。周额度阶段起始剩余96%；每阶段复查，剩余<=20%按用户要求停止。
