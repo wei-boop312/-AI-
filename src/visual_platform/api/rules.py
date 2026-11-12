@@ -11,6 +11,6 @@ async def platforms(user=Depends(current_user)):
 async def rules(platform: str,request: Request,marketplace: str='US',category: str='generic',image_type: str='MAIN',user=Depends(current_user)):
     if platform not in PLATFORMS: raise HTTPException(404,'not_found')
     async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
-        row=await c.fetchrow('SELECT version,evidence_status,source_urls,retrieved_at,config FROM app.platform_rules WHERE platform=$1 AND marketplace=$2 AND category=$3 AND image_type=$4 AND published_at IS NOT NULL ORDER BY published_at DESC,id DESC LIMIT 1',platform,marketplace,category,image_type)
+        row=await c.fetchrow('SELECT id,version,evidence_status,source_urls,retrieved_at,evidence_sha256,config_sha256,published_at,config FROM app.platform_rules WHERE platform=$1 AND marketplace=$2 AND category=$3 AND image_type=$4 AND published_at IS NOT NULL ORDER BY published_at DESC,id DESC LIMIT 1',platform,marketplace,category,image_type)
     if not row: return dict(platform=platform,marketplace=marketplace,category=category,image_type=image_type,version='draft-20261112',evidence_status='unverified',source_urls=[],config={})
     return {**dict(row),'platform':platform,'marketplace':marketplace,'category':category,'image_type':image_type,'source_urls':json.loads(row['source_urls']),'config':json.loads(row['config'])}

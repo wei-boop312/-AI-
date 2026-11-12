@@ -58,9 +58,9 @@ async def cancel(task_id: UUID,request: Request,user=Depends(current_user)):
     return serialize(row)
 
 @router.get('/{task_id}/compliance')
-async def compliance(task_id: UUID,request: Request,user=Depends(current_user)):
+async def compliance(task_id: UUID,request: Request,check_id: UUID | None=None,user=Depends(current_user)):
     async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
-        row=await c.fetchrow("SELECT c.id,c.final_version_id,c.final_sha256,c.facts,c.rule_snapshots,c.per_platform_results,c.auto_overall,c.sampling_selected,c.report_sha256,c.created_at FROM app.compliance_checks c JOIN app.generation_tasks t ON t.compliance_id=c.id AND t.user_id=c.user_id WHERE t.id=$1",task_id)
+        row=await c.fetchrow("SELECT c.id,c.final_version_id,c.final_sha256,c.facts,c.rule_snapshots,c.per_platform_results,c.auto_overall,c.sampling_selected,c.report_sha256,c.created_at FROM app.compliance_checks c JOIN app.generation_tasks t ON t.id=c.task_id AND t.user_id=c.user_id WHERE t.id=$1 AND (($2::uuid IS NULL AND c.id=t.compliance_id) OR c.id=$2)",task_id,check_id)
     if not row: raise HTTPException(404,'not_found')
     async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
         review=await c.fetchrow('SELECT id,reviewer_id,decision,reason,evidence_refs,created_at FROM app.compliance_reviews WHERE check_id=$1 ORDER BY created_at DESC,id DESC LIMIT 1',row['id'])
@@ -80,13 +80,13 @@ async def download_final(task_id: UUID,request: Request,user=Depends(current_use
     return RedirectResponse(await asyncio.to_thread(storage.download_url,row['object_key'],row['storage_version_id'],'final.png'),status_code=302)
 
 @router.get('/{task_id}/report/download')
-async def download_report(task_id: UUID,request: Request,user=Depends(current_user)):
+async def download_report(task_id: UUID,request: Request,check_id: UUID | None=None,user=Depends(current_user)):
     import asyncio
     from fastapi.responses import RedirectResponse
     storage=request.app.state.storage
     if storage is None: raise HTTPException(503,'storage_not_configured')
     async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
-        row=await c.fetchrow("SELECT c.report_bucket,c.report_object_key,c.report_storage_version_id FROM app.generation_tasks t JOIN app.compliance_checks c ON c.id=t.compliance_id AND c.user_id=t.user_id WHERE t.id=$1 AND t.status='succeeded'",task_id)
+        row=await c.fetchrow("SELECT c.report_bucket,c.report_object_key,c.report_storage_version_id FROM app.generation_tasks t JOIN app.compliance_checks c ON c.task_id=t.id AND c.user_id=t.user_id WHERE t.id=$1 AND t.status='succeeded' AND (($2::uuid IS NULL AND c.id=t.compliance_id) OR c.id=$2)",task_id,check_id)
     if not row: raise HTTPException(404,'not_found')
     if row['report_bucket']!=storage.bucket: raise HTTPException(503,'storage_bucket_unavailable')
     return RedirectResponse(await asyncio.to_thread(storage.download_url,row['report_object_key'],row['report_storage_version_id'],'report.json'),status_code=302)
@@ -133,3 +133,13 @@ async def task_input(task_id: UUID,request: Request,user=Depends(current_user)):
     if snapshot is None: raise HTTPException(404,'not_found')
     result=json.loads(snapshot);result.pop('_execution',None)
     return result
+
+
+@router.get('/{task_id}/compliance/versions')
+async def report_versions(task_id: UUID,request: Request,cursor: str | None=None,user=Depends(current_user)):
+    pos=cursor_decode(cursor) if cursor else None
+    async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
+        original=await c.fetchval('SELECT compliance_id FROM app.generation_tasks WHERE id=$1',task_id)
+        if not original:raise HTTPException(404,'not_found')
+        rows=await c.fetch('SELECT id,auto_overall,final_version_id,final_sha256,report_sha256,created_at FROM app.compliance_checks WHERE task_id=$1 AND ($2::timestamptz IS NULL OR (created_at,id)<($2,$3::uuid)) ORDER BY created_at DESC,id DESC LIMIT 21',task_id,pos[0] if pos else None,pos[1] if pos else None)
+    return {'items':[{**dict(row),'is_original':row['id']==original} for row in rows[:20]],'next_cursor':cursor_encode(rows[19]) if len(rows)>20 else None}

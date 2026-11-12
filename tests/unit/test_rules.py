@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import copy
 import unittest
 from datetime import datetime,timezone
@@ -69,6 +71,13 @@ class RuleTests(unittest.TestCase):
         for url in ['https://amazon.com.evil.test/rule','https://user:pass@amazon.com/rule','http://amazon.com/rule']:
             doc['source_urls']=[url]
             with self.assertRaises(ValidationError):RuleDocument.model_validate(doc)
+    def test_checked_in_seeds_are_unverified_and_incomplete(self):
+        paths=list(Path('rules/seeds').glob('*.json'));self.assertEqual(len(paths),3)
+        for path in paths:
+            document=RuleDocument.model_validate(json.loads(path.read_text()))
+            self.assertEqual(document.evidence_status,'unverified')
+            self.assertFalse(document.config.complete_rule_set)
+
     def test_boolean_schema_version_is_not_integer(self):
         self.facts['schema_version']=True
         with self.assertRaises(ValidationError):Facts.model_validate(self.facts)

@@ -5,7 +5,8 @@ function account(){const py=path.join(root,process.platform==='win32'?'.venv/Scr
 async function login(page:Page,a:any){await page.goto('/');await expect(page.getByLabel('邮箱',{exact:true})).toBeVisible();await page.getByLabel('邮箱',{exact:true}).fill(a.email);await page.getByLabel('密码',{exact:true}).fill(a.password);await page.getByRole('button',{name:'进入工作台'}).click();await expect(page.getByRole('heading',{name:'视觉工作台',exact:true})).toBeVisible()}
 async function seed(page:Page){const csrf=(await page.context().cookies()).find(c=>c.name==='visual_csrf')!.value;const headers={'Origin':'http://127.0.0.1:5173','X-CSRF-Token':csrf};const product=await page.request.post('/api/v1/products',{headers,data:{name:'断线恢复验收专属产品',category:'generic'}});expect(product.status()).toBe(201);const p=await product.json();const data=readFileSync(new URL('./fixtures/product.png',import.meta.url));const upload=await page.request.post('/api/v1/assets/upload-intents',{headers,data:{product_id:p.id,filename:'fixture.png',mime:'image/png',size:data.length}});const u=await upload.json();expect((await page.request.put(u.upload_url,{data,headers:u.headers})).status()).toBe(200);const complete=await page.request.post('/api/v1/assets/upload-intents/'+u.intent_id+'/complete',{headers});expect(complete.status()).toBe(200);await page.reload();await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();return p}
 
-test('断线轮询、Cookie刷新重连和账号隔离',async({page,context})=>{
+test('断线恢复、规则报告版本、Cookie刷新和账号隔离',async({page,context})=>{
+ if(process.env.REQUIRE_PRODUCTION_BUILD==='1'){const html=await (await page.request.get('/')).text();expect(html).toContain('/assets/');expect(html).not.toContain('/@vite/client')}
  const a=account();await login(page,a);await seed(page);
  let posts=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/api/v1/tasks'))posts++});
  await page.getByRole('button',{name:'获取报价并继续'}).click();
@@ -20,6 +21,24 @@ test('断线轮询、Cookie刷新重连和账号隔离',async({page,context})=>{
  const profile=JSON.parse(readFileSync(path.join(root,'.local/runtime.json'),'utf8'));const proof=path.join(root,'work','browser-review-evidence.json');mkdirSync(path.dirname(proof),{recursive:true});writeFileSync(proof,JSON.stringify(['local:browser-review-fixture']));const py=path.join(root,process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  execFileSync(py,['scripts/admin.py','review','--task',task.id,'--check',reportData.id,'--reviewer',a.user_id,'--decision','approved','--reason','浏览器验收：人工确认产品保护区域','--evidence-json',proof,'--operation-id',crypto.randomUUID()],{cwd:root,env:{...process.env,ADMIN_DATABASE_URL:profile.ADMIN_DATABASE_URL},encoding:'utf8'});
  await page.getByRole('button',{name:'查看检查报告'}).click();const reviewDialog=page.getByRole('dialog',{name:'最终成品检查报告'});await expect(reviewDialog.getByText('人工复核：通过',{exact:true})).toBeVisible();await expect(reviewDialog.getByText('需要人工复核',{exact:true})).toBeVisible();await reviewDialog.getByRole('button',{name:'关闭',exact:true}).click();
+ const ruleVersion='browser-'+crypto.randomUUID();const ruleFile=path.join(root,'work','browser-rule-document.json');
+ writeFileSync(ruleFile,JSON.stringify({platform:'amazon',marketplace:'US',category:'generic',image_type:'MAIN',version:ruleVersion,evidence_status:'unverified',config:{}}));
+ const rulesEnv={...process.env,...profile,PYTHONPATH:path.join(root,'src')};
+ const published=JSON.parse(execFileSync(py,['scripts/rules.py','publish','--document',ruleFile,'--operation-id',crypto.randomUUID(),'--reason','browser synthetic unverified rule fixture'],{cwd:root,env:rulesEnv,encoding:'utf8'}));
+ const beforeBalance=await (await page.request.get('/api/v1/credits/balance')).json();
+ const recomputed=JSON.parse(execFileSync(py,['scripts/rules.py','recheck','--task',task.id,'--source-check',reportData.id,'--rule-id',published.rule_id,'--operation-id',crypto.randomUUID(),'--reason','browser rule-only recheck; no supplier call'],{cwd:root,env:rulesEnv,encoding:'utf8'}));
+ expect(recomputed.provider_submissions).toBe(0);expect(recomputed.credits_charged).toBe(0);
+ expect(await (await page.request.get('/api/v1/credits/balance')).json()).toEqual(beforeBalance);
+ await page.getByRole('button',{name:'查看检查报告'}).click();
+ await expect(reviewDialog.getByText('人工复核：通过',{exact:true})).toBeVisible();
+ await reviewDialog.getByLabel('报告版本',{exact:true}).click();await page.getByText(new RegExp('重算报告.*'+recomputed.check_id.slice(0,8))).last().click();
+ await expect(reviewDialog.getByText('规则版本：'+ruleVersion,{exact:true})).toBeVisible();await expect(reviewDialog.getByText('人工复核：通过',{exact:true})).toHaveCount(0);
+ await expect(reviewDialog.getByRole('link',{name:'下载当前报告'})).toHaveAttribute('href',new RegExp(recomputed.check_id));
+ await reviewDialog.getByText('最终成品检查报告',{exact:true}).click();
+ await expect(page.locator('.ant-select-dropdown:visible')).toHaveCount(0);
+ await page.screenshot({path:path.join(root,'docs/evidence/browser-report-versions.png')});
+ await reviewDialog.getByLabel('报告版本',{exact:true}).click();await page.getByText(new RegExp('原始报告.*'+reportData.id.slice(0,8))).last().click();
+ await expect(reviewDialog.getByText('人工复核：通过',{exact:true})).toBeVisible();await reviewDialog.getByRole('button',{name:'关闭',exact:true}).click();
  await page.getByRole('button',{name:'退出登录',exact:true}).click();await expect(page.getByRole('heading',{name:'登录你的工作台'})).toBeVisible();
  const b=account();await login(page,b);await expect(page.getByText('先放入一张真实产品图',{exact:true})).toBeVisible();await expect(page.getByTestId('canvas-source')).toHaveCount(0);
  expect((await page.request.get('/api/v1/tasks/'+task.id)).status()).toBe(404);

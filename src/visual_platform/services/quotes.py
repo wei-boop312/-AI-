@@ -35,11 +35,11 @@ async def create_quote(pool,uid,body: QuoteRequest):
             appearance={**dict(row),"id":str(row["id"]),"config":json.loads(row["config"])}
         rules=[]
         for target in body.targets:
-            row=await c.fetchrow("""SELECT id,version,evidence_status,config,config_sha256,source_urls,retrieved_at FROM app.platform_rules
+            row=await c.fetchrow("""SELECT id,version,evidence_status,config,config_sha256,source_urls,retrieved_at,evidence_sha256 FROM app.platform_rules
              WHERE platform=$1 AND marketplace=$2 AND category=$3 AND image_type=$4 AND published_at IS NOT NULL
              ORDER BY published_at DESC,id DESC LIMIT 1""",target.platform,target.marketplace,target.category,target.image_type)
             if row:
-                rule={**target.model_dump(),"rule_id":str(row["id"]),"version":row["version"],"evidence_status":row["evidence_status"],"config":json.loads(row["config"]),"config_sha256":row["config_sha256"],"source_urls":json.loads(row["source_urls"]),"retrieved_at":row["retrieved_at"].isoformat() if row["retrieved_at"] else None}
+                rule={**target.model_dump(),"rule_id":str(row["id"]),"version":row["version"],"evidence_status":row["evidence_status"],"config":json.loads(row["config"]),"config_sha256":row["config_sha256"],"evidence_sha256":row["evidence_sha256"],"source_urls":json.loads(row["source_urls"]),"retrieved_at":row["retrieved_at"].isoformat() if row["retrieved_at"] else None}
             else:
                 rule={**target.model_dump(),"version":"draft-20261112","evidence_status":"unverified","config":{},"source_urls":[]}
             rules.append(rule)

@@ -6,6 +6,31 @@
 
 Worker的报告保留逐项原因、规则版本与范围、成品hash及独立像素保护证明。默认没有已验证平台规则，Fake检测不提供完整事实，因此实际离线结果仍为manual_review。单元测试中的verified配置是合成测试策略，不代表任何平台现行政策。
 
-规则证据文档要求HTTPS官方来源、时区日期和归档摘要；这些字段校验不等于已完成来源内容核验。当前尚无运营发布命令、证据归档验证流程或报告重算入口，不能据此宣称规则发布管理已完成。这些是接下来要实现和验收的工作。
+规则证据文档要求HTTPS官方来源、时区日期和归档摘要；这些字段校验不等于已完成来源内容核验。现已新增受限运营发布命令、私有证据归档与摘要比对、只追加的规则重算与报告版本查询。verified发布还必须显式声明已人工核对证据、范围和阈值；程序不会判断归档内容是否充分支持某条平台政策。
 
 验证：29项单元、54项真实PG/MQ/S3回归；另行复跑下载报告完整闭环，确认保留规则未验证、检测未完成原因及像素保护检查。日志见docs/evidence/rule-engine-*.log。
+
+
+## 运营命令
+
+仅专用非owner的ops_admin LOGIN可使用。通过进程环境配置ADMIN_DATABASE_URL、S3_ENDPOINT、S3_ACCESS_KEY、S3_SECRET_KEY、S3_BUCKET、可选S3_REGION；不要把凭据写入命令行或提交仓库。远程S3必须HTTPS，本机离线服务可使用127.0.0.1的HTTP。先按部署流程升级数据库至0021。
+
+发布未验证种子示例（每次新操作自行生成UUID；重放同一操作保留原UUID、文档、理由）：
+
+```powershell
+python scripts/rules.py publish --document rules/seeds/amazon.json --operation-id <UUID> --reason "导入未验证种子"
+```
+
+发布verified文档需填官方HTTPS来源、带时区retrieved_at、实际证据文件evidence_sha256，并追加`--evidence-file <归档文件>`及`--attest-evidence-reviewed`。后者代表运营已核对所归档证据、适用范围及阈值，不是自动联网认证。证据1..20MiB，文档≤1MiB，归档进入私有S3，摘要不匹配拒绝发布。已发布版本禁止UPDATE/DELETE，同范围版本唯一；新政策使用新版本。规则发布写审计，普通API角色没有发布或直接改表权限。
+
+```powershell
+python scripts/rules.py recheck --task <UUID> --source-check <原报告UUID> --rule-id <已发布规则UUID> --operation-id <UUID> --reason "使用新版规则复核既有成品"
+```
+
+多平台为每个原范围各传一个`--rule-id`，不得缺少、重复或换平台/站点/类目/图片类型。命令校验源报告S3摘要、成品S3摘要/大小/PNG尺寸及事实一致性，复用原报告的事实、绑定成品的像素保护证明及稳定抽检标记。S3访问在数据库短事务外。生成新JSON并只追加compliance_checks和审计，不改原任务报告指针、资产像素、供应商attempt、积分或旧复核。相同operation并发/重放返回同一新报告；内容冲突拒绝。
+
+用户可在报告弹窗切换原始/重算版本并下载所选JSON，人工复核按check_id分别展示。对应只读接口为GET /tasks/{task}/compliance/versions、GET /tasks/{task}/compliance?check_id=...、GET /tasks/{task}/report/download?check_id=...及GET /tasks/{task}/compliance/reviews?check_id=...。省略check_id始终返回原任务报告。列表按(created_at,id)游标分页；其他账号知道task/check UUID也不能读取。
+
+## 本阶段验证
+
+30项单元，61项真实PG/RabbitMQ/S3集成通过；Chrome生产构建3个完整用例通过，另复跑2个恢复/报告版本用例进行截图验证。覆盖并发发布/重算、唯一版本、不可改写、私有证据403、坏摘要/范围拒绝、跨用户404、原始人工复核与新报告隔离、0新增supplier intent及积分不变。测试证据中的verified规则仅为隔离合成策略，不代表现行平台政策。见rule-versions-*.log、browser-production-rule-versions*.log和browser-report-versions.png。

@@ -1,0 +1,9 @@
+
+Running 2 tests using 1 worker
+
+(node:89268) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\recovery.spec.ts:8:1 › 断线恢复、规则报告版本、Cookie刷新和账号隔离 (19.0s)
+  ok 2 e2e\recovery.spec.ts:47:1 › 不同产品草稿隔离，刷新恢复当前产品且编辑不创建模型任务 (4.6s)
+
+  2 passed (25.7s)
