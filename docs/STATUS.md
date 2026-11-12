@@ -73,3 +73,13 @@ origin/master已连接，阶段成果持续推送。周额度阶段起始剩余9
 故障测试：归档失败后用新provider对象/连接池恢复，generate intent仍只有1；未知结果冻结且不重发；明确fake失败退款；恶意/错误结构事实不能自行判合规，交付manual_review。CLI专项确实运行独立Python进程；之前状态恢复测试是对象/连接池重建，不冒充强杀进程恢复。
 
 尚未接入RabbitMQ confirm/ack/DLX与恢复扫描，也未完成中文React/Konva界面及浏览器验证；因此仍不能标OFFLINE_BACKEND_READY或OFFLINE_READY。下一步接MQ和本地启动脚本，再完成前端。
+
+## 2026-11-13：原生RabbitMQ投递与恢复
+
+0015/0016增加publisher租约token、持久恢复outbox、5次恢复上限和可信消息引用验证；取消同步dispatch状态。实现durable direct exchange/quorum queue、persistent message、publisher confirms、mandatory return、manual ACK、prefetch=2、DLX与人工quorum队列、数据库恢复扫描。新增独立publisher进程入口与Worker --consume入口。
+
+RabbitMQ 4.4.0 / Erlang 29.1.2 ZIP在任务work内启动，未安装系统服务或改全局PATH；AMQP 127.0.0.1:5679、distribution 127.0.0.1:25679，EPMD仅loopback。密码及cookie只在work。初启遇到Erlang cookie位置和重复-home参数问题，采用显式随机cookie后启动；没有写用户home配置。
+
+18项单元、47项真实PG/RabbitMQ/S3集成通过，完整证据docs/evidence/full-pg-rabbit-s3-20261113.log。覆盖并发publisher唯一claim、真实确认/持久消费完整生成闭环、确认丢失重复投递不重发/重扣、无路由时保留outbox、非法消息DLX、超过5次恢复入人工队列、完成事务后ACK丢失重投、ACK后归档失败由DB扫描恢复。人工队列首次测试发现内部dispatch UPDATE RLS使FOR UPDATE扫描为空，0016前向修复并复测。
+
+离线后端关键链路已有真实服务证据，但尚缺完整运维/迁移干净实例和综合安全验收，未正式宣布阶段门槛。中文React/Konva、浏览器断线恢复/选区/对比尚未实现，仍非OFFLINE_READY。下一步完成本地初始化与前端。

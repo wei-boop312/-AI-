@@ -17,3 +17,5 @@
 S3配置：S3_ENDPOINT、S3_ACCESS_KEY、S3_SECRET_KEY、S3_BUCKET（默认visual-private）、S3_REGION（默认us-east-1）。远程endpoint必须HTTPS，本机可HTTP。请提前创建私有bucket。原生S3测试另设TEST_S3_ENDPOINT/TEST_S3_ACCESS_KEY/TEST_S3_SECRET_KEY/TEST_S3_BUCKET；没有这些变量时S3用例会明确skip，不代表集成通过。临时解码文件在项目work目录并自动删除，已加入gitignore。
 
 独立Worker单任务入口：设置WORKER_DATABASE_URL（仅app_worker权限组）、上述S3配置、PROVIDER_PROFILE=offline，执行`uv run python -m visual_platform.worker --task TASK_UUID`（PYTHONPATH=src）。FAKE_PROVIDER_DIR可设置持久fake结果目录，默认项目work/fake-provider。当前只支持offline，不应改成真实供应商或复用旧密钥。MQ消费入口尚待加入。Worker结果retryable表示仅可恢复安全步骤；uncertain/stopped需查看数据库状态和对账，不能新建同意图调用。
+
+MQ入口：AMQP_URL（远程必须amqps，本机可amqp）、QUEUE_PREFIX（默认visual.v1）。设置DISPATCH_DATABASE_URL（仅ops_dispatcher权限组）后运行`uv run python -m visual_platform.events`，--once可单轮发布/恢复。Worker改用`uv run python -m visual_platform.worker --consume`长期消费。两进程仍需要PYTHONPATH=src，Worker还需S3/WORKER_DATABASE_URL/PROVIDER_PROFILE=offline。恢复超过5次进入QUEUE_PREFIX.manual供人工处理，不授权新付费调用。原生MQ测试额外设置TEST_AMQP_URL。

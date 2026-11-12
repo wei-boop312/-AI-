@@ -18,7 +18,7 @@ from visual_platform.storage.s3 import S3Storage,StorageError
 from visual_platform.worker.runner import Worker
 from test_assets import AssetFixture
 
-class OfflinePipelineTests(AssetFixture):
+class PipelineFixture(AssetFixture):
     @classmethod
     def setUpClass(cls):
         super().setUpClass(); cls.worker_role='worker_'+uuid4().hex; password=secrets.token_urlsafe(32)
@@ -50,6 +50,7 @@ class OfflinePipelineTests(AssetFixture):
             try: return await Worker(pool,storage,provider or self.provider).run(task)
             finally: await pool.close(); storage.close()
         return asyncio.run(run())
+class OfflinePipelineTests(PipelineFixture):
     def test_real_upload_through_final_download_report_and_charge(self):
         task=self.submit(); self.assertEqual(self.run_worker(task),'succeeded')
         result=self.client.get('/api/v1/tasks/'+task).json(); self.assertEqual(result['status'],'succeeded')
