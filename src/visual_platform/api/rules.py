@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from visual_platform.api.auth import current_user
 from visual_platform.db.transactions import tenant_transaction
+from visual_platform.domain.platforms import DEFAULT_MARKETPLACES, PLATFORMS
 
 router = APIRouter(prefix="/api/v1/rules", tags=["rules"])
-PLATFORMS = ("amazon", "ebay", "shopify")
 
 
 @router.get("/platforms")
@@ -21,13 +21,14 @@ async def platforms(user=Depends(current_user)):
 async def rules(
     platform: str,
     request: Request,
-    marketplace: str = "US",
+    marketplace: str | None = None,
     category: str = "generic",
     image_type: str = "MAIN",
     user=Depends(current_user),
 ):
     if platform not in PLATFORMS:
         raise HTTPException(404, "not_found")
+    marketplace = marketplace or DEFAULT_MARKETPLACES[platform]
     async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
         row = await c.fetchrow(
             "SELECT id,version,evidence_status,source_urls,retrieved_at,evidence_sha256,config_sha256,published_at,config FROM app.platform_rules WHERE platform=$1 AND marketplace=$2 AND category=$3 AND image_type=$4 AND published_at IS NOT NULL ORDER BY published_at DESC,id DESC LIMIT 1",

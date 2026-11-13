@@ -1,0 +1,364 @@
+{
+  "base_commit": "41712be96ddfde792115b884874d3936cbf92294",
+  "paid_calls": 0,
+  "observed_at": "2026-11-13T12:43:03.548910+00:00",
+  "scope": "owned CI containers only; no deployment or business task writes",
+  "result": "PASS",
+  "stage": "verified",
+  "prepared": {
+    "prepared": true,
+    "persistent_quorum_delivery": true,
+    "unacknowledged": true
+  },
+  "mq_down": {
+    "snapshot": {
+      "tasks": {
+        "failed": 3,
+        "cancelled": 5,
+        "succeeded": 6
+      },
+      "observed_at": "2026-11-13T12:43:05.209039+00:00",
+      "expired_leases": 0,
+      "outbox_pending": 0,
+      "manual_dispatch": 0,
+      "business_metrics": {
+        "compliance": {
+          "samples": 7,
+          "manual_review": 7,
+          "non_compliant": 0,
+          "manual_review_rate": 1.0
+        },
+        "cost_scope": "one authoritative observation per recently observed attempt; settlement precedes response, intent and estimate; currencies/statuses never combined",
+        "observed_at": "2026-11-13T12:43:05.209039+00:00",
+        "phase_scope": "closed persisted phase spans starting within 24h; consecutive identical phase events merged; not CPU time",
+        "provider_cost": [
+          {
+            "amount": "0.00000000",
+            "attempts": 12,
+            "currency": "USD",
+            "provider": "fake",
+            "cost_status": "confirmed"
+          }
+        ],
+        "phase_duration": [
+          {
+            "phase": "detecting",
+            "samples": 6,
+            "p95_seconds": 0.16351625,
+            "total_seconds": 0.791008
+          },
+          {
+            "phase": "finalizing",
+            "samples": 6,
+            "p95_seconds": 0.00592125,
+            "total_seconds": 0.034454
+          },
+          {
+            "phase": "polling",
+            "samples": 6,
+            "p95_seconds": 15.15835375,
+            "total_seconds": 20.839395
+          },
+          {
+            "phase": "protecting",
+            "samples": 6,
+            "p95_seconds": 0.17818175,
+            "total_seconds": 0.82383
+          },
+          {
+            "phase": "submitting",
+            "samples": 9,
+            "p95_seconds": 0.06269199999999998,
+            "total_seconds": 0.27083
+          }
+        ],
+        "window_seconds": 86400,
+        "compliance_scope": "final compliance check records within 24h, including rule-only rechecks; not human review decisions",
+        "provider_activity": [
+          {
+            "step": "detect",
+            "provider": "fake",
+            "receipt_count": 6,
+            "uncertain_count": 0,
+            "submission_intents": 6
+          },
+          {
+            "step": "generate",
+            "provider": "fake",
+            "receipt_count": 6,
+            "uncertain_count": 0,
+            "submission_intents": 9
+          }
+        ],
+        "missing_measurements": [
+          "api_duration_and_5xx",
+          "archive_failure_count"
+        ],
+        "provider_activity_scope": "write-ahead intents and known receipts for intents started within 24h; not confirmed billable HTTP calls"
+      },
+      "task_duration_24h": {
+        "samples": 14,
+        "p95_seconds": 20.33106785
+      },
+      "ledger_total_errors": 0,
+      "heartbeat_age_seconds": {
+        "worker": 3.196131,
+        "publisher": 3.85951
+      },
+      "outbox_oldest_seconds": 0,
+      "queued_oldest_seconds": 0,
+      "unknown_oldest_seconds": 0,
+      "wallet_equation_errors": 0,
+      "reservation_link_errors": 0,
+      "task_credit_state_errors": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "dependencies": {
+      "mq": "unavailable",
+      "storage": "ready"
+    },
+    "alerts": [
+      {
+        "code": "mq_unavailable",
+        "severity": "critical"
+      }
+    ]
+  },
+  "s3_down": {
+    "snapshot": {
+      "tasks": {
+        "failed": 3,
+        "cancelled": 5,
+        "succeeded": 6
+      },
+      "observed_at": "2026-11-13T12:43:36.045566+00:00",
+      "expired_leases": 0,
+      "outbox_pending": 0,
+      "manual_dispatch": 0,
+      "business_metrics": {
+        "compliance": {
+          "samples": 7,
+          "manual_review": 7,
+          "non_compliant": 0,
+          "manual_review_rate": 1.0
+        },
+        "cost_scope": "one authoritative observation per recently observed attempt; settlement precedes response, intent and estimate; currencies/statuses never combined",
+        "observed_at": "2026-11-13T12:43:36.045566+00:00",
+        "phase_scope": "closed persisted phase spans starting within 24h; consecutive identical phase events merged; not CPU time",
+        "provider_cost": [
+          {
+            "amount": "0.00000000",
+            "attempts": 12,
+            "currency": "USD",
+            "provider": "fake",
+            "cost_status": "confirmed"
+          }
+        ],
+        "phase_duration": [
+          {
+            "phase": "detecting",
+            "samples": 6,
+            "p95_seconds": 0.16351625,
+            "total_seconds": 0.791008
+          },
+          {
+            "phase": "finalizing",
+            "samples": 6,
+            "p95_seconds": 0.00592125,
+            "total_seconds": 0.034454
+          },
+          {
+            "phase": "polling",
+            "samples": 6,
+            "p95_seconds": 15.15835375,
+            "total_seconds": 20.839395
+          },
+          {
+            "phase": "protecting",
+            "samples": 6,
+            "p95_seconds": 0.17818175,
+            "total_seconds": 0.82383
+          },
+          {
+            "phase": "submitting",
+            "samples": 9,
+            "p95_seconds": 0.06269199999999998,
+            "total_seconds": 0.27083
+          }
+        ],
+        "window_seconds": 86400,
+        "compliance_scope": "final compliance check records within 24h, including rule-only rechecks; not human review decisions",
+        "provider_activity": [
+          {
+            "step": "detect",
+            "provider": "fake",
+            "receipt_count": 6,
+            "uncertain_count": 0,
+            "submission_intents": 6
+          },
+          {
+            "step": "generate",
+            "provider": "fake",
+            "receipt_count": 6,
+            "uncertain_count": 0,
+            "submission_intents": 9
+          }
+        ],
+        "missing_measurements": [
+          "api_duration_and_5xx",
+          "archive_failure_count"
+        ],
+        "provider_activity_scope": "write-ahead intents and known receipts for intents started within 24h; not confirmed billable HTTP calls"
+      },
+      "task_duration_24h": {
+        "samples": 14,
+        "p95_seconds": 20.33106785
+      },
+      "ledger_total_errors": 0,
+      "heartbeat_age_seconds": {
+        "worker": 3.998631,
+        "publisher": 4.673806
+      },
+      "outbox_oldest_seconds": 0,
+      "queued_oldest_seconds": 0,
+      "unknown_oldest_seconds": 0,
+      "wallet_equation_errors": 0,
+      "reservation_link_errors": 0,
+      "task_credit_state_errors": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "dependencies": {
+      "mq": "ready",
+      "storage": "unavailable"
+    },
+    "alerts": [
+      {
+        "code": "storage_unavailable",
+        "severity": "critical"
+      }
+    ]
+  },
+  "verification": {
+    "mq_persistent_redelivery": true,
+    "mq_fixture_queue_empty_after_ack": true,
+    "s3_sha256_preserved": true,
+    "s3_object_verification_seconds": 12.362,
+    "s3_get_calls": 8,
+    "s3_immutable_conflict_rejected": true,
+    "signed_download": true,
+    "anonymous_denied": true
+  },
+  "recovered": {
+    "snapshot": {
+      "tasks": {
+        "failed": 3,
+        "cancelled": 5,
+        "succeeded": 6
+      },
+      "observed_at": "2026-11-13T12:43:52.816528+00:00",
+      "expired_leases": 0,
+      "outbox_pending": 0,
+      "manual_dispatch": 0,
+      "business_metrics": {
+        "compliance": {
+          "samples": 7,
+          "manual_review": 7,
+          "non_compliant": 0,
+          "manual_review_rate": 1.0
+        },
+        "cost_scope": "one authoritative observation per recently observed attempt; settlement precedes response, intent and estimate; currencies/statuses never combined",
+        "observed_at": "2026-11-13T12:43:52.816528+00:00",
+        "phase_scope": "closed persisted phase spans starting within 24h; consecutive identical phase events merged; not CPU time",
+        "provider_cost": [
+          {
+            "amount": "0.00000000",
+            "attempts": 12,
+            "currency": "USD",
+            "provider": "fake",
+            "cost_status": "confirmed"
+          }
+        ],
+        "phase_duration": [
+          {
+            "phase": "detecting",
+            "samples": 6,
+            "p95_seconds": 0.16351625,
+            "total_seconds": 0.791008
+          },
+          {
+            "phase": "finalizing",
+            "samples": 6,
+            "p95_seconds": 0.00592125,
+            "total_seconds": 0.034454
+          },
+          {
+            "phase": "polling",
+            "samples": 6,
+            "p95_seconds": 15.15835375,
+            "total_seconds": 20.839395
+          },
+          {
+            "phase": "protecting",
+            "samples": 6,
+            "p95_seconds": 0.17818175,
+            "total_seconds": 0.82383
+          },
+          {
+            "phase": "submitting",
+            "samples": 9,
+            "p95_seconds": 0.06269199999999998,
+            "total_seconds": 0.27083
+          }
+        ],
+        "window_seconds": 86400,
+        "compliance_scope": "final compliance check records within 24h, including rule-only rechecks; not human review decisions",
+        "provider_activity": [
+          {
+            "step": "detect",
+            "provider": "fake",
+            "receipt_count": 6,
+            "uncertain_count": 0,
+            "submission_intents": 6
+          },
+          {
+            "step": "generate",
+            "provider": "fake",
+            "receipt_count": 6,
+            "uncertain_count": 0,
+            "submission_intents": 9
+          }
+        ],
+        "missing_measurements": [
+          "api_duration_and_5xx",
+          "archive_failure_count"
+        ],
+        "provider_activity_scope": "write-ahead intents and known receipts for intents started within 24h; not confirmed billable HTTP calls"
+      },
+      "task_duration_24h": {
+        "samples": 14,
+        "p95_seconds": 20.33106785
+      },
+      "ledger_total_errors": 0,
+      "heartbeat_age_seconds": {
+        "worker": 0.750588,
+        "publisher": 1.427993
+      },
+      "outbox_oldest_seconds": 0,
+      "queued_oldest_seconds": 0,
+      "unknown_oldest_seconds": 0,
+      "wallet_equation_errors": 0,
+      "reservation_link_errors": 0,
+      "task_credit_state_errors": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "dependencies": {
+      "mq": "ready",
+      "storage": "ready"
+    },
+    "alerts": []
+  },
+  "financial_invariants_unchanged": true,
+  "provider_attempts_unchanged": true,
+  "seconds": 49.485,
+  "fixture_cleanup": true
+}

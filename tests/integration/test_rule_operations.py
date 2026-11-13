@@ -105,6 +105,71 @@ class RuleOperationsTests(PipelineFixture):
             if own:
                 storage.close()
 
+    def test_v4_three_platform_quote_delivery_and_rule_discovery(self):
+        listed = self.client.get("/api/v1/rules/platforms").json()["items"]
+        self.assertEqual({row["platform"] for row in listed}, {"amazon", "temu", "ozon"})
+        for platform, marketplace in (("temu", "US"), ("ozon", "RU")):
+            rule = self.publish(self.doc(platform=platform, marketplace=marketplace))
+            found = self.client.get("/api/v1/rules/" + platform).json()
+            self.assertEqual(found["marketplace"], marketplace)
+            self.assertEqual(found["id"], rule["rule_id"])
+            self.assertEqual(found["evidence_status"], "unverified")
+        body = {
+            "product_id": self.product,
+            "source_asset_version_id": self.version,
+            "generation": {
+                "type": "scene",
+                "prompt": "three-platform offline fixture",
+                "output": {"width": 16, "height": 16},
+                "protection_mode": "pixel_exact",
+                "regions": [],
+            },
+            "targets": [
+                {"platform": p, "marketplace": m, "category": "generic", "image_type": "MAIN"}
+                for p, m in (("amazon", "US"), ("temu", "US"), ("ozon", "RU"))
+            ],
+        }
+        quote = self.client.post("/api/v1/quotes", json=body, headers=self.write_headers())
+        self.assertEqual(quote.status_code, 201, quote.text)
+        task = self.client.post(
+            "/api/v1/tasks",
+            json={**body, "quote_id": quote.json()["quote_id"]},
+            headers={**self.write_headers(), "idempotency-key": str(uuid4())},
+        )
+        self.assertEqual(task.status_code, 201, task.text)
+        identity = task.json()["id"]
+        self.assertEqual(self.run_worker(identity), "succeeded")
+        report = self.client.get("/api/v1/tasks/" + identity + "/compliance").json()
+        self.assertEqual(report["auto_overall"], "manual_review")
+        self.assertEqual(
+            {r["platform"] for r in report["per_platform_results"]}, {"amazon", "temu", "ozon"}
+        )
+        self.assertEqual(
+            {r["platform"] for r in report["rule_snapshots"]}, {"amazon", "temu", "ozon"}
+        )
+
+    def test_database_publish_rejects_substituted_platforms_and_wrong_verified_hosts(self):
+        for platform, url in (
+            ("ebay", None),
+            ("shopify", None),
+            ("temu", "https://temu.com.evil.invalid/policy"),
+            ("ozon", "https://amazon.com/policy"),
+        ):
+            doc = self.doc(platform=platform, source_urls=[])
+            if url:
+                doc.update(
+                    evidence_status="verified",
+                    source_urls=[url],
+                    retrieved_at=datetime.now(timezone.utc).isoformat(),
+                    evidence_sha256="a" * 64,
+                )
+            with self.subTest(platform=platform), psycopg.connect(self.admin_dsn) as c:
+                with self.assertRaises(psycopg.errors.RaiseException):
+                    c.execute(
+                        "SELECT ops.publish_rule(%s,%s,'fixture','fixture',NULL,'synthetic negative fixture')",
+                        (uuid4(), Jsonb(doc)),
+                    )
+
     def test_publish_concurrent_idempotent_immutable_and_restricted(self):
         doc = self.doc(category="test-" + uuid4().hex)
         operation = uuid4()

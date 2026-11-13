@@ -8,7 +8,9 @@ from pydantic import ValidationError
 
 from visual_platform.domain.compliance import evaluate_rules
 from visual_platform.domain.facts import Facts
+from visual_platform.domain.platforms import PLATFORMS
 from visual_platform.domain.rules import RuleDocument
+from visual_platform.domain.schemas import Target
 
 
 class RuleTests(unittest.TestCase):
@@ -158,10 +160,50 @@ class RuleTests(unittest.TestCase):
     def test_checked_in_seeds_are_unverified_and_incomplete(self):
         paths = list(Path("rules/seeds").glob("*.json"))
         self.assertEqual(len(paths), 3)
+        self.assertEqual({path.stem for path in paths}, {"amazon", "temu", "ozon"})
         for path in paths:
             document = RuleDocument.model_validate(json.loads(path.read_text()))
             self.assertEqual(document.evidence_status, "unverified")
             self.assertFalse(document.config.complete_rule_set)
+
+    def test_new_target_platforms_match_original_execution_contract(self):
+        contract = json.loads(
+            Path("docs/specification/CODEX_EXECUTION/task-create.schema.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )
+        expected = contract["properties"]["targets"]["items"]["properties"]["platform"]["enum"]
+        self.assertEqual(set(PLATFORMS), set(expected))
+        for platform in ["amazon", "temu", "ozon"]:
+            Target(platform=platform, marketplace="US", category="generic", image_type="MAIN")
+        for platform in ["ebay", "shopify"]:
+            with self.assertRaises(ValidationError):
+                Target(platform=platform, marketplace="US", category="generic", image_type="MAIN")
+
+    def test_temu_ozon_evidence_requires_the_corresponding_source_host(self):
+        for platform, url in [
+            ("temu", "https://seller.kuajingmaihuo.com/policy"),
+            ("ozon", "https://docs.ozon.ru/global/en/products/requirements/media/"),
+        ]:
+            doc = {
+                "platform": platform,
+                "marketplace": "US",
+                "category": "synthetic",
+                "image_type": "MAIN",
+                "version": "synthetic",
+                "evidence_status": "verified",
+                "source_urls": [url],
+                "retrieved_at": datetime.now(timezone.utc),
+                "evidence_sha256": "a" * 64,
+                "config": {},
+            }
+            RuleDocument.model_validate(doc)
+            for bad in [
+                url.replace(".com/", ".com.evil.invalid/").replace(".ru/", ".ru.evil.invalid/"),
+                "https://amazon.com/policy",
+            ]:
+                with self.assertRaises(ValidationError):
+                    RuleDocument.model_validate({**doc, "source_urls": [bad]})
 
     def test_boolean_schema_version_is_not_integer(self):
         self.facts["schema_version"] = True

@@ -4,6 +4,7 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, model_validator
 
+from visual_platform.domain.platforms import OFFICIAL_RULE_HOSTS, Platform
 from visual_platform.domain.schemas import Positive, StrictModel
 
 Ratio = Annotated[float, Field(ge=0, le=1, strict=True)]
@@ -24,7 +25,7 @@ class RuleConfig(StrictModel):
 
 
 class RuleDocument(StrictModel):
-    platform: Literal["amazon", "ebay", "shopify"]
+    platform: Platform
     marketplace: str = Field(strict=True, min_length=1, max_length=40)
     category: str = Field(strict=True, min_length=1, max_length=255)
     image_type: str = Field(strict=True, min_length=1, max_length=40)
@@ -37,11 +38,7 @@ class RuleDocument(StrictModel):
 
     @model_validator(mode="after")
     def evidence(self):
-        hosts = {
-            "amazon": ("amazon.com",),
-            "ebay": ("ebay.com", "ebayinc.com"),
-            "shopify": ("shopify.com",),
-        }[self.platform]
+        hosts = OFFICIAL_RULE_HOSTS[self.platform]
         for value in self.source_urls:
             u = urlsplit(value)
             if (

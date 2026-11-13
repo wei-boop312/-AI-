@@ -31,12 +31,10 @@
 
 P1/P2 原生入口需显式配置专用 `TEST_DATABASE_URL`；涉及存储/流水线的 P2 入口还需 `TEST_AMQP_URL` 和 `TEST_S3_*`。缺失返回 3，不跳过。不在共享日志打印凭据。P1-01 会另建临时 Compose 项目；不能在占用同端口的日常环境旁直接执行。
 
-`python scripts/check.py all --profile offline` 是本次证据综合门槛，而非一条隐式安装/启停命令。干净 Linux CI 依次进行锁定安装、单元/契约、依赖审计/SBOM、秘密扫描、生产构建、`ci_native.py`（原生服务与浏览器）、P0-02、两个镜像构建、`container_smoke.py`（实际镜像离线任务闭环）、P5-01，再执行 all。完整可复现命令以 `.github/workflows/ci.yml` 为准。只接受同一 commit、当前构建、无跳过的全量证据；实现文件未提交则拒绝验证。成功状态只为 OFFLINE_READY，范围 P0–P3、P4 mock 契约和 P5-01。P5-02 单独实测，P4-03/P5-03 仍待外部条件；OFFLINE_READY 不等于真实模型或发布验收。
+`python scripts/check.py all --profile offline` 是本次证据综合门槛，而非一条隐式安装/启停命令。干净 Linux CI 依次进行锁定安装、单元/契约、依赖审计/SBOM、秘密扫描、生产构建、`ci_native.py`（原生服务与浏览器）、P0-02、两个镜像构建、`container_smoke.py`（实际镜像离线任务闭环）、P5-01，再执行 all。完整可复现命令以 `.github/workflows/ci.yml` 为准。只接受同一 commit、当前构建、无跳过的全量证据；实现文件未提交则拒绝验证。成功状态只为 OFFLINE_READY，范围为当前实现的P0–P3、P4 mock契约及P5-01/P5-02 CI演练。原规范仍逐项复核，不能仅凭标签认定完整V4。P4-03/P5-03 仍待外部条件；OFFLINE_READY 不等于真实模型或发布验收。
 
 P5-02 的 Windows 原生准备见 OPERATIONS_RECOVERY / BACKUP_RESTORE：专用 RuntimeRoot 重启演练、暂停本项目消费者后的独立恢复演练、恢复消费者和生产 preview 后执行 performance.spec.ts。两份演练写 base_commit，性能证据也绑定 commit；恢复 schema 必须等于当前 Alembic head。`ops/recovery-objectives.json`记录主计划§13原有的初始演练RPO24h/RTO4h及来源SHA；新恢复报告记录规范化目标摘要和逐项目标结果，门槛重新计算并拒绝超标或旧目标报告。P5-02 不把单节点 stop_app/start_app 外推为 Rabbit 整机或生产集群容灾；单次快照年龄不证明生产备份频率或SLA。
 
-完整主计划复核后，all/P3综合门槛还要求本次application-compose.json证明api/worker/publisher/web完整Compose、回环限制、健康检查、资源限制、优雅退出及回执缓存重建保持。当前此部分待实现，缺少返回BLOCKED_ENV，不能继续依据较早较窄门槛的绿灯返回完整OFFLINE_READY。具体剩余工作见PLAN_GAPS。
+完整all要求当前application-compose.json（8服务、回环、健康、资源、优雅退出/清理标记与持久缓存重建）、frontend-sse-cursor.json（重复/旧revision/刷新/自动头/reset/账号隔离）、format2独立冷恢复、运行指标和operations-gate.json。41712be/CI43426595570已实际全部通过，原始报告见evidence/ci-43426595570。缺失、失败或旧提交证据仍返回3或1；不把早期较窄绿灯扩展到新提交。
 
-8服务Compose候选现已实现、待Linux实测；同时all要求本次frontend-sse-cursor.json，证明客户端显式event id去重、旧revision忽略、reload游标恢复及user/task隔离。服务端游标API或EventSource同实例自动重连不能替代跨实例浏览器证明，缺少返回3。
-
-P5-02同样区分已通过的恢复/重启/性能演练与完整运维任务。新门槛保留drill_verification=PASS，但仍要求本次runtime-metrics.json覆盖主计划列举的API/阶段耗时/归档/供应商费用/规则人工率；缺失返回3，不能以局部演练关闭完整任务。f4aea8a旧范围结果与新增完整门槛BLOCKED_ENV都保留原始证据。
+当前0026修正原task-create.schema要求的Amazon/Temu/Ozon；旧基线误用eBay/Shopify不能证明该要求。新增原生三平台报价/交付/规则报告和SQL负例、生产浏览器草稿/站点参数都须经新CI验证，详见PLATFORM_SCOPE。真实供应商原子预算/live接线及P4-03/P5-03外部条件仍未完成。

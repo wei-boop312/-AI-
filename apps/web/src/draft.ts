@@ -4,10 +4,13 @@ export const defaultPrompt='简洁自然的产品场景，柔和光线，保留�
 export const draftKey=(user:string,product:string)=>'visual:draft:v1:'+user+':'+product;
 export function readDraft(user:string,product:string):Draft|null{
  try{const raw=sessionStorage.getItem(draftKey(user,product));if(!raw||raw.length>100000)return null;const d=JSON.parse(raw);
- if(!['white_background','scene','lifestyle'].includes(d.generationType)||typeof d.prompt!=='string'||d.prompt.length>4000||!['pixel_exact','none'].includes(d.protection)||!['1024x1024','1536x1024','1024x1536'].includes(d.output)||!Array.isArray(d.platforms)||d.platforms.length>3||!d.platforms.every((p:unknown)=>typeof p==='string'&&['amazon','ebay','shopify'].includes(p))||!Array.isArray(d.regions)||d.regions.length>20)return null;
+ if(!['white_background','scene','lifestyle'].includes(d.generationType)||typeof d.prompt!=='string'||d.prompt.length>4000||!['pixel_exact','none'].includes(d.protection)||!['1024x1024','1536x1024','1024x1536'].includes(d.output)||!Array.isArray(d.platforms)||d.platforms.length>3||!d.platforms.every((p:unknown)=>typeof p==='string'&&['amazon','temu','ozon','ebay','shopify'].includes(p))||!Array.isArray(d.regions)||d.regions.length>20)return null;
  if(d.asset_id!==null&&typeof d.asset_id!=='string'||d.version_id!==null&&typeof d.version_id!=='string'||d.appearanceId!==undefined&&typeof d.appearanceId!=='string')return null;
  for(const r of d.regions){if(!['source_x','source_y','width','height','target_x','target_y'].every(k=>Number.isSafeInteger(r[k])&&r[k]>=0)||r.width===0||r.height===0)return null}
- return d as Draft;
+ // Keep editing work from earlier versions, but require a fresh platform choice.
+ // A legacy selection must never silently become authorization for another platform.
+ const platforms=d.platforms.every((p:string)=>['amazon','temu','ozon'].includes(p))?d.platforms:[];
+ return {...d,platforms} as Draft;
  }catch{return null}
 }
 export function regionsFit(regions:Region[],width:number,height:number){

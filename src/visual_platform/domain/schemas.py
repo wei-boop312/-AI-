@@ -5,6 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from visual_platform.domain.platforms import Platform
+
 Pixel = Annotated[int, Field(strict=True, ge=0)]
 Positive = Annotated[int, Field(strict=True, gt=0)]
 
@@ -59,7 +61,7 @@ class Generation(StrictModel):
 
 
 class Target(StrictModel):
-    platform: Literal["amazon", "ebay", "shopify"]
+    platform: Platform
     marketplace: Annotated[str, Field(strict=True, min_length=1, max_length=40)]
     category: Annotated[str, Field(strict=True, min_length=1, max_length=255)]
     image_type: Annotated[str, Field(strict=True, min_length=1, max_length=40)]

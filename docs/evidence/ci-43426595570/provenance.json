@@ -1,0 +1,35 @@
+{
+  "run_id": 43426595570,
+  "commit": "41712be96ddfde792115b884874d3936cbf92294",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43426595570",
+  "artifact_id": 14037768187,
+  "archive_sha256": "b39c288991bc9e98e575d0900d7bee05555575bd22653cab941391b481547b60",
+  "files": {
+    "native-restart-drill.json": {
+      "artifact_path": "work/ci-public/native-restart-drill.json",
+      "sha256": "052a8f98dee319e8439e27ca10b7b1dd3fc99f673c63b97a7b6328a3bb266956"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "19c3b35490bb8052839298114b48e74f8eb9d14e90be4673520c4dd5f9752c6b"
+    },
+    "runtime-metrics.json": {
+      "artifact_path": "work/ci-public/runtime-metrics.json",
+      "sha256": "29be0fffa92906217768217abda3c78ff8cf273741f57e8883d27fb1672549e3"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "3a370ff0c3003923eab26202d4f89857b4efe1e6fec1aca741b7ed35d7f74fe9"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "833583c4019bc60e47ae0cd76246eae7b2ff89dae34a03b90511fccd349eeb28"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "967864f5554dca031ba4dd8cfd7bc023846c1afe42d698dcb6220e1a81ce3beb"
+    }
+  },
+  "scope": "Original selected CI reports. Offline single-node reboot/restore/performance/metrics rehearsal; no paid calls, deployment or production SLA proof."
+}
