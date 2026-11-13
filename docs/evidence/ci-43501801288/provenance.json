@@ -1,0 +1,23 @@
+{
+  "run_id": 43501801288,
+  "commit": "8aadad39683204aebeda66ac2abe29efc7a8cd10",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43501801288",
+  "artifact_id": 14075395178,
+  "archive_sha256": "32213e3df430999d53314452faf18c866e8e575f98c995f83b38f6ffe89baafc",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "02aea27c3795e516a111810f073497fb9878f401a84832e7f456ffca3746c983"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "9c6fe143c0ca4acc6831a417ee225033faafa4bec2b3bf4611ae2d2247f77e88"
+    },
+    "migrate-test.log": {
+      "artifact_path": "work/ci-public/migrate-test.log",
+      "sha256": "d39b10c63e657923aa868daed741263030a7ab1160ece865633871c262f07a10"
+    }
+  },
+  "scope": "0033 receipt-bound exact estimates and cost-review blocking candidate; preserve actual native result"
+}

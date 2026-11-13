@@ -155,7 +155,7 @@ BEGIN
  IF u IS NULL THEN RAISE EXCEPTION 'task_not_found'; END IF;
  PERFORM set_config('app.user_id',u::text,true);
  RETURN jsonb_build_object('task_id',p_task,'actual_spending_verified',false,'estimates',COALESCE((
- SELECT jsonb_agg(jsonb_build_object('id',c.id,'attempt_id',e.attempt_id,'price_id',e.price_id,'price_document_sha256',e.price_document_sha256,'cost_status',c.cost_status,'amount',c.amount::text,'currency',c.currency,'ceiling_state',e.ceiling_state,'calculation_version',e.calculation_version,'reason',c.usage->>'reason','evidence_kind',c.usage->>'evidence_kind))
+ SELECT jsonb_agg(jsonb_build_object('id',c.id,'attempt_id',e.attempt_id,'price_id',e.price_id,'price_document_sha256',e.price_document_sha256,'cost_status',c.cost_status,'amount',c.amount::text,'currency',c.currency,'ceiling_state',e.ceiling_state,'calculation_version',e.calculation_version,'reason',c.usage->>'reason','evidence_kind',c.usage->>'evidence_kind'))
  FROM ops.supplier_cost_estimates e JOIN app.task_cost_records c ON c.id=e.cost_record_id WHERE e.task_id=p_task AND e.user_id=u),'[]'::jsonb));
 END $$;
 ALTER FUNCTION ops.supplier_task_costs(uuid) OWNER TO app_executor;

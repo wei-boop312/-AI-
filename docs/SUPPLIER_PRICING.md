@@ -68,3 +68,7 @@ python scripts/provider_budget.py inspect --authorization <uuid>
 私有输出含估算/未知金额、币种、价表来源、原因与ceiling_state；known_estimate_subtotal只是已知同币种估算的小计，不是全部实际支出。estimate_coverage_complete要求生成与检测两步都存在同币种已知估算；即使完整，actual_spending_verified仍false。用户积分、原始供应商观察与最终账单确认各自独立。
 
 本地新租约/预算测试及有理数边界合计128单元、SDK计量与模型不符合计50契约已通过本地完整回归；新增11项PG/Worker/S3候选涵盖两步精确估算、原未知保留、一次结算、超额后零检测POST/保留冻结/禁止重开、非货币单位、缺计量/模型不符、并发单记录、中断与审计失败回滚、权限/FK/不可变、实际到期前置拒绝及小数向上取整。原生/完整冷恢复必须看新CI，不用本地单元冒充。
+
+## 带数据的恢复候选
+
+独立恢复演练新增非空估算账本：固定MockTransport和合成凭据在loopback profile生成已知回执与最终PNG，明确BFL_CREDIT价表不可比较USD预算，故不得产生检测POST。快照新增第5项被隔离任务，恢复验证原估算金额/单位/关联ID/价表SHA与待审阻断完整保留，不变成美元或实际已确认支出。源fixture仅通过受限fail结案释放内部积分，成本记录不删改；目标保持隔离。该演练不证明live私有SDK元数据或真实账单已验，必须单独看当次冷恢复CI结果。

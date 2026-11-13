@@ -20,6 +20,8 @@ from psycopg.types.json import Jsonb
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+from restore_protocol_fixture import run_cost_review_fixture
+
 from visual_platform.api.main import create_app
 from visual_platform.core.identity import hash_password
 from visual_platform.core.settings import Settings
@@ -29,6 +31,7 @@ from visual_platform.domain.provider_pricing import SupplierPriceVersion, canoni
 from visual_platform.domain.schemas import QuoteRequest, canonical_hash
 from visual_platform.providers.authorization import SmokeAuthorization, canonical_authorization
 from visual_platform.providers.fake import DurableFakeProvider
+from visual_platform.providers.pipeline import BASELINE_ENDPOINTS
 from visual_platform.services.backup import require
 from visual_platform.services.config_backup import validate_configuration
 from visual_platform.services.detection_delivery import (
@@ -40,7 +43,11 @@ from visual_platform.services.provider_budget import (
     provider_quote_review,
     register_provider_budget,
 )
-from visual_platform.services.provider_pricing import publish_supplier_price, supplier_price_context
+from visual_platform.services.provider_pricing import (
+    publish_supplier_price,
+    supplier_price_context,
+    supplier_task_costs,
+)
 from visual_platform.services.quotes import hash_data
 from visual_platform.services.rule_operations import publish_rule
 from visual_platform.storage.s3 import S3Storage, StorageError
@@ -140,6 +147,41 @@ def run_worker(task_id, mode="success", broken=False):
 def admin(query, values):
     with psycopg.connect(profile["ADMIN_DATABASE_URL"]) as c:
         return required_row(c.execute(query, values))[0]
+
+
+def register_drill_budget(quote_identity, snapshot, uid):
+    instant = datetime.now(timezone.utc)
+    scope = SmokeAuthorization.model_validate_json(
+        json.dumps(
+            {
+                "authorization_id": str(uuid4()),
+                "user_id": str(uid),
+                "product_id": snapshot["product_id"],
+                "source_asset_version_id": snapshot["source_asset_version_id"],
+                "quote_input_sha256": hash_data(snapshot),
+                "authorized_by": "synthetic offline recovery review",
+                "authorized_at": instant.isoformat(),
+                "expires_at": (instant + timedelta(hours=1)).isoformat(),
+                "source_path": "restore-fixture.png",
+                "source_sha256": snapshot["_execution"]["source_sha256"],
+                "generation": snapshot["generation"],
+                "targets": snapshot["targets"],
+                "generate_ceiling": "0.10",
+                "detect_ceiling": "0.02",
+                "total_ceiling": "0.12",
+            }
+        )
+    )
+    digest = hashlib.sha256(canonical_authorization(scope)).hexdigest()
+    identity = register_provider_budget(
+        profile["ADMIN_DATABASE_URL"],
+        quote_identity,
+        scope,
+        digest,
+        uuid4(),
+        "synthetic restore budget",
+    )
+    return scope, digest, identity
 
 
 if args.command == "prepare":
@@ -341,6 +383,70 @@ if args.command == "prepare":
             review["sha256"],
         )
         state["tasks"]["queued"] = task(client, body, headers)
+        quoted_cost = client.post("/api/v1/quotes", json=body, headers=headers)
+        require(quoted_cost.status_code == 201, "cost-review source quote failed")
+        with psycopg.connect(profile["API_DATABASE_URL"]) as connection:
+            connection.execute("SELECT set_config('app.user_id',%s,true)", (str(uid),))
+            cost_snapshot = required_row(
+                connection.execute(
+                    "SELECT input_snapshot FROM app.quotes WHERE id=%s",
+                    (quoted_cost.json()["quote_id"],),
+                )
+            )[0]
+            cost_accounts = {
+                "generate": {
+                    "merchant_fingerprint": price.merchant_fingerprint,
+                    "billing_group": price.billing_group,
+                }
+            }
+            cost_snapshot["_execution"].update(
+                provider_profile="offline_protocol_mock",
+                provider_model="flux-3-image-protocol-mock",
+                price_version="trial-protocol-mock-v1",
+                provider_accounts=cost_accounts,
+                provider_endpoints=BASELINE_ENDPOINTS,
+                provider_price_versions={
+                    "generate": {
+                        "id": state["supplier_price_id"],
+                        "document_sha256": state["supplier_price_sha256"],
+                    }
+                },
+            )
+            cost_quote = uuid4()
+            connection.execute(
+                "SELECT app.create_quote(%s,%s,%s,%s::jsonb,%s::jsonb)",
+                (
+                    cost_quote,
+                    canonical_hash(QuoteRequest.model_validate(body)),
+                    hash_data(cost_snapshot),
+                    json.dumps(cost_snapshot),
+                    json.dumps(cost_snapshot["_execution"]["rules"]),
+                ),
+            )
+        _, _, state["cost_review_budget_id"] = register_drill_budget(cost_quote, cost_snapshot, uid)
+        cost_created = client.post(
+            "/api/v1/tasks",
+            json={**body, "quote_id": str(cost_quote)},
+            headers={**headers, "idempotency-key": str(uuid4())},
+        )
+        require(cost_created.status_code == 201, "cost-review task failed")
+        state["tasks"]["cost_review"] = cost_created.json()["id"]
+        cost_run = run_cost_review_fixture(
+            profile, settings, UUID(state["tasks"]["cost_review"]), cost_accounts
+        )
+        require(
+            cost_run["result"] == "stopped" and cost_run["posts"] == {"generate": 1, "detect": 0},
+            "incomparable cost did not stop next synthetic paid step",
+        )
+        state["cost_review_costs"] = supplier_task_costs(
+            profile["ADMIN_DATABASE_URL"], UUID(state["tasks"]["cost_review"])
+        )
+        require(
+            len(state["cost_review_costs"]["estimates"]) == 1
+            and state["cost_review_costs"]["estimates"][0]["currency"] == "BFL_CREDIT"
+            and state["cost_review_costs"]["estimates"][0]["ceiling_state"] == "unknown",
+            "cost-review estimate fixture invalid",
+        )
         state["balance"] = client.get("/api/v1/credits/balance").json()
         require(
             (
@@ -348,7 +454,7 @@ if args.command == "prepare":
                 state["balance"]["reserved"],
                 state["balance"]["spent_total"],
             )
-            == (120, 64, 16),
+            == (104, 80, 16),
             "fixture balance mismatch",
         )
     # Keep one reviewed, unused quote in the snapshot: it may have been consumed
@@ -380,36 +486,8 @@ if args.command == "prepare":
                 json.dumps(snapshot["_execution"]["rules"]),
             ),
         )
-    instant = datetime.now(timezone.utc)
-    scope = SmokeAuthorization.model_validate_json(
-        json.dumps(
-            {
-                "authorization_id": str(uuid4()),
-                "user_id": str(uid),
-                "product_id": state["product_id"],
-                "source_asset_version_id": body["source_asset_version_id"],
-                "quote_input_sha256": hash_data(snapshot),
-                "authorized_by": "synthetic offline recovery review",
-                "authorized_at": instant.isoformat(),
-                "expires_at": (instant + timedelta(hours=1)).isoformat(),
-                "source_path": "restore-fixture.png",
-                "source_sha256": snapshot["_execution"]["source_sha256"],
-                "generation": snapshot["generation"],
-                "targets": snapshot["targets"],
-                "generate_ceiling": "0.10",
-                "detect_ceiling": "0.02",
-                "total_ceiling": "0.12",
-            }
-        )
-    )
-    digest = hashlib.sha256(canonical_authorization(scope)).hexdigest()
-    state["budget_authorization_id"] = register_provider_budget(
-        profile["ADMIN_DATABASE_URL"],
-        quote_identity,
-        scope,
-        digest,
-        uuid4(),
-        "synthetic restore budget",
+    scope, digest, state["budget_authorization_id"] = register_drill_budget(
+        quote_identity, snapshot, uid
     )
     state["budget_quote_id"] = str(quote_identity)
     state["budget_scope_sha256"] = digest
@@ -578,7 +656,7 @@ elif args.command == "verify":
                 == Image.new("RGB", (4, 4), (201, 15, 35)).tobytes(),
                 "restored protection pixels mismatch",
             )
-        for key in ("queued", "known", "unknown", "degraded"):
+        for key in ("queued", "known", "unknown", "degraded", "cost_review"):
             require(
                 client.get("/api/v1/tasks/" + state["tasks"][key]).json()["status"] == "uncertain",
                 "pending task not quarantined",
@@ -587,6 +665,34 @@ elif args.command == "verify":
             run_worker(state["tasks"]["queued"]) == "not_claimed"
             and run_worker(state["tasks"]["unknown"]) == "not_claimed",
             "restored unresolved task was claimed",
+        )
+        restored_costs = supplier_task_costs(
+            profile["ADMIN_DATABASE_URL"], UUID(state["tasks"]["cost_review"])
+        )
+        require(
+            restored_costs == state["cost_review_costs"]
+            and not restored_costs["actual_spending_verified"],
+            "restored cost estimate history changed",
+        )
+        cost_budget = provider_budget_snapshot(
+            profile["ADMIN_DATABASE_URL"], UUID(state["cost_review_budget_id"])
+        )
+        require(
+            cost_budget["state"] == "blocked"
+            and cost_budget["blocked_for_cost_review"]
+            and cost_budget["known_estimate_subtotal"] is None
+            and not cost_budget["actual_spending_verified"],
+            "restored nominal estimate was converted or budget reopened",
+        )
+        require(
+            run_worker(state["tasks"]["cost_review"]) == "not_claimed",
+            "restored cost-review task escaped quarantine",
+        )
+        cost_details = admin("SELECT ops.task_details(%s)", (state["tasks"]["cost_review"],))
+        require(
+            len(cost_details["attempts"]) == 1
+            and cost_details["attempts"][0]["step"] == "generate",
+            "restored cost-review task submitted another model",
         )
         before = admin("SELECT ops.task_details(%s)", (state["tasks"]["known"],))
         require(
@@ -678,7 +784,7 @@ elif args.command == "verify":
         final_balance = client.get("/api/v1/credits/balance").json()
         require(
             (final_balance["available"], final_balance["reserved"], final_balance["spent_total"])
-            == (120, 32, 48),
+            == (104, 48, 48),
             "post-recovery wallet mismatch",
         )
     result["verification"] = {
@@ -689,7 +795,8 @@ elif args.command == "verify":
         "pixel_protection_preserved": True,
         "supplier_price_archive_preserved": True,
         "provider_budget_revoked_before_new_intent": True,
-        "four_fixture_tasks_quarantined": True,
+        "five_fixture_tasks_quarantined": True,
+        "cost_estimate_history_and_review_block_preserved": True,
         "detection_delivery_requires_new_review_after_restore": True,
         "detection_supplier_unknown_and_final_hash_preserved": True,
         "detection_delivery_one_charge": True,
@@ -731,6 +838,19 @@ else:
             == "succeeded",
             "source detection delivery finish failed",
         )
+        cost_state = client.get("/api/v1/tasks/" + state["tasks"]["cost_review"]).json()
+        if cost_state["status"] != "failed":
+            operation = state.setdefault("cost_cleanup_operation_id", str(uuid4()))
+            args.state.write_text(json.dumps(state))
+            admin(
+                "SELECT ops.reconcile_task(%s,%s,'fail',NULL,%s,%s)",
+                (
+                    state["tasks"]["cost_review"],
+                    UUID(operation),
+                    "offline cost-review fixture cannot deliver; release internal credits only",
+                    "b" * 64,
+                ),
+            )
         unknown = client.get("/api/v1/tasks/" + state["tasks"]["unknown"]).json()
         if unknown["status"] != "failed":
             operation = state.setdefault("cleanup_operation_id", str(uuid4()))

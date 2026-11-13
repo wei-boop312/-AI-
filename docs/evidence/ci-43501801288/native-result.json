@@ -1,0 +1,12 @@
+{
+  "commit": "8aadad39683204aebeda66ac2abe29efc7a8cd10",
+  "steps": [
+    {
+      "name": "migrate-test",
+      "exit_code": 1,
+      "seconds": 0.555
+    }
+  ],
+  "result": "FAIL",
+  "paid_calls": 0
+}
