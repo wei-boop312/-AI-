@@ -1,4 +1,5 @@
 import json
+import logging
 from uuid import UUID,uuid4
 import asyncpg
 from fastapi import APIRouter,Depends,Request,Response,Header,HTTPException,Query
@@ -96,6 +97,7 @@ async def events(task_id: UUID,request: Request,last_event_id: str | None=Header
     import asyncio
     from fastapi.responses import StreamingResponse
     from fastapi.encoders import jsonable_encoder
+    cursor_source='last-event-id' if last_event_id is not None else 'query' if cursor is not None else 'initial'
     try:
         # Native EventSource supplies the header on reconnect. A new instance
         # after page reload can only supply its persisted cursor in the URL.
@@ -105,6 +107,9 @@ async def events(task_id: UUID,request: Request,last_event_id: str | None=Header
     except ValueError: raise HTTPException(422,'invalid_event_cursor')
     async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
         if not await c.fetchval('SELECT id FROM app.generation_tasks WHERE id=$1',task_id): raise HTTPException(404,'not_found')
+    # Record only normalized protocol metadata after authorization. No cookies,
+    # tokens, DSNs or raw request headers enter the structured connection trace.
+    logging.getLogger('uvicorn.error').info(json.dumps({'event':'task_event_stream_open','task_id':str(task_id),'cursor':str(cursor),'cursor_source':cursor_source,'request_id':getattr(request.state,'request_id',None)}))
     async def stream():
         nonlocal cursor
         heartbeat=0

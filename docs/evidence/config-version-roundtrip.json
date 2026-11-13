@@ -1,0 +1,121 @@
+{
+  "observed_at": "2026-11-13T10:32:01.924063+00:00",
+  "scope": "actual repository configuration archive + independent directory restoration only; no PG/S3 restore",
+  "commit": "52cc6ba3380e94496ac37964120c351868a3955c",
+  "result": "PASS",
+  "files_verified": 20,
+  "snapshot_sha256": "7599cbae828da55c76a5e15cad9275332e907a85cdfdfff743d362bc6ec67d0e",
+  "application_commit_matches_source": true,
+  "runtime_image_verified": false,
+  "applied_to_runtime": false,
+  "database_or_s3_restore_verified": false,
+  "runtime_setting_names": [
+    "APP_ORIGIN",
+    "COOKIE_SECURE",
+    "PROVIDER_PROFILE",
+    "QUEUE_PREFIX",
+    "S3_REGION"
+  ],
+  "configuration_files": [
+    {
+      "path": "Dockerfile",
+      "sha256": "79ea0e8886c199098bb46ae2ba317ea417b19ecf53bbc361f6c1c7bd9364a23e",
+      "size": 1130
+    },
+    {
+      "path": "alembic.ini",
+      "sha256": "7532ac32eec15df4a5476ed7aafe3396d51d4538f89b37fe22a8c05da370935f",
+      "size": 62
+    },
+    {
+      "path": "apps/web/Dockerfile",
+      "sha256": "6f4e7a4690e4c93e0f6b70e6af11ee0e26f915e5b1a75d39e95f428aa868f752",
+      "size": 740
+    },
+    {
+      "path": "apps/web/package.json",
+      "sha256": "687755b5800f0acc8f8abba55cdf034630d5374de854128eb121beb1e396b770",
+      "size": 725
+    },
+    {
+      "path": "apps/web/pnpm-lock.yaml",
+      "sha256": "3fc7373da3d85e906f553c3867307ae04f81aa6c9a39d289b3950591268f0c3c",
+      "size": 65540
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "sha256": "ef0a57dfe57298785d2387abb012cffd7e532161ec4b2de79e00f811e884000d",
+      "size": 282
+    },
+    {
+      "path": "compose.app.yaml",
+      "sha256": "ccbd23a0290c936fb4ad01fdd5eaccea4e8b54669d75dddd4964ca0864dec515",
+      "size": 2712
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "10ad880705d54b80a2576167199f4e5ab1b93dae5f8f047dfaedca95a9ddbfc3",
+      "size": 2982
+    },
+    {
+      "path": "contracts/facts.schema.json",
+      "sha256": "e0ad912103fb789d0aac6d004f86e5d262694391ef78aa2161eab1256d784334",
+      "size": 4304
+    },
+    {
+      "path": "contracts/openapi.json",
+      "sha256": "b607e1d5438b62b48e9cd13fc2d3026993cd58c9415280a7cc5bc0c76e6d4f77",
+      "size": 51992
+    },
+    {
+      "path": "contracts/task-create.schema.json",
+      "sha256": "2522648aa2507b328a8981fe33780813afd60510583e803453a52cd7f67582c6",
+      "size": 4558
+    },
+    {
+      "path": "ops/alerts.yml",
+      "sha256": "0e93810a19368d82fa85d95ebe9b8af577a1c203c0edf49040d1f9db2fe9a9fc",
+      "size": 1565
+    },
+    {
+      "path": "ops/build-images.json",
+      "sha256": "f8f1bd67692b00c94d6a84ee1cdf6d0690c6878347f01ec23a1b57a652c52140",
+      "size": 1484
+    },
+    {
+      "path": "ops/nginx.conf",
+      "sha256": "38f32719431e9d69861cf4594d3de531ec75639fc75e457d3b811fbdf9b3cb46",
+      "size": 856
+    },
+    {
+      "path": "ops/recovery-objectives.json",
+      "sha256": "ebdb73a0dba9b46b9816b52e597b431912f6b7cd82385ddc7fc47d8dd92540a2",
+      "size": 239
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "c29c5b7f73e09b378c97bf5706148c55237883c6ebe94ee7054dfc9f555b8a6e",
+      "size": 643
+    },
+    {
+      "path": "rules/seeds/amazon.json",
+      "sha256": "7ac556b84783bd408a13b1137209c762218f5a97d291d7d4dc3dcacc1d27aa9d",
+      "size": 253
+    },
+    {
+      "path": "rules/seeds/ebay.json",
+      "sha256": "a792efaced3b092c689824da6304a6fd742e1f66a2a78bd880aff436785bd3db",
+      "size": 251
+    },
+    {
+      "path": "rules/seeds/shopify.json",
+      "sha256": "3509f7e714e010b20594fc07ec08f0c8c6495a7e21bc9032fa0a918c78301a56",
+      "size": 254
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "09245757e97bb3a4e180608eeb3bd70161cc7678752b78b33bca87b7509d5801",
+      "size": 313449
+    }
+  ]
+}

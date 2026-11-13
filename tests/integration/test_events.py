@@ -1,11 +1,17 @@
 import psycopg
+import json
 from test_offline_pipeline import PipelineFixture
 class EventTests(PipelineFixture):
     def event_ids(self,text):return [int(line[4:]) for line in text.splitlines() if line.startswith('id: ')]
     def test_last_event_cursor_replays_only_later_persisted_events(self):
         task=self.submit();self.assertEqual(self.run_worker(task),'succeeded')
         response=self.client.get('/api/v1/tasks/'+task+'/events');ids=self.event_ids(response.text);self.assertGreater(len(ids),3)
-        middle=ids[len(ids)//2];resumed=self.client.get('/api/v1/tasks/'+task+'/events',headers={'last-event-id':str(middle)})
+        middle=ids[len(ids)//2]
+        with self.assertLogs('uvicorn.error',level='INFO') as logged:
+            resumed=self.client.get('/api/v1/tasks/'+task+'/events',headers={'last-event-id':str(middle)})
+        trace=json.loads(logged.records[-1].getMessage())
+        self.assertEqual((trace['task_id'],trace['cursor'],trace['cursor_source']),(task,str(middle),'last-event-id'))
+        self.assertEqual(set(trace),{'event','task_id','cursor','cursor_source','request_id'})
         self.assertEqual(self.event_ids(resumed.text),[i for i in ids if i>middle]);self.assertIn('succeeded',resumed.text)
         restored=self.client.get('/api/v1/tasks/'+task+'/events',params={'cursor':str(middle)})
         self.assertEqual(self.event_ids(restored.text),[i for i in ids if i>middle])

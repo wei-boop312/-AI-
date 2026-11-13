@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-13 最新实测：52cc6ba的本项目20个配置文件已从Git对象归档并独立目录恢复，逐文件摘要一致，见evidence/config-version-roundtrip.json；明确仅配置归档/恢复，不证明新版PG/S3恢复。SSE在43408550352/eb67231继续失败于Playwright请求头观测：独立Chromium158 HTTP实测确认服务器收到Last-Event-ID=42，但Playwright headers()/allHeaders()均未暴露该浏览器自动头（evidence/sse-header-observation.json）。保留自动头要求，改读真实API授权后输出的结构化连接日志，核对task_id、游标和last-event-id来源；日志不含Cookie、令牌、DSN或原始头。CI显式传递本任务API日志路径。新增SSE用例尚待CI，未生成通过凭证。
+
 2026-11-13 配置版本备份候选：新format2 manifest含干净Git源码commit/tree、严格白名单配置的原始Git字节/大小/SHA，以及仅5项允许的非秘密运行设置。配置路径/元数据额外字段、秘密字段注入、重复/遗漏清单、损坏文件、修改/未提交代码均拒绝。恢复必须显式提供与归档/Fake缓存分离的新配置目录，先预检再接触PG/S3，恢复后逐文件复核；不自动执行或应用配置。旧format1仍支持但明确缺少配置证据。7项配置行为/负例纳入默认测试，共66单元通过（evidence/config-backup-unit.log）。已更新CLI、独立原生恢复脚本及文档；新版完整PG/S3恢复尚未运行，历史f4aea8a演练不能替代本次证明。源码commit不等同运行镜像版本。
 
 2026-11-13 SSE CI诊断：43407483815/2f7b5df 的90原生/4普通浏览器与5既有受控浏览器用例均通过；新SSE用例已通过持久游标刷新、重复ID/旧revision fetch抑制、服务端reset，失败于setOffline后12秒期待轮询。此控制不能可靠终止已建立长连接，不能用它推断客户端已收到error。改为将一次真实PG事件作为有限HTTP SSE流回放并结束响应，触发浏览器原生EOF重连；后续请求转发真实API，严格断言浏览器携带Last-Event-ID并恢复连接。旧断网/轮询用例仍保留。新用例尚待重跑，不生成成功凭证。

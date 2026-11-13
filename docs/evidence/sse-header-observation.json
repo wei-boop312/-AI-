@@ -1,0 +1,17 @@
+{
+  "scope": "isolated Chromium transport observation; no application/PG evidence",
+  "browser": "158.0.8127.18",
+  "server_last_event_ids": [
+    "42"
+  ],
+  "observed": [
+    {
+      "early": null,
+      "full": null
+    },
+    {
+      "early": null,
+      "full": null
+    }
+  ]
+}

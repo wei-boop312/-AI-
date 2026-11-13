@@ -38,6 +38,7 @@ def main():
     processes=[];containers=[];log_handles=[];steps=[]
     env={k:v for k,v in os.environ.items() if k not in ('BFL_API_KEY','GEMINI_API_KEY','GOOGLE_API_KEY','API_DATABASE_URL','AUTH_DATABASE_URL')}
     env.update(PYTHONPATH=str(ROOT/'src'),PROVIDER_PROFILE='offline',PLAYWRIGHT_CHANNEL='chromium',REQUIRE_PRODUCTION_BUILD='1',CONTROLLED_FAKE_BROWSER='1')
+    env['SSE_API_LOG']=str(private/'api.log')
     pg_password=secrets.token_urlsafe(24);mq_password=secrets.token_urlsafe(24);access=secrets.token_urlsafe(18);secret=secrets.token_urlsafe(32)
     test_dsn='postgresql://ci_owner:'+quote(pg_password,safe='')+'@127.0.0.1:55432/postgres';dev_dsn=test_dsn.replace(':55432/',':55433/')
     env.update(TEST_DATABASE_URL=test_dsn,MIGRATION_DATABASE_URL=dev_dsn,AMQP_URL='amqp://ci:'+quote(mq_password,safe='')+'@127.0.0.1:5679/visual-test',S3_ENDPOINT='http://127.0.0.1:18333',S3_ACCESS_KEY=access,S3_SECRET_KEY=secret,S3_BUCKET='visual-dev-private',S3_REGION='us-east-1')

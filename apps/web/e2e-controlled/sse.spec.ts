@@ -42,6 +42,13 @@ async function submit(page: Page) {
 test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离', async ({page, browser}) => {
   test.setTimeout(120000);
   expect(process.env.CONTROLLED_FAKE_BROWSER, 'owned consumers must be paused').toBe('1');
+  expect(process.env.SSE_API_LOG, 'owned API structured connection log is required').toBeTruthy();
+  const apiLog = process.env.SSE_API_LOG!;
+  const serverEvents = (offset: number) => readFileSync(apiLog, 'utf8').slice(offset).split('\n').flatMap(line => {
+    const start = line.indexOf('{"event":');
+    if (start < 0) return [];
+    try { const item = JSON.parse(line.slice(start)); return item.event === 'task_event_stream_open' ? [item] : []; } catch { return []; }
+  });
   // Keep the native EventSource and real network. Only observe frames/fetches;
   // duplicate/stale fault frames are explicitly injected after a real PG event.
   await page.addInitScript(() => {
@@ -65,13 +72,13 @@ test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账
       return nativeFetch(...args);
     };
   });
-  const requests: Array<{task: string, cursor: string | null, lastEventId: string | null}> = [];
+  const requests: Array<{task: string, cursor: string | null}> = [];
   let taskPosts = 0;
   page.on('request', request => {
     const url = new URL(request.url());
     if (request.method() === 'POST' && url.pathname === '/api/v1/tasks') taskPosts++;
     const match = url.pathname.match(/^\/api\/v1\/tasks\/([^/]+)\/events$/);
-    if (match) requests.push({task: match[1], cursor: url.searchParams.get('cursor'), lastEventId: request.headers()['last-event-id'] ?? null});
+    if (match) requests.push({task: match[1], cursor: url.searchParams.get('cursor')});
   });
   const account = await setup(page);
   const first = await submit(page);
@@ -113,7 +120,7 @@ test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账
   // socket. Inject a real HTTP EOF after replaying the captured PG frame once;
   // the native EventSource must reconnect to the real API with its own header.
   let eofInjected = false;
-  const reconnectStart = requests.length;
+  const reconnectLogStart = readFileSync(apiLog, 'utf8').length;
   await page.route('**/api/v1/tasks/' + first.id + '/events*', async route => {
     if (eofInjected) { await route.continue(); return; }
     eofInjected = true;
@@ -121,7 +128,11 @@ test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账
   });
   await page.reload();
   await expect.poll(() => eofInjected).toBe(true);
-  await expect.poll(() => requests.slice(reconnectStart).some(r => r.task === first.id && r.lastEventId === saved), {timeout: 15000}).toBe(true);
+  // Chromium adds this header below the Playwright request interception layer;
+  // use the actual API's authorized, normalized trace as authoritative evidence.
+  const resumed = () => serverEvents(reconnectLogStart).find(item => item.task_id === first.id && item.cursor_source === 'last-event-id' && item.cursor === saved);
+  await expect.poll(() => !!resumed(), {timeout: 15000}).toBe(true);
+  const serverReconnect = resumed();
   await expect(page.getByText('实时连接', {exact: true})).toBeVisible({timeout: 20000});
   await page.getByRole('button', {name: '取消排队任务', exact: true}).click();
   await expect(page.getByText('排队任务已取消，冻结积分已退回。', {exact: true})).toBeVisible();
@@ -154,6 +165,7 @@ test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账
     deduplicated_events: true, ignored_stale_revisions: true, cursor_restored_after_reload: true,
     cursor_namespaced_by_user_and_task: true, automatic_last_event_header: true, server_reset_recovered: true,
     task_posts: taskPosts, injection_snapshot_reads: injected, event_requests: requests,
+    server_reconnect: serverReconnect,
     test_sha256: createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex')
   };
   mkdirSync(path.join(root, 'work/ci-public'), {recursive: true});
