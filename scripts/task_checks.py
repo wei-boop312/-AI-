@@ -25,6 +25,7 @@ SUITES = {
             "test_worker_db.py",
             "test_reviews_reconciliation.py",
             "test_protocol_pipeline.py",
+            "test_detection_delivery.py",
         ],
     },
     "P2-05": {
@@ -33,7 +34,11 @@ SUITES = {
     },
     "P2-06": {
         "unit": ["test_rules.py", "test_facts.py"],
-        "integration": ["test_rule_operations.py", "test_reviews_reconciliation.py"],
+        "integration": [
+            "test_rule_operations.py",
+            "test_reviews_reconciliation.py",
+            "test_detection_delivery.py",
+        ],
     },
     "P2-07": {"integration": ["test_offline_pipeline.py", "test_protocol_pipeline.py"]},
 }

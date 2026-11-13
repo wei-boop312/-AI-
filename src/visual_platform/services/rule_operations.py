@@ -102,6 +102,7 @@ def recheck_report(dsn, storage, task, source_check, rule_ids, operation, reason
     report = {
         "schema_version": 1,
         "final_asset_version_id": final["id"],
+        "detection_degraded": original.get("detection_degraded", False),
         "final_sha256": final["sha256"],
         "facts": facts,
         "per_platform": result["per_platform"],

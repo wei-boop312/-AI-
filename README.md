@@ -2,7 +2,7 @@
 
 基于V4计划的私有图片工作台：FastAPI/Worker、PostgreSQL、RabbitMQ、私有S3、React/Konva。已验证的离线MVP包含私有登录、产品与外观配置、真实原图上传、保护区域平移、报价/任务、进度与历史、PNG/报告下载、积分账本，以及独立备份恢复和故障演练。规则证据不足时保持人工复核，不保证商城上架。
 
-最新完整已验基线为[a261306 / CI43468137915](https://github.com/wei-boop312/-AI-/actions/runs/43468137915)：109单元、45离线协议契约、121原生PG/MQ/S3测试、4普通+6受控浏览器、完整8服务Compose、独立冷恢复/重启及P5-02通过。后续产品/外观管理界面和冻结网关绑定继续按当次CI验证，不将前一提交的绿灯外推。实际结果见[STATUS](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)及原始[evidence](docs/evidence)。
+最新完整已验基线为[d53131c / CI43471844334](https://github.com/wei-boop312/-AI-/actions/runs/43471844334)：109单元、46离线协议契约、124原生PG/MQ/S3测试、4普通+6受控浏览器、完整8服务Compose、独立冷恢复/重启及P5-02通过。后续检测降级交付候选继续按当次CI验证，不将前一提交的绿灯外推。实际结果见[STATUS](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)及原始[evidence](docs/evidence)。
 
 **当前运行模式仍是offline Fake。Hubway只完成可离线验证的Gemini适配候选，尚未真实接通；完整V4、真实供应商验收和生产发布均未完成。** 剩余内部实现与外部输入见[REMAINING_WORK](docs/REMAINING_WORK.md)，不得以离线MVP替代完整目标。
 
@@ -78,3 +78,5 @@ uv run python scripts/check.py task P5-02
 API/Cookie/CSRF与幂等使用见[API_USAGE](docs/API_USAGE.md)；角色/健康见[READINESS_AND_ROLES](docs/READINESS_AND_ROLES.md)；产品与外观管理见[PRODUCT_MANAGEMENT](docs/PRODUCT_MANAGEMENT.md)、[APPEARANCE_EXECUTION](docs/APPEARANCE_EXECUTION.md)。
 
 备份与独立恢复见[BACKUP_RESTORE](docs/BACKUP_RESTORE.md)。原计划初始演练目标是RPO24h/RTO4h，已有对应CI演练证明；生产备份调度、保留策略和SLA仍需目标环境验证。监控及故障处理见[MONITORING](docs/MONITORING.md)、[RUNBOOK](docs/RUNBOOK.md)；锁文件、SBOM与实际许可文本见[SUPPLY_CHAIN](docs/SUPPLY_CHAIN.md)。原始12份规范保留在[specification](docs/specification)，不覆盖或改写。
+
+检测不可用时按证据交付既有成品、保留供应商未知费用的受限运营候选见[ADR_DETECTION_MANUAL_DELIVERY](docs/ADR_DETECTION_MANUAL_DELIVERY.md)，新原生验证仍待CI。

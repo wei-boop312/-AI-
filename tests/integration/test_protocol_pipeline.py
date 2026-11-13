@@ -178,7 +178,9 @@ class ProtocolPipelineFixture(PipelineFixture):
             },
         )
 
-    def run_protocol(self, task, storage_class=S3Storage, *, gemini_origin=OFFICIAL_ORIGIN):
+    def run_protocol(
+        self, task, storage_class=S3Storage, *, gemini_origin=OFFICIAL_ORIGIN, worker_class=Worker
+    ):
         async def run():
             bfl = BflProvider(
                 "offline-key",
@@ -195,7 +197,7 @@ class ProtocolPipelineFixture(PipelineFixture):
             pool = await open_pool(self.worker_dsn, "app_worker")
             storage = storage_class(self.settings)
             try:
-                return await Worker(pool, storage, provider).run(task)
+                return await worker_class(pool, storage, provider).run(task)
             finally:
                 await pool.close()
                 storage.close()

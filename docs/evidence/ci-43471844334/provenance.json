@@ -1,0 +1,31 @@
+{
+  "run_id": 43471844334,
+  "commit": "d53131c1a2e27f6ae57d6c8dffe714a40f396589",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43471844334",
+  "artifact_id": 14062790567,
+  "archive_sha256": "38d06fe77fa9bd11bec7194cdbcb18c0b3d84634b4a866aa59943701a3f22f6d",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "ee698308d8688c09400c958f2d9b8b3ee212cb252c81c5fcf86df15dc4b4d31d"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "615034911e1bdb791ab470a1218c3bbd1640f8725ed45cddcb19499b06a90670"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "28eeece509824ada34d7ee36ccd445a1e9cd9f4de4500cef76f5b991786c9053"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "bb9c6dea9c6794f8a772b876591e6abf958f41234e0ab8ef307daca0d060bf23"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "53ff773ac16b24398bf4e999b84c0becfeb6bf0dafe5f793c1364e8230764d14"
+    }
+  },
+  "scope": "Original full CI for stable editor labels, product/appearance UI and frozen gateway identity. No paid model or deployment. Later detection manual-delivery candidate excluded."
+}

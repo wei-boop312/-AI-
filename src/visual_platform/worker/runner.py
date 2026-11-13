@@ -144,11 +144,14 @@ class Worker:
                 "supplier_explicit_failure",
             )
             await self.db(
-                "SELECT app.fail_task($1,$2,$3,$4,false)",
+                "SELECT app.fail_task($1,$2,$3,$4,$5)",
                 task,
                 self.owner,
                 fence,
-                "supplier_explicit_failure",
+                "detection_explicit_failure_review"
+                if step == "detect"
+                else "supplier_explicit_failure",
+                step == "detect",
             )
             return False
         except Exception:
@@ -263,49 +266,63 @@ class Worker:
                     generated = await self.read(ctx["generated"])
                     final, meta = await transform(source, generated, generation)
                     await self.asset(task, fence, ctx, "final", final, meta)
-                elif phase == "detecting":
+                elif phase in ("detecting", "validating_rules"):
                     final = await self.read(ctx["final"])
                     final_hash = hashlib.sha256(final).hexdigest()
-                    if "detect" not in attempts:
-                        if not await self.submit(task, fence, "detect", final):
-                            return "stopped"
-                        continue
-                    attempt = attempts["detect"]
-                    if not attempt["provider_id"]:
-                        await self.db(
-                            "SELECT app.fail_task($1,$2,$3,$4,true)",
-                            task,
-                            self.owner,
-                            fence,
-                            "detection_outcome_unknown",
+                    degradation = ctx.get("detection_degradation")
+                    if degradation is not None:
+                        if (
+                            phase != "validating_rules"
+                            or degradation["final_version_id"] != ctx["final_version_id"]
+                            or degradation["final_sha256"] != final_hash
+                            or "detect" not in attempts
+                            or degradation["attempt_id"] != attempts["detect"]["id"]
+                        ):
+                            raise ValueError("manual_detection_scope_mismatch")
+                        facts = Facts.model_validate(degradation["facts"])
+                    else:
+                        if phase != "detecting":
+                            raise ValueError("manual_detection_review_required")
+                        if "detect" not in attempts:
+                            if not await self.submit(task, fence, "detect", final):
+                                return "stopped"
+                            continue
+                        attempt = attempts["detect"]
+                        if not attempt["provider_id"]:
+                            await self.db(
+                                "SELECT app.fail_task($1,$2,$3,$4,true)",
+                                task,
+                                self.owner,
+                                fence,
+                                "detection_outcome_unknown",
+                            )
+                            return "uncertain"
+                        await self.cost(task, fence, UUID(attempt["id"]), "response")
+                        payload = await self.call_provider(
+                            self.provider.fetch_facts, attempt["provider_id"]
                         )
-                        return "uncertain"
-                    await self.cost(task, fence, UUID(attempt["id"]), "response")
-                    payload = await self.call_provider(
-                        self.provider.fetch_facts, attempt["provider_id"]
-                    )
-                    try:
-                        facts = Facts.model_validate(payload["facts"])
-                        if payload.get("final_sha256") != final_hash or (
-                            facts.image_width,
-                            facts.image_height,
-                        ) != (ctx["final"]["width"], ctx["final"]["height"]):
-                            raise ValueError("facts mismatch")
-                    except (ValueError, KeyError, TypeError):
-                        facts = Facts.model_validate(
-                            {
-                                "schema_version": 1,
-                                "analysis_complete": False,
-                                "image_width": ctx["final"]["width"],
-                                "image_height": ctx["final"]["height"],
-                                "text_items": [],
-                                "logo_items": [],
-                                "watermark_items": [],
-                                "background": {"classification": "unknown", "confidence": 0.0},
-                                "product_extent": None,
-                                "uncertainties": ["facts_invalid_or_final_image_mismatch"],
-                            }
-                        )
+                        try:
+                            facts = Facts.model_validate(payload["facts"])
+                            if payload.get("final_sha256") != final_hash or (
+                                facts.image_width,
+                                facts.image_height,
+                            ) != (ctx["final"]["width"], ctx["final"]["height"]):
+                                raise ValueError("facts mismatch")
+                        except (ValueError, KeyError, TypeError):
+                            facts = Facts.model_validate(
+                                {
+                                    "schema_version": 1,
+                                    "analysis_complete": False,
+                                    "image_width": ctx["final"]["width"],
+                                    "image_height": ctx["final"]["height"],
+                                    "text_items": [],
+                                    "logo_items": [],
+                                    "watermark_items": [],
+                                    "background": {"classification": "unknown", "confidence": 0.0},
+                                    "product_extent": None,
+                                    "uncertainties": ["facts_invalid_or_final_image_mismatch"],
+                                }
+                            )
                     source = await self.read(ctx["source"])
                     _, proof = await transform(source, final, generation, verify=True)
                     rules = ctx["input_snapshot"]["_execution"]["rules"]
@@ -337,6 +354,7 @@ class Worker:
                     report = {
                         "schema_version": 1,
                         "final_asset_version_id": ctx["final_version_id"],
+                        "detection_degraded": degradation is not None,
                         "final_sha256": final_hash,
                         "facts": facts.model_dump(mode="json"),
                         "per_platform": check["per_platform"],
@@ -393,11 +411,14 @@ class Worker:
                 "supplier_terminal_failure",
             )
             await self.db(
-                "SELECT app.fail_task($1,$2,$3,$4,false)",
+                "SELECT app.fail_task($1,$2,$3,$4,$5)",
                 task,
                 self.owner,
                 fence,
-                "supplier_terminal_failure",
+                "detection_terminal_failure_review"
+                if attempt["step"] == "detect"
+                else "supplier_terminal_failure",
+                attempt["step"] == "detect",
             )
             return "stopped"
         except (BotoCoreError, ClientError, StorageError, RuntimeError, OSError):

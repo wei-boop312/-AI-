@@ -90,7 +90,7 @@ class WorkerDbTests(TaskApiFixture):
                 1,
             )
 
-    def prepare_delivery(self):
+    def prepare_delivery(self, *, with_detection_receipt=True):
         fence = self.claim()["fencing_token"]
         generate = self.intent(fence)
         receipt = self.receipt(generate)
@@ -114,7 +114,13 @@ class WorkerDbTests(TaskApiFixture):
                     self.body["generation"]["output"]["height"],
                 ),
             )
-        self.intent(fence, "detect")
+        detect = self.intent(fence, "detect")
+        if with_detection_receipt:
+            detect_receipt = self.receipt(detect)
+            self.worker(
+                "SELECT app.apply_receipt(%s,%s,%s,%s)",
+                (self.task, "worker-1", fence, detect_receipt),
+            )
         self.worker(
             "SELECT app.record_report(%s,%s,%s,%s,%s,%s,%s,%s,false,%s,%s,%s,NULL)",
             (
@@ -132,6 +138,18 @@ class WorkerDbTests(TaskApiFixture):
             ),
         )
         return fence
+
+    def test_manual_report_cannot_bypass_missing_detection_receipt_without_review(self):
+        with self.assertRaisesRegex(psycopg.errors.RaiseException, "detection_receipt_required"):
+            self.prepare_delivery(with_detection_receipt=False)
+        self.assertEqual(self.balance(), (0, 16, 0))
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.compliance_checks WHERE task_id=%s", (self.task,)
+                ).fetchone()[0],
+                0,
+            )
 
     def test_delivery_settles_once_manual_review_allowed(self):
         fence = self.prepare_delivery()

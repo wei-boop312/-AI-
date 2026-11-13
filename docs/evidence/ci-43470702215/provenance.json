@@ -1,0 +1,31 @@
+{
+  "run_id": 43470702215,
+  "commit": "1d4b59e4ad31e1025e61952269fc5b4157622f18",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43470702215",
+  "artifact_id": 14060544509,
+  "archive_sha256": "e889e52a4603437fa3b86112d749659656ec3e58e70c4722395362cf5354c508",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "18ac1afcdc79dd9dda838682044a8de34117517388e7a834fc1750a55a030fb0"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "c86eb75cef1c5532ffe493c39cc9fc2b6011eaddcc866e477bf30a4d4a61ef14"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "b36af17d387e31905c8a8b4e94a88dbf13b478edae9f15befcce24ed4d25c23c"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "c507d65370a0a44720f3dd93aff04e4c78d3b6d9ff3de465a485995d19271533"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "7406a18396d3264ab45b05f42f54f8e26db8d4b47e9525b77be8b058e76e04eb"
+    }
+  },
+  "scope": "Original frozen gateway endpoint binding candidate; no paid supplier or deployment. Later stable modal labels excluded."
+}

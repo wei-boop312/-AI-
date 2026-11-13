@@ -138,7 +138,7 @@ async def compliance(
 ):
     async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
         row = await c.fetchrow(
-            "SELECT c.id,c.final_version_id,c.final_sha256,c.facts,c.rule_snapshots,c.per_platform_results,c.auto_overall,c.sampling_selected,c.report_sha256,c.created_at FROM app.compliance_checks c JOIN app.generation_tasks t ON t.id=c.task_id AND t.user_id=c.user_id WHERE t.id=$1 AND (($2::uuid IS NULL AND c.id=t.compliance_id) OR c.id=$2)",
+            "SELECT c.id,c.final_version_id,c.final_sha256,c.facts,c.rule_snapshots,c.per_platform_results,c.auto_overall,c.sampling_selected,c.report_sha256,c.created_at,app.is_manual_detection_delivery(c.id) AS detection_degraded FROM app.compliance_checks c JOIN app.generation_tasks t ON t.id=c.task_id AND t.user_id=c.user_id WHERE t.id=$1 AND (($2::uuid IS NULL AND c.id=t.compliance_id) OR c.id=$2)",
             task_id,
             check_id,
         )
