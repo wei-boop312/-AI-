@@ -147,6 +147,7 @@ def main(task):
             "provider_budget_revoked_before_new_intent",
             "unit_limits_preserved_without_cross_unit_total",
             "detection_archive_preserved_without_local_files",
+            "detection_wire_and_sdk_response_preserved",
             "bill_fixture_evidence_preserved_not_settled",
         ):
             if detail.get("verification", {}).get(key) is not True:

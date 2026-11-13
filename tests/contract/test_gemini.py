@@ -520,3 +520,119 @@ class GeminiContracts(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(record["cost"]["money_amount"])
         self.assertEqual(len(self.calls), 1)
         self.assertIn(MODEL, self.calls[0].url.path)
+
+    async def test_wire_body_and_sdk_response_are_saved_with_independent_recomputable_digests(self):
+        raw = json.dumps(self.response(), separators=(",", ":")).encode()
+        provider = self.provider(
+            lambda _: httpx.Response(200, content=raw, headers={"content-type": "application/json"})
+        )
+        receipt = await self.submit(provider)
+        record = provider.fetch_facts(receipt.provider_id)
+        self.assertEqual(record["archive_version"], 2)
+        self.assertEqual(base64.b64decode(record["response_body_base64"], validate=True), raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), record["wire_response_sha256"])
+        self.assertEqual(
+            hashlib.sha256(record["canonical_response"].encode()).hexdigest(),
+            receipt.response_digest,
+        )
+        self.assertEqual(record["response_structure_integrity"], "valid")
+        self.assertEqual(len(self.calls), 1)
+
+    async def test_cached_facts_usage_body_and_review_flags_cannot_change_silently(self):
+        provider = self.provider()
+        receipt = await self.submit(provider)
+        original = provider.fetch_facts(receipt.provider_id)
+        path = Path(self.temp.name) / (receipt.provider_id[7:] + ".facts.json")
+        variants = []
+        changed = copy.deepcopy(original)
+        changed["facts"]["background"]["classification"] = "non_white"
+        variants.append(changed)
+        changed = copy.deepcopy(original)
+        changed["usage"]["prompt_token_count"] = True
+        variants.append(changed)
+        changed = copy.deepcopy(original)
+        changed["usage"]["prompt_token_count"] = float(changed["usage"]["prompt_token_count"])
+        variants.append(changed)
+        for field, value in (
+            ("wire_response_sha256", "f" * 64),
+            ("canonical_response", original["canonical_response"] + " "),
+            ("manual_review_required", True),
+            ("response_structure_integrity", "ambiguous"),
+            ("archive_version", 2.0),
+        ):
+            variants.append({**original, field: value})
+        for changed in variants:
+            path.write_text(json.dumps(changed))
+            with self.assertRaises(ProviderUncertain):
+                provider.fetch_facts(receipt.provider_id)
+        path.write_text(json.dumps(original))
+        self.assertEqual(provider.fetch_facts(receipt.provider_id), original)
+        self.assertEqual(len(self.calls), 1)
+
+    async def test_duplicate_wire_object_keys_degrade_facts_but_preserve_original_response(self):
+        raw = json.dumps(self.response()).encode()
+        raw = raw[:-1] + b',"responseId":"second-id"}'
+        provider = self.provider(
+            lambda _: httpx.Response(200, content=raw, headers={"content-type": "application/json"})
+        )
+        receipt = await self.submit(provider)
+        record = provider.fetch_facts(receipt.provider_id)
+        self.assertEqual(record["response_structure_integrity"], "ambiguous")
+        self.assertFalse(record["facts"]["analysis_complete"])
+        self.assertIn("gemini_ambiguous_wire_response", record["facts"]["uncertainties"])
+        self.assertEqual(base64.b64decode(record["response_body_base64"], validate=True), raw)
+        self.assertEqual(record["billing_usage_integrity"], "invalid")
+        self.assertEqual(len(self.calls), 1)
+
+    async def test_legacy_fact_record_remains_readable_without_claiming_wire_version_two(self):
+        provider = self.provider()
+        receipt = await self.submit(provider)
+        record = provider.fetch_facts(receipt.provider_id)
+        for field in (
+            "archive_version",
+            "canonical_response",
+            "response_body_base64",
+            "wire_response_sha256",
+            "response_structure_integrity",
+        ):
+            record.pop(field)
+        path = Path(self.temp.name) / (receipt.provider_id[7:] + ".facts.json")
+        path.write_text(json.dumps(record))
+        self.assertEqual(provider.fetch_facts(receipt.provider_id), record)
+        self.assertNotIn("archive_version", record)
+        self.assertEqual(len(self.calls), 1)
+
+    async def test_wire_body_and_normalized_facts_cannot_be_cross_attached(self):
+        provider = self.provider()
+        receipt = await self.submit(provider)
+        record = provider.fetch_facts(receipt.provider_id)
+        raw = json.loads(base64.b64decode(record["response_body_base64"]))
+        raw["responseId"] = "different-upstream-response"
+        replacement = json.dumps(raw).encode()
+        record["response_body_base64"] = base64.b64encode(replacement).decode()
+        record["wire_response_sha256"] = hashlib.sha256(replacement).hexdigest()
+        path = Path(self.temp.name) / (receipt.provider_id[7:] + ".facts.json")
+        path.write_text(json.dumps(record))
+        with self.assertRaises(ProviderUncertain):
+            provider.fetch_facts(receipt.provider_id)
+        self.assertEqual(len(self.calls), 1)
+
+    async def test_duplicate_visual_fact_keys_degrade_instead_of_accepting_last_value(self):
+        response = self.response()
+        text = (
+            json.dumps({**self.facts, "analysis_complete": False})[:-1]
+            + ',"analysis_complete":true}'
+        )
+        response["candidates"][0]["content"]["parts"][0]["text"] = text
+        provider = self.provider(lambda _: httpx.Response(200, json=response))
+        receipt = await self.submit(provider)
+        record = provider.fetch_facts(receipt.provider_id)
+        self.assertFalse(record["facts"]["analysis_complete"])
+        self.assertIn("gemini_facts_schema_or_dimensions_invalid", record["facts"]["uncertainties"])
+        self.assertIn(
+            text,
+            json.loads(record["canonical_response"])["candidates"][0]["content"]["parts"][0][
+                "text"
+            ],
+        )
+        self.assertEqual(len(self.calls), 1)

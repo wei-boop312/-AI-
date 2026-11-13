@@ -541,10 +541,15 @@ if args.command == "prepare":
             "protocol archive fixture failed",
         )
         state["detection_archive"] = admin(
-            "SELECT jsonb_build_object('attempt_id',attempt_id,'receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
+            "SELECT jsonb_build_object('attempt_id',attempt_id,'receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'representation_version',representation_version,'wire_body_sha256',wire_body_sha256,'wire_hash_valid',encode(sha256(decode(document->>'response_body_base64','base64')),'hex')=wire_body_sha256 AND encode(sha256(convert_to(document->>'canonical_response','UTF8')),'hex')=response_digest,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
             (state["tasks"]["protocol_completed"],),
         )
-        require(state["detection_archive"]["canonical_hash_valid"], "source archive invalid")
+        require(
+            state["detection_archive"]["canonical_hash_valid"]
+            and state["detection_archive"]["wire_hash_valid"]
+            and state["detection_archive"]["representation_version"] == 2,
+            "source archive invalid",
+        )
         billing_context = supplier_billing_context(
             profile["ADMIN_DATABASE_URL"],
             UUID(state["tasks"]["protocol_completed"]),
@@ -826,12 +831,14 @@ elif args.command == "verify":
                 "restored protection pixels mismatch",
             )
         restored_archive = admin(
-            "SELECT jsonb_build_object('attempt_id',attempt_id,'receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
+            "SELECT jsonb_build_object('attempt_id',attempt_id,'receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'representation_version',representation_version,'wire_body_sha256',wire_body_sha256,'wire_hash_valid',encode(sha256(decode(document->>'response_body_base64','base64')),'hex')=wire_body_sha256 AND encode(sha256(convert_to(document->>'canonical_response','UTF8')),'hex')=response_digest,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
             (state["tasks"]["protocol_completed"],),
         )
         require(
             restored_archive == state["detection_archive"]
-            and restored_archive["canonical_hash_valid"],
+            and restored_archive["canonical_hash_valid"]
+            and restored_archive["wire_hash_valid"]
+            and restored_archive["representation_version"] == 2,
             "restored synchronous detection archive changed",
         )
         require(
@@ -1019,6 +1026,7 @@ elif args.command == "verify":
         "provider_budget_revoked_before_new_intent": True,
         "unit_limits_preserved_without_cross_unit_total": True,
         "detection_archive_preserved_without_local_files": True,
+        "detection_wire_and_sdk_response_preserved": True,
         "bill_fixture_evidence_preserved_not_settled": True,
         "five_fixture_tasks_quarantined": True,
         "cost_estimate_history_and_review_block_preserved": True,

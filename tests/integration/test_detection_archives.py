@@ -139,7 +139,7 @@ class DetectionArchiveTests(SupplierEstimateFixture):
         with psycopg.connect(self.owner) as c:
             with self.assertRaises(psycopg.errors.ForeignKeyViolation):
                 c.execute(
-                    "INSERT INTO ops.detection_archives(attempt_id,user_id,task_id,receipt_id,provider_id,response_digest,final_sha256,document_sha256,canonical_document,document) SELECT gen_random_uuid(),user_id,task_id,gen_random_uuid(),provider_id,response_digest,final_sha256,document_sha256,canonical_document,document FROM ops.detection_archives WHERE task_id=%s",
+                    "INSERT INTO ops.detection_archives(attempt_id,user_id,task_id,receipt_id,provider_id,response_digest,final_sha256,document_sha256,canonical_document,document,representation_version,wire_body_sha256) SELECT gen_random_uuid(),user_id,task_id,gen_random_uuid(),provider_id,response_digest,final_sha256,document_sha256,canonical_document,document,representation_version,wire_body_sha256 FROM ops.detection_archives WHERE task_id=%s",
                     (task,),
                 )
 

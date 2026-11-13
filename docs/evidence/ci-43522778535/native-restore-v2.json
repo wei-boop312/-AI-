@@ -1,0 +1,98 @@
+{
+  "result": "PASS",
+  "commit": "e3ef27ba7c29f521e31ba3dfaa5953c05d810ba2",
+  "observed_at": "2026-11-13T23:09:13.825409+00:00",
+  "archive_probe_log": "work/ci-restore-14025489f9cc4dce9caee3cae61f64da/logs/prepare.log",
+  "paid_calls": 0,
+  "scope": "cold independent Docker PG/S3 restore using native PG tools; offline Fake only; no deployment",
+  "stage": "verified",
+  "restore": {
+    "backup_id": "f350b669-d630-4b60-9fc9-8975fd8b22f8",
+    "restore_id": "d372da30-50e5-4dc8-a80e-392e9083d6ce",
+    "started_at": "2026-11-13T23:09:24.719200+00:00",
+    "finished_at": "2026-11-13T23:09:33.901506+00:00",
+    "snapshot_at": "2026-11-13T23:09:19.036385+00:00",
+    "table_count": 35,
+    "object_references_verified": 56,
+    "fake_files_restored": 39,
+    "database_exact_before_recovery_guards": true,
+    "function_owners_preserved": true,
+    "old_logins_restored_as_nologin": true,
+    "sessions_revoked": true,
+    "provider_budgets_revoked": 1,
+    "quarantined_tasks": 5,
+    "before_invariants": {
+      "bad_wallets": 0,
+      "bad_ledger_totals": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "after_invariants": {
+      "bad_wallets": 0,
+      "bad_ledger_totals": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "schema_head": "0039",
+    "configuration_restore": {
+      "application_commit": "e3ef27ba7c29f521e31ba3dfaa5953c05d810ba2",
+      "files_verified": 23,
+      "snapshot_sha256": "e9272ae2d9c80f9cb406c5dba26441569ed3e1df91bd6ec52b2f1bc4ff6afcbd",
+      "status": "verified_snapshot_restored",
+      "applied_to_runtime": false
+    },
+    "verification": {
+      "api_ready": true,
+      "old_access_rejected": true,
+      "post_snapshot_marker_absent": true,
+      "completed_report_review_and_download_hash_preserved": true,
+      "pixel_protection_preserved": true,
+      "supplier_price_archive_preserved": true,
+      "provider_budget_revoked_before_new_intent": true,
+      "unit_limits_preserved_without_cross_unit_total": true,
+      "detection_archive_preserved_without_local_files": true,
+      "bill_fixture_evidence_preserved_not_settled": true,
+      "five_fixture_tasks_quarantined": true,
+      "cost_estimate_history_and_review_block_preserved": true,
+      "detection_delivery_requires_new_review_after_restore": true,
+      "detection_supplier_unknown_and_final_hash_preserved": true,
+      "detection_delivery_one_charge": true,
+      "unknown_and_queued_cannot_submit": true,
+      "known_id_recovered_without_new_generate": true,
+      "balance_at_snapshot": {
+        "available": 88,
+        "reserved": 80,
+        "funded_total": 200,
+        "spent_total": 32
+      },
+      "balance_after_two_safe_recoveries": {
+        "available": 88,
+        "reserved": 48,
+        "funded_total": 200,
+        "spent_total": 64
+      },
+      "verified_at": "2026-11-13T23:09:38.106776+00:00"
+    },
+    "base_commit": "e3ef27ba7c29f521e31ba3dfaa5953c05d810ba2",
+    "paid_calls": 0,
+    "backup_format": 2,
+    "timing": {
+      "rto_seconds": 16.865615376999926,
+      "snapshot_age_seconds_at_recovery_start": 2.515427,
+      "backup_seconds": 0.746779,
+      "objectives": {
+        "scope": "initial_rehearsal",
+        "target_document_sha256": "37c82a14debb5e7f9d8e5c4cdaad0ed004b5b496bd4e10adbcca40e2063d12f9",
+        "target_source": "docs/specification/PROJECT_PLAN.md#13",
+        "target_source_sha256": "d74c99ebc7bae74fc7187d10e2f194967d985fe18b11fdf94e8c8910d602fabb",
+        "rpo_target_seconds": 86400,
+        "rto_target_seconds": 14400,
+        "rehearsal_rpo_met": true,
+        "rehearsal_rto_met": true,
+        "rpo_measurement": "snapshot age at recovery start; single rehearsal only",
+        "production_backup_cadence_verified": false,
+        "production_sla_verified": false
+      }
+    }
+  },
+  "source_fixture_cleanup": true,
+  "destination_containers_removed": true
+}

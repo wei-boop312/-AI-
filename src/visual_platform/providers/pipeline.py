@@ -9,7 +9,7 @@ from uuid import UUID
 
 from visual_platform.providers.bfl import BflProvider, BflRequest
 from visual_platform.providers.contract import ProviderPending, ProviderUncertain, Receipt
-from visual_platform.providers.gemini import MODEL, OFFICIAL_ORIGIN
+from visual_platform.providers.gemini import MODEL, OFFICIAL_ORIGIN, validate_archive_record
 
 BASELINE_ENDPOINTS = {
     "generate": BflProvider.endpoint,
@@ -114,7 +114,11 @@ class ProtocolProvider:
         record = self.gemini.fetch_facts(attempt["provider_id"])
         return self.observation_from_facts(record)
 
-    def observation_from_facts(self, record):
+    def validate_facts_record(self, record):
+        return validate_archive_record(record)
+
+    @staticmethod
+    def observation_from_facts(record):
         return {
             "transport": "offline_mock",
             "response_digest": record["response_digest"],
@@ -124,4 +128,7 @@ class ProtocolProvider:
             "cost": record["cost"],
             "final_sha256": record["final_sha256"],
             "sdk_version": record["sdk_version"],
+            "archive_version": record.get("archive_version", 1),
+            "wire_response_sha256": record.get("wire_response_sha256"),
+            "response_structure_integrity": record.get("response_structure_integrity"),
         }

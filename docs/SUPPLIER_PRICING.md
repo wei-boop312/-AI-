@@ -122,3 +122,8 @@ python scripts/supplier_pricing.py bill-inspect --review <uuid>
 按attempt_id、供应商根地址+商户/分组+请求ID，以及商户+原账单/行指纹三层去重；同操作原文档/原因/上下文可并发幂等，不允许用新operation再次记同意图。更正或退款尚不支持，不能改写已有证据。存储失败不产生PG记录；审计失败回滚PG记录，但可能留下无数据库引用的私有S3对象，重试原operation复用原字节，不自动删除审计证据。
 
 输出review_status=offline_fixture_matched，actual_spending_verified=false；它是审核证据记录，未写app.task_cost_records的settlement/confirmed，未改变预算或用户积分。证据文件随独立备份复制并核对SHA，恢复只重绑存储version，不改原文档/上下文/金额/状态。真实账单确认、跨账单累计/退款、live费用验证仍不在已验范围。
+
+
+## 检测响应原文（0040候选）
+
+新版私有归档保存HTTP响应体的Base64原文和SHA256，以及SDK规范化JSON及原有response_digest。HTTP体限1MiB，整个记录限16MiB；它不含请求认证头，也不是TCP/TLS抓包或供应商签名。读取时重新验证响应身份、严格JSON、事实和计费用量；外层重复键响应保留原文并进入人工/未知费用，事实字符串内部重复键也拒绝。旧格式不升级为原文已验证。费用观察必须与归档中的用量、SDK及原文摘要一致。原文和私有账单不进入公开交付ZIP；备份通过原有私有归档恢复。全部供应商传输仍硬绑定MockTransport，真实供应商/账单未验收。

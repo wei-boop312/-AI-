@@ -130,7 +130,7 @@ class Worker:
             UUID(attempt["id"]),
         )
         if saved is not None:
-            return json.loads(saved)
+            return self.provider.validate_facts_record(json.loads(saved))
         # A pre-migration receipt can be archived once from its existing local facts.
         _, payload = await self.preserve_detection(
             task, UUID(attempt["id"]), attempt["provider_id"], attempt["response_digest"]
