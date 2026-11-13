@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-13 SSE 浏览器验收候选：新增第6项受控浏览器用例，真实创建/取消3个零供应商调用的排队任务，原生 EventSource 读取真实持久事件，检查 reload 查询游标、网络断线后的 Last-Event-ID 自动头、超出保留范围后 server reset，以及同用户不同任务/不同账号的存储键和404隔离。对真实事件载荷在浏览器入口注入重复ID和新ID旧revision，直接计数 fetch，要求两个负例均不额外请求任务快照。成功后才生成 work/ci-public/frontend-sse-cursor.json；静态类型检查和6项用例发现通过，当前尚无该用例实际通过证据。CI 43406411518（fb7023f）已通过原生/两组浏览器、基础Compose、镜像构建，正在完整应用Compose测试；不提前记为通过。
+
 2026-11-13 客户端 SSE 增量：EventCursor 用 sessionStorage 按用户/任务保存非敏感游标，PG bigint ID 全程使用字符串与 BigInt；恢复新 EventSource 实例时传入查询游标。拒绝重复/倒序 ID、非法载荷和跨任务事件；收到旧 revision 仍推进有效游标但不重复请求快照。服务端 retention reset 清空客户端持久游标。请求返回继续检查任务 revision，旧用户会话的异步回调不能更新新会话界面。浏览器存储受限时退回内存去重。6 项 Node 行为测试覆盖精度、去重、版本保护、跨实例/用户/任务隔离、reset 和存储异常，已接入 CI；TypeScript 与生产构建通过，记录见 evidence/sse-client-node.log。该记录只证明模块行为，完整浏览器断线/刷新恢复证明仍待补齐，未生成 frontend-sse-cursor.json 验收凭证。
 
 2026-11-13 最新增量：CI 43338831138（d1c66ad）原生集成与普通/受控浏览器通过，基础 Compose 启动失败，尚未进入完整应用 Compose 验收。下载的原始故障证据见 evidence/ci-43338831138；明确原因是固定 SeaweedFS 镜像没有 HEALTHCHECK，而 compose.yaml 只配置了检查周期。已添加显式 curl HTTP 存活检查；带凭据桶访问仍由 ComposeRuntime 单独验证，存活检查不替代对象持久化测试。修复需新 CI 实跑。

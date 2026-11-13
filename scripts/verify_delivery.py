@@ -106,7 +106,7 @@ def verify_run(evidence):
         expected=suite_size(ROOT/'tests'/folder)
         require(match is not None and int(match.group(1))==expected,'test count differs from current suite')
         require(re.search(r'^OK\s*$',text,re.M) is not None and 'skipped=' not in text,'unittest failure or skipped coverage')
-    for name,count in (('browser-production',4),('browser-controlled-faults',5)):
+    for name,count in (('browser-production',4),('browser-controlled-faults',6)):
         text=(evidence/(name+'.log')).read_text(encoding='utf-8-sig')
         require(re.search(r'\b'+str(count)+r' passed\b',text) is not None,'browser suite incomplete')
     for filename in ('performance-production.json','browser-controlled-faults.json'):
