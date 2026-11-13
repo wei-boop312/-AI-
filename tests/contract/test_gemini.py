@@ -448,3 +448,63 @@ class GeminiContracts(unittest.IsolatedAsyncioTestCase):
             json.loads((root / "contracts/facts.schema.json").read_text()),
             Facts.model_json_schema(),
         )
+
+    async def test_usage_is_checked_on_wire_before_sdk_number_coercion(self):
+        response = self.response()
+        response["usageMetadata"] = {
+            "promptTokenCount": True,
+            "cachedContentTokenCount": 0,
+            "candidatesTokenCount": 80,
+            "thoughtsTokenCount": 20,
+            "toolUsePromptTokenCount": 0,
+            "totalTokenCount": 101,
+        }
+        provider = self.provider(lambda _: httpx.Response(200, json=response))
+        receipt = await provider.submit(
+            uuid4(), self.png, expected_sha256=self.sha, width=256, height=256
+        )
+        record = provider.fetch_facts(receipt.provider_id)
+        self.assertEqual(record["billing_usage_integrity"], "invalid")
+        self.assertNotIn("prompt_token_count", record["usage"])
+        self.assertIsNone(record["cost"]["money_amount"])
+        self.assertEqual(len(self.calls), 1)
+
+    async def test_parallel_sdk_responses_cannot_swap_usage_between_intents(self):
+        async def route(request):
+            payload = json.loads(request.content)
+            data = base64.urlsafe_b64decode(
+                payload["contents"][0]["parts"][1]["inlineData"]["data"]
+            )
+            with Image.open(BytesIO(data)) as image:
+                width, height = image.size
+            response = self.response({**self.facts, "image_width": width, "image_height": height})
+            response["usageMetadata"] = {
+                "promptTokenCount": width,
+                "cachedContentTokenCount": 0,
+                "candidatesTokenCount": 1,
+                "thoughtsTokenCount": 0,
+                "toolUsePromptTokenCount": 0,
+                "totalTokenCount": width + 1,
+            }
+            await asyncio.sleep(0.01)
+            return httpx.Response(200, json=response)
+
+        provider = self.provider(route)
+        second = BytesIO()
+        Image.new("RGB", (300, 256), "white").save(second, "PNG")
+        second = second.getvalue()
+        first_receipt, second_receipt = await asyncio.gather(
+            provider.submit(uuid4(), self.png, expected_sha256=self.sha, width=256, height=256),
+            provider.submit(
+                uuid4(),
+                second,
+                expected_sha256=hashlib.sha256(second).hexdigest(),
+                width=300,
+                height=256,
+            ),
+        )
+        for receipt, width in [(first_receipt, 256), (second_receipt, 300)]:
+            record = provider.fetch_facts(receipt.provider_id)
+            self.assertEqual(record["billing_usage_integrity"], "complete")
+            self.assertEqual(record["usage"]["prompt_token_count"], width)
+        self.assertEqual(len(self.calls), 2)

@@ -107,6 +107,7 @@ BEGIN
   account:=execution->'provider_accounts'->entry.key;
   IF jsonb_typeof(account) IS DISTINCT FROM 'object' OR NOT(account ?& ARRAY['merchant_fingerprint','billing_group'])
   OR EXISTS(SELECT 1 FROM jsonb_object_keys(account) k WHERE k NOT IN ('merchant_fingerprint','billing_group'))
+  OR jsonb_typeof(account->'merchant_fingerprint') IS DISTINCT FROM 'string' OR jsonb_typeof(account->'billing_group') IS DISTINCT FROM 'string'
   OR account->>'merchant_fingerprint' IS DISTINCT FROM p.merchant_fingerprint
   OR account->>'billing_group' IS DISTINCT FROM p.billing_group THEN RAISE EXCEPTION 'price_scope_mismatch'; END IF;
   expected_endpoint:=p.endpoint_origin||CASE WHEN entry.key='generate' THEN '/v1/flux-3-image' ELSE '/v1beta/models/gemini-3.8-flash:generateContent' END;

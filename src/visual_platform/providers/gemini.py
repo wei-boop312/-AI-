@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+from contextvars import ContextVar
 from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import UUID
@@ -15,6 +16,7 @@ from google.genai import types
 
 from visual_platform.domain.facts import Facts
 from visual_platform.providers.contract import ProviderUncertain, Receipt
+from visual_platform.providers.gemini_usage import parse_wire_usage
 from visual_platform.services.upload import decode
 
 MODEL = "gemini-3.8-flash"
@@ -157,6 +159,7 @@ class GeminiProvider:
         self.directory = Path(private_directory)
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.offline_transport = isinstance(transport, httpx.MockTransport)
+        self._wire_usage: ContextVar[dict | None] = ContextVar("gemini_wire_usage", default=None)
 
         async def guard(request):
             if (
@@ -168,12 +171,18 @@ class GeminiProvider:
             ):
                 raise ProviderUncertain("Gemini SDK request destination rejected")
 
+        async def observe_wire(response):
+            capture = self._wire_usage.get()
+            if capture is not None and 200 <= response.status_code < 300:
+                body = await response.aread()
+                capture.update(parse_wire_usage(body))
+
         self.http = httpx.AsyncClient(
             transport=BoundedTransport(transport or httpx.AsyncHTTPTransport(retries=0)),
             headers={"accept-encoding": "identity"},
             trust_env=False,
             follow_redirects=False,
-            event_hooks={"request": [guard]},
+            event_hooks={"request": [guard], "response": [observe_wire]},
             timeout=httpx.Timeout(30, connect=5),
         )
         options = types.HttpOptions(
@@ -230,6 +239,8 @@ class GeminiProvider:
             raise ProviderUncertain(
                 "Gemini intent already attempted; inspect saved facts"
             ) from None
+        wire_usage: dict = {}
+        usage_token = self._wire_usage.set(wire_usage)
         try:
             config = types.GenerateContentConfig(
                 system_instruction=SYSTEM,
@@ -259,18 +270,6 @@ class GeminiProvider:
             raw = response.model_dump(mode="json", exclude_none=True)
             digest = hashlib.sha256(encoded(raw)).hexdigest()
             facts = parse_facts(response, width, height)
-            usage = {}
-            if response.usage_metadata:
-                for name in (
-                    "prompt_token_count",
-                    "candidates_token_count",
-                    "thoughts_token_count",
-                    "cached_content_token_count",
-                    "total_token_count",
-                ):
-                    value = getattr(response.usage_metadata, name, None)
-                    if type(value) is int and value >= 0:
-                        usage[name] = value
             local_id = "gemini-" + str(intent)
             record = {
                 **provenance,
@@ -281,7 +280,8 @@ class GeminiProvider:
                 "final_sha256": expected_sha256,
                 "facts": facts.model_dump(mode="json"),
                 "manual_review_required": not facts.analysis_complete or bool(facts.uncertainties),
-                "usage": usage or None,
+                "usage": wire_usage.get("usage"),
+                "billing_usage_integrity": wire_usage.get("billing_usage_integrity", "missing"),
                 "cost": {
                     "money_amount": None,
                     "currency": None,
@@ -296,6 +296,9 @@ class GeminiProvider:
             raise ProviderUncertain(
                 "Gemini detection outcome unavailable; do not resubmit"
             ) from None
+
+        finally:
+            self._wire_usage.reset(usage_token)
 
     def fetch_facts(self, provider_id):
         if not isinstance(provider_id, str) or not provider_id.startswith("gemini-"):

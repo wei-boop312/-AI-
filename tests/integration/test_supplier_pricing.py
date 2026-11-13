@@ -302,3 +302,14 @@ class SupplierPricingTests(ProviderBudgetFixture):
         expired, identity = self.publish(expired)
         with self.assertRaisesRegex(psycopg.errors.RaiseException, "price_scope_mismatch"):
             self.submit(execution_updates=self.execution(expired, identity))
+
+        numeric_price, numeric_id = self.publish(
+            self.document(merchant_fingerprint="1" * 64, billing_group="123")
+        )
+        numeric_scope = self.execution(numeric_price, numeric_id)
+        numeric_scope["provider_accounts"]["generate"] = {
+            "merchant_fingerprint": int("1" * 64),
+            "billing_group": 123,
+        }
+        with self.assertRaisesRegex(psycopg.errors.RaiseException, "price_scope_mismatch"):
+            self.submit(execution_updates=numeric_scope)

@@ -41,3 +41,9 @@ ProtocolProvider收到明确运行时商户范围后先验证结构（不允许�
 ## 验证边界
 
 本地新增10单元（合计121）、新增1协议契约（合计47）、Ruff与Linux/Windows各96生产/运营源码检查通过。8项PG/S3候选覆盖发布/实际归档、精确估算、并发幂等/不可变、审阅与S3失败拒绝、绕过Python的类型负例、权限、冻结报价与正确账户交付、错误账户零POST、错误账户/端点/SHA/过期报价拒绝；新增冷恢复价表证据实际读取。原生与整轮CI尚待执行，不将单元或SQL生成当作PG证明。
+
+## 原始响应计量准备
+
+Gemini HTTP响应在SDK转换数值前校验JSON与六项计数，缺失值不补0，布尔/数字字符串/浮点不能成为整数计费量；重复键、矛盾总数、未知计费字段、工具token或非标准serviceTier不标完整。异步响应使用每个submit独立ContextVar，禁止并发意图互换计量。SDK事实解析和原回执摘要不因此改成合规/费用确认。
+
+[Google GenerateContent UsageMetadata](https://aistudio.google.com/api-reference/generate-content)说明prompt计数包含缓存，总量另含思考、工具和候选输出。因此后续互斥输入量必须扣除明确缓存项，思考不能静默漏掉；该字段语义依据不是Hubway真实兼容性或价表证明。当前只保存经原始响应核验的计量完整性，不写confirmed账单。
