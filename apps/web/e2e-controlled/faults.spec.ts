@@ -80,7 +80,7 @@ test('提交响应丢失后再次确认沿用同一幂等键',async({page})=>{
   if(route.request().method()!=='POST'){await route.continue();return}keys.push(route.request().headers()['idempotency-key']);intercepted++;
   if(intercepted===1){const response=await route.fetch();expect(response.status()).toBe(201);first=await response.json();await route.abort('failed');lossInjected=true}else await route.continue();
  });
- await page.getByRole('button',{name:'获取报价并继续'}).click();const dialog=page.getByRole('dialog',{name:'确认本次生成'});const confirm=dialog.getByRole('button',{name:'确认并创建任务',exact:true});await confirm.click();
+ await page.getByRole('button',{name:'获取报价并继续'}).click();const dialog=page.getByRole('dialog',{name:'确认本次生成'});const confirm=dialog.getByRole('button',{name:'确认并创建任务',exact:true});await expect(confirm).toHaveAttribute('aria-label','确认并创建任务');await confirm.click();
  // Interception starts before the real POST commits. Wait for the injected loss,
  // not just interception, before measuring the UI's recovery from that loss.
  await expect.poll(()=>lossInjected,{timeout:30000}).toBe(true);expect(first.id).toBeTruthy();expect(intercepted).toBe(1);

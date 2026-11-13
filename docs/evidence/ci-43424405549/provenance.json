@@ -1,0 +1,22 @@
+{
+  "run_id": 43424405549,
+  "commit": "b750771d698433e8fd399de224038ee6ad9ff049",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43424405549",
+  "archive_sha256": "03b520f5600ec8371aed8511056d472dd9e0e13b10f787dd368ff19853a64e8a",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "a6990dd0bf5d9669840a0ee47b609888cfce33f146a0e8dba94673808bb8bcd5"
+    },
+    "browser-controlled-faults.log": {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "246ceab21ef84f29fd32b8440980fae8bc04384fd5a335f5399b47971275a3d5"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "9125851ee32e6e8c960205bf6e21990204c2cc629cf9c44b79c8a328f8f33e0d"
+    }
+  },
+  "scope": "Original failure evidence. Native integration and 4 production browser tests passed; controlled lost-submit-response button lookup failed. Restart/operations rehearsal not reached. Raw zip private."
+}

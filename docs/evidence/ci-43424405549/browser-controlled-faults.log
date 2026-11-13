@@ -1,0 +1,45 @@
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e-controlled/faults.spec.ts:32:1 › 排队取消和重复点击只释放一次积分 (2.5s)
+  ✓  2 e2e-controlled/faults.spec.ts:41:1 › 明确供应商失败释放积分，刷新不自动重试 (3.5s)
+  ✓  3 e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 (5.2s)
+{"event":"storage_archive_observed","observation_id":"bd5cffb4-72ec-441a-a702-f2bc6d8cc168","observed_at":"2026-11-13T12:25:48.920043+00:00","duration_ms":9.28,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"2924e8e8-a7a3-4080-b699-40f69fc2ea4f","observed_at":"2026-11-13T12:25:48.999644+00:00","duration_ms":5.377,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"951e114e-7525-42d8-ab9b-7f3b068f01aa","observed_at":"2026-11-13T12:25:49.082078+00:00","duration_ms":5.301,"outcome":"success"}
+  ✓  4 e2e-controlled/faults.spec.ts:65:1 › 晚到回执恢复查询和归档，原生成意图不重发 (5.4s)
+{"lost_response_diagnostic":{"intercepted":1,"lossInjected":true,"has_committed_receipt":true,"requestFailures":["net::ERR_FAILED"],"pageErrors":[],"login_visible":false,"dialogs":[{"title":"_r_t_","buttons":[{"text":"","disabled":false,"classes":"ant-modal-close","label":"关闭"},{"text":"取 消","disabled":false,"classes":"ant-btn css-i19pbt css-var-_r_0_ ant-btn-default ant-btn-color-default ant-btn-variant-outlined","label":null},{"text":"确认并创建任务","disabled":false,"classes":"ant-btn css-i19pbt css-var-_r_0_ ant-btn-primary ant-btn-color-primary ant-btn-variant-solid","label":null}]}]}}
+  ✘  5 e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (6.9s)
+  ✓  6 e2e-controlled/sse.spec.ts:42:1 › 真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离 (21.1s)
+
+
+  1) e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 ───────────────────────────────────────
+
+    Error: expect(locator).not.toHaveClass(expected) failed
+
+    Locator: getByRole('dialog', { name: '确认本次生成' }).getByRole('button', { name: '确认并创建任务', exact: true })
+    Expected pattern: not /ant-btn-loading/
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "not toHaveClass" getByRole('dialog', { name: '确认本次生成' }).getByRole('button', { name: '确认并创建任务', exact: true }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: '确认本次生成' }).getByRole('button', { name: '确认并创建任务', exact: true })
+
+
+      85 |  // not just interception, before measuring the UI's recovery from that loss.
+      86 |  await expect.poll(()=>lossInjected,{timeout:30000}).toBe(true);expect(first.id).toBeTruthy();expect(intercepted).toBe(1);
+    > 87 |  try{await expect(confirm).not.toHaveClass(/ant-btn-loading/)}catch(error){
+         |                                ^
+      88 |   console.log(JSON.stringify({lost_response_diagnostic:{intercepted,lossInjected,has_committed_receipt:!!first?.id,requestFailures,pageErrors,login_visible:await page.getByRole('heading',{name:'登录你的工作台'}).isVisible(),dialogs:await page.getByRole('dialog').evaluateAll(nodes=>nodes.map(node=>({title:node.getAttribute('aria-labelledby'),buttons:Array.from(node.querySelectorAll('button')).map(button=>({text:button.textContent,disabled:button.disabled,classes:button.className,label:button.getAttribute('aria-label')}))})))}}));
+      89 |   await page.screenshot({path:path.join(root,'docs/evidence/browser-fault-lost-response-diagnostic.png'),fullPage:true});throw error;
+      90 |  }
+        at /home/runner/work/-AI-/-AI-/apps/web/e2e-controlled/faults.spec.ts:87:32
+
+    Error Context: ../../work/browser-test-results/faults-提交响应丢失后再次确认沿用同一幂等键/error-context.md
+
+    Error Context: ../../work/browser-test-results/faults-提交响应丢失后再次确认沿用同一幂等键/error-context.md
+
+  1 failed
+    e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 ────────────────────────────────────────
+  5 passed (46.1s)
