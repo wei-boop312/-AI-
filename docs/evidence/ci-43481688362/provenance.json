@@ -1,0 +1,23 @@
+{
+  "run_id": 43481688362,
+  "commit": "fc603c2a66edaa01dcb8a7273cf713e6b78e5bda",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43481688362",
+  "artifact_id": 14064903973,
+  "archive_sha256": "97d858d4bd9283ff76bbcc59fd46cd183a0b4d2c5e5250d625e0162504c8d12d",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "b67bcc3708fdd7c74ebe77f666a5c71e4025f5a8ef6859839e2a0f81aca97d71"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "d3f4a9e1b0024a87592ca04eb940fab561ef6a382ff6a3eb4cd868b32f39d41d"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "5fedb2cb04478226ce50c5761c108646139ea22e13bf0b3e73fd8fd01f13975a"
+    }
+  },
+  "scope": "Recovery dedupe fixed; preserve actual 145-native result, private export unversioned S3 failures already corrected separately"
+}
