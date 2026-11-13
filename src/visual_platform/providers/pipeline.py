@@ -116,6 +116,7 @@ class ProtocolProvider:
             "response_digest": record["response_digest"],
             "usage": record["usage"],
             "billing_usage_integrity": record.get("billing_usage_integrity", "missing"),
+            "reported_model_version": record.get("reported_model_version"),
             "cost": record["cost"],
             "final_sha256": record["final_sha256"],
             "sdk_version": record["sdk_version"],

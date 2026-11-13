@@ -28,7 +28,7 @@ rate包含measure、精确十进制字符串amount与正整数per。允许bfl_cr
 
 计量上下文必须明确provider/model/endpoint_origin/merchant_fingerprint/billing_group、UTC observed_at及quantities。数量集合必须与价表项完全一致：缺失项不补0，多出项不忽略；未知新增计费维度、过期或任一身份不符均返回unknown且amount/currency为null。BFL credit数量须精确十进制字符串；token数量须非负整数，布尔、float与负数不是有效数量。
 
-使用高精度Decimal，合计后向上取整到8位小数以避免低估；溢出为unknown。即便所有明确数量为0且估算为0，仍不表示账单已确认或免费。缓存、思考、输入等计费项必须来自可核验的互斥计量，不能从totalTokenCount猜拆，也不假定SDK的prompt/candidate字段已覆盖全部供应商计费。当前不会把三项现有Gemini用量自动当作完整发票依据。
+使用精确有理数/整数累加，合计后以整数除法向上取整到8位小数以避免有限精度吞掉微小尾数；溢出为unknown。即便所有明确数量为0且估算为0，仍不表示账单已确认或免费。缓存、思考、输入等计费项必须来自可核验的互斥计量，不能从totalTokenCount猜拆，也不假定SDK的prompt/candidate字段已覆盖全部供应商计费。当前不会把三项现有Gemini用量自动当作完整发票依据。
 
 ## 冻结身份与恢复
 
@@ -49,3 +49,22 @@ Gemini HTTP响应在SDK转换数值前校验JSON与六项计数，缺失值不�
 [Google GenerateContent UsageMetadata](https://aistudio.google.com/api-reference/generate-content)说明prompt计数包含缓存，总量另含思考、工具和候选输出。因此后续互斥输入量必须扣除明确缓存项，思考不能静默漏掉；该字段语义依据不是Hubway真实兼容性或价表证明。当前只保存经原始响应核验的计量完整性，不写confirmed账单。
 
 0032阶段实际全量证据：e714f7d / CI43495545487成功，121单元/47契约/153原生、4+7浏览器和完整Compose/独立恢复/重启/P5-02通过，包含supplier_price_archive_preserved实际冷恢复校验。原始计量a9cb71a及后续0033仍按各自提交验收，不将价表阶段的绿灯用于账单/live宣称。
+
+## 0033任务估算与超额阻断候选
+
+任务响应观察保持unknown/null，不覆盖原始记录；持有有效Worker租约者只能从已应用回执及不可变response_observation推导，不传入金额。新增规范化估算关联表把cost_record_kind=estimate、同用户/任务/意图的原始响应观察、原回执摘要和冻结价表UUID/SHA以复合FK绑定；货币值只保存在app.task_cost_records。发布新价表不能重写旧估算。
+
+BFL数量来自已报告的BFL_CREDIT，必须有明确价表才能估算；Gemini必须有原始响应完整性、精确报告模型和六项明确整数计数，缓存从总输入扣除、思考独立计算；工具、缺项、未知新维度、模型不符或价表不覆盖全部互斥项都记录unknown/null，不补0。元数据缺失与供应商报不同模型均不触发新POST；报告也不会把明确不同模型的事实当作完整检查。
+
+Python与PG分别以整数有理数累加，不经有限精度中间除法；最终向上取整到8位，溢出仍unknown。新增微小尾差边界单元验证超过普通Decimal上下文的正尾数不能被吞掉。没有二进制float或站内单位的隐式美元兑换。
+
+超出步骤/合计授权，或明确绑定的价表无法与USD预算比较，将预算阻断；后续新付费意图与hold在同一事务拒绝，先前回执/归档可安全完成本地步骤，内部积分保留冻结等待人工结案。过期价表在第一步前拒绝并释放无付费意图的冻结；已有意图后过期保留冻结。预算原上限不增加，旧review-blocked不能绕过估算审阅阻断。此阻断是保守估算的风控，不证明真实发票超额。
+
+```text
+python scripts/supplier_pricing.py task-costs --task <uuid>
+python scripts/provider_budget.py inspect --authorization <uuid>
+```
+
+私有输出含估算/未知金额、币种、价表来源、原因与ceiling_state；known_estimate_subtotal只是已知同币种估算的小计，不是全部实际支出。estimate_coverage_complete要求生成与检测两步都存在同币种已知估算；即使完整，actual_spending_verified仍false。用户积分、原始供应商观察与最终账单确认各自独立。
+
+本地新租约/预算测试及有理数边界合计128单元、SDK计量与模型不符合计50契约已通过本地完整回归；新增11项PG/Worker/S3候选涵盖两步精确估算、原未知保留、一次结算、超额后零检测POST/保留冻结/禁止重开、非货币单位、缺计量/模型不符、并发单记录、中断与审计失败回滚、权限/FK/不可变、实际到期前置拒绝及小数向上取整。原生/完整冷恢复必须看新CI，不用本地单元冒充。

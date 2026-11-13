@@ -4,7 +4,8 @@ import hashlib
 import json
 import re
 from datetime import datetime, timedelta
-from decimal import ROUND_CEILING, Decimal, localcontext
+from decimal import Decimal
+from fractions import Fraction
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -119,6 +120,7 @@ def estimate_supplier_cost(
         "amount": None,
         "currency": None,
         "actual_spending_verified": False,
+        "calculation_version": "exact-rational-v1",
         "evidence_kind": price.evidence_kind,
         "price_sha256": hashlib.sha256(canonical_price(price)).hexdigest(),
         "price_version": price.version,
@@ -139,26 +141,25 @@ def estimate_supplier_cost(
         return {**result, "reason": "price_not_effective"}
     if type(quantities) is not dict or set(quantities) != {rate.measure for rate in price.rates}:
         return {**result, "reason": "incomplete_or_unpriced_usage"}
-    with localcontext() as context:
-        context.prec = 60
-        amount = Decimal(0)
-        for rate in price.rates:
-            quantity = quantities[rate.measure]
-            if rate.measure == "bfl_credit":
-                if type(quantity) is not str or not re.fullmatch(
-                    r"(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?", quantity
-                ):
-                    return {**result, "reason": "invalid_usage"}
-            elif type(quantity) is not int or not 0 <= quantity <= 1_000_000_000_000:
+    exact = Fraction(0)
+    for rate in price.rates:
+        quantity = quantities[rate.measure]
+        if rate.measure == "bfl_credit":
+            if type(quantity) is not str or not re.fullmatch(
+                r"(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?", quantity
+            ):
                 return {**result, "reason": "invalid_usage"}
-            amount += Decimal(quantity) * Decimal(rate.amount) / rate.per
-        amount = amount.quantize(Decimal("0.00000001"), rounding=ROUND_CEILING)
-        if amount >= Decimal("1000000000000"):
-            return {**result, "reason": "estimate_overflow"}
+        elif type(quantity) is not int or not 0 <= quantity <= 1_000_000_000_000:
+            return {**result, "reason": "invalid_usage"}
+        exact += Fraction(quantity) * Fraction(rate.amount) / rate.per
+    scaled = (exact.numerator * 100000000 + exact.denominator - 1) // exact.denominator
+    if scaled >= 100000000000000000000:
+        return {**result, "reason": "estimate_overflow"}
+    amount = f"{scaled // 100000000}.{scaled % 100000000:08d}"
     return {
         **result,
         "cost_status": "estimated",
-        "amount": format(amount, "f"),
+        "amount": amount,
         "currency": price.currency,
         "reason": "reviewed_table_estimate_not_invoice",
     }

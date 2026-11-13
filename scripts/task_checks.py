@@ -20,12 +20,18 @@ SUITES = {
     "P2-02": {"unit": ["test_normalize.py"], "integration": ["test_assets.py"]},
     "P2-03": {"integration": ["test_broker.py", "test_worker_db.py"]},
     "P2-04": {
-        "unit": ["test_late_fake.py", "test_provider_pricing.py"],
+        "unit": [
+            "test_late_fake.py",
+            "test_provider_pricing.py",
+            "test_gemini_usage.py",
+            "test_budget_worker.py",
+        ],
         "integration": [
             "test_worker_db.py",
             "test_reviews_reconciliation.py",
             "test_protocol_pipeline.py",
             "test_supplier_pricing.py",
+            "test_supplier_estimates.py",
             "test_detection_delivery.py",
         ],
     },

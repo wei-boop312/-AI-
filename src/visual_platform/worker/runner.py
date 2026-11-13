@@ -51,6 +51,13 @@ class Worker:
                 row["attempt_id"] == str(attempt_id) and row["kind"] == "response_observation"
                 for row in ctx.get("cost_observations", [])
             ):
+                await self.db(
+                    "SELECT app.record_supplier_estimate($1,$2,$3,$4)",
+                    task,
+                    self.owner,
+                    fence,
+                    attempt_id,
+                )
                 return
             attempt = next(a for a in ctx["attempts"] if a["id"] == str(attempt_id))
             usage = await self.call_provider(self.provider.observation, attempt["step"], attempt)
@@ -63,6 +70,14 @@ class Worker:
             stage,
             json.dumps(usage, sort_keys=True),
         )
+        if stage == "response":
+            await self.db(
+                "SELECT app.record_supplier_estimate($1,$2,$3,$4)",
+                task,
+                self.owner,
+                fence,
+                attempt_id,
+            )
 
     async def read(self, record):
         if record["bucket"] != self.storage.bucket:
@@ -112,20 +127,28 @@ class Worker:
                 hashlib.sha256(encoded).hexdigest(),
             )
         except asyncpg.RaiseError as error:
-            if str(error).split("\n", 1)[0] not in {
+            code = str(error).split("\n", 1)[0]
+            if code not in {
                 "provider_budget_blocked",
                 "provider_budget_expired",
                 "provider_budget_scope_mismatch",
                 "provider_budget_exhausted",
+                "provider_budget_cost_review_required",
+                "provider_price_expired",
             }:
                 raise
+            needs_review = code == "provider_budget_cost_review_required"
+            if code == "provider_price_expired":
+                context = await self.context(task, fence)
+                needs_review = bool(context["attempts"])
             # The denied step rolled back intent and hold; earlier steps may already have cost.
             await self.db(
-                "SELECT app.fail_task($1,$2,$3,$4,false)",
+                "SELECT app.fail_task($1,$2,$3,$4,$5)",
                 task,
                 self.owner,
                 fence,
-                "provider_budget_denied",
+                "provider_cost_review_required" if needs_review else "provider_budget_denied",
+                needs_review,
             )
             return False
         await self.cost(task, fence, attempt, "intent")

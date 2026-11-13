@@ -16,6 +16,7 @@ from visual_platform.services.provider_pricing import (
     estimate_reviewed_price,
     publish_supplier_price,
     supplier_price_context,
+    supplier_task_costs,
 )
 from visual_platform.storage.s3 import S3Storage
 
@@ -34,6 +35,8 @@ def main():
     estimate = modes.add_parser("estimate")
     estimate.add_argument("--price", type=UUID, required=True)
     estimate.add_argument("--metering-context", type=Path, required=True)
+    task = modes.add_parser("task-costs")
+    task.add_argument("--task", type=UUID, required=True)
     args = parser.parse_args()
     storage = None
     dsn = os.environ.get("ADMIN_DATABASE_URL")
@@ -85,6 +88,8 @@ def main():
             output = supplier_price_context(dsn, UUID(identity))
         elif args.mode == "inspect":
             output = supplier_price_context(dsn, args.price)
+        elif args.mode == "task-costs":
+            output = supplier_task_costs(dsn, args.task)
         else:
             if args.metering_context.stat().st_size > 65536:
                 raise ValueError("bounded usage context required")

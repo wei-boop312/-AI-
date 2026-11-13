@@ -1,0 +1,58 @@
+{
+  "run_id": 43495945879,
+  "commit": "a9cb71ae0348d2f9f9cd61826ff2ae5e3792771e",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43495945879",
+  "artifact_id": 14072703312,
+  "archive_sha256": "bb4447702fc9b6122fb89353d2a6ddbd6797f139533613efa15e549aa5b934f6",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "0ed07e3179dce597bbb2e6eb37f5d26306f46b63a289cbe0f88ba5ddf87f0782"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "e21f1b7b51e9cdb3d8bc4d0ea88510c2689cad9a1e505192024a5fbc27a8ed15"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "a8cda8e0ddec949bf87dc701b687df46bc467886f19b150251fb9c667a4472c1"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "e42aa4b4b587b9525427d088169ac1e876c35ee150a80a73267468942dfcc94f"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "604236a31c0c7622c0da62157bfa616eea9173d364f654a3a1c1afa763220757"
+    }
+  },
+  "scope": "0032 strict frozen account types and raw Gemini wire-usage validation; complete native browser and independent restore acceptance",
+  "test_counts_from_original_logs": {
+    "unit.log": {
+      "passed_tests": 125,
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "b74e712e2f8e6c2e27aca1caf6cb50b90ecf55fcf4fea26e0e9665a614db23c6"
+    },
+    "contracts.log": {
+      "passed_tests": 49,
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "c857909c4a27a0b0e161a3ae32fa35bf7b9414b2ff1f88ce4189f0ae30103f7c"
+    },
+    "native-integration.log": {
+      "passed_tests": 153,
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "b97d95aec300259f2cd187be567df6547526b9b68ecdb89f998a2d01be8749bc"
+    },
+    "browser-production.log": {
+      "passed_tests": 4,
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "91a92883f1bd2aaf5ef96be38946f1a7423b69d32e51ca41384fa595bbd2d9e3"
+    },
+    "browser-controlled-faults.log": {
+      "passed_tests": 7,
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "faf639113369905bbf21a258a008501111d96f52beec1a9c63a55dc2cbee5f74"
+    }
+  }
+}

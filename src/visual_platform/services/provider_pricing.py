@@ -68,3 +68,9 @@ def estimate_reviewed_price(dsn: str, identity: UUID, quantities: dict, **scope)
     if hashlib.sha256(canonical_price(price)).hexdigest() != reviewed["document_sha256"]:
         raise ValueError("supplier_price_document_mismatch")
     return estimate_supplier_cost(price, quantities, **scope)
+
+
+def supplier_task_costs(dsn: str, task: UUID):
+    with psycopg.connect(dsn) as connection:
+        assert_operator(connection)
+        return required_row(connection.execute("SELECT ops.supplier_task_costs(%s)", (task,)))[0]

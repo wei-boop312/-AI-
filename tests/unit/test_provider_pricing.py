@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import json
+import math
 import unittest
 from datetime import datetime, timedelta, timezone
 
@@ -172,3 +173,40 @@ class SupplierPricingTests(unittest.TestCase):
         result = self.estimate({"input_tokens": 10**12}, price=price)
         self.assertEqual(result["reason"], "estimate_overflow")
         self.assertIsNone(result["amount"])
+
+    def test_rational_boundary_cannot_lose_a_positive_epsilon_beyond_decimal_context(self):
+        scaled_rate = 10**19 + 1
+        product = 1
+        denominators = []
+        candidate = 999999999
+        while len(denominators) < 5:
+            if math.gcd(candidate, product * scaled_rate) == 1:
+                denominators.append(candidate)
+                product *= candidate
+            candidate -= 2
+        meters = [
+            "input_tokens",
+            "output_tokens",
+            "cached_input_tokens",
+            "cache_write_tokens",
+            "thinking_tokens",
+        ]
+        quantities = {
+            meter: pow((product // per) * scaled_rate, -1, per)
+            for meter, per in zip(meters, denominators)
+        }
+        price = self.price(
+            rates=[
+                {"measure": meter, "amount": "100000000000.00000001", "per": per}
+                for meter, per in zip(meters, denominators)
+            ]
+        )
+        numerator = sum(
+            quantities[meter] * scaled_rate * (product // per)
+            for meter, per in zip(meters, denominators)
+        )
+        whole, remainder = divmod(numerator, product)
+        self.assertEqual(remainder, 1)
+        self.assertGreater(product, 10**44)
+        expected = f"{(whole + 1) // 100000000}.{(whole + 1) % 100000000:08d}"
+        self.assertEqual(self.estimate(quantities, price=price)["amount"], expected)

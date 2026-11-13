@@ -90,7 +90,9 @@ def parse_facts(response, width, height):
     reason = None
     candidates = response.candidates or []
     feedback = response.prompt_feedback
-    if feedback and feedback.block_reason not in (
+    if response.model_version not in (None, MODEL):
+        reason = "gemini_reported_model_mismatch"
+    elif feedback and feedback.block_reason not in (
         None,
         types.BlockedReason.BLOCKED_REASON_UNSPECIFIED,
     ):

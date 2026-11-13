@@ -508,3 +508,15 @@ class GeminiContracts(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(record["billing_usage_integrity"], "complete")
             self.assertEqual(record["usage"]["prompt_token_count"], width)
         self.assertEqual(len(self.calls), 2)
+
+    async def test_reported_different_model_degrades_facts_without_substitution_or_resubmit(self):
+        response = self.response()
+        response["modelVersion"] = "gemini-4-argon"
+        provider = self.provider(lambda _: httpx.Response(200, json=response))
+        receipt = await self.submit(provider)
+        record = provider.fetch_facts(receipt.provider_id)
+        self.assertFalse(record["facts"]["analysis_complete"])
+        self.assertIn("gemini_reported_model_mismatch", record["facts"]["uncertainties"])
+        self.assertIsNone(record["cost"]["money_amount"])
+        self.assertEqual(len(self.calls), 1)
+        self.assertIn(MODEL, self.calls[0].url.path)
