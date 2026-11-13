@@ -92,12 +92,15 @@ async def download_report(task_id: UUID,request: Request,check_id: UUID | None=N
     return RedirectResponse(await asyncio.to_thread(storage.download_url,row['report_object_key'],row['report_storage_version_id'],'report.json'),status_code=302)
 
 @router.get('/{task_id}/events')
-async def events(task_id: UUID,request: Request,last_event_id: str | None=Header(default=None),user=Depends(current_user)):
+async def events(task_id: UUID,request: Request,last_event_id: str | None=Header(default=None),cursor: str | None=None,user=Depends(current_user)):
     import asyncio
     from fastapi.responses import StreamingResponse
     from fastapi.encoders import jsonable_encoder
     try:
-        cursor=int(last_event_id or '0')
+        # Native EventSource supplies the header on reconnect. A new instance
+        # after page reload can only supply its persisted cursor in the URL.
+        # The newer reconnect header must take precedence over that initial URL.
+        cursor=int(last_event_id if last_event_id is not None else cursor or '0')
         if cursor<0 or cursor>9223372036854775807: raise ValueError()
     except ValueError: raise HTTPException(422,'invalid_event_cursor')
     async with tenant_transaction(request.app.state.api_pool,user['id']) as c:
@@ -115,7 +118,7 @@ async def events(task_id: UUID,request: Request,last_event_id: str | None=Header
                 rows=await c.fetch('SELECT id,type,payload FROM app.task_events WHERE task_id=$1 AND id>$2 ORDER BY id LIMIT 100',task_id,cursor)
                 status=await c.fetchval('SELECT status FROM app.generation_tasks WHERE id=$1',task_id)
             # No connection or transaction is held while streaming or waiting.
-            if reset: yield 'event: stream.reset\ndata: {}\n\n'
+            if reset: yield 'id:\nevent: stream.reset\ndata: {}\n\n'
             for row in rows:
                 cursor=row['id']; payload=json.loads(row['payload'])
                 data={**payload,'task_id':str(task_id)}

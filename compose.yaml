@@ -50,8 +50,10 @@ services:
     mem_limit: 1024m
     pids_limit: 128
     stop_grace_period: 40s
-    # Keep the pinned image's HEALTHCHECK command, set an explicit ready cadence.
+    # The pinned image has curl but no HEALTHCHECK. This is HTTP liveness;
+    # ComposeRuntime additionally verifies authenticated bucket access.
     healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error --max-time 1 http://127.0.0.1:9333/cluster/status > /dev/null && curl --silent --show-error --max-time 1 --output /dev/null http://127.0.0.1:8333/"]
       interval: 2s
       timeout: 2s
       retries: 40

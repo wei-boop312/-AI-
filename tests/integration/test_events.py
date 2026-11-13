@@ -7,6 +7,10 @@ class EventTests(PipelineFixture):
         response=self.client.get('/api/v1/tasks/'+task+'/events');ids=self.event_ids(response.text);self.assertGreater(len(ids),3)
         middle=ids[len(ids)//2];resumed=self.client.get('/api/v1/tasks/'+task+'/events',headers={'last-event-id':str(middle)})
         self.assertEqual(self.event_ids(resumed.text),[i for i in ids if i>middle]);self.assertIn('succeeded',resumed.text)
+        restored=self.client.get('/api/v1/tasks/'+task+'/events',params={'cursor':str(middle)})
+        self.assertEqual(self.event_ids(restored.text),[i for i in ids if i>middle])
+        reconnected=self.client.get('/api/v1/tasks/'+task+'/events',params={'cursor':str(ids[0])},headers={'last-event-id':str(middle)})
+        self.assertEqual(self.event_ids(reconnected.text),[i for i in ids if i>middle])
     def test_retention_and_empty_stream_reset_cursor(self):
         task=self.submit();self.run_worker(task);ids=self.event_ids(self.client.get('/api/v1/tasks/'+task+'/events').text)
         with psycopg.connect(self.owner) as c:c.execute('DELETE FROM app.task_events WHERE task_id=%s AND id<=%s',(task,ids[len(ids)//2]))
@@ -17,6 +21,9 @@ class EventTests(PipelineFixture):
         from uuid import uuid4
         task=self.submit();self.run_worker(task)
         self.assertEqual(self.client.get('/api/v1/tasks/'+task+'/events',headers={'last-event-id':'-1'}).status_code,422)
+        for cursor in ('-1','9223372036854775808','bad'):
+            self.assertEqual(self.client.get('/api/v1/tasks/'+task+'/events',params={'cursor':cursor}).status_code,422)
+        self.assertEqual(self.client.get('/api/v1/tasks/'+task+'/events',params={'cursor':'0'},headers={'last-event-id':'bad'}).status_code,422)
         self.assertEqual(self.client.get('/api/v1/tasks/'+str(uuid4())+'/events').status_code,404)
         self.assertEqual(self.client.get('/api/v1/tasks/'+task+'/input').json()['source_asset_version_id'],self.version)
         self.assertNotIn('_execution',self.client.get('/api/v1/tasks/'+task+'/input').json())

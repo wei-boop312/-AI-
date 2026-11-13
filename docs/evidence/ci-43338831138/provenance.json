@@ -1,0 +1,16 @@
+{
+  "run_id": 43338831138,
+  "commit": "d1c66adcd751b79528446b7a67c43b606d5f530c",
+  "conclusion": "failure",
+  "failed_step": "Compose fresh bootstrap and volume persistence",
+  "source": "GitHub Actions artifact downloaded with authenticated API",
+  "files": [
+    {
+      "path": "compose-smoke.json",
+      "sha256": "11f13c887bdb6872c544fafb80ef9f23ec7b18714861008173f361f342483d95"
+    }
+  ],
+  "scope": "Historical raw evidence, not current-commit acceptance",
+  "diagnostic": "container visual-19bdece1168af118-s3-1 has no healthcheck configured",
+  "raw_diagnostics": "Retained in ignored .local/ci-review/43338831138.zip; full artifact not published."
+}

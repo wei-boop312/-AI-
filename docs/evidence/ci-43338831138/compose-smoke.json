@@ -1,0 +1,8 @@
+{
+  "result": "FAIL",
+  "stage": "initializing",
+  "exception": "RuntimeError",
+  "s3_object_recovery": {},
+  "commit": "d1c66adcd751b79528446b7a67c43b606d5f530c",
+  "paid_calls": 0
+}

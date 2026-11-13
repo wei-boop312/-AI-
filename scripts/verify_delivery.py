@@ -45,6 +45,7 @@ def verify_static():
         require(service['image']==expected,'Compose image inventory differs')
         require(all(str(port).startswith('127.0.0.1:') for port in service['ports']),'Compose exposes non-loopback port')
         require(service.get('healthcheck') and service.get('cpus') and service.get('mem_limit') and service.get('pids_limit') and service.get('stop_grace_period'),'infrastructure lifecycle/resource constraints missing')
+        require(bool(service['healthcheck'].get('test')),'infrastructure healthcheck command missing')
     application=yaml.safe_load((ROOT/'compose.app.yaml').read_text())
     require(set(application['services'])=={'api','worker','publisher','web'},'application Compose services incomplete')
     for service in application['services'].values():
