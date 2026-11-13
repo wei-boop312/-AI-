@@ -29,11 +29,15 @@ class ProviderAuthorizationTests(unittest.IsolatedAsyncioTestCase):
         self.now = datetime(2026, 11, 13, 12, tzinfo=timezone.utc)
         self.data = {
             "authorization_id": str(uuid4()),
+            "user_id": str(uuid4()),
+            "product_id": str(uuid4()),
+            "source_asset_version_id": str(uuid4()),
             "authorized_by": "review fixture, not spending permission",
             "authorized_at": self.now.isoformat(),
             "expires_at": (self.now + timedelta(hours=1)).isoformat(),
             "source_path": "sample.png",
             "source_sha256": hashlib.sha256(self.image).hexdigest(),
+            "quote_input_sha256": "c" * 64,
             "generation": {
                 "type": "scene",
                 "prompt": "Review fixture",
@@ -140,6 +144,18 @@ class ProviderAuthorizationTests(unittest.IsolatedAsyncioTestCase):
         scope, _ = self.load(data)
         with self.assertRaisesRegex(ValueError, "dimensions"):
             await verify_sample(scope, self.path)
+
+    def test_v2_pins_owner_source_and_locked_quote_and_rejects_legacy_scope(self):
+        _, original = self.load()
+        for field in ["user_id", "product_id", "source_asset_version_id", "quote_input_sha256"]:
+            value = str(uuid4()) if field != "quote_input_sha256" else "f" * 64
+            with self.subTest(field=field):
+                self.assertNotEqual(original, self.load({**self.data, field: value})[1])
+                changed = {k: v for k, v in self.data.items() if k != field}
+                with self.assertRaises(ValueError):
+                    self.load(changed)
+        with self.assertRaises(ValueError):
+            self.load({**self.data, "schema_version": 1})
 
     def test_oversized_configuration_is_rejected(self):
         self.path.write_bytes(b" " * 65537)

@@ -139,6 +139,7 @@ def main(task):
             "three_fixture_tasks_quarantined",
             "unknown_and_queued_cannot_submit",
             "known_id_recovered_without_new_generate",
+            "provider_budget_revoked_before_new_intent",
         ):
             if detail.get("verification", {}).get(key) is not True:
                 raise ValueError("recovery guard missing: " + key)

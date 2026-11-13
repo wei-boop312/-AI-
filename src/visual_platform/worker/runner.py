@@ -102,14 +102,32 @@ class Worker:
                 payload, sort_keys=True, separators=(",", ":"), allow_nan=False
             ).encode()
         )
-        attempt = await self.db(
-            "SELECT app.record_intent($1,$2,$3,$4,$5)",
-            task,
-            self.owner,
-            fence,
-            step,
-            hashlib.sha256(encoded).hexdigest(),
-        )
+        try:
+            attempt = await self.db(
+                "SELECT app.record_intent($1,$2,$3,$4,$5)",
+                task,
+                self.owner,
+                fence,
+                step,
+                hashlib.sha256(encoded).hexdigest(),
+            )
+        except asyncpg.RaiseError as error:
+            if str(error).split("\n", 1)[0] not in {
+                "provider_budget_blocked",
+                "provider_budget_expired",
+                "provider_budget_scope_mismatch",
+                "provider_budget_exhausted",
+            }:
+                raise
+            # The denied step rolled back intent and hold; earlier steps may already have cost.
+            await self.db(
+                "SELECT app.fail_task($1,$2,$3,$4,false)",
+                task,
+                self.owner,
+                fence,
+                "provider_budget_denied",
+            )
+            return False
         await self.cost(task, fence, attempt, "intent")
         try:
             method = (

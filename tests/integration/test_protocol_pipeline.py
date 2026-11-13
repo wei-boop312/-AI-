@@ -25,7 +25,7 @@ from visual_platform.storage.s3 import S3Storage, StorageError
 from visual_platform.worker.runner import Worker
 
 
-class ProtocolPipelineTests(PipelineFixture):
+class ProtocolPipelineFixture(PipelineFixture):
     def setUp(self):
         super().setUp()
         stream = BytesIO()
@@ -41,7 +41,7 @@ class ProtocolPipelineTests(PipelineFixture):
         Image.new("RGB", (256, 256), (35, 45, 200)).save(stream, "JPEG")
         self.jpeg = stream.getvalue()
 
-    def submit(self):
+    def submit(self, before_task=None):
         body = {
             "product_id": self.product,
             "source_asset_version_id": self.version,
@@ -95,6 +95,10 @@ class ProtocolPipelineTests(PipelineFixture):
                     json.dumps(snapshot["_execution"]["rules"]),
                 ),
             )
+        self.last_quote = quote
+        self.last_snapshot = snapshot
+        if before_task is not None:
+            before_task(quote, snapshot)
         result = self.client.post(
             "/api/v1/tasks",
             json={**body, "quote_id": str(quote)},
@@ -199,6 +203,33 @@ class ProtocolPipelineTests(PipelineFixture):
     def post_count(self, supplier):
         return sum(name == supplier and method == "POST" for name, method, _ in self.calls)
 
+    def assert_response_loss(self, step):
+        self.timeout_step = step
+        task = self.submit()
+        supplier = "bfl" if step == "generate" else "gemini"
+        before = self.post_count(supplier)
+        self.assertEqual(self.run_protocol(task), "stopped")
+        self.assertEqual(self.run_protocol(task), "not_claimed")
+        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "uncertain")
+        self.assertEqual(self.post_count(supplier) - before, 1)
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.credit_transactions WHERE task_id=%s AND type IN ('charge','refund')",
+                    (task,),
+                ).fetchone()[0],
+                0,
+            )
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.task_cost_records WHERE task_id=%s AND cost_record_kind='intent_observation'",
+                    (task,),
+                ).fetchone()[0],
+                1 if step == "generate" else 2,
+            )
+
+
+class ProtocolPipelineTests(ProtocolPipelineFixture):
     def test_full_protocol_worker_final_png_cost_observations_and_single_charge(self):
         task = self.submit()
         self.assertEqual(self.run_protocol(task), "succeeded")
@@ -299,31 +330,6 @@ class ProtocolPipelineTests(PipelineFixture):
         self.assertEqual(self.run_protocol(task), "succeeded")
         self.assertEqual(self.post_count("bfl"), 1)
         self.assertEqual(self.post_count("gemini"), 1)
-
-    def assert_response_loss(self, step):
-        self.timeout_step = step
-        task = self.submit()
-        supplier = "bfl" if step == "generate" else "gemini"
-        before = self.post_count(supplier)
-        self.assertEqual(self.run_protocol(task), "stopped")
-        self.assertEqual(self.run_protocol(task), "not_claimed")
-        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "uncertain")
-        self.assertEqual(self.post_count(supplier) - before, 1)
-        with psycopg.connect(self.owner) as c:
-            self.assertEqual(
-                c.execute(
-                    "SELECT count(*) FROM app.credit_transactions WHERE task_id=%s AND type IN ('charge','refund')",
-                    (task,),
-                ).fetchone()[0],
-                0,
-            )
-            self.assertEqual(
-                c.execute(
-                    "SELECT count(*) FROM app.task_cost_records WHERE task_id=%s AND cost_record_kind='intent_observation'",
-                    (task,),
-                ).fetchone()[0],
-                1 if step == "generate" else 2,
-            )
 
     def test_generate_response_loss_keeps_frozen_and_never_reposts(self):
         self.assert_response_loss("generate")

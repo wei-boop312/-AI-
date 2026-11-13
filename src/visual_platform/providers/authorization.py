@@ -25,13 +25,17 @@ def unique_object(pairs):
 
 class SmokeAuthorization(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    schema_version: Annotated[int, Field(ge=1, le=1)] = 1
+    schema_version: Annotated[int, Field(ge=2, le=2)] = 2
     authorization_id: UUID
+    user_id: UUID
+    product_id: UUID
+    source_asset_version_id: UUID
     authorized_by: Annotated[str, Field(min_length=1, max_length=160)]
     authorized_at: datetime
     expires_at: datetime
     source_path: Annotated[str, Field(min_length=1, max_length=1000)]
     source_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    quote_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
     generation: Generation
     targets: Targets
     bfl_model: Literal["flux-3-image"] = "flux-3-image"
@@ -86,10 +90,13 @@ def load_authorization(path: Path, *, now: datetime | None = None):
     instant = now or datetime.now(timezone.utc)
     if instant.tzinfo is None or not scope.authorized_at <= instant < scope.expires_at:
         raise ValueError("authorization is not currently valid")
-    canonical = json.dumps(
+    return scope, hashlib.sha256(canonical_authorization(scope)).hexdigest()
+
+
+def canonical_authorization(scope: SmokeAuthorization) -> bytes:
+    return json.dumps(
         scope.model_dump(mode="json"), sort_keys=True, separators=(",", ":"), allow_nan=False
     ).encode()
-    return scope, hashlib.sha256(canonical).hexdigest()
 
 
 async def verify_sample(scope: SmokeAuthorization, config_path: Path):

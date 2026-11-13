@@ -1,0 +1,251 @@
+"""Real non-owner PG/Worker/S3 budget reservations; supplier HTTP remains mocked."""
+
+import hashlib
+import json
+import secrets
+import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from uuid import UUID, uuid4
+
+import psycopg
+from psycopg import sql
+from psycopg.conninfo import make_conninfo
+from test_protocol_pipeline import ProtocolPipelineFixture
+
+from visual_platform.providers.authorization import SmokeAuthorization, canonical_authorization
+from visual_platform.services.provider_budget import (
+    provider_budget_snapshot,
+    provider_quote_review,
+    register_provider_budget,
+)
+from visual_platform.services.quotes import hash_data
+
+
+class ProviderBudgetTests(ProtocolPipelineFixture):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.operator = "budget_" + uuid4().hex
+        password = secrets.token_urlsafe(32)
+        with psycopg.connect(cls.owner) as c:
+            c.execute(
+                sql.SQL(
+                    "CREATE ROLE {} LOGIN PASSWORD {} NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE"
+                ).format(sql.Identifier(cls.operator), sql.Literal(password))
+            )
+            c.execute(sql.SQL("GRANT ops_admin TO {}").format(sql.Identifier(cls.operator)))
+        cls.operator_dsn = make_conninfo(cls.owner, user=cls.operator, password=password)
+
+    @classmethod
+    def tearDownClass(cls):
+        with psycopg.connect(cls.owner) as c:
+            c.execute(sql.SQL("DROP ROLE {}").format(sql.Identifier(cls.operator)))
+        super().tearDownClass()
+
+    def bind(self, quote, snapshot, *, lifetime=3600, changed=None):
+        now = datetime.now(timezone.utc)
+        data = {
+            "authorization_id": str(uuid4()),
+            "user_id": str(self.user),
+            "product_id": self.product,
+            "source_asset_version_id": self.version,
+            "authorized_by": "synthetic offline review, not spending permission",
+            "authorized_at": (now - timedelta(seconds=1)).isoformat(),
+            "expires_at": (now + timedelta(seconds=lifetime)).isoformat(),
+            "source_path": "synthetic.png",
+            "source_sha256": snapshot["_execution"]["source_sha256"],
+            "quote_input_sha256": hash_data(snapshot),
+            "generation": snapshot["generation"],
+            "targets": snapshot["targets"],
+            "generate_ceiling": "0.10",
+            "detect_ceiling": "0.02",
+            "total_ceiling": "0.12",
+        }
+        if changed:
+            data.update(changed)
+        self.scope = SmokeAuthorization.model_validate_json(json.dumps(data))
+        self.digest = hashlib.sha256(canonical_authorization(self.scope)).hexdigest()
+        self.operation = uuid4()
+        self.budget = register_provider_budget(
+            self.operator_dsn,
+            quote,
+            self.scope,
+            self.digest,
+            self.operation,
+            "synthetic offline budget",
+        )
+
+    def snapshot(self):
+        return provider_budget_snapshot(self.operator_dsn, UUID(self.budget))
+
+    def test_known_receipts_keep_two_exact_ceilings_distinct_from_actual_cost_and_credits(self):
+        task = self.submit(self.bind)
+        reviewed = provider_quote_review(self.operator_dsn, self.user, self.last_quote)
+        self.assertEqual(reviewed["input_sha256"], self.scope.quote_input_sha256)
+        self.assertEqual(self.run_protocol(task), "succeeded")
+        self.assertEqual(self.run_protocol(task), "not_claimed")
+        value = self.snapshot()
+        self.assertEqual(value["state"], "closed")
+        self.assertEqual(Decimal(value["reserved_ceiling_total"]), Decimal("0.12"))
+        self.assertFalse(value["actual_spending_verified"])
+        self.assertEqual(
+            {(h["step"], h["outcome"]) for h in value["holds"]},
+            {("generate", "known"), ("detect", "known")},
+        )
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 1))
+        balance = self.client.get("/api/v1/credits/balance").json()
+        self.assertEqual(
+            (balance["available"], balance["reserved"], balance["spent_total"]), (84, 0, 16)
+        )
+
+    def test_response_loss_blocks_authorization_and_never_resubmits(self):
+        task = self.submit(self.bind)
+        self.timeout_step = "generate"
+        self.assertEqual(self.run_protocol(task), "stopped")
+        self.assertEqual(self.run_protocol(task), "not_claimed")
+        value = self.snapshot()
+        self.assertEqual(value["state"], "blocked")
+        self.assertEqual(len(value["holds"]), 1)
+        self.assertEqual(value["holds"][0]["outcome"], "uncertain")
+        self.assertEqual(Decimal(value["reserved_ceiling_total"]), Decimal("0.10"))
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 0))
+        balance = self.client.get("/api/v1/credits/balance").json()
+        self.assertEqual((balance["available"], balance["reserved"]), (84, 16))
+
+    def test_expired_scope_rolls_back_intent_and_hold_before_any_post_and_refunds_credits(self):
+        task = self.submit(lambda quote, snapshot: self.bind(quote, snapshot, lifetime=3))
+        while datetime.now(timezone.utc) < self.scope.expires_at:
+            time.sleep(0.05)
+        self.assertEqual(self.run_protocol(task), "stopped")
+        value = self.snapshot()
+        self.assertEqual(value["holds"], [])
+        self.assertEqual(Decimal(value["reserved_ceiling_total"]), 0)
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (0, 0))
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.provider_attempts WHERE task_id=%s", (task,)
+                ).fetchone()[0],
+                0,
+            )
+        balance = self.client.get("/api/v1/credits/balance").json()
+        self.assertEqual((balance["available"], balance["reserved"]), (100, 0))
+
+    def test_concurrent_intent_and_hold_have_one_winner(self):
+        task = self.submit(self.bind)
+        with psycopg.connect(self.worker_dsn) as c:
+            claim = c.execute("SELECT ops.claim_task(%s,'budget-worker')", (task,)).fetchone()[0]
+
+        def reserve(_):
+            try:
+                with psycopg.connect(self.worker_dsn) as c:
+                    return c.execute(
+                        "SELECT app.record_intent(%s,'budget-worker',%s,'generate',%s)",
+                        (task, claim["fencing_token"], "a" * 64),
+                    ).fetchone()[0]
+            except psycopg.errors.ObjectNotInPrerequisiteState:
+                return None
+
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            winners = list(pool.map(reserve, range(4)))
+        self.assertEqual(sum(x is not None for x in winners), 1)
+        value = self.snapshot()
+        self.assertEqual(len(value["holds"]), 1)
+        self.assertEqual(Decimal(value["reserved_ceiling_total"]), Decimal("0.10"))
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (0, 0))
+
+    def test_registration_is_idempotent_and_cannot_expand_reviewed_scope(self):
+        task = self.submit(self.bind)
+        # The quote is now consumed, but exact operation replay still returns the original record.
+        self.assertEqual(
+            register_provider_budget(
+                self.operator_dsn,
+                self.last_quote,
+                self.scope,
+                self.digest,
+                self.operation,
+                "synthetic offline budget",
+            ),
+            self.budget,
+        )
+        changed = SmokeAuthorization.model_validate_json(
+            json.dumps({**self.scope.model_dump(mode="json"), "total_ceiling": "0.13"})
+        )
+        digest = hashlib.sha256(canonical_authorization(changed)).hexdigest()
+        with self.assertRaises(psycopg.errors.RaiseException):
+            register_provider_budget(
+                self.operator_dsn,
+                self.last_quote,
+                changed,
+                digest,
+                self.operation,
+                "synthetic offline budget",
+            )
+        self.assertEqual(self.snapshot()["scope_sha256"], self.digest)
+        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "queued")
+
+    def test_sql_itself_rejects_unreviewed_types_limits_and_secret_fields(self):
+        def check(quote, snapshot):
+            self.bind(quote, snapshot)
+            for changed, expected in [
+                ({"total_ceiling": "0.11"}, "invalid_provider_ceiling"),
+                ({"generate_ceiling": 0.1}, "invalid_provider_scope"),
+                ({"max_generate_calls": 2}, "invalid_provider_scope"),
+                ({"max_generate_calls": "1"}, "invalid_provider_scope"),
+                ({"max_detect_calls": True}, "invalid_provider_scope"),
+                ({"api_key": "test"}, "invalid_provider_scope"),
+            ]:
+                identity = uuid4()
+                raw = {
+                    **self.scope.model_dump(mode="json"),
+                    **changed,
+                    "authorization_id": str(identity),
+                }
+                text = json.dumps(raw, sort_keys=True, separators=(",", ":"))
+                digest = hashlib.sha256(text.encode()).hexdigest()
+                with self.subTest(changed=changed), psycopg.connect(self.operator_dsn) as c:
+                    with self.assertRaises(psycopg.errors.RaiseException) as rejected:
+                        c.execute(
+                            "SELECT ops.register_provider_budget(%s,%s,%s,%s,%s,'negative SQL fixture')",
+                            (identity, quote, text, digest, uuid4()),
+                        )
+                    self.assertEqual(str(rejected.exception).splitlines()[0], expected)
+            self.assertEqual(self.snapshot()["scope_sha256"], self.digest)
+
+        self.submit(check)
+
+    def test_wrong_quote_hash_and_unprivileged_calls_do_not_create_budget_records(self):
+        for changed in [
+            {"quote_input_sha256": "f" * 64},
+            {"user_id": str(uuid4())},
+            {"source_sha256": "f" * 64},
+        ]:
+            with self.subTest(changed=changed), self.assertRaises(psycopg.errors.RaiseException):
+                self.submit(lambda quote, snapshot: self.bind(quote, snapshot, changed=changed))
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM ops.provider_budgets WHERE quote_id=%s",
+                    (self.last_quote,),
+                ).fetchone()[0],
+                0,
+            )
+        for query, parameters in [
+            (
+                "SELECT ops.register_provider_budget(%s,%s,'{}',%s,%s,'forbidden')",
+                (uuid4(), self.last_quote, "a" * 64, uuid4()),
+            ),
+            ("SELECT ops.reserve_provider_budget(%s,%s,'generate')", (uuid4(), uuid4())),
+            ("SELECT * FROM ops.provider_budgets", ()),
+        ]:
+            with self.subTest(query=query), psycopg.connect(self.worker_dsn) as c:
+                with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                    c.execute(query, parameters)
+        with psycopg.connect(self.operator_dsn) as c:
+            with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                c.execute(
+                    "UPDATE ops.provider_budgets SET total_ceiling=999 WHERE id=%s",
+                    (self.scope.authorization_id,),
+                )

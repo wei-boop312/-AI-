@@ -77,6 +77,7 @@ def main():
             "three_fixture_tasks_quarantined",
             "unknown_and_queued_cannot_submit",
             "known_id_recovered_without_new_generate",
+            "provider_budget_revoked_before_new_intent",
         ):
             require(verification[field] is True, "recovery guard failed: " + field)
         require(

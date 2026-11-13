@@ -1,0 +1,65 @@
+{
+  "observed_at": "2026-11-13T14:54:06.141168+00:00",
+  "requested_gate": "all",
+  "profile": "offline",
+  "paid_calls": 0,
+  "deployed": false,
+  "not_verified": {
+    "P4-03": "WAITING_EXTERNAL: real provider call and budget authorization are absent",
+    "P5-03": "WAITING_EXTERNAL: target environment, policy evidence and release decision"
+  },
+  "scope": "current native suites + production browser + Compose applications/persistence + independent versioned backup restore + locked build evidence",
+  "source_provenance": {
+    "result": "PASS",
+    "scope": "P0-01 specification provenance; authorized remote only, no deployment",
+    "specification_files": 12,
+    "paid_calls": 0
+  },
+  "static": "PASS",
+  "legal_text_references": 273,
+  "dependency_components": 192,
+  "openapi_paths": 31,
+  "native_ci": "PASS",
+  "commit": "3dda30f8c7e6f7281051b680a975dd05b5f91a37",
+  "docker_engine": "28.0.4",
+  "runtime_image_ids": [
+    "sha256:b0325b09a04c5c9cf3079d5a36415508124e14f73f980565711a3f6b4a8c2a65",
+    "sha256:d84ce8d8f77a1b6c30c30312e89965df3e398bc53d65c5df769fa682aa8b994f"
+  ],
+  "application_compose": "PASS",
+  "frontend_sse_cursor": "PASS",
+  "versioned_backup_restore": "PASS",
+  "runtime_metrics": {
+    "api_samples": 950,
+    "archive_operations": 35,
+    "phase_groups": 5,
+    "monetary_groups": 1
+  },
+  "operations_rehearsal": "PASS",
+  "verified_tasks": [
+    "P0-01",
+    "P0-02",
+    "P0-03",
+    "P1-01",
+    "P1-02",
+    "P1-03",
+    "P1-04",
+    "P1-05",
+    "P2-01",
+    "P2-02",
+    "P2-03",
+    "P2-04",
+    "P2-05",
+    "P2-06",
+    "P2-07",
+    "P3-01",
+    "P3-02",
+    "P3-03",
+    "P3-04",
+    "P4-01 (mock HTTP)",
+    "P4-02 (mock SDK HTTP)",
+    "P5-01",
+    "P5-02 (CI rehearsal)"
+  ],
+  "result": "OFFLINE_READY"
+}

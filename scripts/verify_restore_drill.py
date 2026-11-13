@@ -5,7 +5,7 @@ import asyncio
 import hashlib
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -25,9 +25,17 @@ from visual_platform.core.identity import hash_password
 from visual_platform.core.settings import Settings
 from visual_platform.db.pool import open_pool
 from visual_platform.db.result import required_row
+from visual_platform.domain.schemas import QuoteRequest, canonical_hash
+from visual_platform.providers.authorization import SmokeAuthorization, canonical_authorization
 from visual_platform.providers.fake import DurableFakeProvider
 from visual_platform.services.backup import require
 from visual_platform.services.config_backup import validate_configuration
+from visual_platform.services.provider_budget import (
+    provider_budget_snapshot,
+    provider_quote_review,
+    register_provider_budget,
+)
+from visual_platform.services.quotes import hash_data
 from visual_platform.services.rule_operations import publish_rule
 from visual_platform.storage.s3 import S3Storage, StorageError
 from visual_platform.worker.runner import Worker
@@ -280,6 +288,73 @@ if args.command == "prepare":
             == (136, 48, 16),
             "fixture balance mismatch",
         )
+    # Keep one reviewed, unused quote in the snapshot: it may have been consumed
+    # after backup, so restore must revoke it even though no task existed then.
+    with TestClient(create_app(settings)) as client:
+        headers = login(client, state)
+        quotation = client.post("/api/v1/quotes", json=body, headers=headers)
+        require(quotation.status_code == 201, "unused budget quote source failed")
+    with psycopg.connect(profile["API_DATABASE_URL"]) as c:
+        c.execute("SELECT set_config('app.user_id',%s,true)", (str(uid),))
+        snapshot = required_row(
+            c.execute(
+                "SELECT input_snapshot FROM app.quotes WHERE id=%s", (quotation.json()["quote_id"],)
+            )
+        )[0]
+        snapshot["_execution"].update(
+            provider_profile="offline_protocol_mock",
+            provider_model="flux-3-image-protocol-mock",
+            price_version="trial-protocol-mock-v1",
+        )
+        quote_identity = uuid4()
+        c.execute(
+            "SELECT app.create_quote(%s,%s,%s,%s::jsonb,%s::jsonb)",
+            (
+                quote_identity,
+                canonical_hash(QuoteRequest.model_validate(body)),
+                hash_data(snapshot),
+                json.dumps(snapshot),
+                json.dumps(snapshot["_execution"]["rules"]),
+            ),
+        )
+    instant = datetime.now(timezone.utc)
+    scope = SmokeAuthorization.model_validate_json(
+        json.dumps(
+            {
+                "authorization_id": str(uuid4()),
+                "user_id": str(uid),
+                "product_id": state["product_id"],
+                "source_asset_version_id": body["source_asset_version_id"],
+                "quote_input_sha256": hash_data(snapshot),
+                "authorized_by": "synthetic offline recovery review",
+                "authorized_at": instant.isoformat(),
+                "expires_at": (instant + timedelta(hours=1)).isoformat(),
+                "source_path": "restore-fixture.png",
+                "source_sha256": snapshot["_execution"]["source_sha256"],
+                "generation": snapshot["generation"],
+                "targets": snapshot["targets"],
+                "generate_ceiling": "0.10",
+                "detect_ceiling": "0.02",
+                "total_ceiling": "0.12",
+            }
+        )
+    )
+    digest = hashlib.sha256(canonical_authorization(scope)).hexdigest()
+    state["budget_authorization_id"] = register_provider_budget(
+        profile["ADMIN_DATABASE_URL"],
+        quote_identity,
+        scope,
+        digest,
+        uuid4(),
+        "synthetic restore budget",
+    )
+    state["budget_quote_id"] = str(quote_identity)
+    state["budget_scope_sha256"] = digest
+    require(
+        provider_budget_snapshot(profile["ADMIN_DATABASE_URL"], scope.authorization_id)["state"]
+        == "open",
+        "source authorization not open",
+    )
     args.state.parent.mkdir(parents=True, exist_ok=True)
     args.state.write_text(json.dumps(state))
     print("Prepared isolated restore fixtures; private state retained in work.")
@@ -326,6 +401,71 @@ elif args.command == "verify":
         )
         client.cookies.clear()
         headers = login(client, state)
+        budget = provider_budget_snapshot(
+            profile["ADMIN_DATABASE_URL"], UUID(state["budget_authorization_id"])
+        )
+        require(
+            budget["state"] == "blocked"
+            and budget["scope_sha256"] == state["budget_scope_sha256"]
+            and budget["holds"] == [],
+            "restored unused authorization not revoked",
+        )
+        require(
+            result.get("provider_budgets_revoked", 0) >= 1,
+            "restore did not report budget revocation",
+        )
+        review = provider_quote_review(
+            profile["ADMIN_DATABASE_URL"], UUID(state["user_id"]), UUID(state["budget_quote_id"])
+        )
+        snapshot = review["input_snapshot"]
+        business = {
+            k: snapshot[k]
+            for k in (
+                "product_id",
+                "source_asset_version_id",
+                "appearance_profile_id",
+                "generation",
+                "targets",
+            )
+            if k in snapshot and snapshot[k] is not None
+        }
+        probe = client.post(
+            "/api/v1/tasks",
+            json={**business, "quote_id": state["budget_quote_id"]},
+            headers={**headers, "Idempotency-Key": str(uuid4())},
+        )
+        require(probe.status_code == 201, "restore budget probe task failed")
+        probe_id = probe.json()["id"]
+        probe_owner = "restore-budget-" + uuid4().hex
+        with psycopg.connect(profile["WORKER_DATABASE_URL"]) as c:
+            claim = required_row(
+                c.execute("SELECT ops.claim_task(%s,%s)", (probe_id, probe_owner))
+            )[0]
+        try:
+            with psycopg.connect(profile["WORKER_DATABASE_URL"]) as c:
+                c.execute(
+                    "SELECT app.record_intent(%s,%s,%s,'generate',%s)",
+                    (probe_id, probe_owner, claim["fencing_token"], "a" * 64),
+                )
+        except psycopg.errors.RaiseException as error:
+            require(
+                str(error).splitlines()[0] == "provider_budget_blocked",
+                "unexpected restore budget rejection",
+            )
+        else:
+            raise ValueError("restored authorization permitted a new intent")
+        with psycopg.connect(profile["WORKER_DATABASE_URL"]) as c:
+            c.execute(
+                "SELECT app.fail_task(%s,%s,%s,'restore_budget_probe',false)",
+                (probe_id, probe_owner, claim["fencing_token"]),
+            )
+        require(
+            provider_budget_snapshot(
+                profile["ADMIN_DATABASE_URL"], UUID(state["budget_authorization_id"])
+            )["holds"]
+            == [],
+            "restore probe left a monetary reservation",
+        )
         require(
             client.get("/api/v1/products/" + state["post_snapshot_product_id"]).status_code == 404,
             "post-snapshot marker unexpectedly restored",
@@ -402,6 +542,7 @@ elif args.command == "verify":
         "post_snapshot_marker_absent": True,
         "completed_report_review_and_download_hash_preserved": True,
         "pixel_protection_preserved": True,
+        "provider_budget_revoked_before_new_intent": True,
         "three_fixture_tasks_quarantined": True,
         "unknown_and_queued_cannot_submit": True,
         "known_id_recovered_without_new_generate": True,

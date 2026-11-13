@@ -573,6 +573,13 @@ def restore_database(
                 c.execute("DELETE FROM ops.service_heartbeats")
             c.execute("UPDATE auth.session_families SET revoked_at=COALESCE(revoked_at,now())")
             c.execute("UPDATE auth.refresh_sessions SET revoked_at=COALESCE(revoked_at,now())")
+            provider_budget_revocations = 0
+            if required_row(c.execute("SELECT to_regclass('ops.provider_budgets')"))[0]:
+                # An unconsumed quote may have spent money after the snapshot.
+                # Restoring its old authorization must never enable new submissions.
+                provider_budget_revocations = c.execute(
+                    "UPDATE ops.provider_budgets SET state='blocked' WHERE state='open'"
+                ).rowcount
             tasks = c.execute(
                 "SELECT id,status,credits_status FROM app.generation_tasks WHERE status IN ('queued','processing','uncertain') FOR UPDATE"
             ).fetchall()
@@ -620,6 +627,7 @@ def restore_database(
             "function_owners_preserved": True,
             "old_logins_restored_as_nologin": True,
             "sessions_revoked": True,
+            "provider_budgets_revoked": provider_budget_revocations,
             "quarantined_tasks": len(tasks),
             "before_invariants": before,
             "after_invariants": after,

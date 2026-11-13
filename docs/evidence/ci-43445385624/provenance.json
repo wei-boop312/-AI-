@@ -1,0 +1,31 @@
+{
+  "run_id": 43445385624,
+  "commit": "3dda30f8c7e6f7281051b680a975dd05b5f91a37",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43445385624",
+  "artifact_id": 14048396903,
+  "archive_sha256": "7981a4482ab0c34dddd628f3d5d29cb2d8e9f7d8dea1510692d94bdd909d3de0",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "64ff33130c34f8279bf47bc143db77d1ed61478990930df6ea985507d1e8061f"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "75b2c4e3d365096dee245fc65450162a6f371716cc3e3c7fa158428ea0204b00"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "77e0e89a98523f2bc7ba00c8ad8c8a208ec4caa5b825cdbfabbe4f7db8d36ff5"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "60be29934885ff59de688fcf37358211a7464f9b105b0b0a58e19ceb5d73a305"
+    },
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "d3828defd1b44d5b6f4bd56c9653d45321f234766a5be63b7908454f5587ebe3"
+    }
+  },
+  "scope": "Original reports: 256..8192 output, 25MP actual decoder and Worker/S3 delivery boundaries, full offline CI. Later 0027 monetary reservation candidate is not covered. No paid models or deployment; raw zip private."
+}
