@@ -53,6 +53,9 @@ class DetectionDeliveryTests(ProviderBudgetFixture):
         self.assertEqual(report["auto_overall"], "manual_review")
         self.assertFalse(report["facts"]["analysis_complete"])
         self.assertTrue(report["detection_degraded"])
+        self.assertTrue(
+            self.client.get("/api/v1/tasks/" + task).json()["compliance"]["detection_degraded"]
+        )
         self.assertIn("detection_unavailable_operator_delivery", report["facts"]["uncertainties"])
         download = self.client.get("/api/v1/tasks/" + task + "/download", follow_redirects=False)
         self.assertEqual(download.status_code, 302)
@@ -145,6 +148,9 @@ class DetectionDeliveryTests(ProviderBudgetFixture):
         report = self.client.get("/api/v1/tasks/" + task + "/compliance").json()
         self.assertIn("detection_unavailable_operator_delivery", report["facts"]["uncertainties"])
         self.assertFalse(report["detection_degraded"])
+        self.assertFalse(
+            self.client.get("/api/v1/tasks/" + task).json()["compliance"]["detection_degraded"]
+        )
         self.assertIsNone(detection_delivery_context(self.operator_dsn, UUID(task))["decision"])
 
     def test_public_delivery_flag_is_tenant_scoped_without_exposing_operator_table(self):

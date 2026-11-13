@@ -105,6 +105,7 @@ test('检测结果未知经运营审批交付，保留未知状态且只结算�
  const digest=before.final.sha256;const op=crypto.randomUUID();const approved=review(['approve','--task',task.id,'--attempt',before.detect_attempt.id,'--final-sha256',digest,'--operation-id',op,'--reason','reviewed controlled offline final image; preserve unresolved detection','--evidence-digest',digest]);expect(approved.result).toBe('LOCAL_DELIVERY_APPROVED');
  expect(worker(task.id,'success').result).toBe('succeeded');await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible({timeout:15000});
  const download=await page.request.get('/api/v1/tasks/'+task.id+'/download');expect(download.status()).toBe(200);expect(createHash('sha256').update(await download.body()).digest('hex')).toBe(digest);
+ await expect(page.getByText('检测结果未取得，已按运营审核交付；请人工核对成品。',{exact:true})).toBeVisible();
  const report=await(await page.request.get('/api/v1/tasks/'+task.id+'/compliance')).json();expect(report.detection_degraded).toBe(true);expect(report.auto_overall).toBe('manual_review');
  await page.getByRole('button',{name:'查看检查报告'}).click();await expect(page.getByText('视觉检测未取得可用结果',{exact:true})).toBeVisible();await expect(page.getByText(/此交付不代表检测成功/)).toBeVisible();
  const after=review(['inspect','--task',task.id]).context;expect(after.detect_attempt.status).toBe('uncertain');expect(after.detect_attempt.provider_id).toBeNull();expect(after.supplier_cost_verified).toBe(false);

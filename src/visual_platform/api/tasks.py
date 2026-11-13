@@ -13,7 +13,7 @@ from visual_platform.services.quotes import db_conflict, hash_data
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 
-COLUMNS = "product_id,source_asset_version_id,(SELECT asset_id FROM app.asset_versions WHERE id=generation_tasks.source_asset_version_id) AS source_asset_id,id,status,phase,revision,credits_status,reserved_credits,created_at,updated_at,completed_at,error_code,final_version_id,compliance_id,(SELECT sha256 FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_sha256,(SELECT width FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_width,(SELECT height FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_height,(SELECT auto_overall FROM app.compliance_checks WHERE id=generation_tasks.compliance_id) AS auto_overall"
+COLUMNS = "product_id,source_asset_version_id,(SELECT asset_id FROM app.asset_versions WHERE id=generation_tasks.source_asset_version_id) AS source_asset_id,id,status,phase,revision,credits_status,reserved_credits,created_at,updated_at,completed_at,error_code,final_version_id,compliance_id,(SELECT sha256 FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_sha256,(SELECT width FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_width,(SELECT height FROM app.asset_versions WHERE id=generation_tasks.final_version_id) AS final_height,(SELECT auto_overall FROM app.compliance_checks WHERE id=generation_tasks.compliance_id) AS auto_overall,app.is_manual_detection_delivery(compliance_id) AS detection_degraded"
 
 
 def serialize(row, replay=False):
@@ -29,6 +29,7 @@ def serialize(row, replay=False):
     width = data.pop("final_width")
     height = data.pop("final_height")
     overall = data.pop("auto_overall")
+    degraded = data.pop("detection_degraded")
     data["result"] = (
         {
             "asset_version_id": str(version),
@@ -41,7 +42,11 @@ def serialize(row, replay=False):
         if data["status"] == "succeeded"
         else None
     )
-    data["compliance"] = {"auto_overall": overall, "report_id": str(check)} if check else None
+    data["compliance"] = (
+        {"auto_overall": overall, "report_id": str(check), "detection_degraded": degraded}
+        if check
+        else None
+    )
     data["idempotent_replay"] = replay
     return data
 
