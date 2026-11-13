@@ -76,7 +76,7 @@ python scripts/provider_budget.py inspect --authorization <uuid>
 0033与非空账本恢复最终证据：9174020/CI43503294037成功，128单元/50契约/164原生、4+7浏览器、完整Compose/独立冷恢复/重启/P5-02通过，包含cost_estimate_history_and_review_block_preserved。这里只验证合成供应商与估算，不代表真实发票、实际USD支出或Hubway live接通。
 
 
-## v3 多计价单位预算（0034候选，等待原生 CI）
+## v3 多计价单位预算（0034，aecd209/CI43511616685整轮通过）
 
 授权 JSON 的 `schema_version: 3` 用 `step_budgets.generate/detect` 各自指定 `{currency, ceiling}`，`currency_totals` 是同结构的单位总额数组。允许 USD、CNY、BFL_CREDIT、HUBWAY_BALANCE_UNIT；上限必须是正数的精确字符串，最多6位小数。相同单位两步的总上限必须覆盖两步上限之和；不同单位分别授权，禁止重复、缺失或多余的单位总额，禁止重试步骤和 v2 标量字段混入。模型和每步最多1次仍固定。
 
@@ -87,14 +87,14 @@ v3私有快照的 `currency/total_ceiling/reserved_ceiling_total/known_estimate_
 登记/查看仍使用 `scripts/provider_budget.py register/inspect`；预检 `scripts/provider_smoke.py --preflight` 同时支持v2/v3，并保持execution_enabled=false与零付费调用。真实账单、价格凭证与live供应商接入仍待完成。
 
 
-## 同步检测事实的持久化（0035候选）
+## 同步检测事实的持久化（0035，cd29656/CI43512330026整轮通过）
 
 Gemini同步响应没有可供恢复查询的远程任务ID；`gemini-<意图UUID>`仅是本地归档标识。新Worker在应用检测回执之前，用单个数据库事务保存已知回执与完整的受限事实归档，含原响应摘要、最终图摘要、原始计量和SDK/提示版本信息；任意一步或审计写入失败都会回滚两者。私有表与受限函数不向API用户暴露，数据不可修改或删除。Worker后续估算和交付读取已存归档，不依赖本地`.facts.json`，不会因文件丢失再次调用检测。
 
 已知响应返回到首次持久化之间仍存在不可消除的进程崩溃窗口：若数据库未保存且本地原结果也丢失，只能保持未知/人工处置，不能自动重发或宣称检测成功。旧回执仅在原本地事实文件仍在时补归档。归档证明保存的是同一次响应，不证明供应商实际质量、发票或商户真实扣费；默认仍双MockTransport。
 
 
-## 账单作用域预检（0036候选，尚未确认真实费用）
+## 账单作用域预检（0036，0e1d772/CI43514389341整轮通过，未确认真实费用）
 
 私有Ops命令：
 
