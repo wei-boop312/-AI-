@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-14 0039规则技术约束与公开资料候选：浏览器实际读取Ozon新官方global-help.ozon.com的China卖家Image Requirements正文，创建短摘录/审阅包和两个未发布/不完整/需身份复核的类目草稿；不存完整第三方网页、不改3份未核验种子，不擅自解释10 MB或把显示调整当上传拒绝。RuleConfig新增最大宽高、精确有理比例与范围一致性；Python/PG独立拒绝错误字段/类型。PG合规写入/重检按最终资产实际尺寸/字节及事实尺寸再把关，保留原有人工/证据/抽检规则，不信任伪造passed。6新单元已过，本地154单元/静态/前端生产构建通过；6项PG/S3/Worker候选含上下界、官方域名与仿冒、真实报告/规则重检伪造阻断，待CI。
+
 2026-11-14 34a2119/CI43518399894迁移0038通过、148单元/50契约和静态通过；193原生有1失败1错误：旧wrong-provider用例仍预期领取后stopped，现应not_claimed并保持任务/积分完全一致；新增MQ用例把libpq键值DSN交给只收URI的asyncpg。修正旧断言并加强不变检查；新dispatcher LOGIN仍独立非owner，改用已有Broker fixture同样的URL编码URI格式。原失败JSON/原生日志/SHA已留存，其他隔离测试不放宽，整轮仍待新CI。
 
 2026-11-14 0038执行profile隔离候选：Worker使用冻结profile参与PG领取，配置不匹配在租约/状态/unknown检查之前返回未领取；旧2参接口只代表默认offline Fake，新3参仅offline或offline_protocol_mock，原manual/未知意图/租约fence边界保留。协议初始/恢复outbox通知进入已有人工队列，普通delivery验证拒绝协议或manual消息，显式私有Mock Worker仍可单任务执行；不新增live能力/付费。新增6原生候选含双向错误Worker零状态/积分变化、旧API与显式profile、8并发只1正确winner、manual与未知profile拒绝、实际MQ只有人工队列且不生成自动恢复。旧协议fixture改用明确3参，不放宽财务/未知供应商断言；原生/CI待验。

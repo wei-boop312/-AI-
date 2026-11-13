@@ -49,6 +49,7 @@ SUITES = {
         "unit": ["test_rules.py", "test_facts.py"],
         "integration": [
             "test_rule_operations.py",
+            "test_rule_constraints.py",
             "test_reviews_reconciliation.py",
             "test_detection_delivery.py",
         ],

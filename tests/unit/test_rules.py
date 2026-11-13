@@ -209,3 +209,98 @@ class RuleTests(unittest.TestCase):
         self.facts["schema_version"] = True
         with self.assertRaises(ValidationError):
             Facts.model_validate(self.facts)
+
+    def test_max_dimensions_and_exact_ratio_add_known_technical_failures(self):
+        self.rule["config"]["min_height"] = 1
+        for config, reason in (
+            ({"max_width": 199}, "max_width"),
+            ({"max_height": 99}, "max_height"),
+            ({"required_aspect_ratio": {"width": 3, "height": 4}}, "aspect_ratio"),
+        ):
+            original = copy.deepcopy(self.rule["config"])
+            self.rule["config"].update(config)
+            with self.subTest(reason=reason):
+                result = self.report()
+                self.assertEqual(result["auto_overall"], "non_compliant")
+                self.assertIn(reason, self.reasons(result))
+            self.rule["config"] = original
+
+    def test_exact_ratio_and_upper_bound_include_boundary_without_float_tolerance(self):
+        self.rule["config"].update(
+            max_width=200, max_height=100, required_aspect_ratio={"width": 2, "height": 1}
+        )
+        self.assertEqual(self.report()["auto_overall"], "compliant")
+        self.rule["config"]["required_aspect_ratio"] = {"width": 2000, "height": 1000}
+        self.assertEqual(self.report()["auto_overall"], "compliant")
+        self.rule["config"]["required_aspect_ratio"] = {"width": 9999, "height": 5000}
+        self.assertEqual(self.report()["auto_overall"], "non_compliant")
+
+    def test_new_constraints_reject_boolean_float_extra_keys_and_inverted_bounds(self):
+        from visual_platform.domain.rules import RuleConfig
+
+        for data in (
+            {"max_width": True},
+            {"max_height": 1.5},
+            {"max_width": 1000001},
+            {"min_width": 500, "max_width": 499},
+            {"min_height": 5, "max_height": 4},
+            {"required_aspect_ratio": {"width": True, "height": 4}},
+            {"required_aspect_ratio": {"width": 3.0, "height": 4}},
+            {"required_aspect_ratio": {"width": 3, "height": 0}},
+            {"required_aspect_ratio": {"width": 10001, "height": 4}},
+            {"required_aspect_ratio": {"width": 3, "height": 4, "tolerance": 1}},
+        ):
+            with self.subTest(data=data), self.assertRaises(ValidationError):
+                RuleConfig.model_validate(data)
+
+    def test_unverified_maximum_does_not_turn_into_an_automatic_policy_failure(self):
+        self.rule["evidence_status"] = "unverified"
+        self.rule["config"]["max_width"] = 100
+        report = self.report()
+        self.assertEqual(report["auto_overall"], "manual_review")
+        checks = report["per_platform"][0]["checks"]
+        self.assertEqual(next(c["status"] for c in checks if c["id"] == "max_width"), "unverified")
+
+    def test_new_official_ozon_help_host_is_scoped_and_lookalikes_are_rejected(self):
+        base = {
+            "platform": "ozon",
+            "marketplace": "RU",
+            "category": "synthetic",
+            "image_type": "MAIN",
+            "version": "synthetic",
+            "evidence_status": "verified",
+            "config": {},
+            "retrieved_at": datetime.now(timezone.utc),
+            "evidence_sha256": "a" * 64,
+        }
+        RuleDocument.model_validate(
+            {
+                **base,
+                "source_urls": [
+                    "https://global-help.ozon.com/en/products/requirements/media/image-requirements"
+                ],
+            }
+        )
+        for url in (
+            "https://global-help.ozon.com.evil.invalid/policy",
+            "https://evilozon.com/policy",
+            "https://user:pass@global-help.ozon.com/policy",
+        ):
+            with self.subTest(url=url), self.assertRaises(ValidationError):
+                RuleDocument.model_validate({**base, "source_urls": [url]})
+
+    def test_observed_ozon_packets_are_unpublished_incomplete_drafts_with_exact_archive_hash(self):
+        import hashlib
+
+        raw = Path("rules/evidence/ozon-image-requirements-20261114.json").read_bytes()
+        packet = json.loads(raw)
+        self.assertFalse(packet["full_official_page_archived"])
+        self.assertFalse(packet["complete_rule_set"])
+        drafts = list(Path("rules/drafts").glob("ozon-*-20261114.json"))
+        self.assertEqual(len(drafts), 2)
+        for path in drafts:
+            doc = RuleDocument.model_validate_json(path.read_bytes())
+            self.assertEqual(doc.evidence_sha256, hashlib.sha256(raw).hexdigest())
+            self.assertEqual(doc.evidence_status, "unverified")
+            self.assertFalse(doc.config.complete_rule_set)
+            self.assertIsNone(doc.config.max_bytes)

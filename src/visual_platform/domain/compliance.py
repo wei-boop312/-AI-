@@ -80,6 +80,32 @@ def evaluate_rules(final_sha256, rules, facts, local, *, sampling_selected=False
                 local.get("byte_size", 0) <= config.max_bytes,
                 {"actual": local.get("byte_size"), "maximum": config.max_bytes},
             )
+        if config.max_width is not None:
+            check(
+                "max_width",
+                local.get("width", 0) <= config.max_width,
+                {"actual": local.get("width"), "maximum": config.max_width},
+            )
+        if config.max_height is not None:
+            check(
+                "max_height",
+                local.get("height", 0) <= config.max_height,
+                {"actual": local.get("height"), "maximum": config.max_height},
+            )
+        if config.required_aspect_ratio is not None:
+            ratio = config.required_aspect_ratio
+            width, height = local.get("width"), local.get("height")
+            valid = type(width) is int and type(height) is int and width > 0 and height > 0
+            check(
+                "aspect_ratio",
+                valid and width * ratio.height == height * ratio.width,
+                {
+                    "actual_width": width,
+                    "actual_height": height,
+                    "required_width": ratio.width,
+                    "required_height": ratio.height,
+                },
+            )
         if config.require_white_background:
             background = facts.get("background", {})
             if (

@@ -8,5 +8,5 @@ DEFAULT_MARKETPLACES = {"amazon": "US", "temu": "US", "ozon": "RU"}
 OFFICIAL_RULE_HOSTS = {
     "amazon": ("amazon.com",),
     "temu": ("temu.com", "kuajingmaihuo.com"),
-    "ozon": ("ozon.ru",),
+    "ozon": ("ozon.ru", "global-help.ozon.com"),
 }

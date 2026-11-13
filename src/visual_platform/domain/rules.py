@@ -10,10 +10,18 @@ from visual_platform.domain.schemas import Positive, StrictModel
 Ratio = Annotated[float, Field(ge=0, le=1, strict=True)]
 
 
+class RequiredAspectRatio(StrictModel):
+    width: Annotated[int, Field(strict=True, ge=1, le=10000)]
+    height: Annotated[int, Field(strict=True, ge=1, le=10000)]
+
+
 class RuleConfig(StrictModel):
     min_width: Positive | None = None
     min_height: Positive | None = None
     max_bytes: Positive | None = None
+    max_width: Annotated[int, Field(strict=True, ge=1, le=1000000)] | None = None
+    max_height: Annotated[int, Field(strict=True, ge=1, le=1000000)] | None = None
+    required_aspect_ratio: RequiredAspectRatio | None = None
     require_white_background: bool = Field(default=False, strict=True)
     forbid_added_text: bool = Field(default=False, strict=True)
     forbid_added_watermarks: bool = Field(default=False, strict=True)
@@ -22,6 +30,16 @@ class RuleConfig(StrictModel):
     minimum_confidence: Ratio = 0.9
     require_identity_review: bool = Field(default=True, strict=True)
     complete_rule_set: bool = Field(default=False, strict=True)
+
+    @model_validator(mode="after")
+    def dimension_bounds(self):
+        for minimum, maximum in (
+            (self.min_width, self.max_width),
+            (self.min_height, self.max_height),
+        ):
+            if minimum is not None and maximum is not None and minimum > maximum:
+                raise ValueError("rule minimum exceeds maximum")
+        return self
 
 
 class RuleDocument(StrictModel):
