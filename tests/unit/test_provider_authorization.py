@@ -194,3 +194,87 @@ class ProviderAuthorizationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.returncode, 1)
         self.assertNotIn(secret, result.stdout + result.stderr)
         self.assertEqual(json.loads(result.stdout)["result"], "PREFLIGHT_REJECTED")
+
+    def unit_scope(self):
+        data = {
+            k: v
+            for k, v in self.data.items()
+            if k not in ("generate_ceiling", "detect_ceiling", "total_ceiling")
+        }
+        data.update(
+            schema_version=3,
+            step_budgets={
+                "generate": {"currency": "BFL_CREDIT", "ceiling": "0.10"},
+                "detect": {"currency": "HUBWAY_BALANCE_UNIT", "ceiling": "0.02"},
+            },
+            currency_totals=[
+                {"currency": "BFL_CREDIT", "ceiling": "0.10"},
+                {"currency": "HUBWAY_BALANCE_UNIT", "ceiling": "0.02"},
+            ],
+        )
+        return data
+
+    def test_v3_units_remain_explicit_and_change_review_digest(self):
+        data = self.unit_scope()
+        scope, digest = self.load(data)
+        self.assertEqual(scope.schema_version, 3)
+        self.assertNotIn("total_ceiling", scope.model_dump())
+        data["step_budgets"]["generate"]["currency"] = "CNY"
+        data["currency_totals"][0]["currency"] = "CNY"
+        self.assertNotEqual(digest, self.load(data)[1])
+
+    def test_v3_rejects_missing_extra_duplicate_and_underfunded_currency_totals(self):
+        for totals in (
+            [],
+            [{"currency": "USD", "ceiling": "1"}],
+            [
+                {"currency": "BFL_CREDIT", "ceiling": "0.01"},
+                {"currency": "HUBWAY_BALANCE_UNIT", "ceiling": "0.02"},
+            ],
+            [{"currency": "BFL_CREDIT", "ceiling": "1"}] * 2,
+        ):
+            with self.subTest(totals=totals), self.assertRaises(ValueError):
+                self.load({**self.unit_scope(), "currency_totals": totals})
+
+    def test_v3_same_unit_steps_require_a_combined_cap_in_that_unit(self):
+        data = self.unit_scope()
+        data["step_budgets"]["detect"]["currency"] = "BFL_CREDIT"
+        data["currency_totals"] = [{"currency": "BFL_CREDIT", "ceiling": "0.119999"}]
+        with self.assertRaises(ValueError):
+            self.load(data)
+        data["currency_totals"][0]["ceiling"] = "0.12"
+        self.load(data)
+
+    def test_v3_rejects_float_boolean_exponent_extra_step_and_legacy_scalar(self):
+        for value in (True, 0.1, "1e2", "0", "0.0000001"):
+            data = self.unit_scope()
+            data["step_budgets"]["generate"]["ceiling"] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                self.load(data)
+        for key, value in (("currency", "USD"), ("total_ceiling", "1"), ("schema_version", True)):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                self.load({**self.unit_scope(), key: value})
+        data = self.unit_scope()
+        data["step_budgets"]["retry"] = {"currency": "USD", "ceiling": "1"}
+        with self.assertRaises(ValueError):
+            self.load(data)
+
+    def test_v2_canonical_bytes_remain_compatible_with_original_document(self):
+        from visual_platform.providers.authorization import canonical_authorization
+
+        scope, _ = self.load()
+        expected = {
+            **self.data,
+            "schema_version": 2,
+            "bfl_model": "flux-3-image",
+            "gemini_model": "gemini-3.8-flash",
+            "max_generate_calls": 1,
+            "max_detect_calls": 1,
+            "currency": "USD",
+        }
+        expected["authorized_at"] = expected["authorized_at"].replace("+00:00", "Z")
+        expected["expires_at"] = expected["expires_at"].replace("+00:00", "Z")
+        self.assertEqual(
+            canonical_authorization(scope),
+            json.dumps(expected, sort_keys=True, separators=(",", ":")).encode(),
+        )

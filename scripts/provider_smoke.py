@@ -8,7 +8,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from visual_platform.providers.authorization import load_authorization, verify_sample
+from visual_platform.providers.authorization import (
+    UnitSmokeAuthorization,
+    load_authorization,
+    verify_sample,
+)
 
 
 async def main():
@@ -55,12 +59,21 @@ async def main():
                     "generate": scope.max_generate_calls,
                     "detect": scope.max_detect_calls,
                 },
-                "cost_ceiling": {
-                    "currency": scope.currency,
-                    "generate": scope.generate_ceiling,
-                    "detect": scope.detect_ceiling,
-                    "total": scope.total_ceiling,
-                },
+                "cost_ceiling": (
+                    {
+                        "step_budgets": scope.step_budgets.model_dump(mode="json"),
+                        "currency_totals": [
+                            row.model_dump(mode="json") for row in scope.currency_totals
+                        ],
+                    }
+                    if isinstance(scope, UnitSmokeAuthorization)
+                    else {
+                        "currency": scope.currency,
+                        "generate": scope.generate_ceiling,
+                        "detect": scope.detect_ceiling,
+                        "total": scope.total_ceiling,
+                    }
+                ),
                 "expires_at": scope.expires_at.isoformat(),
                 "execution_enabled": False,
                 "not_verified": [

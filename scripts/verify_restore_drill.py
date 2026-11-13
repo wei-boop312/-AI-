@@ -29,7 +29,12 @@ from visual_platform.db.pool import open_pool
 from visual_platform.db.result import required_row
 from visual_platform.domain.provider_pricing import SupplierPriceVersion, canonical_price
 from visual_platform.domain.schemas import QuoteRequest, canonical_hash
-from visual_platform.providers.authorization import SmokeAuthorization, canonical_authorization
+from visual_platform.providers.authorization import (
+    ProviderAuthorization,
+    SmokeAuthorization,
+    UnitSmokeAuthorization,
+    canonical_authorization,
+)
 from visual_platform.providers.fake import DurableFakeProvider
 from visual_platform.providers.pipeline import BASELINE_ENDPOINTS
 from visual_platform.services.backup import require
@@ -149,9 +154,9 @@ def admin(query, values):
         return required_row(c.execute(query, values))[0]
 
 
-def register_drill_budget(quote_identity, snapshot, uid):
+def register_drill_budget(quote_identity, snapshot, uid, *, unit_budget=False):
     instant = datetime.now(timezone.utc)
-    scope = SmokeAuthorization.model_validate_json(
+    scope: ProviderAuthorization = SmokeAuthorization.model_validate_json(
         json.dumps(
             {
                 "authorization_id": str(uuid4()),
@@ -172,6 +177,22 @@ def register_drill_budget(quote_identity, snapshot, uid):
             }
         )
     )
+    if unit_budget:
+        data = scope.model_dump(mode="json")
+        for field in ("currency", "generate_ceiling", "detect_ceiling", "total_ceiling"):
+            data.pop(field)
+        data.update(
+            schema_version=3,
+            step_budgets={
+                "generate": {"currency": "BFL_CREDIT", "ceiling": "0.10"},
+                "detect": {"currency": "HUBWAY_BALANCE_UNIT", "ceiling": "0.02"},
+            },
+            currency_totals=[
+                {"currency": "BFL_CREDIT", "ceiling": "0.10"},
+                {"currency": "HUBWAY_BALANCE_UNIT", "ceiling": "0.02"},
+            ],
+        )
+        scope = UnitSmokeAuthorization.model_validate_json(json.dumps(data))
     digest = hashlib.sha256(canonical_authorization(scope)).hexdigest()
     identity = register_provider_budget(
         profile["ADMIN_DATABASE_URL"],
@@ -239,6 +260,26 @@ if args.command == "prepare":
         )
         state["supplier_price_sha256"] = hashlib.sha256(canonical_price(price)).hexdigest()
         state["supplier_price_evidence_sha256"] = hashlib.sha256(price_evidence).hexdigest()
+        vision_data = price.model_dump(mode="json")
+        vision_data.update(
+            provider="gemini",
+            model="gemini-3.8-flash",
+            endpoint_origin="https://generativelanguage.googleapis.com",
+            currency="HUBWAY_BALANCE_UNIT",
+            version="restore-vision-" + uuid4().hex,
+            rates=[{"measure": "input_tokens", "amount": "1", "per": 1000000}],
+        )
+        vision_price = SupplierPriceVersion.model_validate_json(json.dumps(vision_data))
+        state["vision_price_id"] = publish_supplier_price(
+            profile["ADMIN_DATABASE_URL"],
+            storage,
+            vision_price,
+            price_evidence,
+            uuid4(),
+            "synthetic detection unit price for unused restore budget",
+            evidence_reviewed=True,
+        )
+        state["vision_price_sha256"] = hashlib.sha256(canonical_price(vision_price)).hexdigest()
         rule = publish_rule(
             profile["ADMIN_DATABASE_URL"],
             storage,
@@ -474,6 +515,24 @@ if args.command == "prepare":
             provider_profile="offline_protocol_mock",
             provider_model="flux-3-image-protocol-mock",
             price_version="trial-protocol-mock-v1",
+            provider_endpoints=BASELINE_ENDPOINTS,
+            provider_accounts={
+                step: {
+                    "merchant_fingerprint": price.merchant_fingerprint,
+                    "billing_group": price.billing_group,
+                }
+                for step in ("generate", "detect")
+            },
+            provider_price_versions={
+                "generate": {
+                    "id": state["supplier_price_id"],
+                    "document_sha256": state["supplier_price_sha256"],
+                },
+                "detect": {
+                    "id": state["vision_price_id"],
+                    "document_sha256": state["vision_price_sha256"],
+                },
+            },
         )
         quote_identity = uuid4()
         c.execute(
@@ -487,7 +546,7 @@ if args.command == "prepare":
             ),
         )
     scope, digest, state["budget_authorization_id"] = register_drill_budget(
-        quote_identity, snapshot, uid
+        quote_identity, snapshot, uid, unit_budget=True
     )
     state["budget_quote_id"] = str(quote_identity)
     state["budget_scope_sha256"] = digest
@@ -496,6 +555,9 @@ if args.command == "prepare":
         == "open",
         "source authorization not open",
     )
+    before_budget = provider_budget_snapshot(profile["ADMIN_DATABASE_URL"], scope.authorization_id)
+    state["unit_limits"] = before_budget["limits_by_currency"]
+    state["step_limits"] = before_budget["step_limits"]
     args.state.parent.mkdir(parents=True, exist_ok=True)
     args.state.write_text(json.dumps(state))
     print("Prepared isolated restore fixtures; private state retained in work.")
@@ -548,7 +610,19 @@ elif args.command == "verify":
         require(
             budget["state"] == "blocked"
             and budget["scope_sha256"] == state["budget_scope_sha256"]
-            and budget["holds"] == [],
+            and budget["holds"] == []
+            and budget["schema_version"] == 3
+            and budget["limits_by_currency"] == state["unit_limits"]
+            and budget["step_limits"] == state["step_limits"]
+            and all(
+                budget[key] is None
+                for key in (
+                    "currency",
+                    "total_ceiling",
+                    "reserved_ceiling_total",
+                    "known_estimate_subtotal",
+                )
+            ),
             "restored unused authorization not revoked",
         )
         require(
@@ -795,6 +869,7 @@ elif args.command == "verify":
         "pixel_protection_preserved": True,
         "supplier_price_archive_preserved": True,
         "provider_budget_revoked_before_new_intent": True,
+        "unit_limits_preserved_without_cross_unit_total": True,
         "five_fixture_tasks_quarantined": True,
         "cost_estimate_history_and_review_block_preserved": True,
         "detection_delivery_requires_new_review_after_restore": True,

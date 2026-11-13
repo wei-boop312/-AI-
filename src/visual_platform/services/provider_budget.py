@@ -6,14 +6,14 @@ from uuid import UUID
 import psycopg
 
 from visual_platform.db.result import required_row
-from visual_platform.providers.authorization import SmokeAuthorization, canonical_authorization
+from visual_platform.providers.authorization import ProviderAuthorization, canonical_authorization
 from visual_platform.services.rule_operations import assert_operator
 
 
 def register_provider_budget(
     dsn: str,
     quote: UUID,
-    scope: SmokeAuthorization,
+    scope: ProviderAuthorization,
     reviewed_sha256: str,
     operation: UUID,
     reason: str,

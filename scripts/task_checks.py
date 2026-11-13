@@ -32,6 +32,7 @@ SUITES = {
             "test_protocol_pipeline.py",
             "test_supplier_pricing.py",
             "test_supplier_estimates.py",
+            "test_unit_provider_budget.py",
             "test_detection_delivery.py",
         ],
     },

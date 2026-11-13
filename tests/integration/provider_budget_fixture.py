@@ -11,7 +11,11 @@ from psycopg import sql
 from psycopg.conninfo import make_conninfo
 from test_protocol_pipeline import ProtocolPipelineFixture
 
-from visual_platform.providers.authorization import SmokeAuthorization, canonical_authorization
+from visual_platform.providers.authorization import (
+    SmokeAuthorization,
+    UnitSmokeAuthorization,
+    canonical_authorization,
+)
 from visual_platform.services.provider_budget import (
     provider_budget_snapshot,
     register_provider_budget,
@@ -61,7 +65,12 @@ class ProviderBudgetFixture(ProtocolPipelineFixture):
         }
         if changed:
             data.update(changed)
-        self.scope = SmokeAuthorization.model_validate_json(json.dumps(data))
+        model = SmokeAuthorization
+        if data.get("schema_version") == 3:
+            model = UnitSmokeAuthorization
+            for key in ("generate_ceiling", "detect_ceiling", "total_ceiling"):
+                data.pop(key)
+        self.scope = model.model_validate_json(json.dumps(data))
         self.digest = hashlib.sha256(canonical_authorization(self.scope)).hexdigest()
         self.operation = uuid4()
         self.budget = register_provider_budget(

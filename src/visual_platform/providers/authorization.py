@@ -23,9 +23,8 @@ def unique_object(pairs):
     return result
 
 
-class SmokeAuthorization(BaseModel):
+class AuthorizationScope(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    schema_version: Annotated[int, Field(ge=2, le=2)] = 2
     authorization_id: UUID
     user_id: UUID
     product_id: UUID
@@ -42,20 +41,6 @@ class SmokeAuthorization(BaseModel):
     gemini_model: Literal["gemini-3.8-flash"] = "gemini-3.8-flash"
     max_generate_calls: Annotated[int, Field(ge=1, le=1)] = 1
     max_detect_calls: Annotated[int, Field(ge=1, le=1)] = 1
-    currency: Literal["USD"] = "USD"
-    generate_ceiling: str
-    detect_ceiling: str
-    total_ceiling: str
-
-    @field_validator("generate_ceiling", "detect_ceiling", "total_ceiling")
-    @classmethod
-    def money(cls, value):
-        # Exact decimal strings only: no float rounding, infinity or exponent notation.
-        if not re.fullmatch(r"(?:0|[1-9][0-9]{0,5})(?:\.[0-9]{1,6})?", value):
-            raise ValueError("positive fixed-point decimal string required")
-        if Decimal(value) <= 0:
-            raise ValueError("cost ceiling must be positive")
-        return value
 
     @field_validator("authorized_by", "source_path")
     @classmethod
@@ -71,11 +56,76 @@ class SmokeAuthorization(BaseModel):
                 raise ValueError("explicit UTC timestamps required")
         if not timedelta(0) < self.expires_at - self.authorized_at <= timedelta(hours=24):
             raise ValueError("authorization duration must be at most 24 hours")
+        return self
+
+
+class SmokeAuthorization(AuthorizationScope):
+    schema_version: Annotated[int, Field(ge=2, le=2)] = 2
+    currency: Literal["USD"] = "USD"
+    generate_ceiling: str
+    detect_ceiling: str
+    total_ceiling: str
+
+    @field_validator("generate_ceiling", "detect_ceiling", "total_ceiling")
+    @classmethod
+    def money(cls, value):
+        # Exact decimal strings only: no float rounding, infinity or exponent notation.
+        if not re.fullmatch(r"(?:0|[1-9][0-9]{0,5})(?:\.[0-9]{1,6})?", value):
+            raise ValueError("positive fixed-point decimal string required")
+        if Decimal(value) <= 0:
+            raise ValueError("cost ceiling must be positive")
+        return value
+
+    @model_validator(mode="after")
+    def total(self):
         if Decimal(self.total_ceiling) < Decimal(self.generate_ceiling) + Decimal(
             self.detect_ceiling
         ):
             raise ValueError("total ceiling cannot cover both authorized requests")
         return self
+
+
+BudgetCurrency = Literal["USD", "CNY", "BFL_CREDIT", "HUBWAY_BALANCE_UNIT"]
+
+
+class UnitCeiling(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    currency: BudgetCurrency
+    ceiling: str
+
+    @field_validator("ceiling")
+    @classmethod
+    def money(cls, value):
+        return SmokeAuthorization.money(value)
+
+
+class StepCeilings(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    generate: UnitCeiling
+    detect: UnitCeiling
+
+
+class UnitSmokeAuthorization(AuthorizationScope):
+    schema_version: Annotated[int, Field(ge=3, le=3)] = 3
+    step_budgets: StepCeilings
+    currency_totals: Annotated[list[UnitCeiling], Field(min_length=1, max_length=2)]
+
+    @model_validator(mode="after")
+    def totals(self):
+        totals: dict[str, Decimal] = {
+            row.currency: Decimal(row.ceiling) for row in self.currency_totals
+        }
+        if len(totals) != len(self.currency_totals):
+            raise ValueError("duplicate currency total")
+        required: dict[str, Decimal] = {}
+        for row in (self.step_budgets.generate, self.step_budgets.detect):
+            required[row.currency] = required.get(row.currency, Decimal(0)) + Decimal(row.ceiling)
+        if set(totals) != set(required) or any(totals[k] < v for k, v in required.items()):
+            raise ValueError("currency totals must cover exactly the authorized units")
+        return self
+
+
+ProviderAuthorization = SmokeAuthorization | UnitSmokeAuthorization
 
 
 def load_authorization(path: Path, *, now: datetime | None = None):
@@ -86,20 +136,24 @@ def load_authorization(path: Path, *, now: datetime | None = None):
         raise ValueError("configuration grew beyond limit")
     data = json.loads(raw, object_pairs_hook=unique_object)
     # JSON mode accepts UUID/ISO timestamps while retaining strict numeric/string types.
-    scope = SmokeAuthorization.model_validate_json(json.dumps(data))
+    if not isinstance(data, dict):
+        raise ValueError("configuration object required")
+    version = data.get("schema_version", 2)
+    model = UnitSmokeAuthorization if type(version) is int and version == 3 else SmokeAuthorization
+    scope = model.model_validate_json(json.dumps(data))
     instant = now or datetime.now(timezone.utc)
     if instant.tzinfo is None or not scope.authorized_at <= instant < scope.expires_at:
         raise ValueError("authorization is not currently valid")
     return scope, hashlib.sha256(canonical_authorization(scope)).hexdigest()
 
 
-def canonical_authorization(scope: SmokeAuthorization) -> bytes:
+def canonical_authorization(scope: ProviderAuthorization) -> bytes:
     return json.dumps(
         scope.model_dump(mode="json"), sort_keys=True, separators=(",", ":"), allow_nan=False
     ).encode()
 
 
-async def verify_sample(scope: SmokeAuthorization, config_path: Path):
+async def verify_sample(scope: ProviderAuthorization, config_path: Path):
     source = Path(scope.source_path)
     if not source.is_absolute():
         source = config_path.parent / source

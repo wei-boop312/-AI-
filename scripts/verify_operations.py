@@ -83,6 +83,7 @@ def main():
             "unknown_and_queued_cannot_submit",
             "known_id_recovered_without_new_generate",
             "provider_budget_revoked_before_new_intent",
+            "unit_limits_preserved_without_cross_unit_total",
         ):
             require(verification[field] is True, "recovery guard failed: " + field)
         require(

@@ -74,3 +74,14 @@ python scripts/provider_budget.py inspect --authorization <uuid>
 独立恢复演练新增非空估算账本：固定MockTransport和合成凭据在loopback profile生成已知回执与最终PNG，明确BFL_CREDIT价表不可比较USD预算，故不得产生检测POST。快照新增第5项被隔离任务，恢复验证原估算金额/单位/关联ID/价表SHA与待审阻断完整保留，不变成美元或实际已确认支出。源fixture仅通过受限fail结案释放内部积分，成本记录不删改；目标保持隔离。该演练不证明live私有SDK元数据或真实账单已验，必须单独看当次冷恢复CI结果。
 
 0033与非空账本恢复最终证据：9174020/CI43503294037成功，128单元/50契约/164原生、4+7浏览器、完整Compose/独立冷恢复/重启/P5-02通过，包含cost_estimate_history_and_review_block_preserved。这里只验证合成供应商与估算，不代表真实发票、实际USD支出或Hubway live接通。
+
+
+## v3 多计价单位预算（0034候选，等待原生 CI）
+
+授权 JSON 的 `schema_version: 3` 用 `step_budgets.generate/detect` 各自指定 `{currency, ceiling}`，`currency_totals` 是同结构的单位总额数组。允许 USD、CNY、BFL_CREDIT、HUBWAY_BALANCE_UNIT；上限必须是正数的精确字符串，最多6位小数。相同单位两步的总上限必须覆盖两步上限之和；不同单位分别授权，禁止重复、缺失或多余的单位总额，禁止重试步骤和 v2 标量字段混入。模型和每步最多1次仍固定。
+
+登记前报价必须冻结两步已归档价表，且每步价表单位与预算一致；缺失价表或单位不一致在登记阶段拒绝，尚未创建任务或供应商意图。价格版本已绑定完整报价摘要、商户/分组/端点；更换单位或上限改变审核摘要。v2仍接受原USD格式，原有不可比单位估算会阻断，不被v3静默升级。
+
+v3私有快照的 `currency/total_ceiling/reserved_ceiling_total/known_estimate_subtotal` 为 null；请读 `limits_by_currency` 中每个单位的独立金额，`step_limits/holds`也明确带单位。即使两步使用同单位，v3仍使用这套输出，不产生新的全局金额。所有数字均为授权上限或估算，`actual_spending_verified`始终false，不能凭Hubway页面的美元符号或充值比例转换为现金USD。
+
+登记/查看仍使用 `scripts/provider_budget.py register/inspect`；预检 `scripts/provider_smoke.py --preflight` 同时支持v2/v3，并保持execution_enabled=false与零付费调用。真实账单、价格凭证与live供应商接入仍待完成。
