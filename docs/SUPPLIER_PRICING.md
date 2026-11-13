@@ -108,3 +108,17 @@ python scripts/supplier_pricing.py review-bill --document <私有账单映射JSO
 上下文只从PG原回执/冻结价格/归档结果取值。生成使用BFL已知请求ID；同步检测必须用真实响应里的provider_response_id，不能把本地gemini-意图ID当供应商请求编号。缺远程ID、商户/分组/根地址/模型/报价SHA/单位不一致或未应用回执均拒绝。Hubway余额仍保持HUBWAY_BALANCE_UNIT。
 
 当前只验offline_fixture和offline_protocol_mock，reviewed_statement或live组合拒绝。输出仅OFFLINE_BILL_SCOPE_MATCHED、单步上限关系及同单位估算差额；未知/不同单位估算的差额为null，全预算累计尚未核对。actual_spending_verified、confirmation_enabled、evidence_archived始终false，无账单入账、预算重开或积分变动。真实证据归档、去重、正式账单确认与live上下文仍需后续实现和独立验收。
+
+
+## 离线账单证据归档（0037候选）
+
+```sh
+python scripts/supplier_pricing.py archive-bill --document <私有账单映射JSON> --evidence-file <私有证据> --attest-reviewed --operation-id <uuid> --reason <审阅原因>
+python scripts/supplier_pricing.py bill-inspect --review <uuid>
+```
+
+沿用预检的严格范围，只接收离线fixture，不启用reviewed_statement或live账单。先用Ops身份读取PG上下文并预检、核对证据SHA，再向私有S3写不可变原字节，最后在单个PG事务重新核对上下文/文档及审计。上下文变化时拒绝旧审核；SQL也独立拒绝金额类型、额外字段、未知身份和本地Gemini ID。
+
+按attempt_id、供应商根地址+商户/分组+请求ID，以及商户+原账单/行指纹三层去重；同操作原文档/原因/上下文可并发幂等，不允许用新operation再次记同意图。更正或退款尚不支持，不能改写已有证据。存储失败不产生PG记录；审计失败回滚PG记录，但可能留下无数据库引用的私有S3对象，重试原operation复用原字节，不自动删除审计证据。
+
+输出review_status=offline_fixture_matched，actual_spending_verified=false；它是审核证据记录，未写app.task_cost_records的settlement/confirmed，未改变预算或用户积分。证据文件随独立备份复制并核对SHA，恢复只重绑存储version，不改原文档/上下文/金额/状态。真实账单确认、跨账单累计/退款、live费用验证仍不在已验范围。

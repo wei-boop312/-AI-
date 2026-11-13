@@ -29,6 +29,7 @@ from visual_platform.db.pool import open_pool
 from visual_platform.db.result import required_row
 from visual_platform.domain.provider_pricing import SupplierPriceVersion, canonical_price
 from visual_platform.domain.schemas import QuoteRequest, canonical_hash
+from visual_platform.domain.supplier_billing import SupplierBillReview
 from visual_platform.providers.authorization import (
     ProviderAuthorization,
     SmokeAuthorization,
@@ -49,7 +50,10 @@ from visual_platform.services.provider_budget import (
     register_provider_budget,
 )
 from visual_platform.services.provider_pricing import (
+    archive_supplier_bill,
     publish_supplier_price,
+    supplier_bill_review,
+    supplier_billing_context,
     supplier_price_context,
     supplier_task_costs,
 )
@@ -537,10 +541,46 @@ if args.command == "prepare":
             "protocol archive fixture failed",
         )
         state["detection_archive"] = admin(
-            "SELECT jsonb_build_object('receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
+            "SELECT jsonb_build_object('attempt_id',attempt_id,'receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
             (state["tasks"]["protocol_completed"],),
         )
         require(state["detection_archive"]["canonical_hash_valid"], "source archive invalid")
+        billing_context = supplier_billing_context(
+            profile["ADMIN_DATABASE_URL"],
+            UUID(state["tasks"]["protocol_completed"]),
+            UUID(state["detection_archive"]["attempt_id"]),
+        )
+        bill_evidence = b"Synthetic archived bill for cold restore, not a real supplier statement."
+        bill = SupplierBillReview.model_validate_json(
+            json.dumps(
+                {
+                    **billing_context["scope"],
+                    "schema_version": 1,
+                    "amount": "0.000001",
+                    "evidence_kind": "offline_fixture",
+                    "evidence_sha256": hashlib.sha256(bill_evidence).hexdigest(),
+                    "statement_fingerprint": hashlib.sha256(str(uuid4()).encode()).hexdigest(),
+                    "line_fingerprint": hashlib.sha256(str(uuid4()).encode()).hexdigest(),
+                }
+            )
+        )
+        bill_storage = S3Storage(settings)
+        try:
+            state["supplier_bill_review_id"] = archive_supplier_bill(
+                profile["ADMIN_DATABASE_URL"],
+                bill_storage,
+                bill,
+                bill_evidence,
+                uuid4(),
+                "synthetic bill evidence for independent restore",
+                evidence_reviewed=True,
+            )
+        finally:
+            bill_storage.close()
+        state["supplier_bill_review"] = supplier_bill_review(
+            profile["ADMIN_DATABASE_URL"], UUID(state["supplier_bill_review_id"])
+        )
+        state["bill_evidence_sha256"] = bill.evidence_sha256
         state["balance"] = client.get("/api/v1/credits/balance").json()
         require(
             (
@@ -784,7 +824,7 @@ elif args.command == "verify":
                 "restored protection pixels mismatch",
             )
         restored_archive = admin(
-            "SELECT jsonb_build_object('receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
+            "SELECT jsonb_build_object('attempt_id',attempt_id,'receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
             (state["tasks"]["protocol_completed"],),
         )
         require(
@@ -809,6 +849,33 @@ elif args.command == "verify":
             == restored_archive["document"]["final_sha256"],
             "restored detection archive final differs from delivered report",
         )
+        restored_bill = supplier_bill_review(
+            profile["ADMIN_DATABASE_URL"], UUID(state["supplier_bill_review_id"])
+        )
+        require(
+            restored_bill == state["supplier_bill_review"]
+            and not restored_bill["actual_spending_verified"]
+            and restored_bill["review_status"] == "offline_fixture_matched",
+            "restored fixture bill became a settlement",
+        )
+        bill_pointer = admin(
+            "SELECT jsonb_build_object('key',evidence_object_key,'version',evidence_storage_version_id,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256 AND encode(sha256(convert_to(canonical_context,'UTF8')),'hex')=context_sha256) FROM ops.supplier_bill_reviews WHERE id=%s",
+            (state["supplier_bill_review_id"],),
+        )
+        require(
+            bill_pointer["canonical_hash_valid"], "restored bill document or context hash mismatch"
+        )
+        bill_storage = S3Storage(settings)
+        try:
+            bill_bytes, _, _ = bill_storage.get(
+                bill_pointer["key"], version=bill_pointer["version"]
+            )
+            require(
+                hashlib.sha256(bill_bytes).hexdigest() == state["bill_evidence_sha256"],
+                "restored bill evidence bytes changed",
+            )
+        finally:
+            bill_storage.close()
         for key in ("queued", "known", "unknown", "degraded", "cost_review"):
             require(
                 client.get("/api/v1/tasks/" + state["tasks"][key]).json()["status"] == "uncertain",
@@ -950,6 +1017,7 @@ elif args.command == "verify":
         "provider_budget_revoked_before_new_intent": True,
         "unit_limits_preserved_without_cross_unit_total": True,
         "detection_archive_preserved_without_local_files": True,
+        "bill_fixture_evidence_preserved_not_settled": True,
         "five_fixture_tasks_quarantined": True,
         "cost_estimate_history_and_review_block_preserved": True,
         "detection_delivery_requires_new_review_after_restore": True,

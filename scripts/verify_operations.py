@@ -85,6 +85,7 @@ def main():
             "provider_budget_revoked_before_new_intent",
             "unit_limits_preserved_without_cross_unit_total",
             "detection_archive_preserved_without_local_files",
+            "bill_fixture_evidence_preserved_not_settled",
         ):
             require(verification[field] is True, "recovery guard failed: " + field)
         require(

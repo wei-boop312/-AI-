@@ -223,6 +223,21 @@ def object_references(c, bucket):
                 "mime": "application/octet-stream",
             }
         )
+    if required_row(c.execute("SELECT to_regclass('ops.supplier_bill_reviews')"))[0]:
+        for row in c.execute(
+            "SELECT id,evidence_bucket,evidence_object_key,evidence_storage_version_id,evidence_sha256 FROM ops.supplier_bill_reviews"
+        ):
+            rows.append(
+                {
+                    "kind": "supplier_bill_evidence",
+                    "id": str(row[0]),
+                    "bucket": row[1],
+                    "key": row[2],
+                    "version": row[3],
+                    "sha256": row[4],
+                    "mime": "application/octet-stream",
+                }
+            )
     if required_row(c.execute("SELECT to_regclass('ops.supplier_price_versions')"))[0]:
         for row in c.execute(
             "SELECT id,evidence_bucket,evidence_object_key,evidence_storage_version_id,evidence_sha256 FROM ops.supplier_price_versions"
@@ -586,6 +601,11 @@ def restore_database(
                 elif obj["kind"] == "supplier_price_evidence":
                     c.execute(
                         "UPDATE ops.supplier_price_versions SET evidence_storage_version_id=%s WHERE id=%s",
+                        (version, obj["id"]),
+                    )
+                elif obj["kind"] == "supplier_bill_evidence":
+                    c.execute(
+                        "UPDATE ops.supplier_bill_reviews SET evidence_storage_version_id=%s WHERE id=%s",
                         (version, obj["id"]),
                     )
             c.execute("SET LOCAL session_replication_role=origin")

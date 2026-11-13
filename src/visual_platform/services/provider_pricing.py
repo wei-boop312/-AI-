@@ -82,3 +82,48 @@ def supplier_billing_context(dsn: str, task: UUID, attempt: UUID):
         return required_row(
             connection.execute("SELECT ops.supplier_billing_context(%s,%s)", (task, attempt))
         )[0]
+
+
+def archive_supplier_bill(
+    dsn, storage, review, evidence: bytes, operation: UUID, reason: str, *, evidence_reviewed=False
+):
+    from visual_platform.domain.supplier_billing import canonical_bill, review_supplier_bill
+
+    context = supplier_billing_context(dsn, review.task_id, review.attempt_id)
+    result = review_supplier_bill(review, context, evidence, evidence_reviewed=evidence_reviewed)
+    if not reason.strip() or len(reason) > 4000:
+        raise ValueError("invalid_bill_review_reason")
+    canonical = canonical_bill(review)
+    context_text = json.dumps(context, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    key = "private/supplier-bill/" + str(operation) + "/" + review.evidence_sha256
+    version = storage.put_immutable(key, evidence, "application/octet-stream")
+    with psycopg.connect(dsn) as connection:
+        assert_operator(connection)
+        identity = required_row(
+            connection.execute(
+                "SELECT ops.archive_supplier_bill(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                (
+                    canonical.decode(),
+                    result["review_sha256"],
+                    context_text,
+                    result["context_sha256"],
+                    storage.bucket,
+                    key,
+                    version,
+                    operation,
+                    reason,
+                ),
+            )
+        )[0]
+    return str(identity)
+
+
+def supplier_bill_review(dsn, identity: UUID):
+    with psycopg.connect(dsn) as connection:
+        assert_operator(connection)
+        result = required_row(
+            connection.execute("SELECT ops.supplier_bill_review(%s)", (identity,))
+        )[0]
+    if result is None:
+        raise ValueError("supplier_bill_review_not_found")
+    return result

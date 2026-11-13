@@ -14,8 +14,10 @@ sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.domain.provider_pricing import SupplierMeteringContext, SupplierPriceVersion
 from visual_platform.domain.supplier_billing import load_bill_review, review_supplier_bill
 from visual_platform.services.provider_pricing import (
+    archive_supplier_bill,
     estimate_reviewed_price,
     publish_supplier_price,
+    supplier_bill_review,
     supplier_billing_context,
     supplier_price_context,
     supplier_task_costs,
@@ -46,6 +48,14 @@ def main():
     bill.add_argument("--document", type=Path, required=True)
     bill.add_argument("--evidence-file", type=Path, required=True)
     bill.add_argument("--attest-reviewed", action="store_true", required=True)
+    archive = modes.add_parser("archive-bill")
+    archive.add_argument("--document", type=Path, required=True)
+    archive.add_argument("--evidence-file", type=Path, required=True)
+    archive.add_argument("--attest-reviewed", action="store_true", required=True)
+    archive.add_argument("--operation-id", type=UUID, required=True)
+    archive.add_argument("--reason", required=True)
+    bill_inspect = modes.add_parser("bill-inspect")
+    bill_inspect.add_argument("--review", type=UUID, required=True)
     args = parser.parse_args()
     storage = None
     dsn = os.environ.get("ADMIN_DATABASE_URL")
@@ -53,15 +63,20 @@ def main():
         print(json.dumps({"result": "BLOCKED_ENV", "paid_calls": 0}))
         return 3
     try:
-        if args.mode == "publish":
+        if args.mode in ("publish", "archive-bill"):
             if (
-                args.document.stat().st_size > 16384
+                args.document.stat().st_size > (16384 if args.mode == "publish" else 65536)
                 or not 0 < args.evidence_file.stat().st_size <= 20 * 1024 * 1024
             ):
                 raise ValueError("bounded pricing evidence required")
-            document = SupplierPriceVersion.model_validate_json(
-                args.document.read_text(encoding="utf-8-sig")
-            )
+            if args.mode == "publish":
+                document = SupplierPriceVersion.model_validate_json(
+                    args.document.read_text(encoding="utf-8-sig")
+                )
+            else:
+                if args.evidence_file.is_symlink() or not args.evidence_file.is_file():
+                    raise ValueError("regular bill evidence file required")
+                bill_review = load_bill_review(args.document)
             endpoint = urlsplit(os.environ["S3_ENDPOINT"])
             if (
                 endpoint.username
@@ -85,18 +100,32 @@ def main():
                     s3_region=os.environ.get("S3_REGION", "us-east-1"),
                 )
             )
-            identity = publish_supplier_price(
-                dsn,
-                storage,
-                document,
-                args.evidence_file.read_bytes(),
-                args.operation_id,
-                args.reason,
-                evidence_reviewed=args.attest_reviewed,
-            )
-            output = supplier_price_context(dsn, UUID(identity))
+            if args.mode == "publish":
+                identity = publish_supplier_price(
+                    dsn,
+                    storage,
+                    document,
+                    args.evidence_file.read_bytes(),
+                    args.operation_id,
+                    args.reason,
+                    evidence_reviewed=args.attest_reviewed,
+                )
+                output = supplier_price_context(dsn, UUID(identity))
+            else:
+                identity = archive_supplier_bill(
+                    dsn,
+                    storage,
+                    bill_review,
+                    args.evidence_file.read_bytes(),
+                    args.operation_id,
+                    args.reason,
+                    evidence_reviewed=args.attest_reviewed,
+                )
+                output = supplier_bill_review(dsn, UUID(identity))
         elif args.mode == "inspect":
             output = supplier_price_context(dsn, args.price)
+        elif args.mode == "bill-inspect":
+            output = supplier_bill_review(dsn, args.review)
         elif args.mode == "billing-context":
             output = supplier_billing_context(dsn, args.task, args.attempt)
         elif args.mode == "review-bill":
