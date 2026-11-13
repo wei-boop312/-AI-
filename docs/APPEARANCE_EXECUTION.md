@@ -9,3 +9,5 @@ Worker只读取受信任务input_snapshot._execution.appearance，传给Protocol
 验证：离线契约通过最大说明、40项最长引号/反斜线标签及4000中文描述的实际MockTransport提交，确保数据完整且不含资料元信息；超长标签/布尔值/额外字段拒绝。新增原生候选通过API创建资料、报价后编辑、真实PG任务/Worker/S3流程，核对实际Mock POST只使用冻结旧配置且一次提交。候选未跑CI前不称通过；默认Fake只是离线确定性功能验收，不证明真实外观效果。
 
 官方协议复核只读取 https://api.bfl.ai/openapi.json （2026-11-13 UTC，SHA256 ea458c661ef8b0e03d72ee6b29267451f5a04ae65f35e55ea8a87e53645ef670），Flux3ImageInputs.prompt没有maxLength；32768为本项目界限。保持grounding=false，不引入外部检索。没有付费模型调用或部署。
+
+前端补颜色/材质tags输入，保持说明字段，保存确切数组；每组20项，每项255码点，在表单中显式报错。独立端口的生产前端HTTP mock验证保存/刷新/报价ID绑定，21项/256字无POST，20项/255字通过及390px最终布局。下拉离场动画按最终稳定宽度检查，不以瞬间动画定位误判永久溢出。正式真实服务浏览器用例增加资料保存数组及刷新后任务ID绑定，待CI。
