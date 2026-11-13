@@ -747,7 +747,9 @@ elif args.command == "verify":
         probe_owner = "restore-budget-" + uuid4().hex
         with psycopg.connect(profile["WORKER_DATABASE_URL"]) as c:
             claim = required_row(
-                c.execute("SELECT ops.claim_task(%s,%s)", (probe_id, probe_owner))
+                c.execute(
+                    "SELECT ops.claim_task(%s,%s,'offline_protocol_mock')", (probe_id, probe_owner)
+                )
             )[0]
         try:
             with psycopg.connect(profile["WORKER_DATABASE_URL"]) as c:

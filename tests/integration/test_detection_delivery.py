@@ -365,7 +365,9 @@ class DetectionDeliveryTests(ProviderBudgetFixture):
         task, context = self.unresolved()
         decision = self.approve(task, context)
         with psycopg.connect(self.worker_dsn) as c:
-            claim = c.execute("SELECT ops.claim_task(%s,'guard-worker')", (task,)).fetchone()[0]
+            claim = c.execute(
+                "SELECT ops.claim_task(%s,'guard-worker','offline_protocol_mock')", (task,)
+            ).fetchone()[0]
         with psycopg.connect(self.owner) as c:
             facts = c.execute(
                 "SELECT facts FROM ops.detection_manual_deliveries WHERE id=%s", (decision,)

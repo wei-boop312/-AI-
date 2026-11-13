@@ -34,6 +34,7 @@ SUITES = {
             "test_supplier_pricing.py",
             "test_supplier_estimates.py",
             "test_unit_provider_budget.py",
+            "test_worker_profiles.py",
             "test_detection_archives.py",
             "test_supplier_bill_archives.py",
             "test_supplier_billing.py",

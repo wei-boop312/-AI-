@@ -237,7 +237,9 @@ class ProviderBudgetTests(ProviderBudgetFixture):
     def test_concurrent_intent_and_hold_have_one_winner(self):
         task = self.submit(self.bind)
         with psycopg.connect(self.worker_dsn) as c:
-            claim = c.execute("SELECT ops.claim_task(%s,'budget-worker')", (task,)).fetchone()[0]
+            claim = c.execute(
+                "SELECT ops.claim_task(%s,'budget-worker','offline_protocol_mock')", (task,)
+            ).fetchone()[0]
 
         def reserve(_):
             try:

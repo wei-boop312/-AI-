@@ -463,7 +463,11 @@ class ProtocolPipelineTests(ProtocolPipelineFixture):
             worker = Worker(pool, None, None, owner="observation-contract")
             try:
                 claim = json.loads(
-                    await worker.db("SELECT ops.claim_task($1,$2)", UUID(task), worker.owner)
+                    await worker.db(
+                        "SELECT ops.claim_task($1,$2,'offline_protocol_mock')",
+                        UUID(task),
+                        worker.owner,
+                    )
                 )
                 fence = claim["fencing_token"]
                 attempt = await worker.db(

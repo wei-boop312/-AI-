@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-14 0038执行profile隔离候选：Worker使用冻结profile参与PG领取，配置不匹配在租约/状态/unknown检查之前返回未领取；旧2参接口只代表默认offline Fake，新3参仅offline或offline_protocol_mock，原manual/未知意图/租约fence边界保留。协议初始/恢复outbox通知进入已有人工队列，普通delivery验证拒绝协议或manual消息，显式私有Mock Worker仍可单任务执行；不新增live能力/付费。新增6原生候选含双向错误Worker零状态/积分变化、旧API与显式profile、8并发只1正确winner、manual与未知profile拒绝、实际MQ只有人工队列且不生成自动恢复。旧协议fixture改用明确3参，不放宽财务/未知供应商断言；原生/CI待验。
+
 2026-11-14 账单作用域预检整轮已验：0e1d772/CI43514389341成功，140单元/50契约/182原生、4普通+7受控浏览器、完整Compose/持久化回执/独立冷恢复/重启/P5-02全绿。5项新PG测试确认生成/检测原上下文匹配、供应商远程responseId与本地标识区分、缺远程ID保持未知、真实statement/错误商户单位拒绝、名义价表对USD hold不通过、Ops权限与错误attempt拒绝；预检前后预算/积分与confirmed记录不变。5原始JSON/来源SHA/原日志计数归档。0037证据归档5829b86和新的交付包仍候选，当前本地148单元/静态通过，不能外推。
 
 2026-11-14 离线交付包候选：新增scripts/handoff.py，仅在当前提交5个同SHA/零付费/成功门槛和现有P5构建校验通过后导出准确git源码、当次前端、SBOM/实际许可/原始证据。ZIP逐文件摘要且单独比较浏览器原始资产哈希与许可inventory引用；拒绝陈旧/失败/dirty门槛、私有环境文件/穿越/重复/符号链接/篡改，输出仅新建。8项合成单元验证拒绝分支，实际包需CI末步运行，不把合成包当交付。明确OFFLINE_READY且provider/release/deployed均false，不自动发布。

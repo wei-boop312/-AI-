@@ -261,7 +261,12 @@ class Worker:
 
     async def run(self, task_id):
         task = UUID(str(task_id))
-        result = await self.db("SELECT ops.claim_task($1,$2)", task, self.owner)
+        result = await self.db(
+            "SELECT ops.claim_task($1,$2,$3)",
+            task,
+            self.owner,
+            getattr(self.provider, "execution_profile", "offline"),
+        )
         if result is None:
             return "not_claimed"
         claim = json.loads(result)

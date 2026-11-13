@@ -45,3 +45,12 @@ MQ入口：AMQP_URL（远程必须amqps，本机可amqp）、QUEUE_PREFIX（默�
 DB+S3+规则恢复已在独立原生实例演练，命令与边界见docs/BACKUP_RESTORE.md。恢复端默认把未结束任务隔离为uncertain/manual，保留冻结额度；不能根据旧快照自动重发生成/检测。仅核验既有回执且确认源侧提交边界后，使用受限运营resume。旧会话撤销，服务账号与JWT重新签发；只有受信任私有归档可交给DDL恢复。
 
 故障分流、常驻监控和原生MQ/S3重启恢复步骤见[OPERATIONS_RECOVERY.md](OPERATIONS_RECOVERY.md)。重启演练只针对本项目隔离的本机服务。
+
+
+### 执行profile与协议演练通知（0038候选）
+
+默认常驻Worker只领取冻结profile为offline的任务；协议演练Worker必须明确声明offline_protocol_mock。领取时先核对profile，错误Worker返回not_claimed并保持状态、租约、冻结积分与预算不变，不能先领取再因配置冲突退费。旧SQL两参数ops.claim_task等同offline，协议内部测试/明确单任务演练使用三参数接口；未知profile拒绝，manual隔离仍不能领取。
+
+新协议任务的初始/恢复通知使用既有task.manual队列，普通消费者验证也拒绝协议消息。它们由专用双MockTransport实例显式调用单任务Worker，当前没有面向真实供应商的常驻消费者。人工队列的通知不等于task_dispatch已被设为manual；若任务因恢复/unknown已经隔离，必须继续既有审计核验流程，不能靠指定profile绕过。
+
+迁移前已发布的旧协议消息即便误入普通队列，也会被新的delivery/profile检查拒绝；已有恢复/人工通知保持历史证据，不改写消息或供应商结果。真实供应商接线仍按独立授权、预算、回执和计价门槛推进。

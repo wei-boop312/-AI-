@@ -169,7 +169,7 @@ class SupplierEstimateTests(SupplierEstimateFixture):
         )
         with psycopg.connect(self.worker_dsn) as c:
             claim = c.execute(
-                "SELECT ops.claim_task(%s,%s)", (task, "cost-concurrency")
+                "SELECT ops.claim_task(%s,%s,'offline_protocol_mock')", (task, "cost-concurrency")
             ).fetchone()[0]
         with psycopg.connect(self.owner) as c:
             attempt = c.execute(
