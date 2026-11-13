@@ -17,9 +17,9 @@ def main(task):
     report={'observed_at':datetime.now(timezone.utc).isoformat(),'requested_gate':task,
             'profile':'offline','paid_calls':0,'deployed':False,
             'not_verified':{'P4-03':'WAITING_EXTERNAL: real provider call and budget authorization are absent',
-                            'P5-02':'separate restore/restart drill; this gate does not rerun operations',
+                            'P5-02':'versioned restore is included; full runtime metrics/restart operations gate remains separate',
                             'P5-03':'WAITING_EXTERNAL: target environment, policy evidence and release decision'},
-            'scope':'current native test suites + production browser + Compose migrations/persistence + locked build evidence'}
+            'scope':'current native suites + production browser + Compose applications/persistence + independent versioned backup restore + locked build evidence'}
     try:
         report['source_provenance']=verify()
         report.update(verify_static());report.update(verify_run(evidence))
@@ -41,6 +41,19 @@ def main(task):
         for key in ('deduplicated_events','ignored_stale_revisions','cursor_restored_after_reload','cursor_namespaced_by_user_and_task'):
             if cursor.get(key) is not True:raise ValueError('browser SSE cursor verification missing: '+key)
         report['frontend_sse_cursor']='PASS'
+        restore_path=evidence/'native-restore-v2.json'
+        if not restore_path.is_file():raise EnvironmentError('BLOCKED_ENV: independent version 2 backup restore evidence missing')
+        restored=json.loads(restore_path.read_text(encoding='utf-8-sig'))
+        if restored.get('result')!='PASS' or restored.get('commit')!=report['commit'] or restored.get('paid_calls')!=0:raise ValueError('independent backup restore evidence failed or stale')
+        if not restored.get('source_fixture_cleanup') or not restored.get('destination_containers_removed'):raise ValueError('restore fixture/container cleanup missing')
+        detail=restored['restore'];configuration=detail['configuration_restore']
+        if detail.get('backup_format')!=2 or configuration.get('status')!='verified_snapshot_restored' or configuration.get('application_commit')!=report['commit'] or configuration.get('files_verified',0)<12 or configuration.get('applied_to_runtime') is not False:raise ValueError('configuration version recovery evidence incomplete')
+        for key in ('database_exact_before_recovery_guards','function_owners_preserved','old_logins_restored_as_nologin','sessions_revoked'):
+            if detail.get(key) is not True:raise ValueError('restore invariant missing: '+key)
+        if detail.get('table_count',0)<25 or detail.get('object_references_verified',0)<1:raise ValueError('empty recovery fixture')
+        for key in ('api_ready','old_access_rejected','post_snapshot_marker_absent','completed_report_review_and_download_hash_preserved','pixel_protection_preserved','three_fixture_tasks_quarantined','unknown_and_queued_cannot_submit','known_id_recovered_without_new_generate'):
+            if detail.get('verification',{}).get(key) is not True:raise ValueError('recovery guard missing: '+key)
+        report['versioned_backup_restore']='PASS'
         plan=json.loads((ROOT/'docs/specification/CODEX_EXECUTION/tasks.json').read_text(encoding='utf-8-sig'))
         report['verified_tasks']=[x['id'] for x in plan['tasks'] if x['phase'] in ('P0','P1','P2','P3')]+['P4-01 (mock HTTP)','P4-02 (mock SDK HTTP)','P5-01']
         report['result']='OFFLINE_READY';code=0

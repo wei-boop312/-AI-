@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-13 新版原生恢复CI候选：ci_native在受控浏览器结束、确认停止自己的publisher/worker后执行ci_restore。入口验证源PG/S3的CI owner和offline profile，准备真实任务/报告/规则/回执，创建独立目标PG/S3，使用固定PG镜像工具执行format2同步备份/恢复，新建服务LOGIN与JWT，复核DB/对象/函数/财务/会话撤销/任务隔离/安全已知ID恢复及配置快照。恢复RPO/RTO绑定既有初始演练目标；源测试余额结案和目标容器/匿名卷清理失败均不能通过。私有归档不进入artifact，故障诊断限量脱敏。Windows预检按预期返回3、无服务操作；改动脚本AST通过。尚未取得新版Linux实跑证据，未关闭PLAN_GAPS；综合门槛新增当前提交native-restore-v2报告要求。
+
 2026-11-13 最新实测：52cc6ba的本项目20个配置文件已从Git对象归档并独立目录恢复，逐文件摘要一致，见evidence/config-version-roundtrip.json；明确仅配置归档/恢复，不证明新版PG/S3恢复。SSE在43408550352/eb67231继续失败于Playwright请求头观测：独立Chromium158 HTTP实测确认服务器收到Last-Event-ID=42，但Playwright headers()/allHeaders()均未暴露该浏览器自动头（evidence/sse-header-observation.json）。保留自动头要求，改读真实API授权后输出的结构化连接日志，核对task_id、游标和last-event-id来源；日志不含Cookie、令牌、DSN或原始头。CI显式传递本任务API日志路径。新增SSE用例尚待CI，未生成通过凭证。
 
 2026-11-13 配置版本备份候选：新format2 manifest含干净Git源码commit/tree、严格白名单配置的原始Git字节/大小/SHA，以及仅5项允许的非秘密运行设置。配置路径/元数据额外字段、秘密字段注入、重复/遗漏清单、损坏文件、修改/未提交代码均拒绝。恢复必须显式提供与归档/Fake缓存分离的新配置目录，先预检再接触PG/S3，恢复后逐文件复核；不自动执行或应用配置。旧format1仍支持但明确缺少配置证据。7项配置行为/负例纳入默认测试，共66单元通过（evidence/config-backup-unit.log）。已更新CLI、独立原生恢复脚本及文档；新版完整PG/S3恢复尚未运行，历史f4aea8a演练不能替代本次证明。源码commit不等同运行镜像版本。

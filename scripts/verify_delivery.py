@@ -85,7 +85,7 @@ def verify_run(evidence):
     if not (evidence/'native-result.json').is_file():raise EnvironmentError('BLOCKED_ENV: current native/browser build run is missing')
     run=load(evidence/'native-result.json')
     require(run['result']=='PASS' and run['commit']==commit and run['paid_calls']==0,'native evidence failed, stale, or not offline')
-    required={'migrate-test','bootstrap-dev','native-integration','browser-production','browser-controlled-faults','monitor-after-recovery'}
+    required={'migrate-test','bootstrap-dev','native-integration','browser-production','browser-controlled-faults','native-restore-v2','monitor-after-recovery'}
     require(required<={x['name'] for x in run['steps']},'native build stages missing')
     require(all(x['exit_code']==0 for x in run['steps']),'native stage failed')
     for relative,digest in run['files'].items():

@@ -108,6 +108,7 @@ def main():
         command(['pnpm','--dir','apps/web','exec','playwright','test'],name='browser-production')
         stop(worker);stop(publisher)
         command(['pnpm','--dir','apps/web','exec','playwright','test','--config','playwright.faults.config.ts'],name='browser-controlled-faults')
+        command([sys.executable,'scripts/ci_restore.py'],name='native-restore-v2',child_env={**env,'CI_RESTORE_SOURCE_OWNER':run_id,'CI_RESTORE_WORKERS_PAUSED':'1'})
         publisher=start('publisher');worker=start('worker')
         wait(lambda:subprocess.run([sys.executable,'scripts/run_local.py','monitor'],cwd=ROOT,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0,'recovered service heartbeats')
         command([sys.executable,'scripts/run_local.py','monitor'],name='monitor-after-recovery')

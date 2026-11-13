@@ -41,6 +41,10 @@ python scripts/backup.py restore --input work/backups/new-run --fake-output work
 
 ## 可复跑的原生演练
 
+Linux CI 在普通/受控浏览器结束且自身消费者停止后运行 scripts/ci_restore.py。该入口只接受由ci_native.py创建的源PG/S3容器与对应owner标记，创建独立目标PG55434/S318334；使用固定PostgreSQL镜像里的pg_dump/pg_restore，通过同UID、仅本次归档目录的挂载执行。准备真实已交付/已知ID/未知/排队任务，完成format2备份、冷启动恢复、新身份重建、PNG/规则/人工复核/会话撤销/隔离/已知ID恢复及配置逐文件验证，最后结案源测试账号并删除自己创建的目标容器/匿名卷。清理失败同样验收失败。
+
+报告写入work/ci-public/native-restore-v2.json，故障日志按已知密码/DSN/令牌脱敏后限量保留；数据库、对象、私钥和profile不上传。当前入口已通过静态/Windows拒绝执行预检，首次Linux整链结果仍待CI；不能把“已加入工作流”称为恢复已通过。新离线综合门槛明确要求当前提交的真实恢复报告。
+
 PowerShell 7、原生PG与weed二进制、源.local profile和源MIGRATION_DATABASE_URL就绪后，暂停本项目publisher/worker终端：
 
 ```text
