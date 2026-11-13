@@ -2,7 +2,7 @@
 
 基于V4计划的私有图片工作台：FastAPI/Worker、PostgreSQL、RabbitMQ、私有S3、React/Konva。已验证的离线MVP包含私有登录、产品与外观配置、真实原图上传、保护区域平移、报价/任务、进度与历史、PNG/报告下载、积分账本，以及独立备份恢复和故障演练。规则证据不足时保持人工复核，不保证商城上架。
 
-最新完整已验基线为[db7b8b1 / CI43482913577](https://github.com/wei-boop312/-AI-/actions/runs/43482913577)：111单元、46离线协议契约、145原生PG/MQ/S3测试、4普通+7受控浏览器、完整8服务Compose、独立冷恢复/重启及P5-02通过。检测未知的受限本地交付、私有实际图片审阅和告知已包含在该基线；后续源码继续按当次CI验证，不将前一提交的绿灯外推。实际结果见[STATUS](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)及原始[evidence](docs/evidence)。
+最新完整已验基线为[e714f7d / CI43495545487](https://github.com/wei-boop312/-AI-/actions/runs/43495545487)：121单元、47离线协议契约、153原生PG/MQ/S3测试、4普通+7受控浏览器、完整8服务Compose、独立冷恢复/重启及P5-02通过。检测降级交付、私有图片审阅与告知、价表证据归档及冻结商户验证已包含在该基线；后续源码继续按当次CI验证，不将前一提交的绿灯外推。实际结果见[STATUS](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)及原始[evidence](docs/evidence)。
 
 **当前运行模式仍是offline Fake。Hubway只完成可离线验证的Gemini适配候选，尚未真实接通；完整V4、真实供应商验收和生产发布均未完成。** 剩余内部实现与外部输入见[REMAINING_WORK](docs/REMAINING_WORK.md)，不得以离线MVP替代完整目标。
 

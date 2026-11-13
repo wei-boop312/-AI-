@@ -1,0 +1,94 @@
+{
+  "result": "PASS",
+  "commit": "e714f7d704362ef66ceec4280028da1fc989bdac",
+  "observed_at": "2026-11-13T19:55:11.252227+00:00",
+  "archive_probe_log": "work/ci-restore-8d0284ccab054f68a39a2804f4ccd755/logs/prepare.log",
+  "paid_calls": 0,
+  "scope": "cold independent Docker PG/S3 restore using native PG tools; offline Fake only; no deployment",
+  "stage": "verified",
+  "restore": {
+    "backup_id": "68d3b770-2545-4e68-8e60-6f50692b56aa",
+    "restore_id": "cc9e24f0-f541-47b9-bc55-23b29a1bfc9e",
+    "started_at": "2026-11-13T19:55:19.738397+00:00",
+    "finished_at": "2026-11-13T19:55:28.864350+00:00",
+    "snapshot_at": "2026-11-13T19:55:14.414591+00:00",
+    "table_count": 30,
+    "object_references_verified": 49,
+    "fake_files_restored": 39,
+    "database_exact_before_recovery_guards": true,
+    "function_owners_preserved": true,
+    "old_logins_restored_as_nologin": true,
+    "sessions_revoked": true,
+    "provider_budgets_revoked": 1,
+    "quarantined_tasks": 4,
+    "before_invariants": {
+      "bad_wallets": 0,
+      "bad_ledger_totals": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "after_invariants": {
+      "bad_wallets": 0,
+      "bad_ledger_totals": 0,
+      "duplicate_terminal_settlements": 0
+    },
+    "schema_head": "0032",
+    "configuration_restore": {
+      "application_commit": "e714f7d704362ef66ceec4280028da1fc989bdac",
+      "files_verified": 20,
+      "snapshot_sha256": "ef17a46ab573b8525747bc1b2e68d371f30286c2369ff3dae65555999166850c",
+      "status": "verified_snapshot_restored",
+      "applied_to_runtime": false
+    },
+    "verification": {
+      "api_ready": true,
+      "old_access_rejected": true,
+      "post_snapshot_marker_absent": true,
+      "completed_report_review_and_download_hash_preserved": true,
+      "pixel_protection_preserved": true,
+      "supplier_price_archive_preserved": true,
+      "provider_budget_revoked_before_new_intent": true,
+      "four_fixture_tasks_quarantined": true,
+      "detection_delivery_requires_new_review_after_restore": true,
+      "detection_supplier_unknown_and_final_hash_preserved": true,
+      "detection_delivery_one_charge": true,
+      "unknown_and_queued_cannot_submit": true,
+      "known_id_recovered_without_new_generate": true,
+      "balance_at_snapshot": {
+        "available": 120,
+        "reserved": 64,
+        "funded_total": 200,
+        "spent_total": 16
+      },
+      "balance_after_two_safe_recoveries": {
+        "available": 120,
+        "reserved": 32,
+        "funded_total": 200,
+        "spent_total": 48
+      },
+      "verified_at": "2026-11-13T19:55:31.829934+00:00"
+    },
+    "base_commit": "e714f7d704362ef66ceec4280028da1fc989bdac",
+    "paid_calls": 0,
+    "backup_format": 2,
+    "timing": {
+      "rto_seconds": 15.28274748399997,
+      "snapshot_age_seconds_at_recovery_start": 2.354047,
+      "backup_seconds": 0.972644,
+      "objectives": {
+        "scope": "initial_rehearsal",
+        "target_document_sha256": "37c82a14debb5e7f9d8e5c4cdaad0ed004b5b496bd4e10adbcca40e2063d12f9",
+        "target_source": "docs/specification/PROJECT_PLAN.md#13",
+        "target_source_sha256": "d74c99ebc7bae74fc7187d10e2f194967d985fe18b11fdf94e8c8910d602fabb",
+        "rpo_target_seconds": 86400,
+        "rto_target_seconds": 14400,
+        "rehearsal_rpo_met": true,
+        "rehearsal_rto_met": true,
+        "rpo_measurement": "snapshot age at recovery start; single rehearsal only",
+        "production_backup_cadence_verified": false,
+        "production_sla_verified": false
+      }
+    }
+  },
+  "source_fixture_cleanup": true,
+  "destination_containers_removed": true
+}
