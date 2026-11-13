@@ -1,27 +1,29 @@
 # 跨境电商 AI 视觉生产平台
 
-V4计划实施中的私有图片工作台：FastAPI/Worker、PostgreSQL、RabbitMQ、S3与React/Konva。当前仅启用离线假供应商，未达到完整OFFLINE_READY验收；真实模型、商业发布均未进行。
+基于V4计划的私有图片工作台：FastAPI/Worker、PostgreSQL、RabbitMQ、私有S3、React/Konva。已验证的离线MVP包含私有登录、产品与外观配置、真实原图上传、保护区域平移、报价/任务、进度与历史、PNG/报告下载、积分账本，以及独立备份恢复和故障演练。规则证据不足时保持人工复核，不保证商城上架。
 
-已可操作：私有登录、产品与外观、真实原图上传、矩形像素保护与目标平移、报价/任务、进度与历史、PNG/报告下载、积分流水。平台证据未验证时保持人工复核，不保证商城上架。
+最新完整已验基线为[a261306 / CI43468137915](https://github.com/wei-boop312/-AI-/actions/runs/43468137915)：109单元、45离线协议契约、121原生PG/MQ/S3测试、4普通+6受控浏览器、完整8服务Compose、独立冷恢复/重启及P5-02通过。后续产品/外观管理界面和冻结网关绑定继续按当次CI验证，不将前一提交的绿灯外推。实际结果见[STATUS](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)及原始[evidence](docs/evidence)。
+
+**当前运行模式仍是offline Fake。Hubway只完成可离线验证的Gemini适配候选，尚未真实接通；完整V4、真实供应商验收和生产发布均未完成。** 剩余内部实现与外部输入见[REMAINING_WORK](docs/REMAINING_WORK.md)，不得以离线MVP替代完整目标。
 
 ## 安装与本地运行
 
-Python 3.13–3.14、Node 24、pnpm 11.25、独立PostgreSQL 17、RabbitMQ 4和私有S3服务。
+需要Python 3.13–3.14、Node 24、pnpm 11.25，以及独立PostgreSQL 17、RabbitMQ 4和私有S3服务。
 
 ```text
 uv sync --locked
 pnpm --dir apps/web install --frozen-lockfile
 ```
 
-设置MIGRATION_DATABASE_URL（专属空实例的DDL角色）、S3_ENDPOINT/S3_ACCESS_KEY/S3_SECRET_KEY/S3_BUCKET、AMQP_URL，再执行：
+在隔离的本机环境配置MIGRATION_DATABASE_URL（专属DDL角色）、S3_ENDPOINT/S3_ACCESS_KEY/S3_SECRET_KEY/S3_BUCKET及AMQP_URL，然后执行：
 
 ```text
 uv run python scripts/setup_local.py --demo-account
 ```
 
-该命令迁移并创建6个独立非owner LOGIN（含只读权限组）、JWT密钥、S3 CORS和本地体验账号；不安装系统服务。角色为集群级，不要对日常业务实例运行。秘密只写被忽略的.local目录；账号在.local/account.json，不应上传。已有profile不会覆盖。
+该命令迁移新实例，创建6个独立非owner LOGIN、JWT密钥、S3 CORS和体验账号；角色为集群级，仅用于专属测试实例。私有profile与账号写入被忽略的.local目录，已有profile不会覆盖。项目不包含公开注册、充值或用户配置模型密钥功能。
 
-分别在四个终端启动：
+四个终端分别启动：
 
 ```text
 uv run python scripts/run_local.py api
@@ -30,50 +32,49 @@ uv run python scripts/run_local.py worker
 uv run python scripts/run_local.py web
 ```
 
-打开http://127.0.0.1:5173。默认本地HTTP profile仅允许loopback；其他环境应配置HTTPS安全Cookie。当前没有一键托管发布或充值功能。
+打开http://127.0.0.1:5173。本机HTTP profile仅用于loopback；其他环境需配置HTTPS安全Cookie。不要同时运行dev web和production preview占用同一端口。Docker独立基础服务及完整应用Compose说明见[COMPOSE](docs/COMPOSE.md)，不是托管发布。
 
 ## 验证
 
+始终离线的单元与协议契约：
+
 ```text
 uv run python scripts/check.py unit
-uv run python scripts/check.py integration
+uv run python scripts/check.py task P4-01 --profile offline
+uv run python scripts/check.py task P4-02 --profile offline
 pnpm --dir apps/web build
-# 停止开发web进程；另一个终端启动生产预览，再执行浏览器验收
+```
+
+原生集成需要隔离的TEST_DATABASE_URL，以及TEST_S3_ENDPOINT/TEST_S3_ACCESS_KEY/TEST_S3_SECRET_KEY/TEST_S3_BUCKET/TEST_S3_REGION和TEST_AMQP_URL。缺依赖不能以skip作为验收证据。
+
+```text
+uv run python scripts/check.py integration
+```
+
+生产浏览器要求API/publisher/worker、.local/runtime.json和Chrome；停止本项目dev web后另一个终端启动preview，再运行e2e。测试创建隔离账号，不复用体验账号。
+
+```text
 uv run python scripts/run_local.py preview
-# 另一个终端
 pnpm --dir apps/web e2e
 ```
 
-原生集成需要TEST_DATABASE_URL，以及TEST_S3_ENDPOINT/TEST_S3_ACCESS_KEY/TEST_S3_SECRET_KEY/TEST_S3_BUCKET和TEST_AMQP_URL，必须使用可建测试角色的隔离实例。E2E需要API/publisher/worker和5173生产预览、.local/runtime.json与Chrome；测试自动创建隔离账号，不复用体验账号。不能让开发web与preview同时占用5173。可用PLAYWRIGHT_CHANNEL指定另一个已安装的Playwright浏览器。没有配置的集成会明确skip，不能作验收证据。测试不调用真实付费模型。
+完整离线门槛是Linux CI下当前提交的原生、构建、生产浏览器、Compose、恢复和运行指标证据组合，不会隐式启动缺少的服务，也不会访问真实付费供应商：
 
-实际状态和缺口见docs/STATUS.md；运维细节见docs/RUNBOOK.md；V4规格保留在docs/specification。
+```text
+uv run python scripts/check.py all --profile offline
+uv run python scripts/check.py task P5-02
+```
 
+逐任务命令与合并实现映射见[ACCEPTANCE](docs/ACCEPTANCE.md)。真实模型P4-03和发布P5-03保留独立门槛；不能用离线成功标记PROVIDER_VERIFIED或商业发布就绪。
 
-单独重跑生产性能基准：`pnpm --dir apps/web exec playwright test performance.spec.ts`。包含4MP合成原图、双画布50个绘制对象（2图像+24矩形+24标签）、60秒真实指针缩放/平移/区域拖动，以及20并发500次已登录只读API请求。完整原始样本与设备记录写入docs/evidence/performance-production.json，目标为帧间隔p95<33ms、API p95<500ms，失败请求也计入分位数。此基准不代表真实商品视觉质量或生产集群容量。
+生产性能基准见[性能验收说明](docs/ACCEPTANCE.md)：4MP、双画布50绘制对象、60秒真实指针、20并发500次非模型API。只证明所属CI环境，不代表生产容量或真实视觉质量。
 
+## Hubway 与运营
 
-API健康检查、只读权限与新实例验证见[docs/READINESS_AND_ROLES.md](docs/READINESS_AND_ROLES.md)。原生PG角色专项入口：`python scripts/check.py task P1-02`；尚未实现的其他task/all入口会明确NOT_RUN。
+用户指定检测供应商候选为Hubway，默认https://hubway.cc、可显式选择https://z.hubway.cc，已在登录网站确认gemini-3.8-flash。实际密钥仅放私有服务端环境；.env.example中为空。设置环境变量不会自动将普通Worker切到付费模式。
 
+[Hubway接入与冻结路由](docs/HUBWAY_INTEGRATION.md)区分SDK MockTransport证明和真实服务端兼容性。FLUX图片编辑API尚未在Hubway核实，不能拿聊天文本接口冒充图像生成。费用、授权及未知结果处理见[PROVIDER_BUDGET](docs/PROVIDER_BUDGET.md)。
 
-受控故障浏览器配置与单任务Fake CLI见[docs/CONTROLLED_BROWSER.md](docs/CONTROLLED_BROWSER.md)。普通e2e和受控配置分别验收；后者要求显式离线标记并暂停本项目publisher/consumer，完成后恢复。
+API/Cookie/CSRF与幂等使用见[API_USAGE](docs/API_USAGE.md)；角色/健康见[READINESS_AND_ROLES](docs/READINESS_AND_ROLES.md)；产品与外观管理见[PRODUCT_MANAGEMENT](docs/PRODUCT_MANAGEMENT.md)、[APPEARANCE_EXECUTION](docs/APPEARANCE_EXECUTION.md)。
 
-
-原生同步快照备份、独立PG/S3恢复、会话撤销及未结束任务隔离见[docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md)。归档和私有profile只保存在忽略目录，Git中仅包含脱敏结果；生产RPO/RTO目标尚未设定。
-
-只读聚合监控、常驻进程心跳与告警模板见[docs/MONITORING.md](docs/MONITORING.md)。`python scripts/run_local.py monitor`同时探测本机MQ/S3；尚未部署告警采集与通知服务。
-
-故障分流、原生MQ/S3重启演练及安全恢复顺序见[docs/RUNBOOK.md](docs/RUNBOOK.md)。演练固定为独立本机服务，不用于操作其他环境。
-
-BFL官方协议的离线传输契约与字段映射见[docs/BFL_PROTOCOL.md](docs/BFL_PROTOCOL.md)：`python scripts/check.py task P4-01 --profile offline`。该模块未启用真实Worker调用，不能作为真实模型验收。
-
-Gemini官方SDK一次检测和严格事实校验见[docs/GEMINI_PROTOCOL.md](docs/GEMINI_PROTOCOL.md)：`python scripts/check.py task P4-02 --profile offline`。SDK重试及自动续发均关闭；真实供应商调用及其Worker接线仍未验收。
-
-两种官方协议经Worker、PG和私有S3的离线组合闭环见[docs/PROTOCOL_PIPELINE.md](docs/PROTOCOL_PIPELINE.md)。该模式强制双方MockTransport并显式标记协议模拟；真实传输仍未启用。
-
-锁定构建、依赖审计、SBOM与实际第三方许可文本见[docs/SUPPLY_CHAIN.md](docs/SUPPLY_CHAIN.md)。CI和容器候选仍在实测修复中，不能据已有文件宣称发布就绪。
-
-当前31条API路径、Cookie/CSRF与幂等提交、容器候选和P5-01构建门槛见[docs/API_USAGE.md](docs/API_USAGE.md)。缺Docker或本次完整证据时验收返回BLOCKED_ENV。
-
-独立Compose基础服务、保卷启停及全新实例持久性演练见[docs/COMPOSE.md](docs/COMPOSE.md)。`dev.py up/down/bootstrap`不会覆盖既有profile或接管其他服务；Compose候选仍以实际CI结果为准。
-
-逐任务命令、合并实现映射、综合离线门槛及外部待验条件见[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。`check.py all --profile offline`验证当前 CI 证据，不会隐式启动服务；成功仅代表离线范围，不代表真实模型或生产发布。
+备份与独立恢复见[BACKUP_RESTORE](docs/BACKUP_RESTORE.md)。原计划初始演练目标是RPO24h/RTO4h，已有对应CI演练证明；生产备份调度、保留策略和SLA仍需目标环境验证。监控及故障处理见[MONITORING](docs/MONITORING.md)、[RUNBOOK](docs/RUNBOOK.md)；锁文件、SBOM与实际许可文本见[SUPPLY_CHAIN](docs/SUPPLY_CHAIN.md)。原始12份规范保留在[specification](docs/specification)，不覆盖或改写。
