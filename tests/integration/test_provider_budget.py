@@ -81,6 +81,20 @@ class ProviderBudgetTests(ProtocolPipelineFixture):
     def snapshot(self):
         return provider_budget_snapshot(self.operator_dsn, UUID(self.budget))
 
+    def test_reviewed_quote_hash_binds_explicit_hubway_mock_endpoint_through_delivery(self):
+        from visual_platform.providers.pipeline import BASELINE_ENDPOINTS
+
+        endpoints = {
+            **BASELINE_ENDPOINTS,
+            "detect": "https://hubway.cc/v1beta/models/gemini-3.8-flash:generateContent",
+        }
+        task = self.submit(self.bind, execution_updates={"provider_endpoints": endpoints})
+        self.assertEqual(self.scope.quote_input_sha256, hash_data(self.last_snapshot))
+        self.assertEqual(self.run_protocol(task, gemini_origin="https://hubway.cc"), "succeeded")
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 1))
+        self.assertEqual(self.snapshot()["state"], "closed")
+        self.assertFalse(self.snapshot()["actual_spending_verified"])
+
     def uncertain_receipt(self, *, lifetime=3600):
         task = self.submit(lambda quote, snapshot: self.bind(quote, snapshot, lifetime=lifetime))
         self.timeout_step = "generate"

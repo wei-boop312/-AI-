@@ -21,3 +21,12 @@ HubwayGeminiProvider使用已锁定Google SDK和原Facts schema，不改为聊�
 45离线契约通过：两个Hubway origin的实际SDK请求路径/认证/图片字节及私有元数据、非法URL拒绝、私有环境与模型替换拒绝、限流/错误与跨origin禁止重投。所有测试使用合成key和MockTransport，不是供应商原生验收。
 
 默认任务Worker、报价及预算授权仍offline/offline_protocol_mock；本次不将实验性网关自动接进生产消费者，也不将原预算授权改成新商户/费用。运行环境未写入实际密钥。FLUX图片编辑API/模型未核实；图片生成不能改成文本模型后声称完成。真实请求/响应、费用单位和账单证据、运行快照中的网关身份/授权绑定及后续live门槛仍待闭合。API供应商替换尚未完整完成。
+
+
+## 冻结网关绑定候选
+
+ProtocolProvider在Worker的每个阶段先核对_execution.provider_endpoints与生成/检测实例实际请求端点。旧协议mock快照未写此字段时固定解释为原官方BFL/Gemini地址，不跟随新环境变量。显式Hubway需在受信报价快照中记录完整端点对；原0027授权quote_input_sha256覆盖整个快照，因此运营审阅也绑定该选择。当前API仍只创建Fake报价，公开schema不允许用户传_execution；不新增未经审核的live报价入口。
+
+无意图时地址不符会在读取源图/写意图/网络发送前拒绝并走无意图释放；已有未决回执时拒绝变更路径并按原函数转uncertain保留冻结，不写成未收费，不切换默认/直连重新提交。旧授权与旧任务记录不改写，不能仅凭相同模型名称跨中转。
+
+46离线契约通过包括官方旧快照保留、两个Hubway精确绑定、缺失/空/额外字段和错误端点拒绝。3项新增原生候选验证：未冻结Hubway无意图无POST且退款；原回执后切Hubway只保留原一次POST和冻结；完整PG授权SHA绑定显式Hubway mock路径并完成真实S3交付。需新CI证明；所有供应商请求仍MockTransport。这解决内部路由约束，不证明真实账单或Hubway服务端兼容。

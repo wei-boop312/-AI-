@@ -1,0 +1,31 @@
+{
+  "run_id": 43468137915,
+  "commit": "a261306cc79b4af82e261b32e14bb09383fdeb1c",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43468137915",
+  "artifact_id": 14061035384,
+  "archive_sha256": "ac6f62e427792f10e4785be6209bd4c760540339c83fe222f322dfc4a4b0d5e3",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "1cb2419f5140b042eb053d26ec8a424c11accb906a52e51dae5d4bb394f79083"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "c84b271f2296380e82bba2a714532e33cf3e49bfb1f8096c5cf7cfe68ec8c216"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "3957c54ac42ce923b58263ab35bd3650c7d2297f3160659f2802f6055cd73348"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "22e76d3c2affe0449e2575b718bce0afd9ba1801d265d36a780dff48accdc675"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "bbb767ea8402d76ceb7ba40a76dd7ed386e266f890a49f165867f2faf480232e"
+    }
+  },
+  "scope": "Original full successful CI for Hubway mock SDK candidate, form association fix, 109 unit/45 contracts/121 native plus all browser/Compose/restore/P5-02. No paid supplier or deployment. Later management UI excluded."
+}

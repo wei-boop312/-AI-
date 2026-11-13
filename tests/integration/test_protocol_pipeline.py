@@ -18,7 +18,7 @@ from test_offline_pipeline import PipelineFixture
 from visual_platform.db.pool import open_pool
 from visual_platform.domain.schemas import QuoteRequest, canonical_hash
 from visual_platform.providers.bfl import BflProvider
-from visual_platform.providers.gemini import GeminiProvider
+from visual_platform.providers.gemini import OFFICIAL_ORIGIN, GeminiProvider
 from visual_platform.providers.pipeline import ProtocolProvider
 from visual_platform.services.quotes import hash_data
 from visual_platform.storage.s3 import S3Storage, StorageError
@@ -41,7 +41,7 @@ class ProtocolPipelineFixture(PipelineFixture):
         Image.new("RGB", (256, 256), (35, 45, 200)).save(stream, "JPEG")
         self.jpeg = stream.getvalue()
 
-    def submit(self, before_task=None, business_updates=None):
+    def submit(self, before_task=None, business_updates=None, execution_updates=None):
         body = {
             "product_id": self.product,
             "source_asset_version_id": self.version,
@@ -83,6 +83,7 @@ class ProtocolPipelineFixture(PipelineFixture):
                 provider_model="flux-3-image-protocol-mock",
                 price_version="trial-protocol-mock-v1",
             )
+            snapshot["_execution"].update(execution_updates or {})
             quote = uuid4()
             c.execute("SET LOCAL ROLE app_api")
             c.execute("SELECT set_config('app.user_id',%s,true)", (str(self.user),))
@@ -177,7 +178,7 @@ class ProtocolPipelineFixture(PipelineFixture):
             },
         )
 
-    def run_protocol(self, task, storage_class=S3Storage):
+    def run_protocol(self, task, storage_class=S3Storage, *, gemini_origin=OFFICIAL_ORIGIN):
         async def run():
             bfl = BflProvider(
                 "offline-key",
@@ -188,6 +189,7 @@ class ProtocolPipelineFixture(PipelineFixture):
                 "offline-key",
                 Path(self.folder.name) / "gemini",
                 transport=httpx.MockTransport(self.gemini_route),
+                base_url=gemini_origin,
             )
             provider = ProtocolProvider(bfl, gemini)
             pool = await open_pool(self.worker_dsn, "app_worker")
@@ -232,6 +234,30 @@ class ProtocolPipelineFixture(PipelineFixture):
 
 
 class ProtocolPipelineTests(ProtocolPipelineFixture):
+    def test_gateway_change_without_frozen_endpoint_rejects_before_intent_or_post(self):
+        task = self.submit()
+        self.assertEqual(self.run_protocol(task, gemini_origin="https://hubway.cc"), "stopped")
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (0, 0))
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.provider_attempts WHERE task_id=%s", (task,)
+                ).fetchone()[0],
+                0,
+            )
+        balance = self.client.get("/api/v1/credits/balance").json()
+        self.assertEqual((balance["available"], balance["reserved"]), (100, 0))
+
+    def test_gateway_change_after_known_receipt_keeps_unknown_without_new_post(self):
+        self.pending = True
+        task = self.submit()
+        self.assertEqual(self.run_protocol(task), "retryable")
+        self.assertEqual(self.run_protocol(task, gemini_origin="https://hubway.cc"), "stopped")
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 0))
+        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "uncertain")
+        balance = self.client.get("/api/v1/credits/balance").json()
+        self.assertEqual((balance["available"], balance["reserved"]), (84, 16))
+
     def test_generation_uses_frozen_appearance_after_profile_edit(self):
         endpoint = "/api/v1/products/" + self.product + "/appearances"
         original = {"description": "original label", "colors": ["red"], "materials": ["steel"]}

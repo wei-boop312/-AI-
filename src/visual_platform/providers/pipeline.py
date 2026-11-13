@@ -5,8 +5,14 @@ import hashlib
 import struct
 from uuid import UUID
 
-from visual_platform.providers.bfl import BflRequest
+from visual_platform.providers.bfl import BflProvider, BflRequest
 from visual_platform.providers.contract import ProviderPending, ProviderUncertain, Receipt
+from visual_platform.providers.gemini import MODEL, OFFICIAL_ORIGIN
+
+BASELINE_ENDPOINTS = {
+    "generate": BflProvider.endpoint,
+    "detect": OFFICIAL_ORIGIN + "/v1beta/models/" + MODEL + ":generateContent",
+}
 
 
 class ProtocolProvider:
@@ -20,6 +26,19 @@ class ProtocolProvider:
             )
         self.bfl = bfl
         self.gemini = gemini
+
+    @property
+    def request_endpoints(self):
+        return {
+            "generate": self.bfl.endpoint,
+            "detect": self.gemini.endpoint_origin + "/v1beta/models/" + MODEL + ":generateContent",
+        }
+
+    def verify_execution_scope(self, execution):
+        # Old mock quotes always meant the official endpoints. A new gateway is
+        # never inferred from environment settings or a matching model name.
+        if execution.get("provider_endpoints", BASELINE_ENDPOINTS) != self.request_endpoints:
+            raise ValueError("locked_provider_endpoint_mismatch")
 
     def prepare_generate(self, generation, source, appearance=None):
         return BflRequest.from_canonical(generation, source, appearance).model_dump()

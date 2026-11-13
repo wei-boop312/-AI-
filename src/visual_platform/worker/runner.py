@@ -210,6 +210,8 @@ class Worker:
                     self.provider, "execution_profile", "offline"
                 ):
                     raise ValueError("locked_provider_profile_mismatch")
+                if hasattr(self.provider, "verify_execution_scope"):
+                    self.provider.verify_execution_scope(execution)
                 attempts = {a["step"]: a for a in ctx["attempts"]}
                 if phase == "submitting":
                     # Validate fixed source bytes before creating a possibly paid intent.
