@@ -1,0 +1,23 @@
+{
+  "run_id": 43480584222,
+  "commit": "eb8706974953f98fec2409e77ee5464dd6410f31",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43480584222",
+  "artifact_id": 14065536531,
+  "archive_sha256": "010d9a985d3c638ce2f10132114f4d7d9b93634930dbdcd45019036a4f803bac",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "c9ec5da99bc9b27142fd0925f77fa0c97d756f3b71e3d507e865cf4fb7348a36"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "10743382a9f12a05c7d81db63c48de184948d58aac27575439105998466cf1c2"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "57eda1a3a743b573160d9c9971ac73a4ec75ee49d628fb2760e392196c2fa7df"
+    }
+  },
+  "scope": "0030 migration binding repair run; preserve actual failure and candidate boundary"
+}

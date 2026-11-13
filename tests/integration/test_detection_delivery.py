@@ -308,7 +308,7 @@ class DetectionDeliveryTests(ProviderBudgetFixture):
             self.assertEqual(
                 c.execute(
                     "SELECT count(*) FROM ops.outbox WHERE task_id=%s AND dedupe_key=%s",
-                    (task, task + ":manual-detection:" + str(operation)),
+                    (task, task + "-manual-detection-" + str(operation)),
                 ).fetchone()[0],
                 1,
             )
