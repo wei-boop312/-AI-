@@ -21,8 +21,8 @@ class ProtocolProvider:
         self.bfl = bfl
         self.gemini = gemini
 
-    def prepare_generate(self, generation, source):
-        return BflRequest.from_canonical(generation, source).model_dump()
+    def prepare_generate(self, generation, source, appearance=None):
+        return BflRequest.from_canonical(generation, source, appearance).model_dump()
 
     async def submit_generate(self, intent, payload):
         return await asyncio.to_thread(self.bfl.submit, intent, BflRequest.model_validate(payload))

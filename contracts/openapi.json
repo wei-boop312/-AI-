@@ -1656,7 +1656,8 @@
           },
           "colors": {
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 255
             },
             "type": "array",
             "maxItems": 20,
@@ -1664,7 +1665,8 @@
           },
           "materials": {
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 255
             },
             "type": "array",
             "maxItems": 20,

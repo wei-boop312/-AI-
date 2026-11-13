@@ -1,0 +1,31 @@
+{
+  "run_id": 43454966553,
+  "commit": "1606b2d504d5a4cf63505df73fc27d612954f75b",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43454966553",
+  "artifact_id": 14054830119,
+  "archive_sha256": "54a50311ec1b1d310cfd846723972e4d179eb0d784925f7257055bdcc53485e9",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "a64c82d8fd3c1ed6e923096d1d0fd162faed36af9590bfeb708db116cf9ee5ad"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "9be8c603c8a38b56f326e814977cbde2b24fa620d9b36bcb112d3092708b6318"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "d45b331b6fe4d1ff94ba001fa1493f9b1b0cb7400634e6e9d025718a3c7b90a2"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "400b15f8be92a2c53fbdea298c41a6d6d46fd626236fb74b4f6f889b14cab76d"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "7d92a483b3173d2b6337e6f3af610dbb44e8b4ac40cf08a1b239f191e8f5b150"
+    }
+  },
+  "scope": "Original reports for 0027 atomic mock supplier reservation and restoration revocation; no paid model or deployment. Later prompt-envelope fix not covered."
+}

@@ -78,6 +78,34 @@ class BflContracts(unittest.TestCase):
                     BflRequest.from_canonical(generation, self.png)
                 self.assertEqual(len(self.calls), before)
 
+    def test_frozen_appearance_is_data_without_private_metadata_and_fits_maxima(self):
+        generation = {
+            "type": "scene",
+            "prompt": "商" * 4000,
+            "output": {"width": 256, "height": 256, "format": "png"},
+            "protection_mode": "none",
+            "regions": [],
+        }
+        config = {
+            "description": '"' * 4000,
+            "colors": ['"' * 255] * 20,
+            "materials": ["\\" * 255] * 20,
+        }
+        appearance = {"config": config, "id": "private-identity", "name": "private-name"}
+        request = BflRequest.from_canonical(generation, self.png, appearance)
+        self.assertLessEqual(len(request.prompt), 32768)
+        self.assertIn(generation["prompt"], request.prompt)
+        self.assertEqual(json.loads(request.prompt.split("instructions):\n", 1)[1]), config)
+        self.assertNotIn("private-identity", request.prompt)
+        self.assertNotIn("private-name", request.prompt)
+        provider = self.provider()
+        provider.submit(uuid4(), request)
+        self.assertEqual(json.loads(self.calls[-1].content)["prompt"], request.prompt)
+        for invalid in ({"colors": ["x" * 256]}, {"materials": [False]}, {"api_key": "bad"}):
+            with self.subTest(invalid=invalid), self.assertRaises(ValidationError):
+                BflRequest.from_canonical(generation, self.png, {"config": invalid})
+        self.assertEqual(len(self.calls), 1)
+
     def test_submit_exact_endpoint_fields_auth_and_cost_provenance(self):
         provider = self.provider()
         intent = uuid4()

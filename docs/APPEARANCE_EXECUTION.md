@@ -1,0 +1,11 @@
+# 外观快照执行
+
+来源：主计划要求任务固定外观配置，工程契约P2-01要求编辑当前资料不改变历史快照。此前只保存快照，ProtocolProvider没有使用它；本次补实际请求传递。
+
+Worker只读取受信任务input_snapshot._execution.appearance，传给ProtocolProvider。BFL请求仅包含经过共享AppearanceConfig校验的description/colors/materials参考JSON；不发送配置名、UUID、revision或任何数据库定位信息，不重新查询当前资料。JSON标记为产品特征参考数据，不宣称文本标签可保证模型抵抗指令注入或精确保留细节。真实像素保证仍来自独立回贴验证。
+
+说明最多4000字符，颜色/材质各20项，每项255字符；不支持控制字符在写入时拒绝，历史不合法快照在意图前拒绝，不静默截断。用户Generation.prompt仍4000；内部合并请求32768字符资源限额，可容纳最大转义JSON与原描述。无外观配置时保持原有提示词。原始规范和历史DB快照不改写。
+
+验证：离线契约通过最大说明、40项最长引号/反斜线标签及4000中文描述的实际MockTransport提交，确保数据完整且不含资料元信息；超长标签/布尔值/额外字段拒绝。新增原生候选通过API创建资料、报价后编辑、真实PG任务/Worker/S3流程，核对实际Mock POST只使用冻结旧配置且一次提交。候选未跑CI前不称通过；默认Fake只是离线确定性功能验收，不证明真实外观效果。
+
+官方协议复核只读取 https://api.bfl.ai/openapi.json （2026-11-13 UTC，SHA256 ea458c661ef8b0e03d72ee6b29267451f5a04ae65f35e55ea8a87e53645ef670），Flux3ImageInputs.prompt没有maxLength；32768为本项目界限。保持grounding=false，不引入外部检索。没有付费模型调用或部署。

@@ -41,7 +41,7 @@ class ProtocolPipelineFixture(PipelineFixture):
         Image.new("RGB", (256, 256), (35, 45, 200)).save(stream, "JPEG")
         self.jpeg = stream.getvalue()
 
-    def submit(self, before_task=None):
+    def submit(self, before_task=None, business_updates=None):
         body = {
             "product_id": self.product,
             "source_asset_version_id": self.version,
@@ -70,6 +70,7 @@ class ProtocolPipelineFixture(PipelineFixture):
                 }
             ],
         }
+        body.update(business_updates or {})
         quoted = self.client.post("/api/v1/quotes", json=body, headers=self.write_headers())
         self.assertEqual(quoted.status_code, 201, quoted.text)
         # Explicit trusted-server fixture profile; HTTP clients cannot supply _execution.
@@ -113,6 +114,7 @@ class ProtocolPipelineFixture(PipelineFixture):
             if self.timeout_step == "generate":
                 raise httpx.ReadTimeout("offline injected response loss")
             payload = json.loads(request.content)
+            self.sent_prompt = payload["prompt"]
             self.sent_source = base64.b64decode(payload["images"][0])
             self.request_digest = hashlib.sha256(
                 json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
@@ -230,6 +232,35 @@ class ProtocolPipelineFixture(PipelineFixture):
 
 
 class ProtocolPipelineTests(ProtocolPipelineFixture):
+    def test_generation_uses_frozen_appearance_after_profile_edit(self):
+        endpoint = "/api/v1/products/" + self.product + "/appearances"
+        original = {"description": "original label", "colors": ["red"], "materials": ["steel"]}
+        created = self.client.post(
+            endpoint,
+            json={"name": "private profile name", "config": original},
+            headers=self.write_headers(),
+        )
+        self.assertEqual(created.status_code, 201, created.text)
+        identity = created.json()["id"]
+
+        def edit_after_quote(quote, snapshot):
+            self.assertEqual(snapshot["_execution"]["appearance"]["config"], original)
+            changed = self.client.patch(
+                endpoint + "/" + identity,
+                json={"name": "edited profile", "config": {"description": "NEW APPEARANCE"}},
+                headers={**self.write_headers(), "if-match": "1"},
+            )
+            self.assertEqual(changed.status_code, 200, changed.text)
+
+        task = self.submit(edit_after_quote, {"appearance_profile_id": identity})
+        self.assertEqual(self.run_protocol(task), "succeeded")
+        frozen = json.loads(self.sent_prompt.split("instructions):\n", 1)[1])
+        self.assertEqual(frozen, original)
+        self.assertNotIn(identity, self.sent_prompt)
+        self.assertNotIn("private profile name", self.sent_prompt)
+        self.assertNotIn("NEW APPEARANCE", self.sent_prompt)
+        self.assertEqual(self.post_count("bfl"), 1)
+
     def test_full_protocol_worker_final_png_cost_observations_and_single_charge(self):
         task = self.submit()
         self.assertEqual(self.run_protocol(task), "succeeded")

@@ -8,6 +8,7 @@ from pydantic import Field
 
 from visual_platform.api.auth import current_user
 from visual_platform.db.transactions import tenant_transaction
+from visual_platform.domain.appearance import AppearanceConfig
 from visual_platform.domain.schemas import StrictModel
 
 router = APIRouter(prefix="/api/v1/products", tags=["products"])
@@ -21,12 +22,6 @@ class ProductCreate(StrictModel):
 class ProductPatch(StrictModel):
     name: str | None = Field(default=None, strict=True, min_length=1, max_length=255)
     category: str | None = Field(default=None, strict=True, min_length=1, max_length=255)
-
-
-class AppearanceConfig(StrictModel):
-    description: str = Field(default="", strict=True, max_length=4000)
-    colors: list[str] = Field(default_factory=list, max_length=20)
-    materials: list[str] = Field(default_factory=list, max_length=20)
 
 
 class AppearanceCreate(StrictModel):

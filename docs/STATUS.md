@@ -1,5 +1,9 @@
 # 实施状态
 
+2026-11-13 外观执行链路候选：共享AppearanceConfig用于API写入与Worker冻结快照校验，颜色/材质每项至多255字符、每组20项，说明4000字符；拒绝非文本及不支持的控制字符。ProtocolProvider仅从input_snapshot._execution.appearance读取config，作为JSON参考数据附于请求，不查询当前资料、不发送资料名/UUID；默认Fake仍不模拟真实外观效果。内部提示词32768字符容纳两组最大标签与转义，公共用户描述仍4000且不截断，未把内部预算称为供应商上限。新增PG/Worker/S3候选先报价后编辑外观，断言只提交原快照一次；109单元、41离线契约、Ruff与双平台90源码检查通过，原生候选待新CI。详见APPEARANCE_EXECUTION。
+
+1606b2d / CI43454966553已完整成功：109单元/107原生/39契约、4+6浏览器、完整Compose与恢复/重启/P5-02通过，五份原始JSON和来源归档evidence/ci-43454966553。预算7项原生覆盖竞争/过期/响应丢失/权限/直接SQL绕过；独立冷恢复实际撤销1个尚无任务的open授权，并验证新意图被provider_budget_blocked拒绝。只证明offline_protocol_mock，实际账单、live和发布仍缺。后续提示词/外观候选不在该基线内；按用户0%停止线继续，无付费调用或部署。
+
 2026-11-13 提示词边界修复：公共Generation仍最多4000字符；BFL内部请求为保留身份/白底前缀预留4096字符，避免合法4000字描述在意图前失败，绝不截断用户输入。三个生成类型的4000中文字符实际MockTransport提交保持完整，4001在公开模型校验拒绝且无POST；40离线契约及Ruff/双平台89源码检查通过。官方OpenAPI复核仅GET，无付费：Flux3ImageInputs.prompt未标maxLength，内部4096是本项目资源界限，不称供应商上限；来源https://api.bfl.ai/openapi.json，原始SHA256 ea458c661ef8b0e03d72ee6b29267451f5a04ae65f35e55ea8a87e53645ef670，schema仍列/v1/flux-3-image，grounding默认true故继续显式false。预算候选CI43454966553所有业务步骤已成功，等待终态/归档，不提前称完整CI绿灯。
 
 2026-11-13 预算原子预留候选：0027增加私有FORCE RLS预算/预留表；schema v2固定用户/产品/资产/完整报价快照SHA，限每步1次及精确USD上限。注册锁未消费报价并审计；同app.record_intent事务写意图/预留，过期/阻断/超限回滚当前步骤，Worker无新POST并按既有事务释放积分，早先实际费用不当作0。回执known仍非真实账单，未知阻断，额度及元数据不可直接覆盖；默认仍Fake，只允许offline_protocol_mock演练注册。新CLI review-quote/preflight/register/inspect不执行模型；7项PG/Worker/S3竞争/权限/过期/超时/SQL绕过候选待CI。109单元/39契约、Ruff和双平台89源码检查通过，离线迁移SQL生成通过但不冒充迁移实跑。恢复新增撤销全部open授权（含无任务报价）及新意图硬拒绝探针，all/P5-02增加必需证据；新恢复待实跑。详见PROVIDER_BUDGET。

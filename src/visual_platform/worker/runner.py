@@ -224,7 +224,12 @@ class Worker:
                         )
                         return "uncertain"
                     payload = (
-                        await self.call_provider(self.provider.prepare_generate, generation, source)
+                        await self.call_provider(
+                            self.provider.prepare_generate,
+                            generation,
+                            source,
+                            execution.get("appearance"),
+                        )
                         if hasattr(self.provider, "prepare_generate")
                         else generation
                     )
