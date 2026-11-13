@@ -290,7 +290,7 @@ def main():
                 "generation": {
                     "type": "scene",
                     "prompt": "offline container rehearsal",
-                    "output": {"width": 320, "height": 256},
+                    "output": {"width": 320, "height": 256, "format": "png"},
                     "protection_mode": "pixel_exact",
                     "regions": [
                         {

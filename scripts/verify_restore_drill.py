@@ -216,7 +216,7 @@ if args.command == "prepare":
             "generation": {
                 "type": "scene",
                 "prompt": "offline backup fixture",
-                "output": {"width": 16, "height": 16},
+                "output": {"width": 16, "height": 16, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {

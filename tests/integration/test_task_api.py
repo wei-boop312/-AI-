@@ -38,7 +38,7 @@ class TaskApiFixture(AuthApiFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "test scene",
-                "output": {"width": 10, "height": 10},
+                "output": {"width": 10, "height": 10, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {

@@ -17,7 +17,7 @@ class LateFakeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             identity = uuid4()
             late = DurableFakeProvider(Path(folder), mode="late")
-            generation = {"output": {"width": 12, "height": 10}, "type": "scene"}
+            generation = {"output": {"width": 12, "height": 10, "format": "png"}, "type": "scene"}
             with self.assertRaises(ProviderUncertain):
                 late.submit_generate(identity, generation)
             path = Path(folder) / ("generate-" + str(identity) + ".json")

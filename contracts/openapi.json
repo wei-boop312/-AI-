@@ -1763,8 +1763,7 @@
             },
             "type": "array",
             "maxItems": 20,
-            "title": "Regions",
-            "default": []
+            "title": "Regions"
           }
         },
         "additionalProperties": false,
@@ -1773,7 +1772,8 @@
           "type",
           "prompt",
           "output",
-          "protection_mode"
+          "protection_mode",
+          "regions"
         ],
         "title": "Generation"
       },
@@ -1830,15 +1830,15 @@
           "format": {
             "type": "string",
             "const": "png",
-            "title": "Format",
-            "default": "png"
+            "title": "Format"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "width",
-          "height"
+          "height",
+          "format"
         ],
         "title": "Output"
       },

@@ -1,0 +1,191 @@
+{
+  "commit": "054d6ba0950aaf8dfdd3aa72d4df0003595953d5",
+  "observed_at": "2026-11-13T13:15:15.209143+00:00",
+  "paid_calls": 0,
+  "profile": "offline_fake",
+  "scope": "eight-service Compose and built non-root applications; Linux loopback rehearsal; no deployment",
+  "stage": "verified",
+  "result": "PASS",
+  "runtime_images": [
+    {
+      "image": "visual-api:ci",
+      "id": "sha256:4949c4556338875d2cc18fff698140c30f87ef8121ab7db4661444ac62f5c605",
+      "user": "10001:10001"
+    },
+    {
+      "image": "visual-web:ci",
+      "id": "sha256:dd56f672a7135adcaed84f2721cf1dc7168ba51dc863e2ef7900a97dbea9b472",
+      "user": "101:101"
+    }
+  ],
+  "production_asset_sha256": {
+    "/assets/index-B61q7dIO.js": "f6375255b418b1d4de8f2ad34252e4d71b402b5942af20b94a50c1101b134b83",
+    "/assets/index-CHe3S2JA.css": "26c8cd96f90eb2f71f8c5b103e2429dee8456e1c98226365d60f4b0f7c02bab9"
+  },
+  "final_sha256": "a270b2cc5893046efbc3fcac8de05d4a66d5c85221bc4041ba4fd1994a9278f7",
+  "pixel_exact": true,
+  "report_bound_to_final": true,
+  "manual_review": true,
+  "wallet": {
+    "available": 184,
+    "reserved": 0,
+    "funded_total": 200,
+    "spent_total": 16
+  },
+  "seconds": 41.804,
+  "application_services": [
+    "api",
+    "worker",
+    "publisher",
+    "web"
+  ],
+  "all_services": [
+    "api",
+    "postgres-dev",
+    "postgres-test",
+    "publisher",
+    "rabbitmq",
+    "s3",
+    "web",
+    "worker"
+  ],
+  "loopback_only": true,
+  "healthchecks_ready": true,
+  "resources_enforced": true,
+  "graceful_shutdown_verified": true,
+  "fake_receipts_survive_recreation": true,
+  "service_role_separation": true,
+  "constraints": {
+    "api": {
+      "image": "sha256:4949c4556338875d2cc18fff698140c30f87ef8121ab7db4661444ac62f5c605",
+      "health": "healthy",
+      "memory_bytes": 805306368,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    },
+    "postgres-dev": {
+      "image": "sha256:018dbecf6a31cfed1f83c218b5e428a52ac389ad46e495f72831641db49d85a9",
+      "health": "healthy",
+      "memory_bytes": 536870912,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "postgres-test": {
+      "image": "sha256:018dbecf6a31cfed1f83c218b5e428a52ac389ad46e495f72831641db49d85a9",
+      "health": "healthy",
+      "memory_bytes": 536870912,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "publisher": {
+      "image": "sha256:4949c4556338875d2cc18fff698140c30f87ef8121ab7db4661444ac62f5c605",
+      "health": "healthy",
+      "memory_bytes": 268435456,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    },
+    "rabbitmq": {
+      "image": "sha256:fed8ec54d327f2fb71a8b89d6d7f27f08914c33ff26d3ac72b36d9e93bd2c8c1",
+      "health": "healthy",
+      "memory_bytes": 805306368,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "s3": {
+      "image": "sha256:438dbbd3f87a4db35b82d4a9646b70d54dda6df32d434df44b6445a3a5e608de",
+      "health": "healthy",
+      "memory_bytes": 1073741824,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "web": {
+      "image": "sha256:dd56f672a7135adcaed84f2721cf1dc7168ba51dc863e2ef7900a97dbea9b472",
+      "health": "healthy",
+      "memory_bytes": 134217728,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    },
+    "worker": {
+      "image": "sha256:4949c4556338875d2cc18fff698140c30f87ef8121ab7db4661444ac62f5c605",
+      "health": "healthy",
+      "memory_bytes": 1073741824,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    }
+  },
+  "initial_constraints": {
+    "api": {
+      "image": "sha256:4949c4556338875d2cc18fff698140c30f87ef8121ab7db4661444ac62f5c605",
+      "health": "healthy",
+      "memory_bytes": 805306368,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    },
+    "postgres-dev": {
+      "image": "sha256:018dbecf6a31cfed1f83c218b5e428a52ac389ad46e495f72831641db49d85a9",
+      "health": "healthy",
+      "memory_bytes": 536870912,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "postgres-test": {
+      "image": "sha256:018dbecf6a31cfed1f83c218b5e428a52ac389ad46e495f72831641db49d85a9",
+      "health": "healthy",
+      "memory_bytes": 536870912,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "publisher": {
+      "image": "sha256:4949c4556338875d2cc18fff698140c30f87ef8121ab7db4661444ac62f5c605",
+      "health": "healthy",
+      "memory_bytes": 268435456,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    },
+    "rabbitmq": {
+      "image": "sha256:fed8ec54d327f2fb71a8b89d6d7f27f08914c33ff26d3ac72b36d9e93bd2c8c1",
+      "health": "healthy",
+      "memory_bytes": 805306368,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "s3": {
+      "image": "sha256:438dbbd3f87a4db35b82d4a9646b70d54dda6df32d434df44b6445a3a5e608de",
+      "health": "healthy",
+      "memory_bytes": 1073741824,
+      "nano_cpus": 1000000000,
+      "pids_limit": 128
+    },
+    "web": {
+      "image": "sha256:dd56f672a7135adcaed84f2721cf1dc7168ba51dc863e2ef7900a97dbea9b472",
+      "health": "healthy",
+      "memory_bytes": 134217728,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    },
+    "worker": {
+      "image": "sha256:4949c4556338875d2cc18fff698140c30f87ef8121ab7db4661444ac62f5c605",
+      "health": "healthy",
+      "memory_bytes": 1073741824,
+      "nano_cpus": 1000000000,
+      "pids_limit": 64
+    }
+  },
+  "stop_exit_codes": {
+    "api": 143,
+    "web": 0,
+    "worker": 0,
+    "publisher": 0
+  },
+  "cache": {
+    "files": 5,
+    "sha256": "75aae4d2f3a1ceed334456214c8e2444f13b960f60faea5b57f72fd63ae5c97a"
+  },
+  "shutdown_scope": "idle services after a completed task; in-flight drain coordination has separate tests",
+  "api_shutdown_marker": {
+    "version": 1,
+    "pid": 7,
+    "lifespan_shutdown_completed": true
+  },
+  "stop_seconds": 0.512
+}

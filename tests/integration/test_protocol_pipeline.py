@@ -48,7 +48,7 @@ class ProtocolPipelineTests(PipelineFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "offline protocol scene",
-                "output": {"width": 256, "height": 256},
+                "output": {"width": 256, "height": 256, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {

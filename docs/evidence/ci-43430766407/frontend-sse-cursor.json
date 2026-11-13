@@ -1,0 +1,65 @@
+{
+  "result": "PASS",
+  "commit": "054d6ba0950aaf8dfdd3aa72d4df0003595953d5",
+  "observed_at": "2026-11-13T13:12:11.133Z",
+  "paid_calls": 0,
+  "browser": "158.0.8127.18",
+  "scope": "production React app + native EventSource/PG HTTP replay; duplicate/stale frames and one finite replay/EOF injected at browser boundaries; reconnect forwarded to real API",
+  "deduplicated_events": true,
+  "ignored_stale_revisions": true,
+  "cursor_restored_after_reload": true,
+  "cursor_namespaced_by_user_and_task": true,
+  "automatic_last_event_header": true,
+  "server_reset_recovered": true,
+  "task_posts": 3,
+  "injection_snapshot_reads": {
+    "before": 2,
+    "afterDuplicate": 2,
+    "afterStale": 2,
+    "staleId": "41",
+    "originalId": "40",
+    "payload": "{\"status\": \"queued\", \"revision\": 1, \"task_id\": \"71c8d7ca-79ff-4fc5-9493-d12cca85e7f8\"}"
+  },
+  "event_requests": [
+    {
+      "task": "71c8d7ca-79ff-4fc5-9493-d12cca85e7f8",
+      "cursor": null
+    },
+    {
+      "task": "71c8d7ca-79ff-4fc5-9493-d12cca85e7f8",
+      "cursor": "40"
+    },
+    {
+      "task": "71c8d7ca-79ff-4fc5-9493-d12cca85e7f8",
+      "cursor": null
+    },
+    {
+      "task": "71c8d7ca-79ff-4fc5-9493-d12cca85e7f8",
+      "cursor": "41"
+    },
+    {
+      "task": "71c8d7ca-79ff-4fc5-9493-d12cca85e7f8",
+      "cursor": "40"
+    },
+    {
+      "task": "71c8d7ca-79ff-4fc5-9493-d12cca85e7f8",
+      "cursor": "40"
+    },
+    {
+      "task": "3614b772-ea7b-48d7-8399-c49e6541be8c",
+      "cursor": null
+    },
+    {
+      "task": "51ed2bcf-5487-4dc3-a68c-01c0fb60d49e",
+      "cursor": null
+    }
+  ],
+  "server_reconnect": {
+    "event": "task_event_stream_open",
+    "task_id": "71c8d7ca-79ff-4fc5-9493-d12cca85e7f8",
+    "cursor": "40",
+    "cursor_source": "last-event-id",
+    "request_id": "344d624e-7dea-4b74-91b4-ba72ec83e162"
+  },
+  "test_sha256": "3103eca177f147d64a509d5c3e2edb638b725f100babf0786ff9d5be7816ca9d"
+}

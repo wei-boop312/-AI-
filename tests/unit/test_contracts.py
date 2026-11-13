@@ -117,8 +117,9 @@ class ContractTests(unittest.TestCase):
             generation=dict(
                 type="scene",
                 prompt="test",
-                output=dict(width=100, height=100),
+                output=dict(width=100, height=100, format="png"),
                 protection_mode="none",
+                regions=[],
             ),
             targets=[
                 dict(platform="amazon", marketplace="US", category="generic", image_type="MAIN")
@@ -135,12 +136,21 @@ class ContractTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             QuoteRequest.model_validate(d)
 
-    def test_hash_defaults(self):
-        d = self.request()
-        a = QuoteRequest.model_validate(d)
-        d["generation"]["regions"] = []
-        d["generation"]["output"]["format"] = "png"
-        self.assertEqual(canonical_hash(a), canonical_hash(QuoteRequest.model_validate(d)))
+    def test_hash_is_stable_for_reordered_explicit_business_fields(self):
+        value = self.request()
+        first = QuoteRequest.model_validate(value)
+        reordered = json.loads(json.dumps(value, sort_keys=True))
+        self.assertEqual(
+            canonical_hash(first), canonical_hash(QuoteRequest.model_validate(reordered))
+        )
+
+    def test_format_and_regions_must_be_explicit(self):
+        for field in ["format", "regions"]:
+            value = self.request()
+            target = value["generation"]["output"] if field == "format" else value["generation"]
+            del target[field]
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                QuoteRequest.model_validate(value)
 
     def test_normalization_strips_exif_and_flattens_alpha(self):
         im = Image.new("RGBA", (8, 5), (255, 0, 0, 0))

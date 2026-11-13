@@ -1,0 +1,47 @@
+{
+  "run_id": 43430766407,
+  "commit": "054d6ba0950aaf8dfdd3aa72d4df0003595953d5",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43430766407",
+  "artifact_id": 14039048488,
+  "archive_sha256": "6fcf79a1aabce473621accee1b2aadcacfc04af63541eb55c773d2b18d79566c",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "b75cebb1bd366892dea6b338788969fb676d3110f0c682c9d7b65e58094980e4"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "1b4cf956d3df7977fbf65c64760cb95387bfefde7b89193e45f895248b7961cb"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "c15e4db5c3d2296a91ef4ebaddb91d643c587c7e89ba946e6748d24a65467a41"
+    },
+    "runtime-metrics.json": {
+      "artifact_path": "work/ci-public/runtime-metrics.json",
+      "sha256": "1528c46198096785f28f234178ece31cecc443a3b53e05f2635622b53d608c99"
+    },
+    "application-compose.json": {
+      "artifact_path": "work/ci-public/application-compose.json",
+      "sha256": "0a6934c6311e9d96f6965c75a34570b5bf1ede5d6ae3dda4c73637d4440a9d04"
+    },
+    "frontend-sse-cursor.json": {
+      "artifact_path": "work/ci-public/frontend-sse-cursor.json",
+      "sha256": "a0dc29dec6ae7278674a81a918976c3a88abeeac668eb6d40a3bf04f4fcadb1d"
+    },
+    "native-restart-drill.json": {
+      "artifact_path": "work/ci-public/native-restart-drill.json",
+      "sha256": "af4e6fd36ec9e9d74e44750a88f7499cf885a9a819be2d15a184951c55352417"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "a151e10e161e63e1f25d0b8c64d08b5a4f3162776b0f1126ca3a90796f565cce"
+    },
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "c7701887ce452f11b96e87c882eaac2cea168178b8b7ebef1c846f9fe7f36a85"
+    }
+  },
+  "scope": "Original selected reports. V4 Amazon/Temu/Ozon flow and per-platform browser reports, empty exact-protection rejection, same-commit offline operations rehearsal. No paid calls, deployment or production SLA proof. Later mandatory-fields candidate is not covered by this run."
+}

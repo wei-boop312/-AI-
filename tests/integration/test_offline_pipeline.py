@@ -80,7 +80,7 @@ class PipelineFixture(AssetFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "test offline scene",
-                "output": {"width": 16, "height": 16},
+                "output": {"width": 16, "height": 16, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {

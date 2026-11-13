@@ -113,7 +113,7 @@ class RuleOperationsTests(PipelineFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "request validation fixture",
-                "output": {"width": 16, "height": 16},
+                "output": {"width": 16, "height": 16, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {
@@ -140,6 +140,22 @@ class RuleOperationsTests(PipelineFixture):
             {**valid, "targets": [{**valid["targets"][0], "category": "界" * 101}]},
             {**valid, "generation": {**valid["generation"], "prompt": ""}},
             {**valid, "generation": {**valid["generation"], "regions": []}},
+            {
+                **valid,
+                "generation": {
+                    **valid["generation"],
+                    "output": {
+                        k: v for k, v in valid["generation"]["output"].items() if k != "format"
+                    },
+                },
+            },
+            {
+                **valid,
+                "generation": {
+                    **{k: v for k, v in valid["generation"].items() if k != "regions"},
+                    "protection_mode": "none",
+                },
+            },
         ]
         for body in bad:
             self.assertEqual(
@@ -193,7 +209,7 @@ class RuleOperationsTests(PipelineFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "three-platform offline fixture",
-                "output": {"width": 16, "height": 16},
+                "output": {"width": 16, "height": 16, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {

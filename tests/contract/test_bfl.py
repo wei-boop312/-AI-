@@ -288,7 +288,7 @@ class BflContracts(unittest.TestCase):
         generation = {
             "type": "white_background",
             "prompt": "soft light",
-            "output": {"width": 256, "height": 256},
+            "output": {"width": 256, "height": 256, "format": "png"},
             "protection_mode": "pixel_exact",
             "regions": [
                 {

@@ -27,7 +27,7 @@ class Region(StrictModel):
 class Output(StrictModel):
     width: Annotated[int, Field(strict=True, ge=1, le=4096)]
     height: Annotated[int, Field(strict=True, ge=1, le=4096)]
-    format: Literal["png"] = "png"
+    format: Literal["png"]
 
 
 class Generation(StrictModel):
@@ -49,7 +49,7 @@ class Generation(StrictModel):
     prompt: Annotated[str, Field(strict=True, min_length=1, max_length=4000)]
     output: Output
     protection_mode: Literal["pixel_exact", "none"]
-    regions: Annotated[list[Region], Field(max_length=20)] = []
+    regions: Annotated[list[Region], Field(max_length=20)]
 
     @model_validator(mode="after")
     def geometry(self):
