@@ -1,0 +1,68 @@
+{
+  "run_id": 43515956403,
+  "commit": "5829b862d9a436b0f10f2833a859c8aefa342642",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43515956403",
+  "artifact_id": 14082046569,
+  "archive_sha256": "e3abb9fd57147809bdf9c0ae7bee7be2f5c8ff264ea2f00055af0484f7f85a64",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "cc59c1d377430304da2ec0dee6c7001c0871da2a0db1e2be00be80e5169182f0"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "09e22d5577319afea2fafdb235c9d3a4a696969e1312d6205ce85b2aefe248b7"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "89a565b889380c9574f91a5a38f16b736410ce620083adcc9494761fa86d50d0"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "5b40a22ad33a25af9330500a38cb90e4a8e415853044cbca3da91f6e05885aef"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "a5e579df6cdb3ff96bc3973eb97b2d488f143c61fb81c11905fe9405fdd977e4"
+    }
+  },
+  "scope": "0037 private fixture bill archives and independent restore",
+  "test_counts_from_original_logs": {
+    "browser-controlled-faults.log": {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "52218b82ff8d8147c5f6e4397356e28cea8909efdc9dc60604c4e42dda2b28bd",
+      "passed_tests": [
+        7
+      ]
+    },
+    "browser-production.log": {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "14f957a6af14979b3e593335642a349b74a507339a421d7db52e6b1585a8a211",
+      "passed_tests": [
+        4
+      ]
+    },
+    "contracts.log": {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "5c6fdf067cfa169931e0cad85e4dba552b26e163c97097f7ca72b2e17c6e10c3",
+      "passed_tests": [
+        50
+      ]
+    },
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "5d73c975e365fca2e1d60ca108eebd1631328e3ed53fb69d0606308eadc5e253",
+      "passed_tests": [
+        187
+      ]
+    },
+    "unit.log": {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "325dc0f8c518d8f58ae6200a3d0703f011918cdf15c7f1b3e461b0bdee74316d",
+      "passed_tests": [
+        140
+      ]
+    }
+  }
+}

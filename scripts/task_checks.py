@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SUITES = {
     "P0-03": {"unit": ["test_contracts.py", "test_late_fake.py", "test_facts.py"]},
     "P1-01": {"integration": ["test_migrations.py", "test_foreign_keys.py", "test_accounting.py"]},
-    "P1-03": {"integration": ["test_auth_api.py"]},
+    "P1-03": {"integration": ["test_auth_api.py", "test_origin_startup.py"]},
     "P1-04": {"integration": ["test_accounting.py", "test_task_api.py"]},
     "P1-05": {"integration": ["test_task_api.py"]},
     "P2-01": {

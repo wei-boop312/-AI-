@@ -6,7 +6,6 @@ import os
 import re
 import subprocess
 from pathlib import Path, PurePosixPath
-from urllib.parse import urlsplit
 
 REQUIRED = (
     "pyproject.toml",
@@ -87,17 +86,9 @@ def public_settings(values):
     for key, value in result.items():
         require(isinstance(value, str), "public runtime setting must be text")
         if key == "APP_ORIGIN":
-            u = urlsplit(value)
-            require(
-                u.scheme in ("http", "https")
-                and u.hostname
-                and not u.username
-                and not u.password
-                and u.path in ("", "/")
-                and not u.query
-                and not u.fragment,
-                "invalid public origin",
-            )
+            from visual_platform.core.service_urls import validate_app_origin
+
+            result[key] = validate_app_origin(value, result.get("COOKIE_SECURE", "1") == "1")
         elif key == "COOKIE_SECURE":
             require(value in ("0", "1"), "invalid cookie security mode")
         elif key == "PROVIDER_PROFILE":

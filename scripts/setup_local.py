@@ -19,6 +19,7 @@ os.chdir(ROOT)
 from types import SimpleNamespace
 
 from visual_platform.core.identity import hash_password
+from visual_platform.core.service_urls import validate_app_origin
 from visual_platform.storage.s3 import S3Storage
 
 p = argparse.ArgumentParser()
@@ -26,6 +27,10 @@ p.add_argument("--origin", default="http://127.0.0.1:5173")
 p.add_argument("--demo-account", action="store_true")
 p.add_argument("--profile-dir", type=Path, default=ROOT / ".local")
 args = p.parse_args()
+try:
+    args.origin = validate_app_origin(args.origin, False)
+except ValueError:
+    p.error("local setup requires an exact HTTP loopback origin and local cookie profile")
 folder = args.profile_dir.resolve()
 if not any(folder.is_relative_to((ROOT / name).resolve()) for name in (".local", "work")):
     p.error("profile directory must stay inside ignored .local or work")

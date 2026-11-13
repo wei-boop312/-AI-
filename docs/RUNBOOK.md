@@ -54,3 +54,10 @@ DB+S3+规则恢复已在独立原生实例演练，命令与边界见docs/BACKUP
 新协议任务的初始/恢复通知使用既有task.manual队列，普通消费者验证也拒绝协议消息。它们由专用双MockTransport实例显式调用单任务Worker，当前没有面向真实供应商的常驻消费者。人工队列的通知不等于task_dispatch已被设为manual；若任务因恢复/unknown已经隔离，必须继续既有审计核验流程，不能靠指定profile绕过。
 
 迁移前已发布的旧协议消息即便误入普通队列，也会被新的delivery/profile检查拒绝；已有恢复/人工通知保持历史证据，不改写消息或供应商结果。真实供应商接线仍按独立授权、预算、回执和计价门槛推进。
+
+
+### 启动地址与Cookie配置
+
+APP_ORIGIN使用无路径/查询/片段/凭据的Origin，HTTPS必须COOKIE_SECURE=1；HTTP只接受localhost/127.0.0.1且明确COOKIE_SECURE=0。其他COOKIE_SECURE值直接拒绝。域名大小写、默认80/443端口与国际域名按浏览器Origin规范化，入站Origin仍要求精确匹配规范值。S3_ENDPOINT支持合法路径前缀，远程必须HTTPS，并拒绝userinfo、查询/片段、控制符和非法端口；客户端创建前验证。以上适用于API、Worker与Ops构造S3客户端。
+
+setup_local是本机专用初始化器；无效origin在目录/迁移/角色创建前拒绝。配置备份使用同一Origin/Cookie规则保存公开规范值。CI中的HTTPS ASGI客户端验证安全Cookie与真实PG会话，不证明生产证书、反向代理或远程服务器已就绪。

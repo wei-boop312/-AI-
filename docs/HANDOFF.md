@@ -21,3 +21,6 @@ python scripts/handoff.py --verify <offline-handoff.zip的路径>
 验证器拒绝重复/大小写冲突成员、路径穿越、绝对路径、反斜线、私有.env/工作目录、符号链接、超限成员、摘要不符、陈旧/失败门槛、浏览器验收后变更的前端以及缺失/变更的许可文本。创建器再次运行现有P5构建校验，再从准确提交导出源码；输出文件仅新建，不覆盖既有包。默认测试用合成fixture校验拒绝条件，实际包生成必须由干净CI完成。
 
 此包状态为`OFFLINE_READY`，provider_verified、production_deployed、release_authorized均false。P4-03真实供应商、质量与实际账单，以及P5-03目标环境、适用规则/权属与发布决定仍待完成。运行完整服务按包内RUNBOOK和Compose说明初始化专属环境和私有凭据；本包提供源码、前端构建和验证证据。原项目代码的许可状态见NOTICE说明，不因打包而赋予新的开源许可。
+
+
+首次实际交付包已在[9248667 / CI43520402375](https://github.com/wei-boop312/-AI-/actions/runs/43520402375)生成：1282文件、4,467,445字节，下载到本机后再次独立校验通过。原始sidecar和嵌套ZIP SHA见docs/evidence/ci-43520402375；后续提交仍须生成/验证属于自身commit的新包。

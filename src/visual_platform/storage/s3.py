@@ -4,6 +4,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
+from visual_platform.core.service_urls import validate_storage_endpoint
 from visual_platform.services.telemetry import archive_observed
 
 
@@ -13,6 +14,7 @@ class StorageError(Exception):
 
 class S3Storage:
     def __init__(self, settings):
+        validate_storage_endpoint(settings.s3_endpoint)
         self.bucket = settings.s3_bucket
         params = dict(
             endpoint_url=settings.s3_endpoint,

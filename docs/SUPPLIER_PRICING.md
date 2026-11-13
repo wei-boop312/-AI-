@@ -110,7 +110,7 @@ python scripts/supplier_pricing.py review-bill --document <私有账单映射JSO
 当前只验offline_fixture和offline_protocol_mock，reviewed_statement或live组合拒绝。输出仅OFFLINE_BILL_SCOPE_MATCHED、单步上限关系及同单位估算差额；未知/不同单位估算的差额为null，全预算累计尚未核对。actual_spending_verified、confirmation_enabled、evidence_archived始终false，无账单入账、预算重开或积分变动。真实证据归档、去重、正式账单确认与live上下文仍需后续实现和独立验收。
 
 
-## 离线账单证据归档（0037候选）
+## 离线账单证据归档（0037，5829b86/CI43515956403整轮通过，仅fixture）
 
 ```sh
 python scripts/supplier_pricing.py archive-bill --document <私有账单映射JSON> --evidence-file <私有证据> --attest-reviewed --operation-id <uuid> --reason <审阅原因>
