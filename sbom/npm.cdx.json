@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:c68617c7-6366-4cba-8851-c4b3fc11bfc0",
+  "serialNumber": "urn:uuid:1b94f514-7c68-4ed2-be8c-6bc570b8a8c8",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-12T21:48:59.823321+00:00",
+    "timestamp": "2026-11-13T11:45:39.986649+00:00",
     "lifecycles": [
       {
         "phase": "build"
@@ -26,7 +26,7 @@
       },
       {
         "name": "lock_sha256:uv.lock",
-        "value": "09245757e97bb3a4e180608eeb3bd70161cc7678752b78b33bca87b7509d5801"
+        "value": "8bf52d8cb6bea574f39a6bce99f480b6120105c040a41e0cc770485e001eea47"
       },
       {
         "name": "lock_sha256:apps/web/pnpm-lock.yaml",

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12T21:48:59.823321+00:00",
+  "generated_at": "2026-11-13T11:45:39.986649+00:00",
   "platform": "Windows-11-10.0.26200-SP0",
   "components": [
     {
@@ -102,6 +102,24 @@
         {
           "file": "third_party/licenses/python/argon2-cffi-bindings-26.1.0/966998dc3707-LICENSE",
           "sha256": "966998dc37070a83cc0507bed5e3241d31782c078d0d24870090dead7c471e36",
+          "origin": "installed distribution legal text"
+        }
+      ]
+    },
+    {
+      "ecosystem": "python",
+      "name": "ast_serialize",
+      "version": "0.13.1",
+      "declared_license": "MIT",
+      "texts": [
+        {
+          "file": "third_party/licenses/python/ast_serialize-0.13.1/f798046f335b-LICENSE",
+          "sha256": "f798046f335b4c84dc851224aeeb8a96b6a1eb70f02f058e860bb00d9d7551cc",
+          "origin": "installed distribution legal text"
+        },
+        {
+          "file": "third_party/licenses/python/ast_serialize-0.13.1/91e174916565-LICENSE",
+          "sha256": "91e1749165651f2ad405f1533a921fc8d5cb0de2fd88a4b82090a8b571b5598d",
           "origin": "installed distribution legal text"
         }
       ]
@@ -484,6 +502,19 @@
     },
     {
       "ecosystem": "python",
+      "name": "librt",
+      "version": "0.16.0",
+      "declared_license": "MIT",
+      "texts": [
+        {
+          "file": "third_party/licenses/python/librt-0.16.0/81b7ac7e5dc9-LICENSE",
+          "sha256": "81b7ac7e5dc9410dd4aa4c8f8c5884b43cb821137904dc247b381132389b6aa8",
+          "origin": "installed distribution legal text"
+        }
+      ]
+    },
+    {
+      "ecosystem": "python",
       "name": "license-expression",
       "version": "30.4.4",
       "declared_license": "Apache-2.0",
@@ -585,6 +616,42 @@
     },
     {
       "ecosystem": "python",
+      "name": "mypy",
+      "version": "2.4.1",
+      "declared_license": "MIT",
+      "texts": [
+        {
+          "file": "third_party/licenses/python/mypy-2.4.1/13c71e096283-LICENSE",
+          "sha256": "13c71e0962836d8850762bda0f6234ff213034871fa66b6c42962549d73517a4",
+          "origin": "installed distribution legal text"
+        },
+        {
+          "file": "third_party/licenses/python/mypy-2.4.1/1cdee80ea936-LICENSE",
+          "sha256": "1cdee80ea9363fbe69582df40fa64e1853d7647fb4978c2b376f5854d88142be",
+          "origin": "installed distribution legal text"
+        },
+        {
+          "file": "third_party/licenses/python/mypy-2.4.1/13c71e096283-LICENSE",
+          "sha256": "13c71e0962836d8850762bda0f6234ff213034871fa66b6c42962549d73517a4",
+          "origin": "installed distribution legal text"
+        }
+      ]
+    },
+    {
+      "ecosystem": "python",
+      "name": "mypy_extensions",
+      "version": "1.2.0",
+      "declared_license": "MIT",
+      "texts": [
+        {
+          "file": "third_party/licenses/python/mypy_extensions-1.2.0/a50450da1d53-LICENSE",
+          "sha256": "a50450da1d53cd777b80ced77c58ff96abe0ccd879706bd142c3ec20e245f0b4",
+          "origin": "installed distribution legal text"
+        }
+      ]
+    },
+    {
+      "ecosystem": "python",
       "name": "opentelemetry-api",
       "version": "1.45.2",
       "declared_license": "Apache-2.0",
@@ -641,6 +708,19 @@
         {
           "file": "third_party/licenses/python/pamqp-5.0.0/987fa2d6c1e5-LICENSE",
           "sha256": "987fa2d6c1e58c2ec08a4f32bf7f6eaa243756a6506728a05efded2cf26f5f8c",
+          "origin": "installed distribution legal text"
+        }
+      ]
+    },
+    {
+      "ecosystem": "python",
+      "name": "pathspec",
+      "version": "1.1.1",
+      "declared_license": "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+      "texts": [
+        {
+          "file": "third_party/licenses/python/pathspec-1.1.1/fab3dd6bdab2-LICENSE",
+          "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
           "origin": "installed distribution legal text"
         }
       ]
@@ -1163,6 +1243,19 @@
         {
           "file": "third_party/licenses/python/rpds-py-2026.9.1/8bcb72c82ea8-LICENSE",
           "sha256": "8bcb72c82ea8ae74802293c41d93ad7d51434001b0ae45a603a5af0f507aee0a",
+          "origin": "installed distribution legal text"
+        }
+      ]
+    },
+    {
+      "ecosystem": "python",
+      "name": "ruff",
+      "version": "0.17.5",
+      "declared_license": "MIT",
+      "texts": [
+        {
+          "file": "third_party/licenses/python/ruff-0.17.5/2597d854122b-LICENSE",
+          "sha256": "2597d854122b77ddc71971564ca2350a37608575ce324adc5650a2b2051c8f18",
           "origin": "installed distribution legal text"
         }
       ]

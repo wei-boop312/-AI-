@@ -1,0 +1,64 @@
+{
+  "observed_at": "2026-11-13T11:33:05.353839+00:00",
+  "requested_gate": "all",
+  "profile": "offline",
+  "paid_calls": 0,
+  "deployed": false,
+  "not_verified": {
+    "P4-03": "WAITING_EXTERNAL: real provider call and budget authorization are absent",
+    "P5-02": "versioned restore is included; full runtime metrics/restart operations gate remains separate",
+    "P5-03": "WAITING_EXTERNAL: target environment, policy evidence and release decision"
+  },
+  "scope": "current native suites + production browser + Compose applications/persistence + independent versioned backup restore + locked build evidence",
+  "source_provenance": {
+    "result": "PASS",
+    "scope": "P0-01 specification provenance; authorized remote only, no deployment",
+    "specification_files": 12,
+    "paid_calls": 0
+  },
+  "static": "PASS",
+  "legal_text_references": 264,
+  "dependency_components": 186,
+  "openapi_paths": 31,
+  "native_ci": "PASS",
+  "commit": "cd4dc472f373bf98e1adb3739e266957b306d694",
+  "docker_engine": "28.0.4",
+  "runtime_image_ids": [
+    "sha256:2dec9ddc08a0130737bebc3e09aca1e9b2cd7f859ab25a936db51cd0c0d79e03",
+    "sha256:2c8837352a225b4957f930a54d618f4cb66ec35c70fd8b11372d8ea9f1b16268"
+  ],
+  "application_compose": "PASS",
+  "frontend_sse_cursor": "PASS",
+  "versioned_backup_restore": "PASS",
+  "runtime_metrics": {
+    "api_samples": 943,
+    "archive_operations": 35,
+    "phase_groups": 5,
+    "monetary_groups": 1
+  },
+  "verified_tasks": [
+    "P0-01",
+    "P0-02",
+    "P0-03",
+    "P1-01",
+    "P1-02",
+    "P1-03",
+    "P1-04",
+    "P1-05",
+    "P2-01",
+    "P2-02",
+    "P2-03",
+    "P2-04",
+    "P2-05",
+    "P2-06",
+    "P2-07",
+    "P3-01",
+    "P3-02",
+    "P3-03",
+    "P3-04",
+    "P4-01 (mock HTTP)",
+    "P4-02 (mock SDK HTTP)",
+    "P5-01"
+  ],
+  "result": "OFFLINE_READY"
+}

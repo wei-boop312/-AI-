@@ -1,0 +1,102 @@
+{
+  "commit": "cd4dc472f373bf98e1adb3739e266957b306d694",
+  "result": "PASS",
+  "paid_calls": 0,
+  "scope": "owned CI API/Worker lifetime plus one explicit archive fault fixture; not a production log coverage claim",
+  "metrics": {
+    "api_p95_ms": 89.82,
+    "api_5xx_count": 0,
+    "task_stage_duration": [
+      {
+        "phase": "detecting",
+        "samples": 6,
+        "p95_seconds": 0.12077475,
+        "total_seconds": 0.68142
+      },
+      {
+        "phase": "finalizing",
+        "samples": 6,
+        "p95_seconds": 0.0054505,
+        "total_seconds": 0.030604
+      },
+      {
+        "phase": "polling",
+        "samples": 6,
+        "p95_seconds": 14.276517499999999,
+        "total_seconds": 19.508282
+      },
+      {
+        "phase": "protecting",
+        "samples": 6,
+        "p95_seconds": 0.123167,
+        "total_seconds": 0.666098
+      },
+      {
+        "phase": "submitting",
+        "samples": 9,
+        "p95_seconds": 0.0341676,
+        "total_seconds": 0.224442
+      }
+    ],
+    "archive_failure_count": 1,
+    "provider_submission_count": {
+      "scope": "write-ahead intents and known receipts for intents started within 24h; not confirmed billable HTTP calls",
+      "activity": [
+        {
+          "step": "detect",
+          "provider": "fake",
+          "receipt_count": 6,
+          "uncertain_count": 0,
+          "submission_intents": 6
+        },
+        {
+          "step": "generate",
+          "provider": "fake",
+          "receipt_count": 6,
+          "uncertain_count": 0,
+          "submission_intents": 9
+        }
+      ]
+    },
+    "provider_cost_by_currency": [
+      {
+        "amount": "0.00000000",
+        "attempts": 12,
+        "currency": "USD",
+        "provider": "fake",
+        "cost_status": "confirmed"
+      }
+    ],
+    "provider_cost_unknown_records": 0,
+    "rule_manual_review_rate": 1.0
+  },
+  "telemetry": {
+    "scope": "24h observations in explicitly supplied files only; not proof of all instances or rotated log coverage",
+    "api_duration_scope": "ASGI body completion or application exception; health probes and task SSE excluded",
+    "archive_scope": "immutable object write plus read-back verification attempts, not unique assets or provider submissions",
+    "observed_at": "2026-11-13T11:30:09.934578+00:00",
+    "files_read": 3,
+    "observations": 978,
+    "duplicate_observations": 0,
+    "malformed_observations": 0,
+    "inputs_truncated": false,
+    "coverage_complete_for_supplied_files": true,
+    "api_samples": 943,
+    "api_p95_ms": 89.82,
+    "p95_method": "nearest_rank",
+    "api_5xx_count": 0,
+    "api_incomplete_or_interrupted": 0,
+    "archive_operations": 35,
+    "archive_failure_count": 1,
+    "archive_interrupted": 0
+  },
+  "cost_scope": "one authoritative observation per recently observed attempt; settlement precedes response, intent and estimate; currencies/statuses never combined",
+  "rule_scope": "final compliance check records within 24h, including rule-only rechecks; not human review decisions",
+  "archive_fault_recovered": true,
+  "verification": {
+    "api_samples": 943,
+    "archive_operations": 35,
+    "phase_groups": 5,
+    "monetary_groups": 1
+  }
+}

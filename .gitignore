@@ -7,3 +7,7 @@ dist/
 work/
 .local/
 *.tsbuildinfo
+
+.mypy_cache/
+
+.ruff_cache/

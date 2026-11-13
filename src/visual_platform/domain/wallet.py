@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
 
+
 @dataclass
 class Wallet:
     """Reference domain model only; production mutations require PG transactions."""
+
     available: int
     reserved: int = 0
     funded: int = field(init=False)
@@ -18,20 +20,27 @@ class Wallet:
         if type(amount) is not int or amount <= 0:
             raise ValueError("invalid amount")
         if task in self.holds:
-            if self.holds[task][0] != amount: raise ValueError("conflict")
+            if self.holds[task][0] != amount:
+                raise ValueError("conflict")
             return
-        if self.available < amount: raise ValueError("insufficient credits")
+        if self.available < amount:
+            raise ValueError("insufficient credits")
         self.available -= amount
         self.reserved += amount
         self.holds[task] = (amount, "frozen")
 
     def finish(self, task, outcome):
-        if outcome not in ("charged", "refunded"): raise ValueError("invalid outcome")
+        if outcome not in ("charged", "refunded"):
+            raise ValueError("invalid outcome")
         amount, state = self.holds[task]
-        if state == outcome: return
-        if state != "frozen": raise ValueError("terminal conflict")
+        if state == outcome:
+            return
+        if state != "frozen":
+            raise ValueError("terminal conflict")
         self.reserved -= amount
-        if outcome == "charged": self.spent += amount
-        else: self.available += amount
+        if outcome == "charged":
+            self.spent += amount
+        else:
+            self.available += amount
         self.holds[task] = (amount, outcome)
         assert self.available + self.reserved == self.funded - self.spent

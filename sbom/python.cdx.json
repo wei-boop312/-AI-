@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:0b4d46f3-de48-492c-adfa-190717948241",
+  "serialNumber": "urn:uuid:5b28c1ba-9e8f-49b9-a9e5-b5b285e8c24d",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-12T21:48:59.823321+00:00",
+    "timestamp": "2026-11-13T11:45:39.986649+00:00",
     "lifecycles": [
       {
         "phase": "build"
@@ -26,7 +26,7 @@
       },
       {
         "name": "lock_sha256:uv.lock",
-        "value": "09245757e97bb3a4e180608eeb3bd70161cc7678752b78b33bca87b7509d5801"
+        "value": "8bf52d8cb6bea574f39a6bce99f480b6120105c040a41e0cc770485e001eea47"
       },
       {
         "name": "lock_sha256:apps/web/pnpm-lock.yaml",
@@ -139,6 +139,20 @@
       "name": "argon2-cffi",
       "version": "25.1.0",
       "purl": "pkg:pypi/argon2-cffi@25.1.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/ast-serialize@0.13.1",
+      "name": "ast_serialize",
+      "version": "0.13.1",
+      "purl": "pkg:pypi/ast-serialize@0.13.1",
       "licenses": [
         {
           "license": {
@@ -527,6 +541,20 @@
     },
     {
       "type": "library",
+      "bom-ref": "pkg:pypi/librt@0.16.0",
+      "name": "librt",
+      "version": "0.16.0",
+      "purl": "pkg:pypi/librt@0.16.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "pkg:pypi/license-expression@30.4.4",
       "name": "license-expression",
       "version": "30.4.4",
@@ -625,6 +653,34 @@
     },
     {
       "type": "library",
+      "bom-ref": "pkg:pypi/mypy-extensions@1.2.0",
+      "name": "mypy_extensions",
+      "version": "1.2.0",
+      "purl": "pkg:pypi/mypy-extensions@1.2.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/mypy@2.4.1",
+      "name": "mypy",
+      "version": "2.4.1",
+      "purl": "pkg:pypi/mypy@2.4.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "pkg:pypi/opentelemetry-api@1.45.2",
       "name": "opentelemetry-api",
       "version": "1.45.2",
@@ -675,6 +731,20 @@
         {
           "license": {
             "name": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/pathspec@1.1.1",
+      "name": "pathspec",
+      "version": "1.1.1",
+      "purl": "pkg:pypi/pathspec@1.1.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
           }
         }
       ]
@@ -1007,6 +1077,20 @@
       "name": "rpds-py",
       "version": "2026.9.1",
       "purl": "pkg:pypi/rpds-py@2026.9.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/ruff@0.17.5",
+      "name": "ruff",
+      "version": "0.17.5",
+      "purl": "pkg:pypi/ruff@0.17.5",
       "licenses": [
         {
           "license": {

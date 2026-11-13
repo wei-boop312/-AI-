@@ -1,6 +1,6 @@
 # Third-party notices
 
-Generated 2026-11-12T21:48:59.823321+00:00. Installed build environment: Windows-11-10.0.26200-SP0.
+Generated 2026-11-13T11:45:39.986649+00:00. Installed build environment: Windows-11-10.0.26200-SP0.
 
 License names below are upstream package metadata, not newly granted permissions. Full packaged LICENSE/COPYING/NOTICE texts are preserved with SHA-256. Runtime and development tools are included. Base OS packages and uninstalled platform variants are outside this inventory; image distribution requires separate review. Original project code is not assigned an open-source license by this file.
 
@@ -677,6 +677,13 @@ MIT
 
 - [third_party/licenses/python/argon2-cffi-bindings-26.1.0/966998dc3707-LICENSE](../third_party/licenses/python/argon2-cffi-bindings-26.1.0/966998dc3707-LICENSE) — SHA-256 966998dc37070a83cc0507bed5e3241d31782c078d0d24870090dead7c471e36; installed distribution legal text
 
+## python: ast_serialize 0.13.1
+
+MIT
+
+- [third_party/licenses/python/ast_serialize-0.13.1/f798046f335b-LICENSE](../third_party/licenses/python/ast_serialize-0.13.1/f798046f335b-LICENSE) — SHA-256 f798046f335b4c84dc851224aeeb8a96b6a1eb70f02f058e860bb00d9d7551cc; installed distribution legal text
+- [third_party/licenses/python/ast_serialize-0.13.1/91e174916565-LICENSE](../third_party/licenses/python/ast_serialize-0.13.1/91e174916565-LICENSE) — SHA-256 91e1749165651f2ad405f1533a921fc8d5cb0de2fd88a4b82090a8b571b5598d; installed distribution legal text
+
 ## python: asyncpg 0.32.0
 
 Apache-2.0
@@ -844,6 +851,12 @@ MIT
 
 - [third_party/licenses/python/jsonschema-specifications-2025.9.1/42dcd63495f8-COPYING](../third_party/licenses/python/jsonschema-specifications-2025.9.1/42dcd63495f8-COPYING) — SHA-256 42dcd63495f87b4eb7c7757afa379bb55a53f94afd7a5f657d9adf57236e515c; installed distribution legal text
 
+## python: librt 0.16.0
+
+MIT
+
+- [third_party/licenses/python/librt-0.16.0/81b7ac7e5dc9-LICENSE](../third_party/licenses/python/librt-0.16.0/81b7ac7e5dc9-LICENSE) — SHA-256 81b7ac7e5dc9410dd4aa4c8f8c5884b43cb821137904dc247b381132389b6aa8; installed distribution legal text
+
 ## python: license-expression 30.4.4
 
 Apache-2.0
@@ -888,6 +901,20 @@ Apache-2.0
 
 - [third_party/licenses/python/multidict-7.2.1/2e4be5fc6c4c-LICENSE](../third_party/licenses/python/multidict-7.2.1/2e4be5fc6c4c-LICENSE) — SHA-256 2e4be5fc6c4c72a466fcb665d726e049a6891981fe536c4f04b6366749461d23; installed distribution legal text
 
+## python: mypy 2.4.1
+
+MIT
+
+- [third_party/licenses/python/mypy-2.4.1/13c71e096283-LICENSE](../third_party/licenses/python/mypy-2.4.1/13c71e096283-LICENSE) — SHA-256 13c71e0962836d8850762bda0f6234ff213034871fa66b6c42962549d73517a4; installed distribution legal text
+- [third_party/licenses/python/mypy-2.4.1/1cdee80ea936-LICENSE](../third_party/licenses/python/mypy-2.4.1/1cdee80ea936-LICENSE) — SHA-256 1cdee80ea9363fbe69582df40fa64e1853d7647fb4978c2b376f5854d88142be; installed distribution legal text
+- [third_party/licenses/python/mypy-2.4.1/13c71e096283-LICENSE](../third_party/licenses/python/mypy-2.4.1/13c71e096283-LICENSE) — SHA-256 13c71e0962836d8850762bda0f6234ff213034871fa66b6c42962549d73517a4; installed distribution legal text
+
+## python: mypy_extensions 1.2.0
+
+MIT
+
+- [third_party/licenses/python/mypy_extensions-1.2.0/a50450da1d53-LICENSE](../third_party/licenses/python/mypy_extensions-1.2.0/a50450da1d53-LICENSE) — SHA-256 a50450da1d53cd777b80ced77c58ff96abe0ccd879706bd142c3ec20e245f0b4; installed distribution legal text
+
 ## python: opentelemetry-api 1.45.2
 
 Apache-2.0
@@ -913,6 +940,12 @@ Apache-2.0 OR BSD-2-Clause
 BSD-3-Clause
 
 - [third_party/licenses/python/pamqp-5.0.0/987fa2d6c1e5-LICENSE](../third_party/licenses/python/pamqp-5.0.0/987fa2d6c1e5-LICENSE) — SHA-256 987fa2d6c1e58c2ec08a4f32bf7f6eaa243756a6506728a05efded2cf26f5f8c; installed distribution legal text
+
+## python: pathspec 1.1.1
+
+License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)
+
+- [third_party/licenses/python/pathspec-1.1.1/fab3dd6bdab2-LICENSE](../third_party/licenses/python/pathspec-1.1.1/fab3dd6bdab2-LICENSE) — SHA-256 fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85; installed distribution legal text
 
 ## python: pillow 13.0.0
 
@@ -1099,6 +1132,12 @@ MIT
 MIT
 
 - [third_party/licenses/python/rpds-py-2026.9.1/8bcb72c82ea8-LICENSE](../third_party/licenses/python/rpds-py-2026.9.1/8bcb72c82ea8-LICENSE) — SHA-256 8bcb72c82ea8ae74802293c41d93ad7d51434001b0ae45a603a5af0f507aee0a; installed distribution legal text
+
+## python: ruff 0.17.5
+
+MIT
+
+- [third_party/licenses/python/ruff-0.17.5/2597d854122b-LICENSE](../third_party/licenses/python/ruff-0.17.5/2597d854122b-LICENSE) — SHA-256 2597d854122b77ddc71971564ca2350a37608575ce324adc5650a2b2051c8f18; installed distribution legal text
 
 ## python: s3transfer 0.19.3
 

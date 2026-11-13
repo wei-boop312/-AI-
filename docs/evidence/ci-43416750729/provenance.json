@@ -1,0 +1,28 @@
+{
+  "run_id": 43416750729,
+  "commit": "cd4dc472f373bf98e1adb3739e266957b306d694",
+  "conclusion": "success",
+  "test_counts": {
+    "unit": 78,
+    "native-integration": 96
+  },
+  "scope": "Current request/archive/business metrics, complete Compose and versioned restore. Static Ruff/mypy checks were not yet present at this commit.",
+  "files": [
+    {
+      "path": "runtime-metrics.json",
+      "sha256": "d555a2e647602a8dd7c5b33671407ede53ecd82008ea5211b4552d3a4d819de9"
+    },
+    {
+      "path": "native-result.json",
+      "sha256": "19133630785fdc80ca40fa6e9f439d714f2114484537f9d84138a7b92587b939"
+    },
+    {
+      "path": "offline-gate.json",
+      "sha256": "483f063f4f9398a2feecde8318353a60af1bc5d1dc22d9594644c7202ef1aad9"
+    },
+    {
+      "path": "native-restore-v2.json",
+      "sha256": "1978bf12eab0732210e6865c16b9a6aa402c1bfea9a937a03ac54bb239ca0c62"
+    }
+  ]
+}

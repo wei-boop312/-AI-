@@ -35,6 +35,8 @@ jobs:
           pnpm --dir apps/web install --frozen-lockfile
           uv pip check
           uv lock --check --offline
+      - name: Python format lint and Linux Windows type checks
+        run: uv run python scripts/static_checks.py
       - name: Unit and offline supplier HTTP contracts
         run: |
           mkdir -p work/ci-public
