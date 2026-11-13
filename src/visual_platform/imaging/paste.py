@@ -3,6 +3,8 @@ from io import BytesIO
 
 from PIL import Image
 
+from visual_platform.domain.image_limits import MAX_PROTECTED_PIXELS
+
 
 @dataclass(frozen=True)
 class Region:
@@ -30,7 +32,7 @@ def protect(source: Image.Image, generated: Image.Image, regions: list[Region]) 
         raise ValueError("canonical RGB required")
     if source.size != generated.size:
         raise ValueError("exact mode requires equal dimensions")
-    if source.width * source.height > 4_000_000 or len(regions) > 20:
+    if source.width * source.height > MAX_PROTECTED_PIXELS or len(regions) > 20:
         raise ValueError("limits exceeded")
     boxes: list[tuple[int, int, int, int]] = []
     for r in regions:

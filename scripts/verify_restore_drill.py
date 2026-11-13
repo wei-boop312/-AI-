@@ -181,7 +181,7 @@ if args.command == "prepare":
         require(product.status_code == 201, "drill product failed")
         state["product_id"] = product.json()["id"]
         stream = BytesIO()
-        Image.new("RGB", (16, 16), (201, 15, 35)).save(stream, "PNG")
+        Image.new("RGB", (256, 256), (201, 15, 35)).save(stream, "PNG")
         data = stream.getvalue()
         intent = client.post(
             "/api/v1/assets/upload-intents",
@@ -216,7 +216,7 @@ if args.command == "prepare":
             "generation": {
                 "type": "scene",
                 "prompt": "offline backup fixture",
-                "output": {"width": 16, "height": 16, "format": "png"},
+                "output": {"width": 256, "height": 256, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {

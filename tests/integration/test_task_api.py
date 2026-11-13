@@ -23,7 +23,7 @@ class TaskApiFixture(AuthApiFixture):
                 (asset, self.user, self.product),
             )
             c.execute(
-                "INSERT INTO app.asset_versions(id,user_id,product_id,asset_id,version_number,bucket,object_key,sha256,mime,width,height,byte_size,color_space,canonical) VALUES(%s,%s,%s,%s,1,'test',%s,%s,'image/png',10,10,100,'sRGB',true)",
+                "INSERT INTO app.asset_versions(id,user_id,product_id,asset_id,version_number,bucket,object_key,sha256,mime,width,height,byte_size,color_space,canonical) VALUES(%s,%s,%s,%s,1,'test',%s,%s,'image/png',256,256,100,'sRGB',true)",
                 (self.version, self.user, self.product, asset, str(uuid4()), "a" * 64),
             )
             c.execute(
@@ -38,7 +38,7 @@ class TaskApiFixture(AuthApiFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "test scene",
-                "output": {"width": 10, "height": 10, "format": "png"},
+                "output": {"width": 256, "height": 256, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {
@@ -135,7 +135,7 @@ class TaskApiTests(TaskApiFixture):
                 (asset, self.user, other),
             )
             c.execute(
-                "INSERT INTO app.asset_versions(id,user_id,product_id,asset_id,version_number,bucket,object_key,sha256,mime,width,height,byte_size,color_space,canonical) VALUES(%s,%s,%s,%s,1,'test',%s,%s,'image/png',10,10,100,'sRGB',true)",
+                "INSERT INTO app.asset_versions(id,user_id,product_id,asset_id,version_number,bucket,object_key,sha256,mime,width,height,byte_size,color_space,canonical) VALUES(%s,%s,%s,%s,1,'test',%s,%s,'image/png',256,256,100,'sRGB',true)",
                 (version, self.user, other, asset, str(uuid4()), "a" * 64),
             )
             c.execute(
@@ -179,14 +179,11 @@ class TaskApiTests(TaskApiFixture):
         self.assertEqual((balance["available"], balance["reserved"]), (16, 0))
 
     def test_size_and_archive(self):
-        self.body["generation"]["output"]["width"] = 11
-        self.assertEqual(
-            self.client.post(
-                "/api/v1/quotes", json=self.body, headers=self.write_headers()
-            ).status_code,
-            422,
-        )
-        self.body["generation"]["output"]["width"] = 10
+        self.body["generation"]["output"]["width"] = 257
+        response = self.client.post("/api/v1/quotes", json=self.body, headers=self.write_headers())
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json()["error"]["code"], "pixel_exact_size_mismatch")
+        self.body["generation"]["output"]["width"] = 256
         self.client.delete("/api/v1/products/" + self.product, headers=self.write_headers())
         self.assertEqual(
             self.client.post(

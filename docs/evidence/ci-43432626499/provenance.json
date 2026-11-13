@@ -1,0 +1,27 @@
+{
+  "run_id": 43432626499,
+  "commit": "5c327a21caff1bd971b36a1044cbfccd55436947",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43432626499",
+  "artifact_id": 14041976579,
+  "archive_sha256": "3b1d40494bbb8c6afe23f2f723acbab2c2424b25ff366a8a9aca34be9f9d8f06",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "9bc981c23b261cb9c7972a9242c5206f8fe88185dca4ef80bb7ff4f9cf6afb46"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "82ab4a6bf051f865058a982aa7d1068c69c84b5eb5d197cd78a0c597e47106de"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "b415d39d2f72a29c78241228694c8f85bfb5a6fe521ac1e2e452ef86f0e9a2ed"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "f27ec1ffad15dfe79a975bfef06e011cb8a63ba4cbe1d2cea8b519b76ab86385"
+    }
+  },
+  "scope": "Original selected JSON; full private zip retained. Explicit format/regions rejection, full offline CI, operations rehearsal. Later output-dimension candidate not covered. No paid model calls or deployment."
+}

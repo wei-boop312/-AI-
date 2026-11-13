@@ -63,7 +63,7 @@ class PipelineFixture(AssetFixture):
         self.folder = tempfile.TemporaryDirectory(dir=work)
         self.addCleanup(self.folder.cleanup)
         self.provider = DurableFakeProvider(Path(self.folder.name))
-        source = Image.new("RGB", (16, 16), (201, 15, 35))
+        source = Image.new("RGB", (256, 256), (201, 15, 35))
         stream = BytesIO()
         source.save(stream, "PNG")
         self.source = stream.getvalue()
@@ -80,7 +80,7 @@ class PipelineFixture(AssetFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "test offline scene",
-                "output": {"width": 16, "height": 16, "format": "png"},
+                "output": {"width": 256, "height": 256, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {

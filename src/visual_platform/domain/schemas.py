@@ -5,10 +5,17 @@ from uuid import UUID
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
+from visual_platform.domain.image_limits import (
+    MAX_CANONICAL_PIXELS,
+    MAX_OUTPUT_EDGE,
+    MAX_PROTECTED_PIXELS,
+    MIN_OUTPUT_EDGE,
+)
 from visual_platform.domain.platforms import Platform
 
 Pixel = Annotated[int, Field(strict=True, ge=0)]
 Positive = Annotated[int, Field(strict=True, gt=0)]
+Span = Annotated[int, Field(strict=True, ge=1, le=MAX_OUTPUT_EDGE)]
 
 
 class StrictModel(BaseModel):
@@ -18,15 +25,15 @@ class StrictModel(BaseModel):
 class Region(StrictModel):
     source_x: Pixel
     source_y: Pixel
-    width: Positive
-    height: Positive
+    width: Span
+    height: Span
     target_x: Pixel
     target_y: Pixel
 
 
 class Output(StrictModel):
-    width: Annotated[int, Field(strict=True, ge=1, le=4096)]
-    height: Annotated[int, Field(strict=True, ge=1, le=4096)]
+    width: Annotated[int, Field(strict=True, ge=MIN_OUTPUT_EDGE, le=MAX_OUTPUT_EDGE)]
+    height: Annotated[int, Field(strict=True, ge=MIN_OUTPUT_EDGE, le=MAX_OUTPUT_EDGE)]
     format: Literal["png"]
 
 
@@ -53,13 +60,15 @@ class Generation(StrictModel):
 
     @model_validator(mode="after")
     def geometry(self):
+        if self.output.width * self.output.height > MAX_CANONICAL_PIXELS:
+            raise ValueError("output exceeds canonical 25MP processing budget")
         if self.protection_mode == "pixel_exact" and not self.regions:
             raise ValueError("pixel_exact requires at least one protection region")
         if self.protection_mode == "none" and self.regions:
             raise ValueError("regions require pixel_exact")
         if (
             self.protection_mode == "pixel_exact"
-            and self.output.width * self.output.height > 4_000_000
+            and self.output.width * self.output.height > MAX_PROTECTED_PIXELS
         ):
             raise ValueError("pixel_exact limited to 4MP")
         boxes: list[tuple[int, int, int, int]] = []

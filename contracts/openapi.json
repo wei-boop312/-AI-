@@ -1817,14 +1817,14 @@
         "properties": {
           "width": {
             "type": "integer",
-            "maximum": 4096.0,
-            "minimum": 1.0,
+            "maximum": 8192.0,
+            "minimum": 256.0,
             "title": "Width"
           },
           "height": {
             "type": "integer",
-            "maximum": 4096.0,
-            "minimum": 1.0,
+            "maximum": 8192.0,
+            "minimum": 256.0,
             "title": "Height"
           },
           "format": {
@@ -1960,12 +1960,14 @@
           },
           "width": {
             "type": "integer",
-            "exclusiveMinimum": 0.0,
+            "maximum": 8192.0,
+            "minimum": 1.0,
             "title": "Width"
           },
           "height": {
             "type": "integer",
-            "exclusiveMinimum": 0.0,
+            "maximum": 8192.0,
+            "minimum": 1.0,
             "title": "Height"
           },
           "target_x": {

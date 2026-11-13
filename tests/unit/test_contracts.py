@@ -117,7 +117,7 @@ class ContractTests(unittest.TestCase):
             generation=dict(
                 type="scene",
                 prompt="test",
-                output=dict(width=100, height=100, format="png"),
+                output=dict(width=256, height=256, format="png"),
                 protection_mode="none",
                 regions=[],
             ),

@@ -3,8 +3,10 @@ from io import BytesIO
 
 from PIL import Image, ImageCms, ImageOps
 
+from visual_platform.domain.image_limits import MAX_CANONICAL_PIXELS, MAX_IMAGE_EDGE
+
 MAX_BYTES = 20 * 1024 * 1024
-MAX_PIXELS = 20_000_000
+MAX_PIXELS = MAX_CANONICAL_PIXELS
 
 
 def normalize(data: bytes) -> bytes:
@@ -18,6 +20,8 @@ def normalize(data: bytes) -> bytes:
                 raise ValueError("unsupported format")
             if getattr(raw, "n_frames", 1) != 1:
                 raise ValueError("animation forbidden")
+            if raw.width > MAX_IMAGE_EDGE or raw.height > MAX_IMAGE_EDGE:
+                raise ValueError("image edge limit")
             if raw.width * raw.height > MAX_PIXELS:
                 raise ValueError("pixel limit")
             raw.load()

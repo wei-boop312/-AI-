@@ -6,6 +6,7 @@ from uuid import UUID
 
 from PIL import Image, ImageDraw
 
+from visual_platform.domain.image_limits import MAX_CANONICAL_PIXELS, MAX_OUTPUT_EDGE
 from visual_platform.providers.contract import ProviderFailure, ProviderUncertain, Receipt
 
 
@@ -64,8 +65,13 @@ class DurableFakeProvider:
         return paths
 
     def submit_generate(self, intent_id, generation):
-        key, _, meta, png = self._begin("generate", intent_id)
         size = (generation["output"]["width"], generation["output"]["height"])
+        if (
+            any(type(edge) is not int or not 1 <= edge <= MAX_OUTPUT_EDGE for edge in size)
+            or size[0] * size[1] > MAX_CANONICAL_PIXELS
+        ):
+            raise ProviderFailure("fake output exceeds processing budget")
+        key, _, meta, png = self._begin("generate", intent_id)
         image = Image.new(
             "RGB", size, "white" if generation["type"] == "white_background" else (224, 234, 242)
         )

@@ -79,10 +79,11 @@ def main():
 
     from PIL import Image
 
+    from visual_platform.domain.image_limits import MAX_CANONICAL_PIXELS
     from visual_platform.imaging.normalize import normalize
 
     original = Path(sys.argv[1]).read_bytes()
-    Image.MAX_IMAGE_PIXELS = 20_000_000
+    Image.MAX_IMAGE_PIXELS = MAX_CANONICAL_PIXELS
     with Image.open(BytesIO(original)) as image:
         mime = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp"}.get(
             image.format or ""

@@ -113,7 +113,7 @@ class RuleOperationsTests(PipelineFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "request validation fixture",
-                "output": {"width": 16, "height": 16, "format": "png"},
+                "output": {"width": 256, "height": 256, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {
@@ -157,6 +157,18 @@ class RuleOperationsTests(PipelineFixture):
                 },
             },
         ]
+        for width, height in [(255, 256), (8193, 256), (8192, 3052)]:
+            bad.append(
+                {
+                    **valid,
+                    "generation": {
+                        **valid["generation"],
+                        "output": {"width": width, "height": height, "format": "png"},
+                        "protection_mode": "none",
+                        "regions": [],
+                    },
+                }
+            )
         for body in bad:
             self.assertEqual(
                 self.client.post(
@@ -194,6 +206,61 @@ class RuleOperationsTests(PipelineFixture):
                 0,
             )
 
+    def test_8192_edges_deliver_actual_private_png_without_protection_claim(self):
+        for width, height in [(8192, 256), (256, 8192), (5000, 5000)]:
+            with self.subTest(width=width, height=height):
+                body = {
+                    "product_id": self.product,
+                    "source_asset_version_id": self.version,
+                    "generation": {
+                        "type": "scene",
+                        "prompt": "wide/tall offline boundary fixture",
+                        "output": {"width": width, "height": height, "format": "png"},
+                        "protection_mode": "none",
+                        "regions": [],
+                    },
+                    "targets": [
+                        {
+                            "platform": "ozon",
+                            "marketplace": "RU",
+                            "category": "generic",
+                            "image_type": "MAIN",
+                        }
+                    ],
+                }
+                quote = self.client.post("/api/v1/quotes", json=body, headers=self.write_headers())
+                self.assertEqual(quote.status_code, 201, quote.text)
+                task = self.client.post(
+                    "/api/v1/tasks",
+                    json={**body, "quote_id": quote.json()["quote_id"]},
+                    headers={**self.write_headers(), "idempotency-key": str(uuid4())},
+                )
+                self.assertEqual(task.status_code, 201, task.text)
+                identity = task.json()["id"]
+                self.assertEqual(self.run_worker(identity), "succeeded")
+                result = self.client.get("/api/v1/tasks/" + identity).json()["result"]
+                self.assertEqual((result["width"], result["height"]), (width, height))
+                url = self.client.get(
+                    "/api/v1/tasks/" + identity + "/download", follow_redirects=False
+                ).headers["location"]
+                data = httpx.get(url, timeout=10, trust_env=False).content
+                self.assertEqual(hashlib.sha256(data).hexdigest(), result["sha256"])
+                from io import BytesIO
+
+                from PIL import Image
+
+                with Image.open(BytesIO(data)) as image:
+                    self.assertEqual(image.size, (width, height))
+                    self.assertEqual(image.mode, "RGB")
+                report_url = self.client.get(
+                    "/api/v1/tasks/" + identity + "/report/download", follow_redirects=False
+                ).headers["location"]
+                report = httpx.get(report_url, timeout=10, trust_env=False).json()
+                self.assertFalse(report["pixel_protection"]["pixel_exact_passed"])
+                self.assertEqual(report["pixel_protection"]["regions"], [])
+                self.assertEqual(report["final_sha256"], result["sha256"])
+                self.assertEqual(report["auto_overall"], "manual_review")
+
     def test_v4_three_platform_quote_delivery_and_rule_discovery(self):
         listed = self.client.get("/api/v1/rules/platforms").json()["items"]
         self.assertEqual({row["platform"] for row in listed}, {"amazon", "temu", "ozon"})
@@ -209,7 +276,7 @@ class RuleOperationsTests(PipelineFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "three-platform offline fixture",
-                "output": {"width": 16, "height": 16, "format": "png"},
+                "output": {"width": 256, "height": 256, "format": "png"},
                 "protection_mode": "pixel_exact",
                 "regions": [
                     {
