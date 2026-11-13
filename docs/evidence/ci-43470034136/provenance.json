@@ -1,0 +1,27 @@
+{
+  "run_id": 43470034136,
+  "commit": "8495393308795282f1a8b7b13d416687a8c0af7d",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43470034136",
+  "artifact_id": 14061136178,
+  "archive_sha256": "c46e060e363aaeadffc736fb9d2244c79c197ec8110ade3a44b4ab78b5fef23a",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "2280c811c285cf610815707ac603be8b0506333dbc7badc96b9ca24c82b9ece7"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "4120a12494aa19ecca31d58e9cb6babd569b44636bf0d5b08e8192d1636369a7"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "1208b46feb6d974d0af946e3f1907874d0b11f0202b912183a63fdebe79e95b3"
+    },
+    "browser-production.log": {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "f3a43907ed284c6a0319a1c34cae78e4168a07e5f3aa96f50efb719066d221ff"
+    }
+  },
+  "scope": "Original run: 109 unit/45 contracts/121 native passed. First 3 production browser cases passed including product edit and draft retention; smoke case failed locating exact save button after appearance creation and edit. Full Compose/restore/P5-02 not reached. Original logs retained, no paid models or deployment."
+}
