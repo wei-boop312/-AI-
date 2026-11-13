@@ -103,7 +103,7 @@ BEGIN
   OR jsonb_typeof(entry.value->'document_sha256') IS DISTINCT FROM 'string' THEN RAISE EXCEPTION 'invalid_price_scope'; END IF;
   SELECT * INTO p FROM ops.supplier_price_versions WHERE id=(entry.value->>'id')::uuid AND document_sha256=entry.value->>'document_sha256';
   IF NOT FOUND OR now()<p.valid_from OR now()>=p.valid_until
-  OR p.provider<>CASE WHEN entry.key='generate' THEN 'bfl' ELSE 'gemini' END THEN RAISE EXCEPTION 'price_scope_mismatch'; END IF;
+  OR p.provider<>(CASE WHEN entry.key='generate' THEN 'bfl' ELSE 'gemini' END) THEN RAISE EXCEPTION 'price_scope_mismatch'; END IF;
   account:=execution->'provider_accounts'->entry.key;
   IF jsonb_typeof(account) IS DISTINCT FROM 'object' OR NOT(account ?& ARRAY['merchant_fingerprint','billing_group'])
   OR EXISTS(SELECT 1 FROM jsonb_object_keys(account) k WHERE k NOT IN ('merchant_fingerprint','billing_group'))

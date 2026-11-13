@@ -1,0 +1,23 @@
+{
+  "run_id": 43493587837,
+  "commit": "cadd5f4aab16737eb7140a237a929b750bf45077",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43493587837",
+  "artifact_id": 14071680673,
+  "archive_sha256": "5f2f3a0eb3fcaa6b16926bc9dd38d5e7d5ccde40a67159c9b577fbe7f3d517c3",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "047a8284c1cf9b3a2bd503467f2bc2bcaff12142e9829e14c110e862f2cb3747"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "ece1789cff5f7d14fe8cd440b4651ef0d8f0a26fdf902fb20900ad79b834dd6f"
+    },
+    "migrate-test.log": {
+      "artifact_path": "work/ci-public/migrate-test.log",
+      "sha256": "21efabc82dc151ff885cf5faa4a3fcbd578abb68477356b9e3d04719cb87561d"
+    }
+  },
+  "scope": "0032 supplier pricing candidate: no real rates or calls; immutable price/archive, merchant-bound quote and independent restore"
+}
