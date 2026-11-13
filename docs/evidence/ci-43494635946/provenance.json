@@ -1,0 +1,23 @@
+{
+  "run_id": 43494635946,
+  "commit": "70eeb9db2b340841a1c9be8779d14aecce3bae24",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43494635946",
+  "artifact_id": 14072036500,
+  "archive_sha256": "0f28dc636128d0111e2def4123f694cd533daab46fbed652698309081e4e6a3c",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "9fb0e9a0d1e242d6e4acb56d02e09accf7344986629a27302ad0137ea897d9d4"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "d0d5a9e853d5fc9c3363d02f81019d12e6ff1401678129f5c807e9ea06799ba5"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "fb7c7327fca2c65ce352f0f114021a05099ea03c24caf77a9a13ac8983c87eaf"
+    }
+  },
+  "scope": "0032 migration syntax repair; preserve actual native pricing and original evidence"
+}

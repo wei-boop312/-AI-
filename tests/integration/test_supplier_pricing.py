@@ -148,7 +148,9 @@ class SupplierPricingTests(ProviderBudgetFixture):
                 ).fetchone()[0],
                 1,
             )
-            with self.assertRaises(psycopg.errors.RaiseException):
+            with self.assertRaisesRegex(
+                psycopg.errors.ObjectNotInPrerequisiteState, "immutable_record"
+            ):
                 c.execute(
                     "UPDATE ops.supplier_price_versions SET version='override' WHERE id=%s",
                     (identities[0],),

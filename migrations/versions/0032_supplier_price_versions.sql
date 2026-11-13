@@ -91,7 +91,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE execution jsonb; entry record; p ops.supplier_price_versions; account jsonb; expected_endpoint text;
 BEGIN
  execution:=NEW.input_snapshot->'_execution';
- IF NOT(execution ? 'provider_price_versions') THEN RETURN NEW; END IF;
+ IF (execution ? 'provider_price_versions') IS DISTINCT FROM true THEN RETURN NEW; END IF;
  IF execution->>'provider_profile' IS DISTINCT FROM 'offline_protocol_mock'
  OR jsonb_typeof(execution->'provider_price_versions') IS DISTINCT FROM 'object'
  OR execution->'provider_price_versions'='{}'::jsonb THEN RAISE EXCEPTION 'invalid_price_scope'; END IF;
