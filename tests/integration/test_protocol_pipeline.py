@@ -424,7 +424,11 @@ class ProtocolPipelineTests(ProtocolPipelineFixture):
 
     def test_wrong_provider_cannot_run_locked_quote(self):
         task = self.submit()
-        self.assertEqual(self.run_worker(task), "stopped")
+        before = self.client.get("/api/v1/tasks/" + task).json()
+        balance = self.client.get("/api/v1/credits/balance").json()
+        self.assertEqual(self.run_worker(task), "not_claimed")
+        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json(), before)
+        self.assertEqual(self.client.get("/api/v1/credits/balance").json(), balance)
         with psycopg.connect(self.owner) as c:
             self.assertEqual(
                 c.execute(

@@ -1,0 +1,23 @@
+{
+  "run_id": 43518399894,
+  "commit": "34a211933aa2069088639325977ca9afef1dd9d6",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43518399894",
+  "artifact_id": 14082731523,
+  "archive_sha256": "ed101ebabfca12fd0d4bda6ef41a999621fc07d3056ed44f58a90b4b65300cf5",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "5bb6dd91d5ca248d557c7e519f768fef47d86a68641f0294da2ba6e34255e596"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "fdf3e0f6daa11ca9989ca408120fe45f4cc6725ccc212231425d7700ac6e3582"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "4516f7cd872c3521cf14ee1c503c96b96011e3b74e12ce24ca9dfcfa476b1310"
+    }
+  },
+  "scope": "0038 profile isolation and first real handoff candidate"
+}

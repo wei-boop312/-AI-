@@ -4,12 +4,12 @@ import asyncio
 import os
 import secrets
 from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import quote, urlsplit, urlunsplit
 from uuid import UUID, uuid4
 
 import psycopg
 from provider_budget_fixture import ProviderBudgetFixture
 from psycopg import sql
-from psycopg.conninfo import make_conninfo
 from test_offline_pipeline import PipelineFixture
 
 from visual_platform.db.pool import open_pool
@@ -32,7 +32,22 @@ class WorkerProfileTests(ProviderBudgetFixture):
             c.execute(
                 sql.SQL("GRANT ops_dispatcher TO {}").format(sql.Identifier(cls.dispatch_role))
             )
-        cls.dispatch_dsn = make_conninfo(cls.owner, user=cls.dispatch_role, password=password)
+        endpoint = urlsplit(cls.owner)
+        cls.dispatch_dsn = urlunsplit(
+            (
+                endpoint.scheme,
+                quote(cls.dispatch_role)
+                + ":"
+                + quote(password)
+                + "@"
+                + endpoint.hostname
+                + ":"
+                + str(endpoint.port or 5432),
+                endpoint.path,
+                endpoint.query,
+                endpoint.fragment,
+            )
+        )
 
     @classmethod
     def tearDownClass(cls):

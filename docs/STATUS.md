@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-14 34a2119/CI43518399894迁移0038通过、148单元/50契约和静态通过；193原生有1失败1错误：旧wrong-provider用例仍预期领取后stopped，现应not_claimed并保持任务/积分完全一致；新增MQ用例把libpq键值DSN交给只收URI的asyncpg。修正旧断言并加强不变检查；新dispatcher LOGIN仍独立非owner，改用已有Broker fixture同样的URL编码URI格式。原失败JSON/原生日志/SHA已留存，其他隔离测试不放宽，整轮仍待新CI。
+
 2026-11-14 0038执行profile隔离候选：Worker使用冻结profile参与PG领取，配置不匹配在租约/状态/unknown检查之前返回未领取；旧2参接口只代表默认offline Fake，新3参仅offline或offline_protocol_mock，原manual/未知意图/租约fence边界保留。协议初始/恢复outbox通知进入已有人工队列，普通delivery验证拒绝协议或manual消息，显式私有Mock Worker仍可单任务执行；不新增live能力/付费。新增6原生候选含双向错误Worker零状态/积分变化、旧API与显式profile、8并发只1正确winner、manual与未知profile拒绝、实际MQ只有人工队列且不生成自动恢复。旧协议fixture改用明确3参，不放宽财务/未知供应商断言；原生/CI待验。
 
 2026-11-14 账单作用域预检整轮已验：0e1d772/CI43514389341成功，140单元/50契约/182原生、4普通+7受控浏览器、完整Compose/持久化回执/独立冷恢复/重启/P5-02全绿。5项新PG测试确认生成/检测原上下文匹配、供应商远程responseId与本地标识区分、缺远程ID保持未知、真实statement/错误商户单位拒绝、名义价表对USD hold不通过、Ops权限与错误attempt拒绝；预检前后预算/积分与confirmed记录不变。5原始JSON/来源SHA/原日志计数归档。0037证据归档5829b86和新的交付包仍候选，当前本地148单元/静态通过，不能外推。
