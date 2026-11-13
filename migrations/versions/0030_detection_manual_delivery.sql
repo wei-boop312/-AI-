@@ -76,7 +76,7 @@ BEGIN
  UPDATE app.generation_tasks SET status='processing',phase=next_phase,lease_owner=NULL,lease_until=now(),
  fencing_token=fencing_token+1,revision=revision+1,updated_at=now(),error_code='manual_detection_delivery_approved' WHERE id=t.id;
  UPDATE ops.task_dispatch SET state='processing',lease_until=now(),next_recovery_at=now(),recovery_attempts=0,fencing_token=t.fencing_token+1 WHERE task_id=t.id;
- INSERT INTO ops.outbox(user_id,task_id,event_type,dedupe_key) VALUES(u,t.id,'task.recovery',t.id::text||':manual-detection:'||p_operation::text);
+ INSERT INTO ops.outbox(user_id,task_id,event_type,dedupe_key) VALUES(u,t.id,'task.recovery',t.id::text||'-manual-detection-'||p_operation::text);
  INSERT INTO ops.audit_events(actor,action,target_type,target_id,reason,evidence_digest,before_state,after_state,request_id)
  VALUES(session_user,'detection_manual_delivery','task',t.id,p_reason,p_evidence,
  jsonb_build_object('status',t.status,'phase',t.phase,'credits_status',t.credits_status),

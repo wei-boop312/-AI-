@@ -44,3 +44,19 @@ class LateFakeTests(unittest.TestCase):
             facts = DurableFakeProvider(Path(folder)).fetch_facts(record["provider_id"])
             self.assertEqual(facts["final_sha256"], hashlib.sha256(image).hexdigest())
             self.assertFalse(facts["facts"]["analysis_complete"])
+
+    def test_detection_only_unknown_preserves_generation_and_refuses_duplicate_after_restart(self):
+        with tempfile.TemporaryDirectory() as folder:
+            directory = Path(folder)
+            provider = DurableFakeProvider(directory, mode="detect_uncertain")
+            generation = {"output": {"width": 12, "height": 10, "format": "png"}, "type": "scene"}
+            generated = provider.submit_generate(uuid4(), generation)
+            image = provider.fetch_image(generated.provider_id)
+            identity = uuid4()
+            with self.assertRaises(ProviderUncertain):
+                provider.submit_detect(identity, image)
+            self.assertFalse((directory / ("detect-" + str(identity) + ".json")).exists())
+            with self.assertRaises(ProviderUncertain):
+                DurableFakeProvider(directory).submit_detect(identity, image)
+            self.assertEqual(len(list(directory.glob("detect-*.intent"))), 1)
+            self.assertEqual(provider.fetch_image(generated.provider_id), image)

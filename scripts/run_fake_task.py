@@ -12,7 +12,9 @@ from uuid import UUID
 ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument("--task", type=UUID, required=True)
-p.add_argument("--mode", choices=["success", "failed", "uncertain", "late"], required=True)
+p.add_argument(
+    "--mode", choices=["success", "failed", "uncertain", "late", "detect_uncertain"], required=True
+)
 p.add_argument("--profile-dir", type=Path, default=ROOT / ".local")
 args = p.parse_args()
 folder = args.profile_dir.resolve()

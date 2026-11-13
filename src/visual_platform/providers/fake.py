@@ -35,7 +35,7 @@ class DurableFakeProvider:
     """Local-only supplier simulator. Exclusive intent files survive Worker restarts."""
 
     def __init__(self, directory: Path, mode="success"):
-        if mode not in ("success", "failed", "uncertain", "late"):
+        if mode not in ("success", "failed", "uncertain", "late", "detect_uncertain"):
             raise ValueError("invalid fake mode")
         self.directory = Path(directory)
         self.directory.mkdir(parents=True, exist_ok=True)
@@ -60,7 +60,7 @@ class DurableFakeProvider:
             raise ProviderUncertain("duplicate submit refused")
         if self.mode == "failed":
             raise ProviderFailure("explicit fake failure")
-        if self.mode == "uncertain":
+        if self.mode == "uncertain" or (self.mode == "detect_uncertain" and step == "detect"):
             raise ProviderUncertain("fake unknown outcome")
         return paths
 

@@ -329,7 +329,7 @@ def verify_run(evidence):
             re.search(r"^OK\s*$", text, re.M) is not None and "skipped=" not in text,
             "unittest failure or skipped coverage",
         )
-    for name, count in (("browser-production", 4), ("browser-controlled-faults", 6)):
+    for name, count in (("browser-production", 4), ("browser-controlled-faults", 7)):
         text = (evidence / (name + ".log")).read_text(encoding="utf-8-sig")
         require(
             re.search(r"\b" + str(count) + r" passed\b", text) is not None,

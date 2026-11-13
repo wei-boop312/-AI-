@@ -30,6 +30,10 @@ from visual_platform.providers.authorization import SmokeAuthorization, canonica
 from visual_platform.providers.fake import DurableFakeProvider
 from visual_platform.services.backup import require
 from visual_platform.services.config_backup import validate_configuration
+from visual_platform.services.detection_delivery import (
+    approve_detection_delivery,
+    detection_delivery_context,
+)
 from visual_platform.services.provider_budget import (
     provider_budget_snapshot,
     provider_quote_review,
@@ -277,6 +281,30 @@ if args.command == "prepare":
             run_worker(state["tasks"]["unknown"], "uncertain") == "stopped",
             "unknown fixture failed",
         )
+        state["tasks"]["degraded"] = task(client, body, headers)
+        require(
+            run_worker(state["tasks"]["degraded"], "detect_uncertain") == "stopped",
+            "detection unknown fixture failed",
+        )
+        context = detection_delivery_context(
+            profile["ADMIN_DATABASE_URL"], UUID(state["tasks"]["degraded"])
+        )
+        state["detection_review"] = {
+            "attempt": context["detect_attempt"]["id"],
+            "sha256": context["final"]["sha256"],
+            "operation": str(uuid4()),
+            "reason": "reviewed offline final before backup",
+        }
+        review = state["detection_review"]
+        state["detection_decision"] = approve_detection_delivery(
+            profile["ADMIN_DATABASE_URL"],
+            UUID(state["tasks"]["degraded"]),
+            UUID(review["attempt"]),
+            review["sha256"],
+            UUID(review["operation"]),
+            review["reason"],
+            review["sha256"],
+        )
         state["tasks"]["queued"] = task(client, body, headers)
         state["balance"] = client.get("/api/v1/credits/balance").json()
         require(
@@ -285,7 +313,7 @@ if args.command == "prepare":
                 state["balance"]["reserved"],
                 state["balance"]["spent_total"],
             )
-            == (136, 48, 16),
+            == (120, 64, 16),
             "fixture balance mismatch",
         )
     # Keep one reviewed, unused quote in the snapshot: it may have been consumed
@@ -495,7 +523,7 @@ elif args.command == "verify":
                 == Image.new("RGB", (4, 4), (201, 15, 35)).tobytes(),
                 "restored protection pixels mismatch",
             )
-        for key in ("queued", "known", "unknown"):
+        for key in ("queued", "known", "unknown", "degraded"):
             require(
                 client.get("/api/v1/tasks/" + state["tasks"][key]).json()["status"] == "uncertain",
                 "pending task not quarantined",
@@ -530,10 +558,72 @@ elif args.command == "verify":
             len([a for a in after["attempts"] if a["step"] == "generate"]) == 1,
             "generation resubmitted after restore",
         )
+        review = state["detection_review"]
+        degraded_id = UUID(state["tasks"]["degraded"])
+        require(run_worker(degraded_id) == "not_claimed", "restored approval bypassed quarantine")
+        original = detection_delivery_context(profile["ADMIN_DATABASE_URL"], degraded_id)[
+            "decision"
+        ]
+        replayed = approve_detection_delivery(
+            profile["ADMIN_DATABASE_URL"],
+            degraded_id,
+            UUID(review["attempt"]),
+            review["sha256"],
+            UUID(review["operation"]),
+            review["reason"],
+            review["sha256"],
+        )
+        require(
+            str(replayed) == str(state["detection_decision"])
+            and run_worker(degraded_id) == "not_claimed",
+            "old review replay resumed restored task",
+        )
+        approve_detection_delivery(
+            profile["ADMIN_DATABASE_URL"],
+            degraded_id,
+            UUID(review["attempt"]),
+            review["sha256"],
+            uuid4(),
+            "new review of restored final; local delivery only",
+            review["sha256"],
+        )
+        require(run_worker(degraded_id) == "succeeded", "restored local delivery failed")
+        reviewed = detection_delivery_context(profile["ADMIN_DATABASE_URL"], degraded_id)
+        require(
+            reviewed["decision"] == original
+            and reviewed["detect_attempt"]["status"] == "uncertain"
+            and reviewed["detect_attempt"]["provider_id"] is None
+            and not reviewed["supplier_cost_verified"],
+            "restored delivery changed immutable review or supplier outcome",
+        )
+        degraded_report = client.get(f"/api/v1/tasks/{degraded_id}/compliance").json()
+        require(
+            degraded_report["detection_degraded"]
+            and degraded_report["auto_overall"] == "manual_review",
+            "restored report lost degradation notice",
+        )
+        downloaded = client.get(f"/api/v1/tasks/{degraded_id}/download", follow_redirects=False)
+        final_bytes = httpx.get(downloaded.headers["location"]).content
+        require(
+            hashlib.sha256(final_bytes).hexdigest() == review["sha256"],
+            "restored degraded final changed",
+        )
+        transactions = client.get("/api/v1/credits/transactions").json()["items"]
+        require(
+            len(
+                [
+                    row
+                    for row in transactions
+                    if row["task_id"] == str(degraded_id) and row["type"] == "charge"
+                ]
+            )
+            == 1,
+            "restored degraded delivery did not charge exactly once",
+        )
         final_balance = client.get("/api/v1/credits/balance").json()
         require(
             (final_balance["available"], final_balance["reserved"], final_balance["spent_total"])
-            == (136, 32, 32),
+            == (120, 32, 48),
             "post-recovery wallet mismatch",
         )
     result["verification"] = {
@@ -543,11 +633,14 @@ elif args.command == "verify":
         "completed_report_review_and_download_hash_preserved": True,
         "pixel_protection_preserved": True,
         "provider_budget_revoked_before_new_intent": True,
-        "three_fixture_tasks_quarantined": True,
+        "four_fixture_tasks_quarantined": True,
+        "detection_delivery_requires_new_review_after_restore": True,
+        "detection_supplier_unknown_and_final_hash_preserved": True,
+        "detection_delivery_one_charge": True,
         "unknown_and_queued_cannot_submit": True,
         "known_id_recovered_without_new_generate": True,
         "balance_at_snapshot": state["balance"],
-        "balance_after_one_safe_recovery": final_balance,
+        "balance_after_two_safe_recoveries": final_balance,
         "verified_at": datetime.now(timezone.utc).isoformat(),
     }
     result["configuration_restore"] = {
@@ -574,6 +667,13 @@ else:
             and client.get("/api/v1/tasks/" + state["tasks"]["known"]).json()["status"]
             == "succeeded",
             "source fixture safe finish failed",
+        )
+        degraded = run_worker(state["tasks"]["degraded"])
+        require(
+            degraded in ("succeeded", "not_claimed")
+            and client.get("/api/v1/tasks/" + state["tasks"]["degraded"]).json()["status"]
+            == "succeeded",
+            "source detection delivery finish failed",
         )
         unknown = client.get("/api/v1/tasks/" + state["tasks"]["unknown"]).json()
         if unknown["status"] != "failed":

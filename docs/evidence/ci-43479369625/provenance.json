@@ -1,0 +1,23 @@
+{
+  "run_id": 43479369625,
+  "commit": "67288fcdfc078b431e36b4af081b0dc149618ace",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43479369625",
+  "artifact_id": 14064123792,
+  "archive_sha256": "afda18e20990c17c9739561c31a80ad20ff66935ecd309af495d3e5db6a497d5",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "17a7f6c4f02cb9eabd177169a99aa8ba45c51c4a20510cfe0ad35557a6c288b7"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "c07de9bb74893b60959867442d56cef67fa2af9318b9318434ffdfb9b3239821"
+    },
+    "migrate-test.log": {
+      "artifact_path": "work/ci-public/migrate-test.log",
+      "sha256": "732ecd00b81989a0536d4d72d6cc87193fda1ec3dcd5737851922989a15e3237"
+    }
+  },
+  "scope": "Detection manual-delivery candidate; inspect failed native run before acceptance"
+}

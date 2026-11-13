@@ -27,7 +27,7 @@ async function ledger(page:Page,task:string){return (await(await page.request.ge
 async function capture(page:Page,name:string){await page.locator('.progress-card').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(root,'docs/evidence/browser-fault-'+name+'.png')})}
 
 test.beforeAll(async({request,browser})=>{browserVersion=browser.version();expect(process.env.CONTROLLED_FAKE_BROWSER,'pause the owned local publisher/consumer before controlled tests').toBe('1');const html=await(await request.get('/')).text();expect(html).toContain('/assets/');expect(html).not.toContain('/@vite/client');expect(profile.PROVIDER_PROFILE).toBe('offline')});
-test.afterAll(()=>writeFileSync(path.join(root,'docs/evidence/browser-controlled-faults.json'),JSON.stringify({started_at:suiteStartedAt,finished_at:new Date().toISOString(),base_commit:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),command:'CONTROLLED_FAKE_BROWSER=1 pnpm --dir apps/web exec playwright test -c playwright.faults.config.ts',environment:{node:process.version,platform:process.platform,browser:browserVersion,profile:'loopback/offline'},test_sha256:createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex'),production_assets:readdirSync(path.join(root,'apps/web/dist/assets')).filter(x=>x.endsWith('.js')).map(name=>({name,sha256:createHash('sha256').update(readFileSync(path.join(root,'apps/web/dist/assets',name))).digest('hex')})),expected_cases:5,passed:evidence.length===5,cases:evidence},null,2)));
+test.afterAll(()=>writeFileSync(path.join(root,'docs/evidence/browser-controlled-faults.json'),JSON.stringify({started_at:suiteStartedAt,finished_at:new Date().toISOString(),base_commit:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),command:'CONTROLLED_FAKE_BROWSER=1 pnpm --dir apps/web exec playwright test -c playwright.faults.config.ts',environment:{node:process.version,platform:process.platform,browser:browserVersion,profile:'loopback/offline'},test_sha256:createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex'),production_assets:readdirSync(path.join(root,'apps/web/dist/assets')).filter(x=>x.endsWith('.js')).map(name=>({name,sha256:createHash('sha256').update(readFileSync(path.join(root,'apps/web/dist/assets',name))).digest('hex')})),expected_cases:6,passed:evidence.length===6,cases:evidence},null,2)));
 
 test('排队取消和重复点击只释放一次积分',async({page})=>{
  const {headers}=await setup(page);const task=await submit(page);
@@ -91,4 +91,21 @@ test('提交响应丢失后再次确认沿用同一幂等键',async({page})=>{
  const replay=page.waitForResponse(r=>r.url().endsWith('/api/v1/tasks')&&r.request().method()==='POST'&&r.status()===200);await confirm.click();const recovered=await(await replay).json();expect(recovered.id).toBe(first.id);expect(keys).toHaveLength(2);expect(keys[0]).toBe(keys[1]);
  expect(worker(recovered.id,'success').result).toBe('succeeded');await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible();const rows=await ledger(page,recovered.id);expect(rows.filter((r:any)=>r.type==='freeze')).toHaveLength(1);expect(rows.filter((r:any)=>r.type==='charge')).toHaveLength(1);expect((await(await page.request.get('/api/v1/tasks')).json()).items).toHaveLength(1);
  evidence.push({case:'lost_submit_response',http_replay_status:200,same_idempotency_key:true,unique_tasks:1,one_freeze:true,one_charge:true});
+});
+
+
+test('检测结果未知经运营审批交付，保留未知状态且只结算一次',async({page})=>{
+ await setup(page);const task=await submit(page);expect(worker(task.id,'detect_uncertain').result).toBe('stopped');
+ await expect(page.getByRole('button',{name:'等待对账后再生成'})).toBeDisabled();expect(worker(task.id,'success').result).toBe('not_claimed');
+ function review(args:string[]){return JSON.parse(execFileSync(py,['scripts/detection_delivery.py',...args],{cwd:root,env:{...process.env,ADMIN_DATABASE_URL:profile.ADMIN_DATABASE_URL},encoding:'utf8'}))}
+ const before=review(['inspect','--task',task.id]).context;expect(before.task.status).toBe('uncertain');expect(before.detect_attempt.status).toBe('uncertain');expect(before.final.ready).toBe(true);
+ const digest=before.final.sha256;const op=crypto.randomUUID();const approved=review(['approve','--task',task.id,'--attempt',before.detect_attempt.id,'--final-sha256',digest,'--operation-id',op,'--reason','reviewed controlled offline final image; preserve unresolved detection','--evidence-digest',digest]);expect(approved.result).toBe('LOCAL_DELIVERY_APPROVED');
+ expect(worker(task.id,'success').result).toBe('succeeded');await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible({timeout:15000});
+ const download=await page.request.get('/api/v1/tasks/'+task.id+'/download');expect(download.status()).toBe(200);expect(createHash('sha256').update(await download.body()).digest('hex')).toBe(digest);
+ const report=await(await page.request.get('/api/v1/tasks/'+task.id+'/compliance')).json();expect(report.detection_degraded).toBe(true);expect(report.auto_overall).toBe('manual_review');
+ await page.getByRole('button',{name:'查看检查报告'}).click();await expect(page.getByText('视觉检测未取得可用结果',{exact:true})).toBeVisible();await expect(page.getByText(/此交付不代表检测成功/)).toBeVisible();
+ const after=review(['inspect','--task',task.id]).context;expect(after.detect_attempt.status).toBe('uncertain');expect(after.detect_attempt.provider_id).toBeNull();expect(after.supplier_cost_verified).toBe(false);
+ const b=await balance(page);expect([b.available,b.reserved,b.spent_total]).toEqual([184,0,16]);const rows=await ledger(page,task.id);expect(rows.filter((r:any)=>r.type==='charge')).toHaveLength(1);expect(rows.filter((r:any)=>r.type==='refund')).toHaveLength(0);
+ expect(readdirSync(profile.FAKE_PROVIDER_DIR).filter(name=>name==='detect-'+before.detect_attempt.id+'.intent')).toHaveLength(1);
+ evidence.push({case:'reviewed_detection_delivery',final_hash_verified:true,unresolved_detection_preserved:true,warning_visible:true,one_charge:true,paid_calls:0,balance:b});
 });

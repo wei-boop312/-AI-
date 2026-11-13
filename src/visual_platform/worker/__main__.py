@@ -20,7 +20,9 @@ async def main():
     mode.add_argument("--task", type=UUID)
     mode.add_argument("--consume", action="store_true")
     parser.add_argument(
-        "--fake-mode", choices=["success", "failed", "uncertain", "late"], default="success"
+        "--fake-mode",
+        choices=["success", "failed", "uncertain", "late", "detect_uncertain"],
+        default="success",
     )
     args = parser.parse_args()
     if os.environ.get("PROVIDER_PROFILE", "offline") != "offline":
