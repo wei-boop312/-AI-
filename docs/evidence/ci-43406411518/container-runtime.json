@@ -1,0 +1,10 @@
+{
+  "commit": "fb7023f7d7f72f78c591c1fcf8f89f392786f182",
+  "observed_at": "2026-11-13T10:12:19.052067+00:00",
+  "paid_calls": 0,
+  "profile": "offline_fake",
+  "scope": "eight-service Compose and built non-root applications; Linux loopback rehearsal; no deployment",
+  "stage": "application_recreation",
+  "result": "FAIL",
+  "reason": "application did not stop gracefully"
+}

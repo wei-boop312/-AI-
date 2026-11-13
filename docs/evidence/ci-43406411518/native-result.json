@@ -1,0 +1,68 @@
+{
+  "commit": "fb7023f7d7f72f78c591c1fcf8f89f392786f182",
+  "files": {
+    "apps/web/dist/assets/index-CHe3S2JA.css": "26c8cd96f90eb2f71f8c5b103e2429dee8456e1c98226365d60f4b0f7c02bab9",
+    "apps/web/dist/assets/index-D9e80hb4.js": "3c83a9bf27eb3715bb6878dc9d416e815e570bd7c629c3d80dcbf9d9aadc8c76",
+    "apps/web/dist/index.html": "9c89d30f228268f0c66e8b6957fcad0d59f6ffc9dd5c6b4730db91da9482b8e9"
+  },
+  "images": {
+    "python": {
+      "image": "python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72",
+      "digest": "sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72"
+    },
+    "node": {
+      "image": "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c",
+      "digest": "sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c"
+    },
+    "postgres": {
+      "image": "postgres:17.11-bookworm@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994",
+      "digest": "sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994"
+    },
+    "rabbitmq": {
+      "image": "rabbitmq:4.4.0-alpine@sha256:7b77c3d3a996c7fcca1ca8bf53ce1557ff43c13b8ca2c132df6031781b209ef2",
+      "digest": "sha256:7b77c3d3a996c7fcca1ca8bf53ce1557ff43c13b8ca2c132df6031781b209ef2"
+    },
+    "seaweedfs": {
+      "image": "chrislusf/seaweedfs:4.53@sha256:ccad23e18639c8b98cee17e7100b95830a06077b56d8e5b006d6dcf8ec5e94a0",
+      "digest": "sha256:ccad23e18639c8b98cee17e7100b95830a06077b56d8e5b006d6dcf8ec5e94a0"
+    },
+    "nginx": {
+      "image": "nginx:stable-alpine@sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311",
+      "digest": "sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311"
+    }
+  },
+  "steps": [
+    {
+      "name": "migrate-test",
+      "exit_code": 0,
+      "seconds": 1.496
+    },
+    {
+      "name": "bootstrap-dev",
+      "exit_code": 0,
+      "seconds": 1.392
+    },
+    {
+      "name": "native-integration",
+      "exit_code": 0,
+      "seconds": 68.858
+    },
+    {
+      "name": "browser-production",
+      "exit_code": 0,
+      "seconds": 98.329
+    },
+    {
+      "name": "browser-controlled-faults",
+      "exit_code": 0,
+      "seconds": 29.567
+    },
+    {
+      "name": "monitor-after-recovery",
+      "exit_code": 0,
+      "seconds": 0.582
+    }
+  ],
+  "paid_calls": 0,
+  "result": "PASS"
+}

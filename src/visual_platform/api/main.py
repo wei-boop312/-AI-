@@ -10,12 +10,15 @@ from visual_platform.core.settings import Settings
 from visual_platform.db.pool import open_pool
 from visual_platform.storage.s3 import S3Storage
 from visual_platform.services.readiness import Readiness
+from visual_platform.core.lifecycle import clear_api_shutdown_marker,record_api_shutdown
 from visual_platform.api import auth,products,credits,quotes,tasks,rules,assets,reviews
 
 
 def create_app(settings: Settings | None=None):
     @asynccontextmanager
     async def lifespan(app):
+        clear_api_shutdown_marker()
+        started=False
         configured=settings or (Settings.from_env() if os.environ.get("API_DATABASE_URL") else None)
         app.state.settings=configured
         app.state.storage=None
@@ -29,12 +32,20 @@ def create_app(settings: Settings | None=None):
                 app.state.api_pool=await open_pool(configured.api_database_url,"app_api")
                 app.state.auth_pool=await open_pool(configured.auth_database_url,"app_auth")
             app.state.readiness=Readiness(app.state.api_pool,app.state.auth_pool,app.state.storage)
+            started=True
             yield
         finally:
-            if app.state.readiness: await app.state.readiness.close()
-            if app.state.api_pool: await app.state.api_pool.close()
-            if app.state.auth_pool: await app.state.auth_pool.close()
-            if app.state.storage: app.state.storage.close()
+            try:
+                if app.state.readiness: await app.state.readiness.close()
+            finally:
+                try:
+                    if app.state.api_pool: await app.state.api_pool.close()
+                finally:
+                    try:
+                        if app.state.auth_pool: await app.state.auth_pool.close()
+                    finally:
+                        if app.state.storage: app.state.storage.close()
+            if started: record_api_shutdown()
 
     app=FastAPI(title="跨境电商 AI 视觉生产平台",version="0.1.0",lifespan=lifespan)
     def error(request,status,code):

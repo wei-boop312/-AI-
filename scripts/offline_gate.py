@@ -32,6 +32,7 @@ def main(task):
         if set(application.get('application_services',[]))!={'api','worker','publisher','web'}:raise ValueError('application Compose service coverage incomplete')
         for key in ('loopback_only','healthchecks_ready','resources_enforced','graceful_shutdown_verified','fake_receipts_survive_recreation'):
             if application.get(key) is not True:raise ValueError('application Compose acceptance missing: '+key)
+        if application.get('api_shutdown_marker',{}).get('lifespan_shutdown_completed') is not True:raise ValueError('API lifespan cleanup proof missing')
         report['application_compose']='PASS'
         cursor_path=evidence/'frontend-sse-cursor.json'
         if not cursor_path.is_file():raise EnvironmentError('BLOCKED_ENV: browser proof of persistent client SSE cursor/deduplication missing; see docs/PLAN_GAPS.md')

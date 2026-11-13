@@ -108,6 +108,7 @@ class ComposeRuntime:
         for component,keys in components.items():
             values={k:profile[k] for k in keys}
             if component!='API':values['CONTAINER_HEARTBEAT']='1'
+            else:values['CONTAINER_LIFECYCLE']='1'
             if component=='WORKER':values['FAKE_PROVIDER_DIR']='/app/work/fake-provider'
             if any('\n' in str(v) or '\r' in str(v) for v in values.values()):raise ValueError('multiline runtime environment refused')
             path=self.folder/(component.lower()+'.env');self.write_private(path,'\n'.join(k+'='+str(v) for k,v in values.items())+'\n');paths[component+'_RUNTIME_ENV_FILE']=path.as_posix()

@@ -139,9 +139,16 @@ def main():
             require(sum(row['type']=='charge' and row['task_id']==task for row in ledger)==1,'container task must have exactly one charge')
             before=cache_digest(services()['worker']['Id']);require(before['files']>0,'persistent Fake cache empty')
             report['stage']='application_recreation'
-            runtime.owned_resources();runtime.invoke(['stop','web','api','publisher','worker'])
+            runtime.owned_resources();stop_started=time.monotonic();runtime.invoke(['stop','web','api','publisher','worker'])
+            stop_seconds=round(time.monotonic()-stop_started,3)
             stopped=services();exit_codes={name:stopped[name]['State']['ExitCode'] for name in ('api','web','worker','publisher')}
-            require(all(value==0 for value in exit_codes.values()) and not any(stopped[name]['State']['OOMKilled'] for name in exit_codes),'application did not stop gracefully')
+            # Uvicorn re-raises SIGTERM after graceful shutdown (Docker 143).
+            # Require completed cleanup evidence, not just a signal exit code.
+            marker_file=private/'api-shutdown.json'
+            docker(['cp',stopped['api']['Id']+':/tmp/visual-api-shutdown.json',str(marker_file)])
+            shutdown_marker=json.loads(marker_file.read_text())
+            require(shutdown_marker.get('version')==1 and shutdown_marker.get('lifespan_shutdown_completed') is True,'API lifespan cleanup proof missing')
+            require(exit_codes['api'] in (0,143) and all(exit_codes[name]==0 for name in ('web','worker','publisher')) and not any(stopped[name]['State']['OOMKilled'] for name in exit_codes) and stop_seconds<80,'application did not stop gracefully')
             old_ids={name:stopped[name]['Id'] for name in exit_codes}
             runtime.invoke(['rm','-f','web','api','publisher','worker']);runtime.up()
             after_services=services();require(all(after_services[name]['Id']!=old_ids[name] for name in old_ids),'application containers were not recreated')
@@ -153,7 +160,7 @@ def main():
                 require(restored_client.get('/api/v1/credits/balance').json()==balance,'wallet changed across container recreation')
             final_constraints=constraints()
             report.update(result='PASS',stage='verified',runtime_images=inspections,production_asset_sha256=production_assets,final_sha256=digest,pixel_exact=True,report_bound_to_final=True,manual_review=True,wallet=balance,seconds=round(time.monotonic()-started,3))
-            application={**report,'application_services':['api','worker','publisher','web'],'all_services':sorted(final_constraints),'loopback_only':True,'healthchecks_ready':True,'resources_enforced':True,'graceful_shutdown_verified':True,'fake_receipts_survive_recreation':True,'service_role_separation':True,'constraints':final_constraints,'initial_constraints':initial_constraints,'stop_exit_codes':exit_codes,'cache':after,'shutdown_scope':'idle services after a completed task; in-flight drain coordination has separate tests'}
+            application={**report,'application_services':['api','worker','publisher','web'],'all_services':sorted(final_constraints),'loopback_only':True,'healthchecks_ready':True,'resources_enforced':True,'graceful_shutdown_verified':True,'fake_receipts_survive_recreation':True,'service_role_separation':True,'constraints':final_constraints,'initial_constraints':initial_constraints,'stop_exit_codes':exit_codes,'cache':after,'shutdown_scope':'idle services after a completed task; in-flight drain coordination has separate tests','api_shutdown_marker':shutdown_marker,'stop_seconds':stop_seconds}
             (public/'application-compose.json').write_text(json.dumps(application,indent=2)+'\n',encoding='utf-8')
     except Exception as error:
         report.update(result='FAIL',reason=str(error) if isinstance(error,AcceptanceError) else 'Runtime container rehearsal failed: '+type(error).__name__)

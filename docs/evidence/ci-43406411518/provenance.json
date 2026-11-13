@@ -1,0 +1,26 @@
+{
+  "run_id": 43406411518,
+  "commit": "fb7023f7d7f72f78c591c1fcf8f89f392786f182",
+  "failed_step": "Exercise complete application Compose and persistent receipts",
+  "result": "failure",
+  "diagnosis": "API Docker exit 143, publisher/worker/web exit 0, no OOM; task pipeline assertions passed before shutdown assertion. Recreation not reached.",
+  "scope": "Historical raw evidence; not current acceptance",
+  "files": [
+    {
+      "path": "application-compose.json",
+      "sha256": "4d6ad97c66a21be2b73bf714be5f0cd48f627a1b5ebf682c0a41f5acecb49108"
+    },
+    {
+      "path": "compose-smoke.json",
+      "sha256": "2848065de47922823d3fb2e497c14a1ae01a8650d16a8b7997fe5d82bc604883"
+    },
+    {
+      "path": "container-runtime.json",
+      "sha256": "4d6ad97c66a21be2b73bf714be5f0cd48f627a1b5ebf682c0a41f5acecb49108"
+    },
+    {
+      "path": "native-result.json",
+      "sha256": "de5fec9cce20c2ccb708ce85470316fcadd1663ef5e11a6e626c4ce3e4dbf753"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "version": "0.54.0",
+  "url": "https://raw.githubusercontent.com/Kludex/uvicorn/0.54.0/uvicorn/server.py",
+  "upstream_sha256": "c1be9d133467a42ab88d7168e408ef5a90257661a901899426214a3d1fc2d026",
+  "installed_sha256": "c1be9d133467a42ab88d7168e408ef5a90257661a901899426214a3d1fc2d026",
+  "same_source": true,
+  "observation": "capture_signals restores original handlers and re-raises captured signals after serve completes."
+}

@@ -1,0 +1,94 @@
+{
+  "observed_at": "2026-11-13T10:11:31.741350+00:00",
+  "commit": "fb7023f7d7f72f78c591c1fcf8f89f392786f182",
+  "compose": {
+    "services": [
+      "postgres-dev",
+      "postgres-test",
+      "rabbitmq",
+      "s3"
+    ],
+    "loopback_only": true,
+    "pinned_images": true,
+    "project": "visual-beb955d57b38303b"
+  },
+  "fresh_bootstrap": {
+    "verified_at": "2026-11-13T10:10:50.211757+00:00",
+    "postgres_version": "17.11 (Debian 17.11-1.pgdg12+2)",
+    "migration_head": "0024",
+    "repeat_upgrade_exit_code": 0,
+    "schema_unchanged_on_repeat": true,
+    "schema_fingerprint_sha256": "a9e9ab0b3aefab28a941dade708af82eae744d36de46a4ee4c115839b5770fa4",
+    "forced_rls_table_count": 25,
+    "roles": {
+      "app_api": {
+        "unprivileged": true,
+        "owns_application_objects": false
+      },
+      "app_auth": {
+        "unprivileged": true,
+        "owns_application_objects": false
+      },
+      "ops_admin": {
+        "unprivileged": true,
+        "owns_application_objects": false
+      },
+      "app_worker": {
+        "unprivileged": true,
+        "owns_application_objects": false
+      },
+      "ops_dispatcher": {
+        "unprivileged": true,
+        "owns_application_objects": false
+      },
+      "app_readonly": {
+        "unprivileged": true,
+        "owns_application_objects": false
+      }
+    },
+    "checks": {
+      "api_ready": {
+        "status": "ready",
+        "scope": "api_dependencies",
+        "checks": {
+          "database": "ready",
+          "authentication": "ready",
+          "storage": "ready"
+        }
+      },
+      "private_login": true,
+      "private_product_create": true,
+      "initial_credits": 200,
+      "readonly_own_context": true,
+      "readonly_no_context_empty": true,
+      "secret_column_denied": true
+    },
+    "model_calls": 0,
+    "scope": "fresh isolated local bootstrap; MQ consumption and backup restore are separate gates"
+  },
+  "empty_upgrade_to_head": "0024",
+  "previous_upgrade_from": "0023",
+  "previous_upgrade_to": "0024",
+  "postgres_system_identifier_preserved": true,
+  "postgres_user_count_preserved": 1,
+  "private_s3_sha256": "c58c24ca71b86d06e6912659d1521227e32489ceb29cd9cbd77812aeb76f8015",
+  "rabbit_quorum_message_preserved": true,
+  "recreated_container_services": true,
+  "seconds": 56.743,
+  "paid_calls": 0,
+  "result": "PASS",
+  "s3_object_recovery": {
+    "attempts": 9,
+    "transient_errors": [
+      "ReadTimeoutError",
+      "ReadTimeoutError",
+      "ReadTimeoutError",
+      "ReadTimeoutError",
+      "ReadTimeoutError",
+      "ReadTimeoutError",
+      "ReadTimeoutError",
+      "ReadTimeoutError"
+    ],
+    "seconds": 8.077
+  }
+}
