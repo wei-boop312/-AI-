@@ -34,3 +34,6 @@ ProtocolProvider在Worker的每个阶段先核对_execution.provider_endpoints�
 2026-11-14补充检索：[公开Model Plaza](https://api.hubway.cc/model-plaza)仍不足以核验本项目的FLUX图片编辑协议和3.8检测模型实际结算。页面站内单位说明不作为已核实USD或人民币兑换率；未检索到可归档的FLUX编辑接口文档，不推断该服务一定不提供。现有固定模型/登录选择器证据保留，不自行改为其他模型。
 
 2026-11-14登录控制台复核：站点有“在线聊天/生图”入口，但当前可用渠道列表未列FLUX 3 Image；页面入口不等于已核验对应编辑协议。原聊天页仍选择gemini-3.8-flash，未提交消息/图片或修改密钥。生成模型与供应商的取舍已向用户提出，其他费用与恢复开发继续；不把目录未列出当作供应商绝对不支持的结论。
+
+
+2026-11-14公开资料补充：[Sub2API上游README](https://github.com/Wei-Shaw/sub2api)与[路由定义](https://github.com/Wei-Shaw/sub2api/blob/main/backend/internal/handler/endpoint.go)说明上游软件有图片生成/编辑路由；这只说明该软件具备相关接口，不证明Hubway部署版本、账号分组或FLUX 3 Image模型可用。未复制上游源码、未新增依赖、未调用付费接口；仍等待用户确认生成模型/供应商方向，固定模型未替换。
