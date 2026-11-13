@@ -200,6 +200,15 @@ class UploadTempCleanupTests(ProviderBudgetFixture):
                 "retry same operation",
             )
             self.assertEqual(result["result"], "UPLOAD_TEMP_RECLAIMED")
+            with psycopg.connect(self.owner) as c:
+                self.assertEqual(
+                    c.execute(
+                        "SELECT count(*),count(DISTINCT request_id) FROM ops.audit_events WHERE after_state->>'operation_id'=%s",
+                        (str(operation),),
+                    ).fetchone(),
+                    (3, 3),
+                )
+
         finally:
             storage.close()
 

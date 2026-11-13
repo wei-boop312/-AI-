@@ -1,0 +1,23 @@
+{
+  "run_id": 43529839165,
+  "commit": "f2328a705b7908892f3088a116a4963aed3d0880",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43529839165",
+  "artifact_id": 14086967786,
+  "archive_sha256": "bdf5ca3d5a9aba2e9fde8d3705e60e2eba2b83811e23fd170f96ef90df2d2918",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "eaec20fc1c983f578d920f31dd3a4c3232a24e7204a203c1009d048c4c9653fe"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "4f865a4c75bcc28a7b3ce8ab0cf8480e2c9fe12cfa208172d6ac8f666c28cade"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "6f9bb2d225b4a157dcc6fee67c29890cf919af06f4a1ef3035cd6c7aee52e75c"
+    }
+  },
+  "scope": "0041 exact temporary upload reclamation and 0042 event retention"
+}
