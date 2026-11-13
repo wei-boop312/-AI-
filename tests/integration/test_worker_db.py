@@ -99,7 +99,7 @@ class WorkerDbTests(TaskApiFixture):
         )
         for kind in ("generated", "final"):
             self.worker(
-                "SELECT app.record_task_asset(%s,%s,%s,%s,%s,%s,%s,%s,NULL,%s,10,10,100)",
+                "SELECT app.record_task_asset(%s,%s,%s,%s,%s,%s,%s,%s,NULL,%s,%s,%s,100)",
                 (
                     self.task,
                     "worker-1",
@@ -110,6 +110,8 @@ class WorkerDbTests(TaskApiFixture):
                     "test",
                     str(uuid4()),
                     "c" * 64,
+                    self.body["generation"]["output"]["width"],
+                    self.body["generation"]["output"]["height"],
                 ),
             )
         self.intent(fence, "detect")

@@ -1,0 +1,18 @@
+{
+  "run_id": 43442915677,
+  "commit": "97fefd62c7616d1f397fa434c5bdaed54b899744",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43442915677",
+  "archive_sha256": "133f17bfe68d310ea26a7b373ee3c5890ababe8a82ee6ed50afda38ecf7dd564",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "e82cba1d15004b7c6ab43f12b3fb7967131df13f263359d4865190bcabe27f7f"
+    },
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "864823cc4c2239a5ed97931ae24d36280360ea2ff9695e58a2b594b8ff602d82"
+    }
+  },
+  "scope": "100 native tests ran; two WorkerDb positive fixtures incorrectly recorded 10x10 for the 256x256 quote and were rejected. 8192 wide/tall and 25MP API/Worker/S3 delivery test passed; browser/restore/Compose not reached. Unit 106 passed. Full zip private."
+}
