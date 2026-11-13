@@ -24,7 +24,9 @@ from visual_platform.providers.contract import ProviderFailure, ProviderUncertai
 
 class BflRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    prompt: Annotated[str, Field(min_length=1, max_length=4000)]
+    # Internal envelope includes our identity/background instruction. The public
+    # Generation limit remains 4000; never truncate the customer's description.
+    prompt: Annotated[str, Field(min_length=1, max_length=4096)]
     images: Annotated[list[str], Field(min_length=1, max_length=10)]
     width: Annotated[int, Field(ge=256, le=6256)]
     height: Annotated[int, Field(ge=256, le=6256)]

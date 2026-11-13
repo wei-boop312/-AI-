@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-13 提示词边界修复：公共Generation仍最多4000字符；BFL内部请求为保留身份/白底前缀预留4096字符，避免合法4000字描述在意图前失败，绝不截断用户输入。三个生成类型的4000中文字符实际MockTransport提交保持完整，4001在公开模型校验拒绝且无POST；40离线契约及Ruff/双平台89源码检查通过。官方OpenAPI复核仅GET，无付费：Flux3ImageInputs.prompt未标maxLength，内部4096是本项目资源界限，不称供应商上限；来源https://api.bfl.ai/openapi.json，原始SHA256 ea458c661ef8b0e03d72ee6b29267451f5a04ae65f35e55ea8a87e53645ef670，schema仍列/v1/flux-3-image，grounding默认true故继续显式false。预算候选CI43454966553所有业务步骤已成功，等待终态/归档，不提前称完整CI绿灯。
+
 2026-11-13 预算原子预留候选：0027增加私有FORCE RLS预算/预留表；schema v2固定用户/产品/资产/完整报价快照SHA，限每步1次及精确USD上限。注册锁未消费报价并审计；同app.record_intent事务写意图/预留，过期/阻断/超限回滚当前步骤，Worker无新POST并按既有事务释放积分，早先实际费用不当作0。回执known仍非真实账单，未知阻断，额度及元数据不可直接覆盖；默认仍Fake，只允许offline_protocol_mock演练注册。新CLI review-quote/preflight/register/inspect不执行模型；7项PG/Worker/S3竞争/权限/过期/超时/SQL绕过候选待CI。109单元/39契约、Ruff和双平台89源码检查通过，离线迁移SQL生成通过但不冒充迁移实跑。恢复新增撤销全部open授权（含无任务报价）及新意图硬拒绝探针，all/P5-02增加必需证据；新恢复待实跑。详见PROVIDER_BUDGET。
 
 最新干净基线3dda30f / [CI43445385624](https://github.com/wei-boop312/-AI-/actions/runs/43445385624)全绿：106单元/100原生、39契约、4+6浏览器、8192宽高/25MP真实PNG、完整Compose/恢复/重启/P5-02均通过；5份原始JSON及来源归档evidence/ci-43445385624。该基线不包含后续0027预算候选。实际价格/费用核验、live接线、未知后的运营审批及发布外部条件仍未完成，零付费模型调用、零部署。按用户新0%停止线继续。

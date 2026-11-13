@@ -54,6 +54,30 @@ class BflContracts(unittest.TestCase):
         self.addCleanup(provider.close)
         return provider
 
+    def test_full_public_prompt_survives_internal_prefix_and_http_submission(self):
+        provider = self.provider()
+        for kind in ("white_background", "scene", "lifestyle"):
+            generation = {
+                "type": kind,
+                "prompt": "商" * 4000,
+                "output": {"width": 256, "height": 256, "format": "png"},
+                "protection_mode": "none",
+                "regions": [],
+            }
+            with self.subTest(kind=kind):
+                request = BflRequest.from_canonical(generation, self.png)
+                self.assertTrue(request.prompt.endswith(generation["prompt"]))
+                self.assertGreater(len(request.prompt), 4000)
+                provider.submit(uuid4(), request)
+                body = json.loads(self.calls[-1].content)
+                self.assertEqual(body["prompt"], request.prompt)
+                self.assertFalse(body["grounding"])
+                before = len(self.calls)
+                generation["prompt"] += "商"
+                with self.assertRaises(ValidationError):
+                    BflRequest.from_canonical(generation, self.png)
+                self.assertEqual(len(self.calls), before)
+
     def test_submit_exact_endpoint_fields_auth_and_cost_provenance(self):
         provider = self.provider()
         intent = uuid4()
