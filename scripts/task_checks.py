@@ -17,7 +17,10 @@ SUITES = {
     "P2-01": {
         "integration": ["test_auth_api.py", "test_task_api.py", "test_appearance_archive.py"]
     },
-    "P2-02": {"unit": ["test_normalize.py"], "integration": ["test_assets.py"]},
+    "P2-02": {
+        "unit": ["test_normalize.py", "test_upload_cleanup.py"],
+        "integration": ["test_assets.py", "test_upload_cleanup.py"],
+    },
     "P2-03": {"integration": ["test_broker.py", "test_worker_db.py"]},
     "P2-04": {
         "unit": [
