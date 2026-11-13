@@ -13,6 +13,7 @@ from psycopg import sql
 from psycopg.types.json import Jsonb
 from botocore.exceptions import ClientError
 from visual_platform.storage.s3 import S3Storage
+from visual_platform.services.config_backup import capture_configuration,validate_configuration,restore_configuration
 
 SCHEMAS=('app','auth','ops','public')
 def require(value,message):
@@ -96,17 +97,19 @@ def read_object(client,row):
         if row.get('size') is not None:require(len(data)==row['size'],'referenced object size mismatch')
         return data,response.get('VersionId'),response.get('ContentType')
     finally:response['Body'].close()
-def backup_database(dsn,storage_settings,pg_bin,directory,fake_directory):
+def backup_database(dsn,storage_settings,pg_bin,directory,fake_directory,*,source_root=None,runtime_settings=None):
     dsn,u=database_url(dsn);directory=Path(directory)
     require(not directory.exists(),'backup directory must be new')
     directory.mkdir(parents=True,mode=0o700);(directory/'objects').mkdir(mode=0o700);(directory/'fake').mkdir(mode=0o700)
-    storage=S3Storage(storage_settings);started=now()
+    started=now()
+    configuration=capture_configuration(source_root or Path(__file__).resolve().parents[3],directory,runtime_settings or {})
+    storage=S3Storage(storage_settings)
     try:
         with psycopg.connect(dsn) as c:
             c.execute('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY')
             c.execute("SET LOCAL idle_in_transaction_session_timeout='300000'")
             snapshot=c.execute('SELECT pg_export_snapshot()').fetchone()[0]
-            manifest={'format_version':1,'backup_id':str(uuid4()),'started_at':started,'snapshot_at':now(),'source_system_identifier':str(c.execute('SELECT system_identifier FROM pg_control_system()').fetchone()[0]),'source_s3_endpoint':storage_settings.s3_endpoint,'source_bucket':storage.bucket,'postgres_version':c.execute('SHOW server_version').fetchone()[0],'migration_head':c.execute('SELECT version_num FROM public.alembic_version').fetchone()[0],'tables':table_fingerprints(c),'functions_sha256':function_fingerprint(c),'roles':roles(c),'invariants':invariant_counts(c),'objects':[],'fake_files':[]}
+            manifest={'format_version':2,'configuration_snapshot':configuration,'backup_id':str(uuid4()),'started_at':started,'snapshot_at':now(),'source_system_identifier':str(c.execute('SELECT system_identifier FROM pg_control_system()').fetchone()[0]),'source_s3_endpoint':storage_settings.s3_endpoint,'source_bucket':storage.bucket,'postgres_version':c.execute('SHOW server_version').fetchone()[0],'migration_head':c.execute('SELECT version_num FROM public.alembic_version').fetchone()[0],'tables':table_fingerprints(c),'functions_sha256':function_fingerprint(c),'roles':roles(c),'invariants':invariant_counts(c),'objects':[],'fake_files':[]}
             command=[native(pg_bin,'pg_dump'),'--format=custom','--no-password','--file',str(directory/'database.dump'),'--snapshot',snapshot]
             command.extend('--schema='+s for s in SCHEMAS)
             run_pg(command,dsn,directory/'pg_dump.log')
@@ -136,7 +139,8 @@ def backup_database(dsn,storage_settings,pg_bin,directory,fake_directory):
 def load_backup(directory):
     directory=Path(directory).resolve();data=(directory/'manifest.json').read_bytes()
     require(sha(data)==(directory/'manifest.sha256').read_text().strip(),'manifest checksum mismatch')
-    m=json.loads(data);require(m.get('format_version')==1,'unsupported backup format')
+    m=json.loads(data);require(type(m.get('format_version')) is int and m['format_version'] in (1,2),'unsupported backup format')
+    if m['format_version']==2:validate_configuration(directory,m['configuration_snapshot'])
     require(sha_file(checked_file(directory,'database.dump'))==m['database_sha256'],'database archive checksum mismatch')
     for obj in m['objects']:
         if obj.get('missing_at_snapshot'):continue
@@ -146,10 +150,16 @@ def load_backup(directory):
         require(re.fullmatch(r'(generate|detect)-[0-9a-f-]{36}\.(intent|json|png)',item['name']),'invalid fake archive path')
         path=checked_file(directory,'fake/'+item['name']);require(path.stat().st_size<=80*1024*1024 and sha_file(path)==item['sha256'],'fake archive checksum mismatch')
     return m
-def restore_database(dsn,storage_settings,pg_bin,directory,fake_directory):
+def restore_database(dsn,storage_settings,pg_bin,directory,fake_directory,*,configuration_output=None):
     dsn,_=database_url(dsn);directory=Path(directory).resolve();m=load_backup(directory);started=now()
     require(storage_settings.s3_endpoint.rstrip('/')!=m['source_s3_endpoint'].rstrip('/'),'restore requires an independent object service')
-    fake_directory=Path(fake_directory);require(not fake_directory.exists(),'restored fake directory must be new')
+    fake_directory=Path(fake_directory);require(not fake_directory.exists() and not fake_directory.is_symlink(),'restored fake directory must be new')
+    if m['format_version']==2:
+        require(configuration_output is not None,'explicit separate configuration output required for version 2 backup')
+        require(not Path(configuration_output).is_symlink(),'configuration output symlink refused')
+        configuration_output=Path(configuration_output).resolve();fake_resolved=fake_directory.resolve()
+        require(not configuration_output.exists() and not configuration_output.is_relative_to(directory) and not directory.is_relative_to(configuration_output),'configuration output must be new and separate from archive')
+        require(not configuration_output.is_relative_to(fake_resolved) and not fake_resolved.is_relative_to(configuration_output),'configuration and fake output directories must be separate')
     storage=S3Storage(storage_settings)
     try:
         require(not storage.client.list_buckets()['Buckets'],'restore object service must be empty')
@@ -200,6 +210,8 @@ def restore_database(dsn,storage_settings,pg_bin,directory,fake_directory):
             after=invariant_counts(c)
         fake_directory.mkdir(parents=True,mode=0o700)
         for item in m['fake_files']:(fake_directory/item['name']).write_bytes((directory/'fake'/item['name']).read_bytes())
+        configuration=restore_configuration(directory,m['configuration_snapshot'],configuration_output) if m['format_version']==2 else {'status':'unavailable_legacy_format','applied_to_runtime':False}
         result={'backup_id':m['backup_id'],'restore_id':str(restore_id),'started_at':started,'finished_at':now(),'snapshot_at':m['snapshot_at'],'table_count':len(m['tables']),'object_references_verified':len(locations),'fake_files_restored':len(m['fake_files']),'database_exact_before_recovery_guards':True,'function_owners_preserved':True,'old_logins_restored_as_nologin':True,'sessions_revoked':True,'quarantined_tasks':len(tasks),'before_invariants':before,'after_invariants':after,'schema_head':m['migration_head']}
+        result['configuration_restore']=configuration
         return result
     finally:storage.close()

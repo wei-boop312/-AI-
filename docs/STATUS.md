@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-13 配置版本备份候选：新format2 manifest含干净Git源码commit/tree、严格白名单配置的原始Git字节/大小/SHA，以及仅5项允许的非秘密运行设置。配置路径/元数据额外字段、秘密字段注入、重复/遗漏清单、损坏文件、修改/未提交代码均拒绝。恢复必须显式提供与归档/Fake缓存分离的新配置目录，先预检再接触PG/S3，恢复后逐文件复核；不自动执行或应用配置。旧format1仍支持但明确缺少配置证据。7项配置行为/负例纳入默认测试，共66单元通过（evidence/config-backup-unit.log）。已更新CLI、独立原生恢复脚本及文档；新版完整PG/S3恢复尚未运行，历史f4aea8a演练不能替代本次证明。源码commit不等同运行镜像版本。
+
 2026-11-13 SSE CI诊断：43407483815/2f7b5df 的90原生/4普通浏览器与5既有受控浏览器用例均通过；新SSE用例已通过持久游标刷新、重复ID/旧revision fetch抑制、服务端reset，失败于setOffline后12秒期待轮询。此控制不能可靠终止已建立长连接，不能用它推断客户端已收到error。改为将一次真实PG事件作为有限HTTP SSE流回放并结束响应，触发浏览器原生EOF重连；后续请求转发真实API，严格断言浏览器携带Last-Event-ID并恢复连接。旧断网/轮询用例仍保留。新用例尚待重跑，不生成成功凭证。
 
 2026-11-13 完整Compose停机证据修正：CI 43406411518/fb7023f 已通过基础Compose持久化、镜像构建、8服务健康/资源/租户角色检查及实际MQ生成、最终PNG/报告SHA、像素精确回贴、钱包184/0/16和唯一扣费；在应用停机断言失败，尚未验证重建。原始JSON见 evidence/ci-43406411518。诊断显示API退出143而worker/publisher/web均为0、无OOM。固定Uvicorn 0.54.0上游源码与本机安装文件SHA相同，确认capture_signals在serve清理返回后重抛SIGTERM（evidence/uvicorn-signal-semantics.json），不能把143直接等同粗暴停止。

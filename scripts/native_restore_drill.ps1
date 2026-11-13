@@ -71,7 +71,7 @@ try {
     $env:RESTORE_DATABASE_URL="postgresql://visual_restore_owner:${taskPassword}@127.0.0.1:55434/postgres"
     $env:S3_ENDPOINT='http://127.0.0.1:18334';$env:S3_ACCESS_KEY=$taskAccess;$env:S3_SECRET_KEY=$taskSecret;$env:S3_BUCKET=$taskSource.S3_BUCKET;$env:S3_REGION=$taskSource.S3_REGION
     $taskRestoreLog=Join-Path $taskDir 'restore-result.json'
-    Invoke-TaskPython -TaskArguments @('scripts/backup.py','restore','--input',$taskBackup,'--fake-output',$taskFake,'--pg-bin',$PgBin) -TaskLog $taskRestoreLog
+    Invoke-TaskPython -TaskArguments @('scripts/backup.py','restore','--input',$taskBackup,'--fake-output',$taskFake,'--config-output',(Join-Path $taskDir 'restored-configuration'),'--pg-bin',$PgBin) -TaskLog $taskRestoreLog
     $env:MIGRATION_DATABASE_URL="postgresql+psycopg://visual_restore_owner:${taskPassword}@127.0.0.1:55434/postgres"
     $env:AMQP_URL=$taskSource.AMQP_URL
     Invoke-TaskPython -TaskArguments @('scripts/setup_local.py','--profile-dir',$taskProfile) -TaskLog (Join-Path $taskDir 'profile.log')

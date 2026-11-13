@@ -21,6 +21,7 @@ from visual_platform.core.identity import hash_password
 from visual_platform.db.pool import open_pool
 from visual_platform.providers.fake import DurableFakeProvider
 from visual_platform.services.backup import require
+from visual_platform.services.config_backup import validate_configuration
 from visual_platform.services.rule_operations import publish_rule
 from visual_platform.storage.s3 import S3Storage,StorageError
 from visual_platform.worker.runner import Worker
@@ -88,6 +89,11 @@ elif args.command=='marker':
     args.state.write_text(json.dumps(state));print('Post-snapshot marker created.')
 elif args.command=='verify':
     state=json.loads(args.state.read_text());result=json.loads(args.restore_result.read_text())
+    configuration=result.get('configuration_restore',{})
+    require(configuration.get('status')=='verified_snapshot_restored' and configuration.get('applied_to_runtime') is False,'configuration snapshot restoration proof missing')
+    config_root=Path(configuration['output']);config_manifest=json.loads((config_root/'application.json').read_text())
+    verified_config=validate_configuration(config_root,config_manifest)
+    require(all(configuration[key]==verified_config[key] for key in ('application_commit','files_verified','snapshot_sha256')),'restored configuration version or checksum differs')
     with TestClient(create_app(settings)) as client:
         require(client.get('/api/v1/health/ready').status_code==200,'restored API not ready')
         require(client.get('/api/v1/auth/me',headers={'cookie':'visual_access='+state['old_access']}).status_code==401,'old access accepted')
@@ -107,6 +113,7 @@ elif args.command=='verify':
         after=admin('SELECT ops.task_details(%s)',(state['tasks']['known'],));require(len([a for a in after['attempts'] if a['step']=='generate'])==1,'generation resubmitted after restore')
         final_balance=client.get('/api/v1/credits/balance').json();require((final_balance['available'],final_balance['reserved'],final_balance['spent_total'])==(136,32,32),'post-recovery wallet mismatch')
     result['verification']={'api_ready':True,'old_access_rejected':True,'post_snapshot_marker_absent':True,'completed_report_review_and_download_hash_preserved':True,'pixel_protection_preserved':True,'three_fixture_tasks_quarantined':True,'unknown_and_queued_cannot_submit':True,'known_id_recovered_without_new_generate':True,'balance_at_snapshot':state['balance'],'balance_after_one_safe_recovery':final_balance,'verified_at':datetime.now(timezone.utc).isoformat()}
+    result['configuration_restore']={key:value for key,value in result['configuration_restore'].items() if key!='output'}
     (ROOT/'docs/evidence/backup-restore-drill.json').write_text(json.dumps(result,indent=2)+'\n');print('Restore API, artifacts, quarantine and known-id recovery verified.')
 else:
     state=json.loads(args.state.read_text())

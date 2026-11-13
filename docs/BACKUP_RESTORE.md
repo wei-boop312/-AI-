@@ -17,6 +17,10 @@ python scripts/backup.py create --output work/backups/new-run --pg-bin <PostgreS
 
 输出目录必须全新。备份使用只读源快照，不暂停普通数据读取；DDL/角色变更应在维护窗口外。演练为便于核对供应商提交边界，显式暂停了本项目publisher/worker。归档保留pg_dump诊断、SQL自定义归档、对象内容摘要文件及manifest；数据库摘要采用流式读取，S3单对象上限80MiB。尚未验证大规模或远程云存储吞吐。
 
+新备份为format_version=2：从干净Git提交的对象中归档明确允许的Compose/Docker、依赖锁、规则/契约JSON、镜像清单、Nginx和恢复目标配置，并保存应用源码commit/tree及每文件SHA256；存在修改或未提交实现文件时拒绝备份。仅允许复制APP_ORIGIN、COOKIE_SECURE、PROVIDER_PROFILE、S3_REGION、QUEUE_PREFIX五项非秘密运行设置，源profile中的DSN、密码、JWT和其他新增字段均不会进入配置快照。Git commit标识备份时源码，不推断已运行进程或镜像版本。
+
+恢复新增独立且全新的--config-output目录，先校验配置路径、完整清单、大小、摘要及字段白名单，再接触目标PG/S3。成功后该目录保存configuration/文件及application.json，逐文件读取复核；不执行脚本、不覆盖当前应用配置、不恢复密钥。旧format_version=1仍可读取，其configuration_restore明确标为unavailable_legacy_format，不能作为配置恢复已验证的证据。新版独立PG/S3演练已接入配置复核，实际整链重跑仍待完成；66单元覆盖配置正负例不是PG/S3恢复验收。
+
 ## 恢复前置条件
 
 - `RESTORE_DATABASE_URL`必须是不同PostgreSQL system_identifier的独立新集群、空数据库和受控DDL身份。
@@ -24,7 +28,7 @@ python scripts/backup.py create --output work/backups/new-run --pg-bin <PostgreS
 - 输入归档摘要全部通过，新Fake缓存目录不存在。归档/输出路径仍在忽略目录内。
 
 ```text
-python scripts/backup.py restore --input work/backups/new-run --fake-output work/restored-fake --pg-bin <PostgreSQL-bin>
+python scripts/backup.py restore --input work/backups/new-run --fake-output work/restored-fake --config-output work/restored-configuration --pg-bin <PostgreSQL-bin>
 ```
 
 源角色名和必要membership恢复为NOLOGIN、NOSUPERUSER、NOBYPASSRLS；目标自身DDL身份仅在与源DDL身份同名时保留。不会复制角色密码。pg_restore保留schema、约束、ACL及函数所有者，单事务/遇错退出；没有--no-owner把所有SECURITY DEFINER改给超级用户。仅在已验证的空目标中替换initdb的空public命名空间，无CASCADE，不删除已有业务表。参见[PostgreSQL 17 pg_restore](https://www.postgresql.org/docs/17/app-pgrestore.html)。非空目标和同源目标被拒绝。
