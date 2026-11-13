@@ -14,10 +14,13 @@
 
 ```text
 python scripts/detection_delivery.py inspect --task <uuid>
+python scripts/detection_delivery.py export --task <uuid> --output .local/review-final.png
 python scripts/detection_delivery.py approve --task <uuid> --attempt <detect-uuid> --final-sha256 <reviewed-final-sha> --operation-id <uuid> --reason <delivery-decision> --evidence-digest <reviewed-evidence-sha>
 ```
 
 inspect不发模型请求，返回阶段、最终版本/SHA/尺寸、检测意图和已有决定；不返回密钥、签名URL或对象存储凭据。reason/evidence表示允许交付待人工复核成品的运营证据，不是已核验供应商账单，也不是确认图片合规。不要在理由里填凭据。
+
+0031的export需要私有S3环境变量，只读取该未知检测任务的不可变最终版本。CLI只允许写入本工程已忽略的.local/work既有目录，目标必须是新PNG；下载核对版本ID、SHA、PNG/RGB和尺寸后，以独占创建写入私有文件。输出仅含SHA/尺寸/paid_calls=0/delivery_approved=false，不输出bucket、key、凭据或签名URL。查看导出的图片并记录审核依据后再approve；导出本身不批准、不解冻或扣积分。未知生成/无最终图/已完成任务不能导出，API/Worker没有该私有函数执行权。审阅文件不要进入Git或公开证据。
 
 批准与决定、任务/dispatch、恢复outbox、审计和事件在同一PG语句事务里完成。金额及钱包在批准时不变；Worker随后重查不可变最终图SHA和像素保护，再保存报告并沿用原settle_task结算一次。原预算不重开，不执行generate/detect。若无法交付，可继续使用既有受限fail对账流程，不伪造供应商退款。
 

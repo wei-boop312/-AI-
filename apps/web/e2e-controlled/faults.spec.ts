@@ -1,6 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
-import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,readdirSync,unlinkSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -99,6 +99,9 @@ test('检测结果未知经运营审批交付，保留未知状态且只结算�
  await expect(page.getByRole('button',{name:'等待对账后再生成'})).toBeDisabled();expect(worker(task.id,'success').result).toBe('not_claimed');
  function review(args:string[]){return JSON.parse(execFileSync(py,['scripts/detection_delivery.py',...args],{cwd:root,env:{...process.env,ADMIN_DATABASE_URL:profile.ADMIN_DATABASE_URL},encoding:'utf8'}))}
  const before=review(['inspect','--task',task.id]).context;expect(before.task.status).toBe('uncertain');expect(before.detect_attempt.status).toBe('uncertain');expect(before.final.ready).toBe(true);
+ const reviewPath=path.join(root,'work','private-review-'+task.id+'.png');
+ const exported=JSON.parse(execFileSync(py,['scripts/detection_delivery.py','export','--task',task.id,'--output',reviewPath],{cwd:root,env:{...process.env,...profile},encoding:'utf8'}));
+ try{expect(exported.result).toBe('PRIVATE_REVIEW_EXPORTED');expect(exported.delivery_approved).toBe(false);expect(createHash('sha256').update(readFileSync(reviewPath)).digest('hex')).toBe(before.final.sha256)}finally{unlinkSync(reviewPath)}
  const digest=before.final.sha256;const op=crypto.randomUUID();const approved=review(['approve','--task',task.id,'--attempt',before.detect_attempt.id,'--final-sha256',digest,'--operation-id',op,'--reason','reviewed controlled offline final image; preserve unresolved detection','--evidence-digest',digest]);expect(approved.result).toBe('LOCAL_DELIVERY_APPROVED');
  expect(worker(task.id,'success').result).toBe('succeeded');await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible({timeout:15000});
  const download=await page.request.get('/api/v1/tasks/'+task.id+'/download');expect(download.status()).toBe(200);expect(createHash('sha256').update(await download.body()).digest('hex')).toBe(digest);

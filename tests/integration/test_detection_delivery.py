@@ -2,7 +2,9 @@
 
 import hashlib
 import json
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from threading import Barrier
 from unittest.mock import patch
 from uuid import UUID, uuid4
@@ -18,6 +20,7 @@ from visual_platform.providers.pipeline import ProtocolProvider
 from visual_platform.services.detection_delivery import (
     approve_detection_delivery,
     detection_delivery_context,
+    export_detection_review,
 )
 from visual_platform.storage.s3 import S3Storage, StorageError
 from visual_platform.worker.runner import Worker
@@ -575,3 +578,78 @@ class DetectionDeliveryTests(ProviderBudgetFixture):
                     (task, uuid4(), receipt, "cannot reopen delivery", "f" * 64),
                 )
         self.assert_delivery_invariants(task, context)
+
+    def test_operator_exports_exact_final_before_approval_without_changing_wallet_or_task(self):
+        task, context = self.unresolved()
+        storage = S3Storage(self.settings)
+        try:
+            with tempfile.TemporaryDirectory() as folder:
+                output = Path(folder) / "review.png"
+                exported = export_detection_review(
+                    self.operator_dsn, storage, UUID(task), output, Path(folder)
+                )
+                self.assertEqual(
+                    hashlib.sha256(output.read_bytes()).hexdigest(), context["final"]["sha256"]
+                )
+                self.assertEqual(exported["final_sha256"], context["final"]["sha256"])
+                self.assertFalse(exported["delivery_approved"])
+                self.assertNotIn("object_key", exported)
+                self.assertNotIn("bucket", exported)
+                with self.assertRaisesRegex(ValueError, "private_review_output_required"):
+                    export_detection_review(
+                        self.operator_dsn, storage, UUID(task), output, Path(folder)
+                    )
+                with self.assertRaisesRegex(ValueError, "private_review_output_required"):
+                    export_detection_review(
+                        self.operator_dsn,
+                        storage,
+                        UUID(task),
+                        Path(folder).parent / "outside.png",
+                        Path(folder),
+                    )
+            self.assertIsNone(detection_delivery_context(self.operator_dsn, UUID(task))["decision"])
+            self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "uncertain")
+            balance = self.client.get("/api/v1/credits/balance").json()
+            self.assertEqual(
+                (balance["available"], balance["reserved"], balance["spent_total"]), (84, 16, 0)
+            )
+            self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 1))
+        finally:
+            storage.close()
+
+    def test_review_export_rejects_corrupt_storage_and_unprivileged_readers(self):
+        task, _ = self.unresolved()
+        storage = S3Storage(self.settings)
+        try:
+            with tempfile.TemporaryDirectory() as folder:
+                output = Path(folder) / "review.png"
+                with patch.object(
+                    storage, "get", return_value=(b"corrupt", "image/png", "wrong-version")
+                ):
+                    with self.assertRaisesRegex(ValueError, "review_artifact_mismatch"):
+                        export_detection_review(
+                            self.operator_dsn, storage, UUID(task), output, Path(folder)
+                        )
+                self.assertFalse(output.exists())
+                for dsn in (self.settings.api_database_url, self.worker_dsn):
+                    with psycopg.connect(dsn) as c:
+                        with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                            c.execute("SELECT ops.detection_review_artifact(%s)", (task,))
+        finally:
+            storage.close()
+
+    def test_review_export_rejects_unknown_generation_without_writing_a_file(self):
+        task, _ = self.unresolved(step="generate")
+        storage = S3Storage(self.settings)
+        try:
+            with tempfile.TemporaryDirectory() as folder:
+                output = Path(folder) / "review.png"
+                with self.assertRaisesRegex(
+                    psycopg.errors.RaiseException, "detection_review_artifact_unavailable"
+                ):
+                    export_detection_review(
+                        self.operator_dsn, storage, UUID(task), output, Path(folder)
+                    )
+                self.assertFalse(output.exists())
+        finally:
+            storage.close()
