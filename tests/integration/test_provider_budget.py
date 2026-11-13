@@ -19,6 +19,7 @@ from visual_platform.services.provider_budget import (
     provider_budget_snapshot,
     provider_quote_review,
     register_provider_budget,
+    review_blocked_provider_budget,
 )
 from visual_platform.services.quotes import hash_data
 
@@ -79,6 +80,152 @@ class ProviderBudgetTests(ProtocolPipelineFixture):
 
     def snapshot(self):
         return provider_budget_snapshot(self.operator_dsn, UUID(self.budget))
+
+    def uncertain_receipt(self, *, lifetime=3600):
+        task = self.submit(lambda quote, snapshot: self.bind(quote, snapshot, lifetime=lifetime))
+        self.timeout_step = "generate"
+        self.assertEqual(self.run_protocol(task), "stopped")
+        self.timeout_step = None
+        with psycopg.connect(self.owner) as c:
+            attempt = c.execute(
+                "SELECT id FROM app.provider_attempts WHERE task_id=%s AND step='generate'",
+                (task,),
+            ).fetchone()[0]
+        with psycopg.connect(self.operator_dsn) as c:
+            receipt = c.execute(
+                "SELECT ops.accept_receipt(%s,%s,'known-result',%s,%s,%s,%s,%s)",
+                (
+                    task,
+                    attempt,
+                    "a" * 64,
+                    "https://api.eu2.bfl.ai/v1/get_result?id=known-result",
+                    uuid4(),
+                    "synthetic supplier receipt only",
+                    "b" * 64,
+                ),
+            ).fetchone()[0]
+        return task, receipt
+
+    def review(self, original_receipt, operation, **changes):
+        args = {
+            "identity": UUID(self.budget),
+            "receipt": original_receipt,
+            "scope_sha": self.digest,
+            "operation": operation,
+            "reason": "synthetic original ceiling review",
+            "evidence": "b" * 64,
+            **changes,
+        }
+        return review_blocked_provider_budget(self.operator_dsn, **args)
+
+    def test_reviewed_receipt_resumes_same_generation_without_new_generation_post(self):
+        task, receipt = self.uncertain_receipt()
+        operation = uuid4()
+        self.assertEqual(self.review(receipt, operation), self.budget)
+        self.assertEqual(self.snapshot()["state"], "open")
+        self.assertEqual(self.snapshot()["holds"][0]["outcome"], "uncertain")
+        # The separate task reconciliation is still required; review alone cannot run it.
+        self.assertEqual(self.run_protocol(task), "not_claimed")
+        with psycopg.connect(self.operator_dsn) as c:
+            c.execute(
+                "SELECT ops.reconcile_task(%s,%s,'resume',%s,%s,%s)",
+                (task, uuid4(), receipt, "synthetic known result", "b" * 64),
+            )
+        self.assertEqual(self.run_protocol(task), "succeeded")
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 1))
+        self.assertEqual(self.review(receipt, operation), self.budget)
+        value = self.snapshot()
+        self.assertEqual(value["state"], "closed")
+        self.assertEqual(Decimal(value["reserved_ceiling_total"]), Decimal("0.12"))
+        self.assertFalse(value["actual_spending_verified"])
+        with psycopg.connect(self.owner) as c:
+            audits = c.execute(
+                "SELECT actor,after_state FROM ops.audit_events WHERE request_id=%s", (operation,)
+            ).fetchall()
+        self.assertEqual(len(audits), 1)
+        self.assertEqual(audits[0][0], self.operator)
+        self.assertEqual(audits[0][1]["scope_sha256"], self.digest)
+        with self.assertRaisesRegex(psycopg.errors.RaiseException, "operation_conflict"):
+            self.review(receipt, operation, reason="changed review")
+
+    def test_review_rejects_changed_scope_missing_receipt_and_unbound_evidence(self):
+        task, receipt = self.uncertain_receipt()
+        for changes, expected in [
+            ({"scope_sha": "f" * 64}, "provider_budget_scope_mismatch"),
+            ({"receipt": uuid4()}, "receipt_required"),
+            ({"evidence": "c" * 64}, "audited_receipt_required"),
+            ({"reason": " "}, "invalid_budget_review"),
+            ({"evidence": None}, "invalid_budget_review"),
+        ]:
+            with (
+                self.subTest(changes=changes),
+                self.assertRaisesRegex(psycopg.errors.RaiseException, expected),
+            ):
+                self.review(receipt, uuid4(), **changes)
+        self.assertEqual(self.snapshot()["state"], "blocked")
+        self.assertEqual(len(self.snapshot()["holds"]), 1)
+        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "uncertain")
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 0))
+
+    def test_concurrent_identical_review_has_one_audit_and_no_new_intent(self):
+        task, receipt = self.uncertain_receipt()
+        operation = uuid4()
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            outcomes = list(pool.map(lambda _: self.review(receipt, operation), range(4)))
+        self.assertEqual(outcomes, [self.budget] * 4)
+        self.assertEqual(len(self.snapshot()["holds"]), 1)
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM ops.audit_events WHERE request_id=%s", (operation,)
+                ).fetchone()[0],
+                1,
+            )
+        self.assertEqual(self.run_protocol(task), "not_claimed")
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 0))
+
+    def test_review_cannot_extend_expired_authorization(self):
+        task, receipt = self.uncertain_receipt(lifetime=4)
+        while datetime.now(timezone.utc) < self.scope.expires_at:
+            time.sleep(0.05)
+        with self.assertRaisesRegex(psycopg.errors.RaiseException, "provider_budget_expired"):
+            self.review(receipt, uuid4())
+        self.assertEqual(self.snapshot()["state"], "blocked")
+        balance = self.client.get("/api/v1/credits/balance").json()
+        self.assertEqual((balance["available"], balance["reserved"]), (84, 16))
+        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "uncertain")
+
+    def test_any_restoration_quarantine_prevents_reopening_original_authorization(self):
+        task, receipt = self.uncertain_receipt()
+        # Controlled audit fixture exercises the SQL guard; not a new restore rehearsal.
+        with psycopg.connect(self.owner) as c:
+            c.execute(
+                "INSERT INTO ops.audit_events(actor,action,target_type,target_id,reason,evidence_digest,request_id) VALUES(current_user,'restore_quarantine','task',%s,'controlled restoration guard fixture',%s,%s)",
+                (task, "c" * 64, uuid4()),
+            )
+        with self.assertRaisesRegex(psycopg.errors.RaiseException, "restored_budget_cannot_reopen"):
+            self.review(receipt, uuid4())
+        self.assertEqual(self.snapshot()["state"], "blocked")
+
+    def test_review_is_operator_only_and_rejects_queued_and_closed_tasks(self):
+        task = self.submit(self.bind)
+        query = "SELECT ops.review_blocked_provider_budget(%s,%s,%s,%s,%s,%s)"
+        params = (self.scope.authorization_id, uuid4(), self.digest, uuid4(), "review", "b" * 64)
+        for dsn in (self.worker_dsn, self.settings.api_database_url):
+            with self.subTest(dsn_role="worker" if dsn == self.worker_dsn else "api"):
+                with psycopg.connect(dsn) as c:
+                    with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                        c.execute(query, params)
+        with self.assertRaisesRegex(
+            psycopg.errors.RaiseException, "budget_review_requires_uncertain_task"
+        ):
+            self.review(uuid4(), uuid4())
+        self.assertEqual(self.run_protocol(task), "succeeded")
+        with self.assertRaisesRegex(
+            psycopg.errors.RaiseException, "budget_review_requires_uncertain_task"
+        ):
+            self.review(uuid4(), uuid4())
+        self.assertEqual(self.snapshot()["state"], "closed")
 
     def test_known_receipts_keep_two_exact_ceilings_distinct_from_actual_cost_and_credits(self):
         task = self.submit(self.bind)

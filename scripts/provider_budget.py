@@ -15,6 +15,7 @@ from visual_platform.services.provider_budget import (
     provider_budget_snapshot,
     provider_quote_review,
     register_provider_budget,
+    review_blocked_provider_budget,
 )
 
 
@@ -29,6 +30,13 @@ async def main():
     register.add_argument("--reason", required=True)
     inspect = modes.add_parser("inspect")
     inspect.add_argument("--authorization", type=UUID, required=True)
+    blocked = modes.add_parser("review-blocked")
+    blocked.add_argument("--authorization", type=UUID, required=True)
+    blocked.add_argument("--receipt", type=UUID, required=True)
+    blocked.add_argument("--reviewed-sha256", required=True)
+    blocked.add_argument("--operation-id", type=UUID, required=True)
+    blocked.add_argument("--reason", required=True)
+    blocked.add_argument("--evidence-digest", required=True)
     review = modes.add_parser("review-quote")
     review.add_argument("--user", type=UUID, required=True)
     review.add_argument("--quote", type=UUID, required=True)
@@ -49,6 +57,16 @@ async def main():
             await verify_sample(scope, args.config)
             identity = register_provider_budget(
                 dsn, args.quote, scope, digest, args.operation_id, args.reason
+            )
+        elif args.mode == "review-blocked":
+            identity = review_blocked_provider_budget(
+                dsn,
+                args.authorization,
+                args.receipt,
+                args.reviewed_sha256,
+                args.operation_id,
+                args.reason,
+                args.evidence_digest,
             )
         else:
             identity = str(args.authorization)

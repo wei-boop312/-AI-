@@ -50,3 +50,24 @@ def provider_quote_review(dsn: str, user: UUID, quote: UUID):
         return required_row(
             connection.execute("SELECT ops.provider_quote_review(%s,%s)", (user, quote))
         )[0]
+
+
+def review_blocked_provider_budget(
+    dsn: str,
+    identity: UUID,
+    receipt: UUID,
+    scope_sha: str,
+    operation: UUID,
+    reason: str,
+    evidence: str,
+):
+    with psycopg.connect(dsn) as connection:
+        assert_operator(connection)
+        return str(
+            required_row(
+                connection.execute(
+                    "SELECT ops.review_blocked_provider_budget(%s,%s,%s,%s,%s,%s)",
+                    (identity, receipt, scope_sha, operation, reason, evidence),
+                )
+            )[0]
+        )

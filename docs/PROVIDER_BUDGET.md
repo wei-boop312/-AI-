@@ -34,3 +34,20 @@ python scripts/provider_budget.py inspect --authorization <uuid>
 新增7项非owner LOGIN的真实PG/Worker/S3候选：完整协议mock两次调用及两个精确上限、超时不重发、过期前置拒绝/无意图/退积分、并发唯一预留、操作重放/拒绝扩额、错误绑定及权限、绕过Python的SQL类型/额度/秘密字段负例。通用协议测试fixture已分离复用。单元另检验已知预算拒绝不触发传输或错误退款，以及v2身份/快照绑定。完整原生及新增冷恢复验证必须经新CI，不能以离线迁移SQL生成或本地单元冒充通过。
 
 本候选没有证明供应商实际收费不会超出上限，也没有核验真实账单。真实价格来源、费用换算/超额处理、live运行接线及未知后运营审批仍未闭合；P4-03不得标PROVIDER_VERIFIED。
+
+
+## 未知生成的显式复核候选（0028）
+
+预算不能自动重开。对`offline_protocol_mock`生成响应丢失，只能先通过既有admin accept-receipt登记实际运营审阅的原attempt回执，再做独立预算复核：
+
+```text
+python scripts/provider_budget.py review-blocked --authorization <uuid> --receipt <uuid> --reviewed-sha256 <original-scope-sha> --operation-id <uuid> --reason <review-reason> --evidence-digest <accepted-receipt-evidence-sha>
+```
+
+函数要求任务仍uncertain/积分frozen，只有一条generate的uncertain预留，无detect预留；回执须属于同用户/任务/attempt，并已有accept_receipt审计及相同证据摘要。授权SHA、快照、金额、调用次数与到期时间不能改变；过期不能延期。只将预算置open，保持原uncertain预留；任务本身仍unknown，尚不能执行。接着经既有admin reconcile resume恢复同attempt的polling，才允许后续首次detect预留。整个流程没有再次generate POST。独立操作可能中断；中断后保持未知预留，不静默认为未收费。
+
+本入口不能恢复已检测未知的预算，不能重开成功/失败/取消或无任务的预算。任何restore_quarantine历史审计存在时拒绝旧授权重开，避免恢复旧快照后重复花费；不能靠修改当前error_code绕过。若要处理恢复后的真实账单或新授权，仍需独立设计，不做自动解锁。
+
+6项新原生候选覆盖：运营审阅→同attempt恢复→最终归档且BFL1/Gemini1；错误SHA/回执/证据拒绝；四并发同operation单审计；过期拒绝且保留冻结；受控restore审计负例；Worker/API无权限以及queued/closed拒绝。受控审计负例只验证SQL分支，不称新冷恢复演练。新候选需当次CI，不用原1606b2d绿灯代替。该基线已经真实通过0027七项预算原生及独立冷恢复撤销验证。
+
+证据摘要表示运营确认的外部资料关联，不自动证明供应商实际账单正确；`actual_spending_verified`仍false。真实账单换算、超额处理、live最小运行及检测未知恢复仍待闭合。
