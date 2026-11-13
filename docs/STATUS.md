@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-13 SSE CI诊断：43407483815/2f7b5df 的90原生/4普通浏览器与5既有受控浏览器用例均通过；新SSE用例已通过持久游标刷新、重复ID/旧revision fetch抑制、服务端reset，失败于setOffline后12秒期待轮询。此控制不能可靠终止已建立长连接，不能用它推断客户端已收到error。改为将一次真实PG事件作为有限HTTP SSE流回放并结束响应，触发浏览器原生EOF重连；后续请求转发真实API，严格断言浏览器携带Last-Event-ID并恢复连接。旧断网/轮询用例仍保留。新用例尚待重跑，不生成成功凭证。
+
 2026-11-13 完整Compose停机证据修正：CI 43406411518/fb7023f 已通过基础Compose持久化、镜像构建、8服务健康/资源/租户角色检查及实际MQ生成、最终PNG/报告SHA、像素精确回贴、钱包184/0/16和唯一扣费；在应用停机断言失败，尚未验证重建。原始JSON见 evidence/ci-43406411518。诊断显示API退出143而worker/publisher/web均为0、无OOM。固定Uvicorn 0.54.0上游源码与本机安装文件SHA相同，确认capture_signals在serve清理返回后重抛SIGTERM（evidence/uvicorn-signal-semantics.json），不能把143直接等同粗暴停止。
 
 新增CONTAINER_LIFECYCLE显式开关：API启动先删除旧标记，只有readiness、两连接池与S3全部关闭后才原子写入完成标记；任一关闭异常仍尝试关闭剩余资源且不留成功标记。Compose验收必须读取停止容器中的该标记，再校验API退出0/143、其余服务0、无OOM及停机时限；137仍失败，未降低到仅允许143。59单元通过（含3项清理正负例），记录 evidence/api-lifecycle-unit.log；完整Linux Compose重建和新SSE浏览器用例仍需新CI验证。

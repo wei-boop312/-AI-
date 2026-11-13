@@ -39,7 +39,7 @@ async function submit(page: Page) {
   return task;
 }
 
-test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离', async ({page, context, browser}) => {
+test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离', async ({page, browser}) => {
   test.setTimeout(120000);
   expect(process.env.CONTROLLED_FAKE_BROWSER, 'owned consumers must be paused').toBe('1');
   // Keep the native EventSource and real network. Only observe frames/fetches;
@@ -99,7 +99,7 @@ test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账
     // Valid same-task/revision payload with a newer transport ID: revision
     // suppression must work independently of ID deduplication.
     source.dispatchEvent(new MessageEvent('task.updated', {lastEventId: staleId, data: frame.data}));
-    return {before, afterDuplicate, afterStale: probe.reads[url] || 0, staleId, originalId: frame.id};
+    return {before, afterDuplicate, afterStale: probe.reads[url] || 0, staleId, originalId: frame.id, payload: frame.data};
   }, first.id);
   expect(injected.afterDuplicate).toBe(injected.before);
   expect(injected.afterStale).toBe(injected.before);
@@ -109,11 +109,20 @@ test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账
   await page.reload();
   await expect.poll(() => page.evaluate(() => (window as any).__sseProbe.resets)).toBeGreaterThan(0);
   await expect.poll(() => page.evaluate(k => sessionStorage.getItem(k), key)).toBe(saved);
-  await context.setOffline(true);
-  await expect(page.getByText('轮询更新', {exact: true})).toBeVisible({timeout: 12000});
-  await context.setOffline(false);
-  await expect.poll(() => requests.some(r => r.task === first.id && r.lastEventId === saved), {timeout: 15000}).toBe(true);
-  await expect(page.getByText('实时连接', {exact: true})).toBeVisible();
+  // Browser offline emulation does not reliably terminate an established SSE
+  // socket. Inject a real HTTP EOF after replaying the captured PG frame once;
+  // the native EventSource must reconnect to the real API with its own header.
+  let eofInjected = false;
+  const reconnectStart = requests.length;
+  await page.route('**/api/v1/tasks/' + first.id + '/events*', async route => {
+    if (eofInjected) { await route.continue(); return; }
+    eofInjected = true;
+    await route.fulfill({status: 200, contentType: 'text/event-stream', headers: {'Cache-Control': 'no-store'}, body: 'retry: 1000\nid: ' + saved + '\nevent: task.updated\ndata: ' + injected.payload + '\n\n'});
+  });
+  await page.reload();
+  await expect.poll(() => eofInjected).toBe(true);
+  await expect.poll(() => requests.slice(reconnectStart).some(r => r.task === first.id && r.lastEventId === saved), {timeout: 15000}).toBe(true);
+  await expect(page.getByText('实时连接', {exact: true})).toBeVisible({timeout: 20000});
   await page.getByRole('button', {name: '取消排队任务', exact: true}).click();
   await expect(page.getByText('排队任务已取消，冻结积分已退回。', {exact: true})).toBeVisible();
   const second = await submit(page);
@@ -141,7 +150,7 @@ test('真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账
   const proof = {
     result: 'PASS', commit: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
     observed_at: new Date().toISOString(), paid_calls: 0, browser: browser.version(),
-    scope: 'production React app + native EventSource/PG HTTP replay; duplicate/stale frames injected at browser event boundary',
+    scope: 'production React app + native EventSource/PG HTTP replay; duplicate/stale frames and one finite replay/EOF injected at browser boundaries; reconnect forwarded to real API',
     deduplicated_events: true, ignored_stale_revisions: true, cursor_restored_after_reload: true,
     cursor_namespaced_by_user_and_task: true, automatic_last_event_header: true, server_reset_recovered: true,
     task_posts: taskPosts, injection_snapshot_reads: injected, event_requests: requests,
