@@ -328,7 +328,13 @@ def main():
             "recovered service heartbeats",
         )
         command([sys.executable, "scripts/run_local.py", "monitor"], name="monitor-after-recovery")
+        command(
+            [sys.executable, "scripts/ci_restart.py"],
+            name="native-restart",
+            child_env={**env, "CI_RESTART_SOURCE_OWNER": run_id},
+        )
         command([sys.executable, "scripts/verify_runtime_metrics.py"], name="runtime-metrics")
+        command([sys.executable, "scripts/check.py", "task", "P5-02"], name="operations-gate")
         build_manifest = {
             "commit": os.environ.get("GITHUB_SHA"),
             "files": {

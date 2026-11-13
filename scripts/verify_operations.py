@@ -112,6 +112,13 @@ def main():
             "restart did not recover",
         )
         require(
+            restart.get("result") == "PASS"
+            and restart.get("fixture_cleanup") is True
+            and restart.get("financial_invariants_unchanged") is True
+            and restart.get("provider_attempts_unchanged") is True,
+            "restart fixture, finance or provider-count verification missing",
+        )
+        require(
             "mq_unavailable" in [x["code"] for x in restart["mq_down"]["alerts"]]
             and "storage_unavailable" in [x["code"] for x in restart["s3_down"]["alerts"]],
             "fault injection not observed",

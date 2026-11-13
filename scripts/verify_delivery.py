@@ -276,6 +276,8 @@ def verify_run(evidence):
         "native-restore-v2",
         "monitor-after-recovery",
         "runtime-metrics",
+        "native-restart",
+        "operations-gate",
     }
     require(required <= {x["name"] for x in run["steps"]}, "native build stages missing")
     require(all(x["exit_code"] == 0 for x in run["steps"]), "native stage failed")

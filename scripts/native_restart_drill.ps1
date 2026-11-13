@@ -46,7 +46,7 @@ function Start-TaskS3 {
     [IO.File]::WriteAllText((Join-Path $taskRoot 'seaweed-pid'),[string]$taskNew.Id)
     return $taskNew
 }
-$taskRabbitStopped=$false;$taskS3Stopped=$false
+$taskRabbitStopped=$false;$taskS3Stopped=$false;$taskFixtureCleaned=$false
 try {
     $taskBefore=Read-TaskMonitor
     if ($taskBefore.alerts.Count -ne 0) {throw 'Resolve existing monitor alerts before restart drill'}
@@ -80,8 +80,16 @@ try {
     if (-not $taskReady) {throw 'Services did not recover cleanly'}
     $taskVerified=Invoke-TaskProbe verify
     $taskCleanup=Invoke-TaskProbe cleanup
+    if (-not $taskCleanup.fixture_cleanup) {throw 'Restart fixture cleanup incomplete'}
+    $taskFixtureCleaned=$true
+    foreach ($taskInvariant in @('wallet_equation_errors','ledger_total_errors','reservation_link_errors','task_credit_state_errors','duplicate_terminal_settlements')) {
+        if ($taskBefore.snapshot.$taskInvariant -ne 0 -or $taskAfter.snapshot.$taskInvariant -ne 0) {throw 'Financial invariant changed during infrastructure drill'}
+    }
+    if (($taskBefore.snapshot.tasks | ConvertTo-Json -Compress) -ne ($taskAfter.snapshot.tasks | ConvertTo-Json -Compress)) {throw 'Business task status changed during fixture-only drill'}
+    if (($taskBefore.snapshot.business_metrics.provider_activity | ConvertTo-Json -Compress) -ne ($taskAfter.snapshot.business_metrics.provider_activity | ConvertTo-Json -Compress)) {throw 'Provider activity changed during fixture-only drill'}
     $taskResult=@{observed_at=[DateTimeOffset]::UtcNow.ToString('o');environment=@{postgres='17.11';rabbitmq='4.4.0';seaweedfs='4.53';scope='isolated Windows native loopback';mq_restart='stop_app/start_app; Erlang VM retained';s3_restart='process stop/new process; same data directory'};prepared=$taskPrepared;mq_down=$taskMqDown;s3_down=$taskS3Down;recovered=$taskAfter;verification=$taskVerified;cleanup=$taskCleanup;paid_calls=0}
     $taskResult.base_commit=(& git -C $taskRepo rev-parse HEAD).Trim()
+    $taskResult.result='PASS';$taskResult.fixture_cleanup=$true;$taskResult.financial_invariants_unchanged=$true;$taskResult.provider_attempts_unchanged=$true
     if ($LASTEXITCODE -ne 0) {throw 'Cannot bind restart evidence to current commit'}
     $taskResult | ConvertTo-Json -Depth 15 | Set-Content -Encoding utf8 docs/evidence/native-restart-drill.json
     Write-Output 'PASS: native MQ application and S3 process restart, alerts, durable redelivery, private immutable object persistence'
@@ -89,6 +97,7 @@ try {
     try {
         if ($taskRabbitStopped) {Invoke-TaskRabbit start_app}
         if ($taskS3Stopped) {$null=Start-TaskS3}
+        if (-not $taskFixtureCleaned -and (Test-Path -LiteralPath $taskState)) {$null=Invoke-TaskProbe cleanup}
     } finally {
         foreach ($taskName in $taskSavedEnv.Keys) {[Environment]::SetEnvironmentVariable($taskName,$taskSavedEnv[$taskName],'Process')}
     }

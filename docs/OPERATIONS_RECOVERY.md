@@ -38,3 +38,9 @@
 按照[BACKUP_RESTORE.md](BACKUP_RESTORE.md)导出同步PG快照和引用S3/规则证据；恢复到不同system_identifier的空PG及独立空S3。先核对表/函数所有者/对象SHA，再撤销旧会话、清空旧心跳并隔离所有未结束任务，保留冻结和审计。只允许对核实过的既有回执恢复查询/归档。不得直接把恢复快照中的排队任务重新消费。
 
 f4aea8a本轮恢复实测RTO25.14秒、恢复起点快照年龄3.66秒。主计划§13初始演练目标RPO24h/RTO4h现由ops/recovery-objectives.json版本化，本轮恢复报告绑定目标摘要并满足两项初始演练目标，结果operations-gate-f4aea8a.json。生产数据量/网络/备份频率仍未验证。数据库schema不自动降级；变更前做备份并验证候选迁移，出现问题先保全已提交账本与供应商意图，再决定兼容性修复或独立实例恢复。35694a4离线核心CI门槛已绿，但完整应用Compose、完整运行指标、真实供应商及目标发布仍见PLAN_GAPS，不宣告RELEASE_READY。
+
+## Linux CI 同提交运维组合
+
+`scripts/ci_native.py` 在独立冷恢复和服务心跳恢复后调用 `scripts/ci_restart.py`；入口只接受CI及父运行32位owner标识，逐次inspect核对容器标签。停止/启动同一MQ/S3容器，保留卷，通过真实监控及私有随机队列/对象验证恢复；finally恢复所属容器并清理fixture，清理失败也判FAIL。不会部署或调用供应商。Windows独立入口保留，但历史证据不能满足当前commit门槛。
+
+`check.py task P5-02` 现在组合当次恢复、重启、生产构建性能及全量运行指标，输出 `work/ci-public/operations-gate.json`；完整 `check.py all` 必须交叉校验该当前commit报告。仅证明单节点CI演练及初始RPO24h/RTO4h目标，生产备份频率及SLA仍未验证。新增组合需实际CI通过后才能认定完成。

@@ -151,12 +151,28 @@ def main(task):
         report["runtime_metrics"] = validate_runtime_evidence(
             json.loads(metrics_path.read_text(encoding="utf-8-sig")), report["commit"]
         )
+        operations_path = evidence / "operations-gate.json"
+        if not operations_path.is_file():
+            raise EnvironmentError("BLOCKED_ENV: current operations rehearsal evidence missing")
+        operations = json.loads(operations_path.read_text(encoding="utf-8-sig"))
+        if (
+            operations.get("result") != "PASS"
+            or operations.get("commit") != report["commit"]
+            or operations.get("paid_calls") != 0
+            or operations.get("drill_verification") != "PASS"
+            or operations.get("runtime_metrics") != "PASS"
+        ):
+            raise ValueError(
+                "operations recovery/restart/performance/metrics evidence failed or stale"
+            )
+        report["operations_rehearsal"] = "PASS"
+        report["not_verified"].pop("P5-02", None)
         plan = json.loads(
             (ROOT / "docs/specification/CODEX_EXECUTION/tasks.json").read_text(encoding="utf-8-sig")
         )
         report["verified_tasks"] = [
             x["id"] for x in plan["tasks"] if x["phase"] in ("P0", "P1", "P2", "P3")
-        ] + ["P4-01 (mock HTTP)", "P4-02 (mock SDK HTTP)", "P5-01"]
+        ] + ["P4-01 (mock HTTP)", "P4-02 (mock SDK HTTP)", "P5-01", "P5-02 (CI rehearsal)"]
         report["result"] = "OFFLINE_READY"
         code = 0
     except EnvironmentError as error:

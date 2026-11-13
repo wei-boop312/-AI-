@@ -1,0 +1,27 @@
+{
+  "run_id": 43421828422,
+  "commit": "35bc830da423110e016f80ca02223fbd967cb60d",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43421828422",
+  "artifact_id": 14035326253,
+  "archive_sha256": "f132b3f71a5211a95d79c26dd6a571532f0f9f4af9ca0cc8f8de57a653da8d1d",
+  "files": {
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "429473cd38d01c4ba3ad36584285cb75615a381a22df9ae8bf27e71cc74a8502"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "63ef60aaa7aa8aeeb2ccd05041fadd1e53c926a2032f6e81710bb8ac8c951e3b"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "5eb88587204352478ab613993f0b760269b897a962f2cefd1e13eb912818840b"
+    },
+    "runtime-metrics.json": {
+      "artifact_path": "work/ci-public/runtime-metrics.json",
+      "sha256": "1bc36de1ea0563efcb90a8e5af88c74fb22624f10c65c4b977961af7cd565799"
+    }
+  },
+  "scope": "Original selected JSON evidence; raw archive retained privately; offline CI only, no paid calls or deployment."
+}

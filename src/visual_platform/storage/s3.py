@@ -63,11 +63,12 @@ class S3Storage:
             params["VersionId"] = version
         return self.client.generate_presigned_url("get_object", Params=params, ExpiresIn=60)
 
-    def get(self, key, *, version=None, limit=20 * 1024 * 1024):
+    def get(self, key, *, version=None, limit=20 * 1024 * 1024, short_probe=False):
         params = {"Bucket": self.bucket, "Key": key}
         if version:
             params["VersionId"] = version
-        result = self.client.get_object(**params)
+        client = self.probe_client if short_probe else self.client
+        result = client.get_object(**params)
         try:
             if result["ContentLength"] > limit:
                 raise ValueError("file_size")

@@ -35,6 +35,10 @@ state = (
     if args.phase == "prepare"
     else json.loads(args.state.read_text())
 )
+if args.phase == "prepare":
+    # Persist identities before any remote mutation so partial setup is cleanable.
+    args.state.parent.mkdir(parents=True, exist_ok=True)
+    args.state.write_text(json.dumps(state))
 payload = b"visual-platform-native-restart-v1\x00" + state["queue"].encode()
 storage = S3Storage(
     SimpleNamespace(**{k.lower(): v for k, v in profile.items() if k.startswith("S3_")})
@@ -86,7 +90,9 @@ async def run():
             while True:
                 attempts += 1
                 try:
-                    data, _, _ = storage.get(state["object"], version=state["version"])
+                    data, _, _ = storage.get(
+                        state["object"], version=state["version"], short_probe=True
+                    )
                     break
                 except (BotoCoreError, ClientError):
                     if time.monotonic() - started >= 90:
@@ -102,7 +108,7 @@ async def run():
                 pass
             else:
                 raise RuntimeError("immutable overwrite was accepted")
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(trust_env=False, timeout=5) as client:
                 response = await client.get(storage.download_url(state["object"], state["version"]))
                 if response.status_code != 200 or response.content != data:
                     raise RuntimeError("private signed download failed")
