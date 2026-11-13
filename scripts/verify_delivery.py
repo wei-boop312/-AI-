@@ -44,6 +44,13 @@ def verify_static():
         expected=images['postgres' if name.startswith('postgres') else 'seaweedfs' if name=='s3' else 'rabbitmq']['image']
         require(service['image']==expected,'Compose image inventory differs')
         require(all(str(port).startswith('127.0.0.1:') for port in service['ports']),'Compose exposes non-loopback port')
+        require(service.get('healthcheck') and service.get('cpus') and service.get('mem_limit') and service.get('pids_limit') and service.get('stop_grace_period'),'infrastructure lifecycle/resource constraints missing')
+    application=yaml.safe_load((ROOT/'compose.app.yaml').read_text())
+    require(set(application['services'])=={'api','worker','publisher','web'},'application Compose services incomplete')
+    for service in application['services'].values():
+        require(service.get('network_mode')=='host' and not service.get('ports') and service.get('pull_policy')=='never','application local topology differs')
+        require(service.get('healthcheck') and service.get('cpus') and service.get('mem_limit') and service.get('pids_limit') and service.get('stop_grace_period'),'application lifecycle/resource constraints missing')
+        require(service.get('init') is True and service.get('cap_drop')==['ALL'],'application signal/privilege constraints missing')
     require(load(ROOT/'contracts/openapi.json')==create_app().openapi(),'checked-in OpenAPI must match current routes and schemas')
     inventory=load(ROOT/'third_party/inventory.json')
     require(not inventory['missing_packaged_texts'],'unresolved legal text inventory')
@@ -66,7 +73,7 @@ def verify_static():
     return {'static':'PASS','legal_text_references':legal_files,'dependency_components':len(inventory['components']),'openapi_paths':len(create_app().openapi()['paths'])}
 
 def verify_run(evidence):
-    paths=['src','scripts','tests','migrations','apps/web','.github','.dockerignore','.gitleaks.toml','compose.yaml','Dockerfile','pyproject.toml','uv.lock','contracts','ops']
+    paths=['src','scripts','tests','migrations','apps/web','.github','.dockerignore','.gitleaks.toml','compose.yaml','compose.app.yaml','Dockerfile','pyproject.toml','uv.lock','contracts','ops']
     if subprocess.call(['git','diff','--quiet','HEAD','--',*paths],cwd=ROOT) or subprocess.check_output(['git','ls-files','--others','--exclude-standard','--',*paths],cwd=ROOT):
         raise EnvironmentError('BLOCKED_ENV: commit implementation changes before validating current-commit build evidence')
     docker=shutil.which('docker')

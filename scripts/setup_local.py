@@ -20,9 +20,10 @@ from types import SimpleNamespace
 p=argparse.ArgumentParser();p.add_argument('--origin',default='http://127.0.0.1:5173');p.add_argument('--demo-account',action='store_true');p.add_argument('--profile-dir',type=Path,default=ROOT/'.local');args=p.parse_args()
 folder=args.profile_dir.resolve()
 if not any(folder.is_relative_to((ROOT/name).resolve()) for name in ('.local','work')):p.error('profile directory must stay inside ignored .local or work')
-folder.mkdir(parents=True,exist_ok=True)
+folder.mkdir(parents=True,exist_ok=True,mode=0o700)
 file=folder/'runtime.json'
 if file.exists(): raise SystemExit('Local profile already exists; no roles or secrets overwritten.')
+os.chmod(folder,0o700)
 owner=os.environ.get('MIGRATION_DATABASE_URL','')
 u=urlsplit(owner.replace('postgresql+psycopg://','postgresql://'))
 if u.hostname not in ('127.0.0.1','localhost'): raise SystemExit('Local setup requires an explicitly configured loopback migration database')
@@ -38,6 +39,7 @@ key=rsa.generate_private_key(public_exponent=65537,key_size=3072)
 private=folder/'private.pem';public=folder/'public.pem'
 private.write_bytes(key.private_bytes(serialization.Encoding.PEM,serialization.PrivateFormat.PKCS8,serialization.NoEncryption()))
 public.write_bytes(key.public_key().public_bytes(serialization.Encoding.PEM,serialization.PublicFormat.SubjectPublicKeyInfo))
+os.chmod(private,0o600);os.chmod(public,0o600)
 values.update({'JWT_PRIVATE_KEY_FILE':str(private),'JWT_PUBLIC_KEY_FILE':str(public),'APP_ORIGIN':args.origin,'COOKIE_SECURE':'0','PROVIDER_PROFILE':'offline','FAKE_PROVIDER_DIR':str(ROOT/'work'/'fake-provider'),'QUEUE_PREFIX':'visual.local.'+uuid4().hex[:8]})
 for key in ('S3_ENDPOINT','S3_ACCESS_KEY','S3_SECRET_KEY','AMQP_URL'): values[key]=os.environ[key]
 values['S3_BUCKET']=os.environ.get('S3_BUCKET','visual-dev-private');values['S3_REGION']=os.environ.get('S3_REGION','us-east-1')
@@ -49,10 +51,12 @@ try:
     storage.client.put_bucket_cors(Bucket=storage.bucket,CORSConfiguration={'CORSRules':[{'AllowedOrigins':[args.origin],'AllowedMethods':['GET','PUT','HEAD'],'AllowedHeaders':['content-type','content-length'],'ExposeHeaders':['ETag'],'MaxAgeSeconds':300}]})
 finally: storage.close()
 file.write_text(json.dumps(values,indent=2),encoding='utf-8')
+os.chmod(file,0o600)
 if args.demo_account:
     uid=uuid4();password=secrets.token_urlsafe(18);email='local-'+uuid4().hex[:8]+'@example.invalid'
     with psycopg.connect(values['ADMIN_DATABASE_URL']) as c:
         c.execute("SELECT app.create_private_user(%s,%s,'本地体验账号',%s)",(uid,email,hash_password(password)))
         c.execute("SELECT app.grant_credits(%s,%s,200,'local offline demo credits')",(uid,uuid4()))
     (folder/'account.json').write_text(json.dumps({'email':email,'password':password,'user_id':str(uid)}),encoding='utf-8')
+    os.chmod(folder/'account.json',0o600)
 print(json.dumps({'profile':str(file.relative_to(ROOT)),'account_file':str((folder/'account.json').relative_to(ROOT)) if args.demo_account else None,'status':'created; secrets were not printed'}))

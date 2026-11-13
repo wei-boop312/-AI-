@@ -4,12 +4,13 @@
 
 | 来源/要求 | 当前证据或差距 | 下一项实际工作 |
 | --- | --- | --- |
-| 主计划§13：Compose含postgres/rabbitmq/s3/api/worker/publisher/web，healthcheck、持久卷、资源限制、优雅退出 | 基础Compose仅4个基础设施服务；ec2a155有独立Docker应用容器候选，尚非完整Compose应用编排 | 补应用overlay、专用profile、回环限制、服务健康/资源/退出和持久离线回执缓存，实际重建验证 |
+| 主计划§13：Compose含postgres/rabbitmq/s3/api/worker/publisher/web，healthcheck、持久卷、资源限制、优雅退出 | f53fc1f手写Docker容器任务闭环已通过；现已补8服务应用overlay、私有profile、资源/健康/退出、命名缓存和重建验收候选 | 56单元/90原生及官方Compose Schema已通过；待Linux实际应用Compose重建证据 |
 | 主计划§13：初始演练RPO24h/RTO4h | f4aea8a新恢复报告已绑定目标摘要，两项演练目标均满足；RTO25.14s、快照年龄3.66s | 本项演练目标已实测；生产备份频率/SLA不外推，完整运行指标仍待补 |
 | 主计划§13：check.py e2e、all默认阻止真实出网 | 新e2e入口四项实际通过；default all离线缺证据正确阻断 | all还要求完整应用Compose证据，未满足不再返回完整OFFLINE_READY |
 | 主计划§13：结构化API p95/5xx、各阶段耗时、归档失败、供应商调用及费用、规则人工率 | 已有性能样本和ops聚合心跳/积压/守恒；常驻监控不含全部列举指标 | 对照实际事件/意图/成本/规则记录补聚合与有限访问，避免推断真实货币或以测试压测代替运行指标 |
 | 主计划§13：CI格式/类型/单元 | 当前Python AST/导入/测试、前端tsc构建通过；未证明完整后端静态类型/格式门槛 | 补清晰工具及范围，实际运行；不得把AST当作类型检查 |
 | 主计划§13：DB、资产与规则/配置版本备份 | DB规则/快照、对象SHA和函数指纹已验证；备份manifest缺少应用commit与非秘密文件配置版本清单 | 补可移植配置来源及摘要/归档校验，密钥仍独立安全保管，实际恢复验证 |
+| 工程契约§8/P3-02：客户端event id去重、revision倒序忽略、Last-Event-ID持久恢复 | 服务端持久游标/租户隔离、原生EventSource同实例重连和GET revision保护有证据；App.tsx回调未显式保存/去重event id，新实例/reload游标仍缺浏览器证明 | 补按user/task隔离的客户端游标和原生浏览器负例，不以服务端API测试代替客户端要求 |
 | P4-03/主计划provider-smoke | BFL/Gemini官方适配器和MockTransport Worker已验证，默认CLI/报价仍offline Fake；实时传输/原子预算接线未完成，零付费调用 | 在不实际调用模型前提下补可审阅的预算/一次性真实验收候选及mock负例；真实样本/次数/费用上限/安全密钥/费用授权仍是外部条件 |
 | P5-03：目标环境和完整规则/费用/权属资料 | 无用户目标服务器/地区/域名或发布决定；种子unverified、不保证上架 | 保持可审阅候选和明确差距；不擅自部署或把manual_review改为compliant |
 

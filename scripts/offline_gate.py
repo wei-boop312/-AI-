@@ -33,6 +33,13 @@ def main(task):
         for key in ('loopback_only','healthchecks_ready','resources_enforced','graceful_shutdown_verified','fake_receipts_survive_recreation'):
             if application.get(key) is not True:raise ValueError('application Compose acceptance missing: '+key)
         report['application_compose']='PASS'
+        cursor_path=evidence/'frontend-sse-cursor.json'
+        if not cursor_path.is_file():raise EnvironmentError('BLOCKED_ENV: browser proof of persistent client SSE cursor/deduplication missing; see docs/PLAN_GAPS.md')
+        cursor=json.loads(cursor_path.read_text(encoding='utf-8-sig'))
+        if cursor.get('result')!='PASS' or cursor.get('commit')!=report['commit'] or cursor.get('paid_calls')!=0:raise ValueError('browser SSE cursor evidence failed or stale')
+        for key in ('deduplicated_events','ignored_stale_revisions','cursor_restored_after_reload','cursor_namespaced_by_user_and_task'):
+            if cursor.get(key) is not True:raise ValueError('browser SSE cursor verification missing: '+key)
+        report['frontend_sse_cursor']='PASS'
         plan=json.loads((ROOT/'docs/specification/CODEX_EXECUTION/tasks.json').read_text(encoding='utf-8-sig'))
         report['verified_tasks']=[x['id'] for x in plan['tasks'] if x['phase'] in ('P0','P1','P2','P3')]+['P4-01 (mock HTTP)','P4-02 (mock SDK HTTP)','P5-01']
         report['result']='OFFLINE_READY';code=0

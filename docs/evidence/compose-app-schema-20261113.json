@@ -1,0 +1,21 @@
+{
+  "result": "PASS",
+  "scope": "official Compose schema static validation; no engine runtime claim",
+  "schema_url": "https://raw.githubusercontent.com/compose-spec/compose-spec/3a4a6995e4a971f6173dff9130cb3e38e6738651/schema/compose-spec.json",
+  "schema_sha256": "d549057ebc2925f39f62799eab0db7b9e2c18b35b6c00595199116da3ed10e64",
+  "services": [
+    "api",
+    "postgres-dev",
+    "postgres-test",
+    "publisher",
+    "rabbitmq",
+    "s3",
+    "web",
+    "worker"
+  ],
+  "paid_calls": 0,
+  "input_sha256": {
+    "compose.yaml": "476c0e957c1a1eeacd2a1154a09508d6f40d5739b6136b0c0f02b63908b9f486",
+    "compose.app.yaml": "ccbd23a0290c936fb4ad01fdd5eaccea4e8b54669d75dddd4964ca0864dec515"
+  }
+}

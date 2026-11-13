@@ -1,0 +1,32 @@
+{
+  "observed_at": "2026-11-12T23:42:27.132932+00:00",
+  "requested_gate": "all",
+  "profile": "offline",
+  "paid_calls": 0,
+  "deployed": false,
+  "not_verified": {
+    "P4-03": "WAITING_EXTERNAL: real provider call and budget authorization are absent",
+    "P5-02": "separate restore/restart drill; this gate does not rerun operations",
+    "P5-03": "WAITING_EXTERNAL: target environment, policy evidence and release decision"
+  },
+  "scope": "current native test suites + production browser + Compose migrations/persistence + locked build evidence",
+  "source_provenance": {
+    "result": "PASS",
+    "scope": "P0-01 specification provenance; authorized remote only, no deployment",
+    "specification_files": 12,
+    "paid_calls": 0
+  },
+  "static": "PASS",
+  "legal_text_references": 264,
+  "dependency_components": 186,
+  "openapi_paths": 31,
+  "native_ci": "PASS",
+  "commit": "f53fc1fa5f6b13cdc6e09889bbec05f62b9b22d7",
+  "docker_engine": "28.0.4",
+  "runtime_image_ids": [
+    "sha256:3b5323884bb5208acba76915adcc2bd0dcdec2a3087588ccff351f539e5e8655",
+    "sha256:989751cc27a4527cc09c06ff703b9cdcf0a8b034d05b679ec9e4a93013014a6a"
+  ],
+  "result": "BLOCKED_ENV",
+  "reason": "BLOCKED_ENV: full application Compose evidence missing; see docs/PLAN_GAPS.md"
+}

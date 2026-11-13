@@ -17,11 +17,23 @@ sub.add_parser("doctor")
 migrate=sub.add_parser("migrate");migrate.add_argument('--compose-profile',type=Path)
 for name in ('up','down'):
     command=sub.add_parser(name);command.add_argument('--profile-dir',type=Path,default=ROOT/'.local/compose')
-bootstrap=sub.add_parser('bootstrap');bootstrap.add_argument('--compose-profile',type=Path,default=ROOT/'.local/compose');bootstrap.add_argument('--profile-dir',type=Path,default=ROOT/'.local');bootstrap.add_argument('--demo-account',action='store_true')
+bootstrap=sub.add_parser('bootstrap');bootstrap.add_argument('--compose-profile',type=Path,default=ROOT/'.local/compose');bootstrap.add_argument('--profile-dir',type=Path,default=ROOT/'.local');bootstrap.add_argument('--demo-account',action='store_true');bootstrap.add_argument('--origin',default='http://127.0.0.1:5173')
+application=sub.add_parser('app-up');application.add_argument('--compose-profile',type=Path,default=ROOT/'.local/compose');application.add_argument('--profile-dir',type=Path,required=True);application.add_argument('--api-image',required=True);application.add_argument('--web-image',required=True)
 user=sub.add_parser("create-user"); user.add_argument("--email",required=True); user.add_argument("--name",default="私有用户"); user.add_argument("--credits",type=int,default=0)
 grant=sub.add_parser("grant"); grant.add_argument("--user-id",type=UUID,required=True); grant.add_argument("--amount",type=int,required=True); grant.add_argument("--operation-id",type=UUID,required=True); grant.add_argument("--reason",required=True)
 args=parser.parse_args()
-if args.command in ('up','down'):
+if args.command=='app-up':
+    from compose_runtime import ComposeRuntime
+    try:
+        runtime=ComposeRuntime(args.compose_profile)
+        if not runtime.application:runtime.enable_application(args.profile_dir,args.api_image,args.web_image)
+        elif Path(runtime.application['profile_dir'])!=args.profile_dir.resolve():raise ValueError('existing application credentials preserved; select its original profile')
+        else:
+            for component,reference in (('api',args.api_image),('web',args.web_image)):
+                if runtime.image_inspection(reference)['Id']!=runtime.application['images'][component]['id']:raise ValueError('existing application image identities preserved; no implicit image upgrade')
+        runtime.up();print(json.dumps({'status':'application-up','services':runtime.config_summary()['services'],'origin':'http://127.0.0.1:8080','application_commit':runtime.application['commit'],'image_ids':{k:v['id'] for k,v in runtime.application['images'].items()},'paid_calls':0}))
+    except EnvironmentError as exc:print(str(exc));raise SystemExit(3)
+elif args.command in ('up','down'):
     from compose_runtime import ComposeRuntime
     try:
         runtime=ComposeRuntime(args.profile_dir)
@@ -32,7 +44,7 @@ if args.command in ('up','down'):
 elif args.command=='bootstrap':
     from compose_runtime import ComposeRuntime
     runtime=ComposeRuntime(args.compose_profile);runtime.owned_resources();runtime.wait_ready()
-    command=[sys.executable,'scripts/setup_local.py','--profile-dir',str(args.profile_dir)]
+    command=[sys.executable,'scripts/setup_local.py','--profile-dir',str(args.profile_dir),'--origin',args.origin]
     if args.demo_account:command.append('--demo-account')
     raise SystemExit(subprocess.call(command,cwd=ROOT,env=runtime.env))
 elif args.command=="doctor":

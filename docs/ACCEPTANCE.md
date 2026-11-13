@@ -37,4 +37,6 @@ P5-02 的 Windows 原生准备见 OPERATIONS_RECOVERY / BACKUP_RESTORE：专用 
 
 完整主计划复核后，all/P3综合门槛还要求本次application-compose.json证明api/worker/publisher/web完整Compose、回环限制、健康检查、资源限制、优雅退出及回执缓存重建保持。当前此部分待实现，缺少返回BLOCKED_ENV，不能继续依据较早较窄门槛的绿灯返回完整OFFLINE_READY。具体剩余工作见PLAN_GAPS。
 
+8服务Compose候选现已实现、待Linux实测；同时all要求本次frontend-sse-cursor.json，证明客户端显式event id去重、旧revision忽略、reload游标恢复及user/task隔离。服务端游标API或EventSource同实例自动重连不能替代跨实例浏览器证明，缺少返回3。
+
 P5-02同样区分已通过的恢复/重启/性能演练与完整运维任务。新门槛保留drill_verification=PASS，但仍要求本次runtime-metrics.json覆盖主计划列举的API/阶段耗时/归档/供应商费用/规则人工率；缺失返回3，不能以局部演练关闭完整任务。f4aea8a旧范围结果与新增完整门槛BLOCKED_ENV都保留原始证据。

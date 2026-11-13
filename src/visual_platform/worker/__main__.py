@@ -10,6 +10,7 @@ from visual_platform.providers.fake import DurableFakeProvider
 from visual_platform.storage.s3 import S3Storage
 from visual_platform.worker.runner import Worker
 from visual_platform.services.heartbeat import service_heartbeat
+from visual_platform.core.termination import run_service
 
 async def main():
     parser=argparse.ArgumentParser(); mode=parser.add_mutually_exclusive_group(required=True); mode.add_argument('--task',type=UUID); mode.add_argument('--consume',action='store_true'); parser.add_argument('--fake-mode',choices=['success','failed','uncertain','late'],default='success'); args=parser.parse_args()
@@ -31,4 +32,4 @@ async def main():
             print(json.dumps({'task_id':str(args.task),'result':result}))
     finally: await pool.close(); storage.close()
 
-if __name__=='__main__': asyncio.run(main())
+if __name__=='__main__': asyncio.run(run_service(main()))

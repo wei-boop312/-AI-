@@ -1,0 +1,10 @@
+{
+  "run_id": 43330109111,
+  "commit": "f53fc1f",
+  "overall": "failure",
+  "passed": "native90/browser9/Compose persistence/two runtime images/real container pipeline/P5-01",
+  "failed_gate": "all correctly blocked missing application Compose proof",
+  "artifact_id": 13995546054,
+  "archive_sha256": "1eae657eeaf74a1ec15afe2502506cd680a47cc4c63314fb2ec208fb246906ae",
+  "paid_calls": 0
+}

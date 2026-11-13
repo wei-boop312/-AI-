@@ -16,4 +16,8 @@ command=commands[args.component]
 if args.component in ('web','preview') and os.name=='nt':
     import shutil
     command[0]=shutil.which('pnpm') or 'pnpm'
+if os.name!='nt':
+    # Keep the owned PID as the actual service. CI can then await its complete
+    # graceful shutdown before running consumer-paused fault scenarios.
+    os.chdir(ROOT);os.execvpe(command[0],command,env)
 raise SystemExit(subprocess.call(command,cwd=ROOT,env=env))

@@ -337,3 +337,15 @@ CI43326433820的90原生/常规浏览器通过，受控丢失响应仍在按钮�
 CI43327560427（f4aea8a）52单元/90原生/全部4+5浏览器实际通过，但Compose保卷重建后S3对象读取失败。真实日志显示桶元数据可读时volume6尚未重新注册（LookupVolume deadline/volume not found），不能用ListBuckets就绪当已存对象可读。演练改为短超时/单次SDK尝试客户端，在90秒恢复窗口反复读取那个实际持久对象；任意成功读取字节不同立即失败，不延迟掩盖损坏；记录尝试/异常类型/耗时。失败也写当前commit/阶段/恢复统计并扩充脱敏日志。当前本机真实S3读取、错误字节立即失败、实际不可达端点有界失败均PASS，证据compose-object-readiness-20261113.json；保卷重建完整修正仍待Linux验证。原CI失败保留ci-43327560427。
 
 完整all门槛现要求真实application-compose.json证明4应用服务、回环/健康/资源/优雅退出/缓存持久性；缺少不会再次标完整OFFLINE_READY。完整P5-02还需runtime-metrics.json，当前缺失明确阻断。下一步按PLAN_GAPS补完整应用Compose、服务退出/缓存重建、全部运行指标、配置版本备份及后端质量门槛；并非整个项目完成。手写Docker候选的host network监听已显式改为API127.0.0.1/Nginx127.0.0.1，不把容器默认0.0.0.0带到宿主公网。静态检查和AST通过；周额度used54%、剩余46%，继续，不调用付费模型或部署。
+
+## 2026-11-13：完整8服务Compose、最小角色及退出/缓存重建候选
+
+新增compose.app.yaml的API/Publisher/Worker/Web，和基础4服务一起构成8服务profile。Linux host network访问回环依赖，API127.0.0.1:8000、私有Nginx127.0.0.1:8080，应用无额外publish端口；全部服务CPU/内存/PID/健康/停止宽限明确。app-up核对bootstrap来源、专用8080离线profile、非owner角色、镜像当前revision/UID/ID，固定owner私有本地tag；生成各组件最小env，不给DDL/admin/readonly身份。application.json持久登记，后续up/down保留身份和卷，不暗中替换镜像/凭据。Fake目录命名卷挂/app/work，JWT只读单文件；setup_local也显式保护0700目录/0600文件，避免依赖Linux umask；S3配置重载改核对不重复截断写入，私有文件拒绝symlink。
+
+服务SIGTERM异步清理，Worker取消订阅并拒收新投递、已有任务最多排空20秒、超时取消且等待租约清理，再关MQ/PG。进程内成功DB心跳文件加服务自身角色PG/MQ/S3检查用于健康，不传监控管理员角色。POSIX run_local采用exec使CI等待真正服务退出；Windows原生入口保留。4项退出协调单元加入后56单元全部通过；真实隔离PG/MQ/S3的完整90项通过（174.534秒）。官方Compose Schema固定commit3a4a6995e4a971f6173dff9130cb3e38e6738651验证当前两个YAML通过，报告含来源/输入SHA；AST及静态交付（31路径/188组件/268法律引用）PASS。Windows没有Docker，app-up/container演练正确exit3，未操作现有原生服务；尚不称8服务运行验收通过。
+
+container_smoke候选从手写docker run改成实际Compose：要求8服务健康/实际资源/最小角色/实际回环socket，HTTP登录上传至MQ生成/最终图与报告/保护RGB/唯一charge；Docker前端JS/CSS字节必须等于浏览器已测dist。实际stop检查4应用exit0且无OOM，删除重建4应用容器后Fake目录SHA/会话/最终图/余额不变，输出application-compose.json，最后仅清理owner匹配的临时卷。明确真实信号验证为完成任务后的空闲服务退出，在途排空另有单元/原生安全验证，不冒充真实付费中断证明。CI接新演练；COMPOSE/API_USAGE/ADR补使用和边界。
+
+f53fc1f的真实CI43330109111已通过52单元/39契约/90原生/4+5浏览器、Compose保卷、镜像、真实手写Docker容器完整任务和P5-01；最终all因缺application-compose.json正确BLOCKED_ENV，整体failure。S3对象恢复14.543秒/15次单次探针（14次ReadTimeout），说明有界实际对象等待覆盖此前卷注册窗口；完整Compose43.246秒。实际容器任务16.923秒，最终SHA/保护/报告/余额184/0及spent16通过。对应8份原始公开报告及来源/归档SHA保存ci-43330109111，整体失败原因如实保留，不把旧手写容器结果扩展到新Compose。
+
+原工程契约§8/P3-02复核发现客户端未显式保存/去重event id；已有服务端游标及同实例EventSource重连不能证明跨实例/reload持久性。PLAN_GAPS/TASK_STATUS纠正范围，all继续要求本次客户端原生浏览器证明，不能提前以新Compose候选关闭完整MVP。下一步继续该客户端缺口、全量运行指标、配置版本备份及后端质量门槛。周额度最近used55%、剩余45%，继续，不调用付费模型或部署。
