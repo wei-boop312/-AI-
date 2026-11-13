@@ -1,0 +1,31 @@
+{
+  "run_id": 43457466711,
+  "commit": "da372c9acf086baaad143bcc9b0b39f77344e9f8",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43457466711",
+  "artifact_id": 14054879325,
+  "archive_sha256": "28be10bbb45b3be38455d608491e53a6441e8901cbe93be48c33abf5cfefd271",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "bee0fe8a9da9798947721c17033f9a8d14c2e025c48c2c53aefef4207debedca"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "cc18530c45a040dde3f864b8ae6ce0fe7a39b68879e9a338a6602ad55440d93a"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "26b7550af099f63a56937f375e910ae5542694abbc342f0b05ecfcf1d260cea1"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "950e4d5dc0aefda53c794d00cd8d0aefcb4c37e20375f47a9701c599bab0deac"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "faf753c1bcffd12a97f2cfa10f19682f1a1e44d9f9020aa3715dfdb145b552fc"
+    }
+  },
+  "scope": "Original full CI: frozen appearance reference config reaches the single protocol MockTransport generation request after profile edit; 109 unit/108 native/41 offline contracts, production browser, Compose, restore and P5-02. No paid provider or deployment. Later 0028 review and UI tags/0029 archive not covered."
+}

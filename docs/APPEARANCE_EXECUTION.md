@@ -11,3 +11,10 @@ Worker只读取受信任务input_snapshot._execution.appearance，传给Protocol
 官方协议复核只读取 https://api.bfl.ai/openapi.json （2026-11-13 UTC，SHA256 ea458c661ef8b0e03d72ee6b29267451f5a04ae65f35e55ea8a87e53645ef670），Flux3ImageInputs.prompt没有maxLength；32768为本项目界限。保持grounding=false，不引入外部检索。没有付费模型调用或部署。
 
 前端补颜色/材质tags输入，保持说明字段，保存确切数组；每组20项，每项255码点，在表单中显式报错。独立端口的生产前端HTTP mock验证保存/刷新/报价ID绑定，21项/256字无POST，20项/255字通过及390px最终布局。下拉离场动画按最终稳定宽度检查，不以瞬间动画定位误判永久溢出。正式真实服务浏览器用例增加资料保存数组及刷新后任务ID绑定，待CI。
+
+
+归档API候选对应主计划§1.2的外观CRUD：GET单个资料可追溯已归档记录；DELETE要求If-Match，未归档时revision冲突409，无效revision422；已归档重复请求204且不再更新版本。默认列表过滤归档，include_archived=true可读历史，同一过滤条件下游标分页。PATCH仍不能复活归档资料。均有租户和产品边界。
+
+0029增加两个BEFORE INSERT触发器，在quote/task写入时使用外观行FOR SHARE锁，与归档UPDATE互斥；不依赖API读到的旧archived_at。app_executor仅增加archived_at列UPDATE权限以满足PG锁权限，NOLOGIN/tenant RLS保持；原函数OID/ACL与幂等重放路径保留，不引入可绕过的旧辅助函数。事务先锁产品再锁资料；归档不锁钱包，不与任务财务路径形成反向锁序。
+
+7项新PG候选覆盖详情/版本/幂等、过滤分页、跨产品/跨租户、旧报价消费及新报价拒绝无冻结、旧任务相同键重放；两个并发用例以受控归档事务先锁行，通过pg_blocking_pids证明API新报价/新任务实际等待，然后提交归档并验证原子拒绝、无task/freeze。该受控事务是锁行为验证，不冒充真实运营操作。已有协议流水线候选增加任务创建后归档再完成原快照交付。尚待CI；前端管理入口待补。

@@ -253,6 +253,11 @@ class ProtocolPipelineTests(ProtocolPipelineFixture):
             self.assertEqual(changed.status_code, 200, changed.text)
 
         task = self.submit(edit_after_quote, {"appearance_profile_id": identity})
+        archived = self.client.delete(
+            endpoint + "/" + identity,
+            headers={**self.write_headers(), "if-match": "2"},
+        )
+        self.assertEqual(archived.status_code, 204, archived.text)
         self.assertEqual(self.run_protocol(task), "succeeded")
         frozen = json.loads(self.sent_prompt.split("instructions):\n", 1)[1])
         self.assertEqual(frozen, original)

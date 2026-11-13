@@ -167,17 +167,19 @@ async def appearances(
     user=Depends(current_user),
     limit: int = Query(20, ge=1, le=100),
     cursor: str | None = None,
+    include_archived: bool = False,
 ):
     pos = cursor_decode(cursor) if cursor else None
     async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
         if not await c.fetchval("SELECT id FROM app.products WHERE id=$1", product_id):
             raise HTTPException(404, "not_found")
         rows = await c.fetch(
-            "SELECT id,name,config,revision,created_at FROM app.appearance_profiles WHERE product_id=$1 AND ($2::timestamptz IS NULL OR (created_at,id)<($2,$3::uuid)) ORDER BY created_at DESC,id DESC LIMIT $4",
+            "SELECT id,name,config,revision,archived_at,created_at FROM app.appearance_profiles WHERE product_id=$1 AND ($5 OR archived_at IS NULL) AND ($2::timestamptz IS NULL OR (created_at,id)<($2,$3::uuid)) ORDER BY created_at DESC,id DESC LIMIT $4",
             product_id,
             pos[0] if pos else None,
             pos[1] if pos else None,
             limit + 1,
+            include_archived,
         )
     return {
         "items": [{**dict(x), "config": json.loads(x["config"])} for x in rows[:limit]],
@@ -219,3 +221,52 @@ async def appearance_update(
             body.config.model_dump_json(),
         )
     return {**dict(row), "config": json.loads(row["config"])}
+
+
+@router.get("/{product_id}/appearances/{appearance_id}")
+async def appearance_detail(
+    product_id: UUID, appearance_id: UUID, request: Request, user=Depends(current_user)
+):
+    async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
+        row = await c.fetchrow(
+            "SELECT id,name,config,revision,archived_at,created_at,updated_at FROM app.appearance_profiles WHERE id=$1 AND product_id=$2",
+            appearance_id,
+            product_id,
+        )
+    if not row:
+        raise HTTPException(404, "not_found")
+    return {**dict(row), "config": json.loads(row["config"])}
+
+
+@router.delete("/{product_id}/appearances/{appearance_id}", status_code=204)
+async def appearance_archive(
+    product_id: UUID,
+    appearance_id: UUID,
+    request: Request,
+    if_match: str = Header(),
+    user=Depends(current_user),
+):
+    try:
+        revision = int(if_match.strip('"'))
+    except ValueError:
+        raise HTTPException(422, "invalid_revision")
+    async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
+        if not await c.fetchval(
+            "SELECT id FROM app.products WHERE id=$1 AND archived_at IS NULL FOR SHARE", product_id
+        ):
+            raise HTTPException(404, "not_found")
+        old = await c.fetchrow(
+            "SELECT revision,archived_at FROM app.appearance_profiles WHERE id=$1 AND product_id=$2 FOR UPDATE",
+            appearance_id,
+            product_id,
+        )
+        if not old:
+            raise HTTPException(404, "not_found")
+        if old["archived_at"] is not None:
+            return
+        if old["revision"] != revision:
+            raise HTTPException(409, "revision_conflict")
+        await c.execute(
+            "UPDATE app.appearance_profiles SET archived_at=now(),revision=revision+1,updated_at=now() WHERE id=$1",
+            appearance_id,
+        )
