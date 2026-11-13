@@ -1,0 +1,23 @@
+{
+  "run_id": 43481269719,
+  "commit": "aa0fad8fc83dbb5970d4d39dea62dc66a3bc473f",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43481269719",
+  "artifact_id": 14066185603,
+  "archive_sha256": "9aada199525441ebb227ffee74ec330980afe723f9df9e552ee4a3ad494fe16d",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "52c93743186726cd7f0e109456a88a9bf3bb961381134390e7ca1498595e9fac"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "3e2267fb665ceb5c7ab15e08a4810a332f52ba27dfbbbf5c5f9e05260d72ebd4"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "5dcf8aa87083cf8a5a801a21ffab24586de950cf6fa869da1f0ef4c04c63e7aa"
+    }
+  },
+  "scope": "0031 private final export candidate; exact native result with preexisting dedupe expectation failure"
+}

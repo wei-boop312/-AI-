@@ -55,7 +55,7 @@ def export_detection_review(dsn: str, storage, task: UUID, output: Path, private
         record = required_row(
             connection.execute("SELECT ops.detection_review_artifact(%s)", (task,))
         )[0]
-    if record["bucket"] != storage.bucket or not record["storage_version_id"]:
+    if record["bucket"] != storage.bucket:
         raise ValueError("review_storage_mismatch")
     data, _, version = storage.get(
         record["object_key"], version=record["storage_version_id"], limit=80 * 1024 * 1024
