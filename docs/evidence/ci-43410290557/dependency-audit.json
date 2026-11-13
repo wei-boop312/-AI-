@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-11-13T10:37:33.002590+00:00",
+  "python_exit_code": 0,
+  "npm_exit_code": 0,
+  "python_dependencies": 86,
+  "python_known_vulnerabilities": 0,
+  "skipped_python_packages": [],
+  "npm_vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0
+  },
+  "lock_sha256": {
+    "uv.lock": "09245757e97bb3a4e180608eeb3bd70161cc7678752b78b33bca87b7509d5801",
+    "apps/web/pnpm-lock.yaml": "3fc7373da3d85e906f553c3867307ae04f81aa6c9a39d289b3950591268f0c3c"
+  },
+  "scope": "installed Python environment and locked npm dependencies; excludes OS/image advisories; not proof of absence of unknown vulnerabilities",
+  "result": "PASS"
+}

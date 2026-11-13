@@ -51,7 +51,7 @@ try:
         c.execute('SET TRANSACTION READ ONLY')
         row=c.execute("SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,pg_has_role(current_user,'ops_monitor','MEMBER') OR pg_has_role(current_user,'ops_admin','MEMBER'),EXISTS(SELECT 1 FROM pg_class t JOIN pg_namespace n ON n.oid=t.relnamespace WHERE n.nspname IN ('app','auth','ops') AND t.relowner=(SELECT oid FROM pg_roles WHERE rolname=current_user)) FROM pg_roles WHERE rolname=current_user").fetchone()
         if not row or any(row[:4]) or not row[4] or row[5]:raise ValueError('monitor runtime role must be unprivileged and non-owner')
-        snapshot=c.execute('SELECT ops.monitor_snapshot()').fetchone()[0]
+        snapshot=c.execute("SELECT ops.monitor_snapshot() || jsonb_build_object('business_metrics',ops.business_metrics_snapshot())").fetchone()[0]
     deps=asyncio.run(dependencies()) if args.probe_dependencies else None
     findings=alerts(snapshot,thresholds,deps)
     if args.prometheus:print(prometheus(snapshot,thresholds,deps),end='')

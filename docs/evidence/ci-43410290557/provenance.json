@@ -1,0 +1,58 @@
+{
+  "run_id": 43410290557,
+  "commit": "7264304a80eea872620b89794b6c0e4ea5edf86b",
+  "conclusion": "success",
+  "source": "Authenticated GitHub Actions artifact; original report bytes retained",
+  "scope": "66 unit,39 mock,90 native,4+6 browsers,base/full Compose and images at this commit; no version 2 PG/S3 cold restore, full runtime metrics, live provider or deployment proof",
+  "files": [
+    {
+      "path": "application-compose.json",
+      "sha256": "15bd6294afbd0eca3a60ca03798e6a8c37d1ca60c196249d642f763f0621723d"
+    },
+    {
+      "path": "compose-smoke.json",
+      "sha256": "65b80e213ffe8ac1198cd42caa17851b5c14c1544927bb9e5ebaee6a99b374ff"
+    },
+    {
+      "path": "container-runtime.json",
+      "sha256": "9cdc4bbde4d73e3ca4a3d0ec54971564f5c523eec668bc527b89b4a9011ab5fc"
+    },
+    {
+      "path": "delivery-gate.json",
+      "sha256": "cf90276842b16142f0b4af6f80c0c4927c00a4aaa7b940f29dcdbe8b77cfa49a"
+    },
+    {
+      "path": "dependency-audit.json",
+      "sha256": "be7af18161b9d699f022b41a5d369d816412c976ee60e7c5a2e68fec3064e178"
+    },
+    {
+      "path": "frontend-sse-cursor.json",
+      "sha256": "e4067ad8a29fa8d7fe77a57565eb26c2bb4c4121a6db6b5defe427ac7ba75361"
+    },
+    {
+      "path": "gitleaks.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "last-api-ready.json",
+      "sha256": "e1bde88481e67933a891ba1ac1254efcd17da786bd388d84662bdde218e977c9"
+    },
+    {
+      "path": "native-result.json",
+      "sha256": "236262dd526c82325c2c874f4caff373a534975c0bdbcd1811e8f5c0c9bfd28d"
+    },
+    {
+      "path": "npm-audit.json",
+      "sha256": "650c8e1d5c337aa17ff44d51ebe7f297b3fdd4b564641c7e59df2f69fe3b86c1"
+    },
+    {
+      "path": "offline-gate.json",
+      "sha256": "574e3065a715055e47072af65450668dbcc4c9ab3dca583f097f48a63c43e265"
+    },
+    {
+      "path": "python-audit.json",
+      "sha256": "4c1d65ac2e8bb5620fc392563b45ace17088803be234e2556bb6a39ca9d9eb59"
+    }
+  ],
+  "full_raw_artifact": "Retained privately in .local/ci-review/43410290557.zip; image identity also bound by runtime/native reports."
+}

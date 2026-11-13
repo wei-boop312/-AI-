@@ -24,3 +24,14 @@ class MonitoringTests(unittest.TestCase):
     def test_only_fixed_low_cardinality_labels_are_exported(self):
         value=self.healthy();value['tasks']['user-secret-label']=2;value['heartbeat_age_seconds']['private-instance-id']=1
         output=prometheus(value,dependencies={'mq':'ready','storage':'ready'});self.assertNotIn('secret',output);self.assertNotIn('private',output);self.assertIn('visual_dependency_up{component="mq"} 1',output)
+    def test_business_aggregates_preserve_fixed_labels_and_do_not_invent_money(self):
+        value=self.healthy();value['business_metrics']={'phase_duration':[{'phase':'protecting','samples':2,'total_seconds':4,'p95_seconds':2},{'phase':'private-user-label','samples':1}],
+          'provider_activity':[{'provider':'fake','step':'generate','submission_intents':3,'receipt_count':2,'uncertain_count':1},{'provider':'secret-provider','step':'generate','submission_intents':99}],
+          'provider_cost':[{'provider':'fake','cost_status':'unknown','currency':None,'amount':None,'attempts':1}],
+          'compliance':{'samples':4,'manual_review':3,'non_compliant':0,'manual_review_rate':.75}}
+        output=prometheus(value)
+        self.assertIn('visual_task_phase_24h_samples{phase="protecting"} 2',output)
+        self.assertIn('visual_provider_24h_submission_intents{provider="fake",step="generate"} 3',output)
+        self.assertIn('visual_provider_unknown_cost_attempts_24h{provider="fake"} 1',output)
+        self.assertIn('visual_compliance_24h_manual_review_rate 0.75',output)
+        for forbidden in ('private-user','secret-provider','None','USD','amount'):self.assertNotIn(forbidden,output)

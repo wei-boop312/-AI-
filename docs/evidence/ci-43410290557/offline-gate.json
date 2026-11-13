@@ -1,0 +1,57 @@
+{
+  "observed_at": "2026-11-13T10:44:50.962419+00:00",
+  "requested_gate": "all",
+  "profile": "offline",
+  "paid_calls": 0,
+  "deployed": false,
+  "not_verified": {
+    "P4-03": "WAITING_EXTERNAL: real provider call and budget authorization are absent",
+    "P5-02": "separate restore/restart drill; this gate does not rerun operations",
+    "P5-03": "WAITING_EXTERNAL: target environment, policy evidence and release decision"
+  },
+  "scope": "current native test suites + production browser + Compose migrations/persistence + locked build evidence",
+  "source_provenance": {
+    "result": "PASS",
+    "scope": "P0-01 specification provenance; authorized remote only, no deployment",
+    "specification_files": 12,
+    "paid_calls": 0
+  },
+  "static": "PASS",
+  "legal_text_references": 264,
+  "dependency_components": 186,
+  "openapi_paths": 31,
+  "native_ci": "PASS",
+  "commit": "7264304a80eea872620b89794b6c0e4ea5edf86b",
+  "docker_engine": "28.0.4",
+  "runtime_image_ids": [
+    "sha256:69389468052c3275dfd521f1058ea69013bf96b43a4fd8dbc025fe70a38d76c2",
+    "sha256:ff994f29164035334733ecc46738323baa2842e3ae55376aaba6f9aba4e8cded"
+  ],
+  "application_compose": "PASS",
+  "frontend_sse_cursor": "PASS",
+  "verified_tasks": [
+    "P0-01",
+    "P0-02",
+    "P0-03",
+    "P1-01",
+    "P1-02",
+    "P1-03",
+    "P1-04",
+    "P1-05",
+    "P2-01",
+    "P2-02",
+    "P2-03",
+    "P2-04",
+    "P2-05",
+    "P2-06",
+    "P2-07",
+    "P3-01",
+    "P3-02",
+    "P3-03",
+    "P3-04",
+    "P4-01 (mock HTTP)",
+    "P4-02 (mock SDK HTTP)",
+    "P5-01"
+  ],
+  "result": "OFFLINE_READY"
+}

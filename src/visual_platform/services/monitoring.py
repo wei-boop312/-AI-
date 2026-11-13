@@ -39,6 +39,19 @@ def prometheus(snapshot,thresholds=Thresholds(),dependencies=None):
         gauge('heartbeat_age_seconds',age,'{component="'+component+'"}')
     gauge('task_duration_24h_samples',snapshot.get('task_duration_24h',{}).get('samples',0))
     gauge('task_duration_24h_p95_seconds',snapshot.get('task_duration_24h',{}).get('p95_seconds'))
+    business=snapshot.get('business_metrics',{})
+    for phase in ('submitting','polling','archiving','protecting','detecting','validating_rules','finalizing'):
+        row=next((row for row in business.get('phase_duration',[]) if row.get('phase')==phase),None)
+        if row:
+            for field in ('samples','total_seconds','p95_seconds'):gauge('task_phase_24h_'+field,row.get(field),'{phase="'+phase+'"}')
+    for provider in ('fake','bfl_mock','gemini_mock','bfl','gemini','other'):
+        for step in ('generate','detect'):
+            row=next((row for row in business.get('provider_activity',[]) if row.get('provider')==provider and row.get('step')==step),None)
+            if row:
+                for field in ('submission_intents','receipt_count','uncertain_count'):gauge('provider_24h_'+field,row.get(field),'{provider="'+provider+'",step="'+step+'"}')
+        unknown=sum(row['attempts'] for row in business.get('provider_cost',[]) if row.get('provider')==provider and row.get('cost_status')=='unknown')
+        if unknown:gauge('provider_unknown_cost_attempts_24h',unknown,'{provider="'+provider+'"}')
+    for field in ('samples','manual_review','non_compliant','manual_review_rate'):gauge('compliance_24h_'+field,business.get('compliance',{}).get(field))
     for component in ('mq','storage'):
         if dependencies is not None:gauge('dependency_up',int(dependencies.get(component)=='ready'),'{component="'+component+'"}')
     return '\n'.join(values)+'\n'

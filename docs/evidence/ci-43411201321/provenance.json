@@ -1,0 +1,25 @@
+{
+  "run_id": 43411201321,
+  "commit": "5e63655c543707620f1b0b95cd5fb94df1ebe503",
+  "conclusion": "success",
+  "source": "Authenticated GitHub Actions artifact; report bytes retained",
+  "scope": "Version 2 cold independent PG/S3 restore plus full Compose at this commit. Not runtime API/archive metrics, backend format/type or paid/live provider verification.",
+  "files": [
+    {
+      "path": "native-restore-v2.json",
+      "sha256": "34170cc790981eac98147bfeb0e11bd86b1e2f08d2d67f58c04f85ddb2d015b8"
+    },
+    {
+      "path": "native-result.json",
+      "sha256": "acd1eec95a7574a4055670a3e91d31315401260b03a91131ee364d3a8d6f525e"
+    },
+    {
+      "path": "offline-gate.json",
+      "sha256": "7658e7f8655528f41ae5cad07acd4cd4404542a332d715ccb3bf45167f22c87f"
+    },
+    {
+      "path": "application-compose.json",
+      "sha256": "494a138dc4a0cdac856343f41a5108e309f675c4d63e0c526217fbdebe609a85"
+    }
+  ]
+}
