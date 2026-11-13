@@ -121,6 +121,19 @@ class WorkerDbTests(TaskApiFixture):
                 "SELECT app.apply_receipt(%s,%s,%s,%s)",
                 (self.task, "worker-1", fence, detect_receipt),
             )
+        context = self.worker("SELECT app.worker_context(%s,%s,%s)", (self.task, "worker-1", fence))
+        results = [
+            {
+                "platform": r["platform"],
+                "marketplace": r.get("marketplace", ""),
+                "category": r.get("category", ""),
+                "image_type": r.get("image_type", ""),
+                "rule_version": r.get("version", "unverified"),
+                "evidence_status": r.get("evidence_status", "unverified"),
+                "status": "manual_review",
+            }
+            for r in context["input_snapshot"]["_execution"]["rules"]
+        ]
         self.worker(
             "SELECT app.record_report(%s,%s,%s,%s,%s,%s,%s,%s,false,%s,%s,%s,NULL)",
             (
@@ -130,7 +143,7 @@ class WorkerDbTests(TaskApiFixture):
                 uuid4(),
                 "c" * 64,
                 Jsonb({"analysis_complete": False}),
-                Jsonb([{"platform": "amazon", "status": "manual_review"}]),
+                Jsonb(results),
                 "manual_review",
                 "d" * 64,
                 "test",

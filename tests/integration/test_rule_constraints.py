@@ -186,6 +186,8 @@ class RuleConstraintTests(ProviderBudgetFixture):
             {
                 "platform": r["platform"],
                 "marketplace": r["marketplace"],
+                "category": r["category"],
+                "evidence_status": r["evidence_status"],
                 "image_type": r["image_type"],
                 "rule_version": r["version"],
                 "status": "compliant",
@@ -268,6 +270,8 @@ class RuleConstraintTests(ProviderBudgetFixture):
             {
                 "platform": rule["platform"],
                 "marketplace": rule["marketplace"],
+                "category": rule["category"],
+                "evidence_status": rule["evidence_status"],
                 "image_type": rule["image_type"],
                 "rule_version": rule["version"],
                 "status": "compliant",
@@ -313,4 +317,149 @@ class RuleConstraintTests(ProviderBudgetFixture):
             storage.close()
         self.assertEqual(result["auto_overall"], "non_compliant")
         self.assertEqual(self.client.get("/api/v1/credits/balance").json(), before)
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 1))
+
+    def test_scope_guard_covers_category_identity_and_overall_for_all_outcomes(self):
+        rule = {
+            "platform": "amazon",
+            "marketplace": "US",
+            "category": "synthetic-a",
+            "image_type": "MAIN",
+            "version": "fixture-v1",
+            "evidence_status": "unverified",
+        }
+        result = {
+            "platform": "amazon",
+            "marketplace": "US",
+            "category": "synthetic-a",
+            "image_type": "MAIN",
+            "rule_version": "fixture-v1",
+            "evidence_status": "unverified",
+            "status": "manual_review",
+        }
+
+        def guard(results, overall="manual_review"):
+            with psycopg.connect(self.owner) as c:
+                return c.execute(
+                    "SELECT app.rule_results_match_scope(%s,%s,%s)",
+                    (Jsonb([rule]), Jsonb(results), overall),
+                ).fetchone()[0]
+
+        for outcome in ("compliant", "non_compliant", "manual_review"):
+            self.assertTrue(guard([{**result, "status": outcome}], outcome))
+        for field in (
+            "platform",
+            "marketplace",
+            "category",
+            "image_type",
+            "rule_version",
+            "evidence_status",
+        ):
+            self.assertFalse(guard([{**result, field: "wrong-scope"}]))
+            altered = dict(result)
+            altered.pop(field)
+            self.assertFalse(guard([altered]))
+            self.assertFalse(guard([{**result, field: True}]))
+        self.assertFalse(guard([]))
+        self.assertFalse(guard([result, result]))
+        self.assertFalse(guard([result], "compliant"))
+
+    def test_worker_manual_report_scope_forgery_rejected_then_original_receipt_resumes(self):
+        import json
+
+        import asyncpg
+
+        class WrongScope(Worker):
+            async def db(inner, query, *args):
+                if "app.record_report(" in query:
+                    values = list(args)
+                    results = json.loads(values[6])
+                    results[0]["category"] = "cross-category-forgery"
+                    values[6] = json.dumps(results)
+                    return await super().db(query, *values)
+                return await super().db(query, *args)
+
+        self.publish(self.document({"complete_rule_set": False}))
+        task = self.submit(
+            self.bind,
+            business_updates={
+                "targets": [
+                    {
+                        "platform": "amazon",
+                        "marketplace": "US",
+                        "category": self.category,
+                        "image_type": "MAIN",
+                    }
+                ]
+            },
+        )
+        with self.assertRaisesRegex(asyncpg.RaiseError, "report_rule_scope_mismatch"):
+            self.run_protocol(task, worker_class=WrongScope)
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.compliance_checks WHERE task_id=%s", (task,)
+                ).fetchone()[0],
+                0,
+            )
+        self.assertEqual(self.run_protocol(task), "succeeded")
+        report = self.client.get(f"/api/v1/tasks/{task}/compliance").json()
+        self.assertEqual(report["auto_overall"], "manual_review")
+        self.assertEqual(report["per_platform_results"][0]["category"], self.category)
+        self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 1))
+
+    def test_manual_rule_recheck_cannot_substitute_category_and_preserves_charge(self):
+        task = self.source_task()
+        source = self.client.get(f"/api/v1/tasks/{task}/compliance").json()
+        identity = self.publish(self.document({"complete_rule_set": False}))
+        with psycopg.connect(self.operator_dsn) as c:
+            ctx = c.execute(
+                "SELECT ops.recheck_context(%s,%s,%s)", (task, source["id"], [UUID(identity)])
+            ).fetchone()[0]
+        rule = ctx["rules"][0]
+        forged = [
+            {
+                "platform": rule["platform"],
+                "marketplace": rule["marketplace"],
+                "category": "wrong-category",
+                "image_type": rule["image_type"],
+                "rule_version": rule["version"],
+                "evidence_status": rule["evidence_status"],
+                "status": "manual_review",
+            }
+        ]
+        balance = self.client.get("/api/v1/credits/balance").json()
+        with (
+            psycopg.connect(self.operator_dsn) as c,
+            self.assertRaisesRegex(psycopg.errors.RaiseException, "report_rule_scope_mismatch"),
+        ):
+            c.execute(
+                "SELECT ops.record_recheck(%s,%s,%s,%s,%s,%s,'manual_review',%s,%s,%s,NULL,'scope rejection')",
+                (
+                    task,
+                    source["id"],
+                    [UUID(identity)],
+                    uuid4(),
+                    uuid4(),
+                    Jsonb(forged),
+                    "a" * 64,
+                    self.settings.s3_bucket,
+                    "private/synthetic-scope-rejection",
+                ),
+            )
+        storage = S3Storage(self.settings)
+        try:
+            result = recheck_report(
+                self.operator_dsn,
+                storage,
+                UUID(task),
+                UUID(source["id"]),
+                [UUID(identity)],
+                uuid4(),
+                "same scope no model resubmit",
+            )
+        finally:
+            storage.close()
+        self.assertEqual(result["auto_overall"], "manual_review")
+        self.assertEqual(self.client.get("/api/v1/credits/balance").json(), balance)
         self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (1, 1))
