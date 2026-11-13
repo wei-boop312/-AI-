@@ -1,0 +1,14 @@
+✔ deduplicates event IDs without losing PostgreSQL bigint precision (0.8579ms)
+✔ advances replay cursor for stale revisions without requesting another snapshot (0.1791ms)
+✔ restores across instances and isolates both user and task namespaces (0.1815ms)
+✔ rejects malformed IDs and cross-task or invalid payloads without poisoning the cursor (0.1829ms)
+✔ retention reset clears persisted state and accepts a lower replacement event ID (0.135ms)
+✔ unavailable storage preserves in-memory deduplication (0.1194ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 132.5723

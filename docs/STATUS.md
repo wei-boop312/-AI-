@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-13 客户端 SSE 增量：EventCursor 用 sessionStorage 按用户/任务保存非敏感游标，PG bigint ID 全程使用字符串与 BigInt；恢复新 EventSource 实例时传入查询游标。拒绝重复/倒序 ID、非法载荷和跨任务事件；收到旧 revision 仍推进有效游标但不重复请求快照。服务端 retention reset 清空客户端持久游标。请求返回继续检查任务 revision，旧用户会话的异步回调不能更新新会话界面。浏览器存储受限时退回内存去重。6 项 Node 行为测试覆盖精度、去重、版本保护、跨实例/用户/任务隔离、reset 和存储异常，已接入 CI；TypeScript 与生产构建通过，记录见 evidence/sse-client-node.log。该记录只证明模块行为，完整浏览器断线/刷新恢复证明仍待补齐，未生成 frontend-sse-cursor.json 验收凭证。
+
 2026-11-13 最新增量：CI 43338831138（d1c66ad）原生集成与普通/受控浏览器通过，基础 Compose 启动失败，尚未进入完整应用 Compose 验收。下载的原始故障证据见 evidence/ci-43338831138；明确原因是固定 SeaweedFS 镜像没有 HEALTHCHECK，而 compose.yaml 只配置了检查周期。已添加显式 curl HTTP 存活检查；带凭据桶访问仍由 ComposeRuntime 单独验证，存活检查不替代对象持久化测试。修复需新 CI 实跑。
 
 SSE 增量：服务端允许新 EventSource 实例用非敏感 cursor 查询参数恢复，自动重连 Last-Event-ID 头优先于初始 URL 游标，保留 bigint 范围校验和租户任务过滤；stream.reset 清空浏览器内部事件 ID。扩充真实 PG/S3 集成用例覆盖查询游标、头优先和非法值，更新 OpenAPI。56 单元通过，静态交付检查通过；本次本机原生服务均未监听，集成检查已中止，不能计为通过。客户端持久化/去重与浏览器证明仍待实现，完整门槛保持未通过。
