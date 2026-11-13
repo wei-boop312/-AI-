@@ -25,6 +25,7 @@ from visual_platform.core.identity import hash_password
 from visual_platform.core.settings import Settings
 from visual_platform.db.pool import open_pool
 from visual_platform.db.result import required_row
+from visual_platform.domain.provider_pricing import SupplierPriceVersion, canonical_price
 from visual_platform.domain.schemas import QuoteRequest, canonical_hash
 from visual_platform.providers.authorization import SmokeAuthorization, canonical_authorization
 from visual_platform.providers.fake import DurableFakeProvider
@@ -39,6 +40,7 @@ from visual_platform.services.provider_budget import (
     provider_quote_review,
     register_provider_budget,
 )
+from visual_platform.services.provider_pricing import publish_supplier_price, supplier_price_context
 from visual_platform.services.quotes import hash_data
 from visual_platform.services.rule_operations import publish_rule
 from visual_platform.storage.s3 import S3Storage, StorageError
@@ -162,6 +164,39 @@ if args.command == "prepare":
         b"Offline synthetic rule archive for backup restoration; not current platform policy."
     )
     try:
+        now = datetime.now(timezone.utc)
+        price_evidence = b"Synthetic supplier price backup fixture; no actual monetary rates."
+        price = SupplierPriceVersion.model_validate_json(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "provider": "bfl",
+                    "model": "flux-3-image",
+                    "endpoint_origin": "https://api.bfl.ai",
+                    "merchant_fingerprint": "a" * 64,
+                    "billing_group": "offline-restore-fixture",
+                    "version": "restore-" + uuid4().hex,
+                    "currency": "BFL_CREDIT",
+                    "valid_from": (now - timedelta(minutes=1)).isoformat(),
+                    "valid_until": (now + timedelta(hours=1)).isoformat(),
+                    "evidence_kind": "offline_fixture",
+                    "evidence_sha256": hashlib.sha256(price_evidence).hexdigest(),
+                    "complete_meter_coverage": True,
+                    "rates": [{"measure": "bfl_credit", "amount": "1", "per": 1}],
+                }
+            )
+        )
+        state["supplier_price_id"] = publish_supplier_price(
+            profile["ADMIN_DATABASE_URL"],
+            storage,
+            price,
+            price_evidence,
+            uuid4(),
+            "synthetic price archive for independent restore",
+            evidence_reviewed=True,
+        )
+        state["supplier_price_sha256"] = hashlib.sha256(canonical_price(price)).hexdigest()
+        state["supplier_price_evidence_sha256"] = hashlib.sha256(price_evidence).hexdigest()
         rule = publish_rule(
             profile["ADMIN_DATABASE_URL"],
             storage,
@@ -502,6 +537,26 @@ elif args.command == "verify":
             client.get("/api/v1/credits/balance").json() == state["balance"],
             "restored frozen wallet mismatch",
         )
+        restored_price = supplier_price_context(
+            profile["ADMIN_DATABASE_URL"], UUID(state["supplier_price_id"])
+        )
+        require(
+            restored_price["document_sha256"] == state["supplier_price_sha256"],
+            "supplier price version changed on restore",
+        )
+        pointer = admin(
+            "SELECT jsonb_build_object('key',evidence_object_key,'version',evidence_storage_version_id) FROM ops.supplier_price_versions WHERE id=%s",
+            (state["supplier_price_id"],),
+        )
+        private_storage = S3Storage(settings)
+        try:
+            archive, _, _ = private_storage.get(pointer["key"], version=pointer["version"])
+            require(
+                hashlib.sha256(archive).hexdigest() == state["supplier_price_evidence_sha256"],
+                "supplier price archive not restored",
+            )
+        finally:
+            private_storage.close()
         report = client.get("/api/v1/tasks/" + state["tasks"]["completed"] + "/compliance").json()
         require(
             report["report_sha256"] == state["report_sha256"]
@@ -632,6 +687,7 @@ elif args.command == "verify":
         "post_snapshot_marker_absent": True,
         "completed_report_review_and_download_hash_preserved": True,
         "pixel_protection_preserved": True,
+        "supplier_price_archive_preserved": True,
         "provider_budget_revoked_before_new_intent": True,
         "four_fixture_tasks_quarantined": True,
         "detection_delivery_requires_new_review_after_restore": True,

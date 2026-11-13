@@ -1,0 +1,174 @@
+import copy
+import hashlib
+import json
+import unittest
+from datetime import datetime, timedelta, timezone
+
+from pydantic import ValidationError
+
+from visual_platform.domain.provider_pricing import (
+    SupplierPriceVersion,
+    canonical_price,
+    compare_supplier_ceiling,
+    estimate_supplier_cost,
+)
+
+
+class SupplierPricingTests(unittest.TestCase):
+    def setUp(self):
+        self.now = datetime.now(timezone.utc)
+        self.document = {
+            "schema_version": 1,
+            "provider": "gemini",
+            "model": "gemini-3.8-flash",
+            "endpoint_origin": "https://hubway.cc",
+            "merchant_fingerprint": "a" * 64,
+            "billing_group": "synthetic-only",
+            "version": "synthetic-1",
+            "currency": "USD",
+            "valid_from": (self.now - timedelta(minutes=1)).isoformat(),
+            "valid_until": (self.now + timedelta(hours=1)).isoformat(),
+            "evidence_kind": "offline_fixture",
+            "evidence_sha256": hashlib.sha256(b"synthetic evidence; not actual prices").hexdigest(),
+            "complete_meter_coverage": True,
+            "rates": [
+                {"measure": "input_tokens", "amount": "0.12345678", "per": 1000000},
+                {"measure": "output_tokens", "amount": "0.98765432", "per": 1000000},
+            ],
+        }
+
+    def price(self, **changes):
+        return SupplierPriceVersion.model_validate_json(json.dumps({**self.document, **changes}))
+
+    def estimate(self, quantities, price=None, **changes):
+        price = price or self.price()
+        scope = {
+            key: getattr(price, key)
+            for key in [
+                "provider",
+                "model",
+                "endpoint_origin",
+                "merchant_fingerprint",
+                "billing_group",
+            ]
+        }
+        return estimate_supplier_cost(
+            price, quantities, observed_at=self.now, **{**scope, **changes}
+        )
+
+    def test_exact_estimate_ceil_is_never_an_invoice_or_internal_credits(self):
+        result = self.estimate({"input_tokens": 1, "output_tokens": 1})
+        self.assertEqual(
+            (result["cost_status"], result["amount"], result["currency"]),
+            ("estimated", "0.00000112", "USD"),
+        )
+        self.assertFalse(result["actual_spending_verified"])
+        self.assertEqual(result["evidence_kind"], "offline_fixture")
+        self.assertEqual(compare_supplier_ceiling(result, "0.00000111", "USD"), "over_ceiling")
+        self.assertEqual(compare_supplier_ceiling(result, "0.00000112", "USD"), "within_ceiling")
+
+    def test_missing_or_extra_meter_never_becomes_zero_or_ignored(self):
+        for quantities in [
+            {"input_tokens": 1},
+            {"input_tokens": 1, "output_tokens": 1, "thinking_tokens": 2},
+            {},
+        ]:
+            result = self.estimate(quantities)
+            self.assertEqual(result["reason"], "incomplete_or_unpriced_usage")
+            self.assertIsNone(result["amount"])
+        zero = self.estimate({"input_tokens": 0, "output_tokens": 0})
+        self.assertEqual(zero["amount"], "0.00000000")
+        self.assertFalse(zero["actual_spending_verified"])
+
+    def test_boolean_float_negative_and_string_token_quantities_are_unknown(self):
+        for bad in [True, False, 1.0, -1, "2", None, 10**13]:
+            with self.subTest(bad=bad):
+                self.assertEqual(
+                    self.estimate({"input_tokens": bad, "output_tokens": 0})["reason"],
+                    "invalid_usage",
+                )
+
+    def test_identity_includes_gateway_merchant_group_model_and_provider(self):
+        for changes in [
+            {"endpoint_origin": "https://z.hubway.cc"},
+            {"merchant_fingerprint": "b" * 64},
+            {"billing_group": "another-group"},
+            {"model": "gemini-4-argon"},
+            {"provider": "bfl"},
+        ]:
+            self.assertEqual(
+                self.estimate({"input_tokens": 1, "output_tokens": 1}, **changes)["reason"],
+                "price_identity_mismatch",
+            )
+
+    def test_no_fiat_conversion_of_hubway_balance_or_bfl_credits(self):
+        price = self.price(currency="HUBWAY_BALANCE_UNIT")
+        result = self.estimate({"input_tokens": 1, "output_tokens": 1}, price=price)
+        self.assertEqual(result["currency"], "HUBWAY_BALANCE_UNIT")
+        self.assertEqual(compare_supplier_ceiling(result, "1", "USD"), "unknown")
+
+    def test_expiry_is_exclusive_and_pre_effective_prices_are_unknown(self):
+        for price in [
+            self.price(valid_until=self.now.isoformat()),
+            self.price(valid_from=(self.now + timedelta(seconds=1)).isoformat()),
+        ]:
+            self.assertEqual(
+                self.estimate({"input_tokens": 1, "output_tokens": 1}, price=price)["reason"],
+                "price_not_effective",
+            )
+
+    def test_unknown_rate_shapes_and_secret_fields_are_rejected(self):
+        bad = [
+            {"schema_version": True},
+            {"complete_meter_coverage": 1},
+            {"api_key": "do-not-store"},
+            {"complete_meter_coverage": False},
+            {"endpoint_origin": "https://hubway.cc/v1"},
+            {"model": "gemini-4-argon"},
+            {"rates": [{"measure": "input_tokens", "amount": 1.0, "per": 1000000}]},
+            {"rates": [{"measure": "input_tokens", "amount": "1e-8", "per": 1000000}]},
+            {"rates": [{"measure": "input_tokens", "amount": "1", "per": True}]},
+            {"rates": [{"measure": "input_tokens", "amount": "NaN", "per": 1}]},
+            {"rates": [self.document["rates"][0], self.document["rates"][0]]},
+            {"valid_until": (self.now + timedelta(days=32)).isoformat()},
+        ]
+        for changes in bad:
+            with self.subTest(changes=changes), self.assertRaises(ValidationError):
+                self.price(**changes)
+
+    def test_decimal_bfl_credits_require_an_explicit_reviewed_unit_rate(self):
+        price = self.price(
+            provider="bfl",
+            model="flux-3-image",
+            endpoint_origin="https://api.bfl.ai",
+            rates=[{"measure": "bfl_credit", "amount": "0.05", "per": 1}],
+        )
+        result = self.estimate({"bfl_credit": "1.25"}, price=price)
+        self.assertEqual(result["amount"], "0.06250000")
+        self.assertFalse(result["actual_spending_verified"])
+        for bad in [1.25, True, "1e3", "NaN", "-1"]:
+            self.assertEqual(
+                self.estimate({"bfl_credit": bad}, price=price)["reason"], "invalid_usage"
+            )
+
+    def test_price_digest_is_order_independent_and_covers_merchant_and_rates(self):
+        price = self.price()
+        reordered = dict(reversed(list(self.document.items())))
+        self.assertEqual(
+            canonical_price(price),
+            canonical_price(SupplierPriceVersion.model_validate_json(json.dumps(reordered))),
+        )
+        changed = copy.deepcopy(self.document)
+        changed["rates"][0]["amount"] = "1"
+        self.assertNotEqual(
+            canonical_price(price),
+            canonical_price(SupplierPriceVersion.model_validate_json(json.dumps(changed))),
+        )
+
+    def test_arithmetic_overflow_returns_unknown_and_does_not_round_to_a_cap(self):
+        price = self.price(
+            rates=[{"measure": "input_tokens", "amount": "999999999999.99999999", "per": 1}]
+        )
+        result = self.estimate({"input_tokens": 10**12}, price=price)
+        self.assertEqual(result["reason"], "estimate_overflow")
+        self.assertIsNone(result["amount"])

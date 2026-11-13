@@ -179,7 +179,13 @@ class ProtocolPipelineFixture(PipelineFixture):
         )
 
     def run_protocol(
-        self, task, storage_class=S3Storage, *, gemini_origin=OFFICIAL_ORIGIN, worker_class=Worker
+        self,
+        task,
+        storage_class=S3Storage,
+        *,
+        gemini_origin=OFFICIAL_ORIGIN,
+        worker_class=Worker,
+        merchant_accounts=None,
     ):
         async def run():
             bfl = BflProvider(
@@ -193,7 +199,7 @@ class ProtocolPipelineFixture(PipelineFixture):
                 transport=httpx.MockTransport(self.gemini_route),
                 base_url=gemini_origin,
             )
-            provider = ProtocolProvider(bfl, gemini)
+            provider = ProtocolProvider(bfl, gemini, merchant_accounts=merchant_accounts)
             pool = await open_pool(self.worker_dsn, "app_worker")
             storage = storage_class(self.settings)
             try:

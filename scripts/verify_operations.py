@@ -74,6 +74,7 @@ def main():
             "post_snapshot_marker_absent",
             "completed_report_review_and_download_hash_preserved",
             "pixel_protection_preserved",
+            "supplier_price_archive_preserved",
             "four_fixture_tasks_quarantined",
             "detection_delivery_requires_new_review_after_restore",
             "detection_supplier_unknown_and_final_hash_preserved",

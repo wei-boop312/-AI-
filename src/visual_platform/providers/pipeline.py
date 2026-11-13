@@ -1,7 +1,9 @@
 """Protocol composition, enabled only with explicit offline HTTP mock transports."""
 
 import asyncio
+import copy
 import hashlib
+import re
 import struct
 from uuid import UUID
 
@@ -19,11 +21,31 @@ class ProtocolProvider:
     execution_profile = "offline_protocol_mock"
     report_profile = "offline_protocol_mock"
 
-    def __init__(self, bfl, gemini):
+    def __init__(self, bfl, gemini, *, merchant_accounts=None):
         if not bfl.offline_transport or not gemini.offline_transport:
             raise ValueError(
                 "protocol pipeline requires explicit offline MockTransport on both suppliers"
             )
+        if merchant_accounts is not None:
+            if (
+                type(merchant_accounts) is not dict
+                or not merchant_accounts
+                or not set(merchant_accounts) <= {"generate", "detect"}
+            ):
+                raise ValueError("invalid merchant account scope")
+            for account in merchant_accounts.values():
+                if (
+                    type(account) is not dict
+                    or set(account) != {"merchant_fingerprint", "billing_group"}
+                    or type(account["merchant_fingerprint"]) is not str
+                    or not re.fullmatch(r"[0-9a-f]{64}", account["merchant_fingerprint"])
+                    or type(account["billing_group"]) is not str
+                    or not 1 <= len(account["billing_group"]) <= 160
+                    or not account["billing_group"].strip()
+                    or any(ord(char) < 32 for char in account["billing_group"])
+                ):
+                    raise ValueError("invalid merchant account scope")
+        self.merchant_accounts = copy.deepcopy(merchant_accounts)
         self.bfl = bfl
         self.gemini = gemini
 
@@ -35,6 +57,8 @@ class ProtocolProvider:
         }
 
     def verify_execution_scope(self, execution):
+        if execution.get("provider_accounts") != self.merchant_accounts:
+            raise ValueError("locked_provider_account_mismatch")
         # Old mock quotes always meant the official endpoints. A new gateway is
         # never inferred from environment settings or a matching model name.
         if execution.get("provider_endpoints", BASELINE_ENDPOINTS) != self.request_endpoints:

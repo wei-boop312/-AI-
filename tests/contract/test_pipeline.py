@@ -74,3 +74,53 @@ class ProtocolActivationContracts(unittest.IsolatedAsyncioTestCase):
             finally:
                 bfl.close()
                 await gemini.aclose()
+
+    async def test_account_scope_is_explicit_validated_frozen_and_cannot_include_credentials(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bfl = BflProvider(
+                "offline-key",
+                Path(directory) / "bfl",
+                transport=httpx.MockTransport(lambda _: httpx.Response(503)),
+            )
+            gemini = GeminiProvider(
+                "offline-key",
+                Path(directory) / "gemini",
+                transport=httpx.MockTransport(lambda _: httpx.Response(503)),
+            )
+            try:
+                accounts = {
+                    "generate": {
+                        "merchant_fingerprint": "a" * 64,
+                        "billing_group": "offline-fixture",
+                    }
+                }
+                provider = ProtocolProvider(bfl, gemini, merchant_accounts=accounts)
+                accounts["generate"]["merchant_fingerprint"] = "b" * 64
+                provider.verify_execution_scope(
+                    {
+                        "provider_accounts": {
+                            "generate": {
+                                "merchant_fingerprint": "a" * 64,
+                                "billing_group": "offline-fixture",
+                            }
+                        }
+                    }
+                )
+                with self.assertRaisesRegex(ValueError, "locked_provider_account_mismatch"):
+                    provider.verify_execution_scope({"provider_accounts": accounts})
+                for invalid in [
+                    {},
+                    {"secret": "key"},
+                    {"generate": {"api_key": "never-store"}},
+                    {
+                        "generate": {
+                            "merchant_fingerprint": "not-a-hash",
+                            "billing_group": "fixture",
+                        }
+                    },
+                ]:
+                    with self.assertRaisesRegex(ValueError, "invalid merchant account scope"):
+                        ProtocolProvider(bfl, gemini, merchant_accounts=invalid)
+            finally:
+                bfl.close()
+                await gemini.aclose()

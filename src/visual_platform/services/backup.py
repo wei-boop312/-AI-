@@ -223,6 +223,21 @@ def object_references(c, bucket):
                 "mime": "application/octet-stream",
             }
         )
+    if required_row(c.execute("SELECT to_regclass('ops.supplier_price_versions')"))[0]:
+        for row in c.execute(
+            "SELECT id,evidence_bucket,evidence_object_key,evidence_storage_version_id,evidence_sha256 FROM ops.supplier_price_versions"
+        ):
+            rows.append(
+                {
+                    "kind": "supplier_price_evidence",
+                    "id": str(row[0]),
+                    "bucket": row[1],
+                    "key": row[2],
+                    "version": row[3],
+                    "sha256": row[4],
+                    "mime": "application/octet-stream",
+                }
+            )
     for row in c.execute(
         "SELECT id,temp_key,expected_mime,expected_size FROM app.upload_intents WHERE status IN ('pending','validating')"
     ):
@@ -566,6 +581,11 @@ def restore_database(
                 elif obj["kind"] == "rule_evidence":
                     c.execute(
                         "UPDATE app.platform_rules SET evidence_storage_version_id=%s WHERE id=%s",
+                        (version, obj["id"]),
+                    )
+                elif obj["kind"] == "supplier_price_evidence":
+                    c.execute(
+                        "UPDATE ops.supplier_price_versions SET evidence_storage_version_id=%s WHERE id=%s",
                         (version, obj["id"]),
                     )
             c.execute("SET LOCAL session_replication_role=origin")
