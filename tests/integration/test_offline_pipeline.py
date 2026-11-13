@@ -16,6 +16,7 @@ from test_assets import AssetFixture
 
 from visual_platform.db.pool import open_pool
 from visual_platform.providers.fake import DurableFakeProvider
+from visual_platform.services.quality_evaluation import evaluate_dataset
 from visual_platform.storage.s3 import S3Storage, StorageError
 from visual_platform.worker.runner import Worker
 
@@ -144,12 +145,53 @@ class OfflinePipelineTests(PipelineFixture):
         report_url = self.client.get(
             "/api/v1/tasks/" + task + "/report/download", follow_redirects=False
         ).headers["location"]
-        report = httpx.get(report_url, timeout=10).json()
+        report_raw = httpx.get(report_url, timeout=10).content
+        report = json.loads(report_raw)
         self.assertEqual(report["final_sha256"], hashlib.sha256(final).hexdigest())
         self.assertTrue(report["pixel_protection"]["pixel_exact_passed"])
         self.assertEqual(report["auto_overall"], "manual_review")
         self.assertFalse(report["facts"]["analysis_complete"])
         platform = report["per_platform"][0]
+        self.assertEqual(platform["category"], "generic")
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / "final.png").write_bytes(final)
+            (folder / "report.json").write_bytes(report_raw)
+            document = {
+                "schema_version": 1,
+                "dataset_kind": "synthetic_fixture",
+                "human_reviewed_attested": True,
+                "usage_rights_attested": True,
+                "samples": [
+                    {
+                        "sample_id": "actual-offline-pipeline-fixture",
+                        "image_file": "final.png",
+                        "image_sha256": hashlib.sha256(final).hexdigest(),
+                        "report_file": "report.json",
+                        "report_sha256": hashlib.sha256(report_raw).hexdigest(),
+                        "platform": "amazon",
+                        "marketplace": "US",
+                        "category": "generic",
+                        "image_type": "MAIN",
+                        "rule_version": platform["rule_version"],
+                        "human_label": "compliant",
+                        "annotator_fingerprint": "a" * 64,
+                        "features": {
+                            "visible_text": False,
+                            "on_product_logo": False,
+                            "added_watermark": False,
+                            "dark_background": False,
+                            "category_exception": False,
+                        },
+                    }
+                ],
+            }
+            manifest = folder / "manifest.json"
+            manifest.write_text(json.dumps(document), encoding="utf-8")
+            quality = evaluate_dataset(manifest)
+            self.assertEqual(quality["overall"]["manual_review_rate"], 1)
+            self.assertIsNone(quality["overall"]["automatic_accuracy"])
+            self.assertFalse(quality["provider_verified"])
         self.assertIn("rule_evidence_unverified", [r["code"] for r in platform["reasons"]])
         self.assertIn("analysis_incomplete", [r["code"] for r in platform["reasons"]])
         self.assertIn("pixel_protection", [c["id"] for c in platform["checks"]])

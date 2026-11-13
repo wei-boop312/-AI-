@@ -154,6 +154,7 @@ def evaluate_rules(final_sha256, rules, facts, local, *, sampling_selected=False
             {
                 "platform": rule["platform"],
                 "marketplace": rule.get("marketplace", ""),
+                "category": rule.get("category", ""),
                 "image_type": rule.get("image_type", ""),
                 "rule_version": rule.get("version", "unverified"),
                 "evidence_status": rule.get("evidence_status", "unverified"),

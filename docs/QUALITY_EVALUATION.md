@@ -1,0 +1,15 @@
+# 离线质量评估
+
+`python scripts/evaluate_quality.py --manifest <私有目录/manifest.json> --output <新的私有统计JSON>`只读取已有最终PNG、原始下载报告和人工标注，零模型请求。输出QUALITY_COUNTS_ONLY，不产生“通过质量门槛”或供应商/发布授权。真实样本尚未提供，当前只验证合成夹具中的统计和输入约束。
+
+manifest的schema见`contracts/quality-dataset.schema.json`。样本必须列人工标签compliant或non_compliant、匿名标注者SHA256指纹、样本/报告相对文件名和各自原字节SHA256，平台、站点、类目、图片类型、精确规则版本及五项布尔特征。顶层区分synthetic_fixture与real_product_set，human_reviewed_attested和usage_rights_attested必须明确true；这是提供者声明，不是独立核实人工标注或素材权属。
+
+五项特征为visible_text、on_product_logo、added_watermark、dark_background、category_exception。按原文档要求分别标注实物Logo与后加水印；不把实物Logo的出现自动视为违规。人工标签须依据对应站点/类目/版本政策及人工确认的最终图片填写，无法判定的样本先复核，不强行填合规/违规。所有样本包含于总体，同时按平台和每种特征存在时给出子集统计。缺失特征覆盖单列，不声称覆盖真实分布或生产准确率。
+
+报告必须是平台下载的原始JSON，final_sha256必须等于该PNG的原字节哈希，且per_platform中站点/类目/图片类型/规则版本严格唯一匹配。新报告增加category；旧报告缺类目时拒绝，不能人为改成新报告并沿用旧SHA。报告保留provider_profile，合成数据只接受offline_fake或offline_protocol_mock。工具核验字节和对应关系，不证明报告由哪台服务器签发，原文摘要不是数字签名。
+
+混淆矩阵行是真实人工标签compliant/non_compliant，列是自动结果compliant/non_compliant/manual_review。误放率=违规样本中自动判compliant数/所有人工违规数；误拦率=合规样本中自动判non_compliant数/所有人工合规数。人工率=manual_review/总数；自动覆盖率=非manual_review/总数；自动准确率=自动结果正确数/非manual_review数。分母为零时null，人工复核不算正确自动预测。未计算模型置信度平均值来充当准确率；不设置未经要求的质量阈值。
+
+每个最终PNG限100MiB、8192边长/25MP且单帧有效PNG；报告限8MiB，manifest限16MiB/10000项。拒绝额外字段、重复JSON键、非标准数值、重复样本或同图同规则作用域、坏SHA、范围错配、越界路径和符号链接。输入均必须在manifest目录之下。输出只包含摘要及聚合数量/比率，不包含图片、原始报告、标注者、样本ID或路径；文件仅新建并在POSIX按0600创建，Windows隐私仍依赖目录ACL。不要把真实样本或私有标注提交GitHub。
+
+下一步需要人工标注的真实产品集和对应真实模型最终报告，再运行同一入口。该工具不执行供应商请求、不修改业务报告、不写数据库/用户积分/供应商费用、不授予部署资格。
