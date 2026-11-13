@@ -1,0 +1,34 @@
+
+Running 4 tests using 1 worker
+
+{"canvas_frame_p95_ms":16.799999999995634,"canvas_duration_ms":60925.79999999999,"api_p95_ms":144.3697059999995,"status_counts":{"200":500},"passed":true}
+  ✓  1 e2e/performance.spec.ts:14:1 › 生产构建：4MP、50绘制对象、60秒真实指针及20并发500次非模型API (1.2m)
+{"event":"storage_archive_observed","observation_id":"0bd8cd7b-b956-42dc-a6ea-d309339f8cc2","observed_at":"2026-11-13T16:18:13.639199+00:00","duration_ms":8.537,"outcome":"success"}
+  ✓  2 e2e/recovery.spec.ts:8:1 › 断线恢复、规则报告版本、Cookie刷新和账号隔离 (16.1s)
+  ✓  3 e2e/recovery.spec.ts:47:1 › 不同产品草稿隔离，刷新恢复当前产品且编辑不创建模型任务 (4.2s)
+  ✘  4 e2e/smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 (1.5m)
+
+
+  1) e2e/smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 ───────────────────────────────────────
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.fill: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('dialog', { name: '添加外观资料', exact: true }).getByLabel('资料名称')
+
+
+      14 |  await page.getByRole('button',{name:/新建产品/}).click();
+      15 |  const dialog=page.getByRole('dialog',{name:'新建产品'});await dialog.getByLabel('产品名称').fill('浏览器验收 · 原色产品');await dialog.getByRole('button',{name:'创建产品',exact:true}).click();await expect(dialog).not.toBeVisible();
+    > 16 |  await page.getByRole('button',{name:'＋ 添加外观资料',exact:true}).click();const appearanceDialog=page.getByRole('dialog',{name:'添加外观资料',exact:true});await appearanceDialog.getByLabel('资料名称').fill('原色与钢材');await appearanceDialog.getByLabel('外观说明').fill('保留包装标签和边缘结构');for(const [field,value] of [['主要颜色','深红色'],['主要颜色','银色'],['主要材质','不锈钢']]){await appearanceDialog.getByLabel(field,{exact:true}).fill(value);await appearanceDialog.getByLabel(field,{exact:true}).press('Enter')}const appearanceSaved=page.waitForResponse(r=>r.url().endsWith('/appearances')&&r.request().method()==='POST'&&r.status()===201);await appearanceDialog.getByRole('button',{name:'保存资料',exact:true}).click();const savedAppearance=await(await appearanceSaved).json();expect(savedAppearance.config).toEqual({description:'保留包装标签和边缘结构',colors:['深红色','银色'],materials:['不锈钢']});await expect(appearanceDialog).not.toBeVisible();
+         |                                                                                                                                                                                           ^
+      17 |  await page.locator('input[type=file]').first().setInputFiles(fixture);
+      18 |  await expect(page.getByText('已归档原图',{exact:true})).toBeVisible({timeout:30000});
+      19 |  await expect(page.getByTestId('canvas-source').locator('canvas')).toBeVisible();
+        at /home/runner/work/-AI-/-AI-/apps/web/e2e/smoke.spec.ts:16:187
+
+    Error Context: ../../work/browser-test-results/smoke-真实服务：登录、产品、上传、Konva选区、生成、报告及移动端/error-context.md
+
+  1 failed
+    e2e/smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 ────────────────────────────────────────
+  3 passed (3.0m)

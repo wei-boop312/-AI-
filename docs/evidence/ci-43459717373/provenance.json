@@ -1,0 +1,27 @@
+{
+  "run_id": 43459717373,
+  "commit": "4f1473cfdbbe6f2b5017c3035d431a5d98d5806c",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43459717373",
+  "artifact_id": 14055992850,
+  "archive_sha256": "985caec6d0ab8db7b04f81d7f2954d208477c590caa7b9feb41b869d8c0013e9",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "902cb0ad25a7e5fb7f512d3dcd0b560d48fba98a857f421eb3c8a260f34e189c"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "a6731377936b39bbe91aa7838322d55a1d8bad12cfc89a6f74a4107a33b39e2e"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "38b31d434f72abc7c7e2a033f9437dfdbbeaee9faac9433b84718f1c57978630"
+    },
+    "browser-production.log": {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "b2dfe01ada2ff41c8420bc823a156dfc8c7c078a2fe09e1c1ba1ffcc54100743"
+    }
+  },
+  "scope": "Original failed run: 109 unit/41 offline contracts and 114 native tests passed including 0028 review; first three browser cases passed, fourth times out filling appearance name after product modal. No controlled-fault browser, restore, Compose or P5-02 success established. No paid model or deployment; later 0029/archive and form-name fix excluded."
+}

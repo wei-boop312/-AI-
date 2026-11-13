@@ -17,6 +17,7 @@ from PIL import Image
 
 from visual_platform.providers.contract import ProviderUncertain
 from visual_platform.providers.gemini import MODEL, GeminiProvider
+from visual_platform.providers.hubway import HubwayGeminiProvider
 
 
 class GeminiContracts(unittest.IsolatedAsyncioTestCase):
@@ -67,7 +68,7 @@ class GeminiContracts(unittest.IsolatedAsyncioTestCase):
             },
         }
 
-    def provider(self, handler=None):
+    def provider(self, handler=None, *, provider_class=GeminiProvider, **options):
         async def route(request):
             self.calls.append(request)
             if handler:
@@ -75,11 +76,92 @@ class GeminiContracts(unittest.IsolatedAsyncioTestCase):
                 return await value if asyncio.iscoroutine(value) else value
             return httpx.Response(200, json=self.response())
 
-        provider = GeminiProvider(
-            "contract-key", Path(self.temp.name), transport=httpx.MockTransport(route)
+        provider = provider_class(
+            "contract-key", Path(self.temp.name), transport=httpx.MockTransport(route), **options
         )
         self.providers.append(provider)
         return provider
+
+    async def test_hubway_sdk_exact_origins_model_and_private_route_provenance(self):
+        for origin in ("https://hubway.cc", "https://z.hubway.cc"):
+            with self.subTest(origin=origin):
+                provider = self.provider(provider_class=HubwayGeminiProvider, base_url=origin)
+                intent = uuid4()
+                await self.submit(provider, intent)
+                request = self.calls[-1]
+                self.assertEqual(
+                    str(request.url), origin + "/v1beta/models/" + MODEL + ":generateContent"
+                )
+                self.assertEqual(request.headers["x-goog-api-key"], "contract-key")
+                body = json.loads(request.content)
+                self.assertEqual(
+                    base64.urlsafe_b64decode(body["contents"][0]["parts"][1]["inlineData"]["data"]),
+                    self.png,
+                )
+                record = json.loads((Path(self.temp.name) / (str(intent) + ".intent")).read_text())
+                self.assertEqual(record["endpoint_origin"], origin)
+                self.assertNotIn("contract-key", json.dumps(record))
+
+    async def test_hubway_rejects_unapproved_destinations_before_any_request(self):
+        for origin in (
+            "http://hubway.cc",
+            "https://hubway.cc/",
+            "https://hubway.cc/v1",
+            "https://hubway.cc.evil.example",
+            "https://hubway.cc:8443",
+            "https://user:password@hubway.cc",
+            "https://hubway.cc?key=secret",
+            "https://generativelanguage.googleapis.com",
+        ):
+            with self.subTest(origin=origin), self.assertRaises(ValueError):
+                self.provider(provider_class=HubwayGeminiProvider, base_url=origin)
+        self.assertEqual(self.calls, [])
+
+    async def test_hubway_private_environment_does_not_silently_substitute_models(self):
+        with patch.dict(
+            "os.environ",
+            {
+                "HUBWAY_API_KEY": "contract-key",
+                "HUBWAY_BASE_URL": "https://z.hubway.cc",
+                "HUBWAY_VISION_MODEL": MODEL,
+            },
+        ):
+            provider = HubwayGeminiProvider.from_environment(
+                Path(self.temp.name), transport=httpx.MockTransport(lambda _: httpx.Response(503))
+            )
+            self.providers.append(provider)
+            self.assertEqual(provider.endpoint_origin, "https://z.hubway.cc")
+            with patch.dict("os.environ", {"HUBWAY_VISION_MODEL": "gemini-4-argon"}):
+                with self.assertRaises(ValueError):
+                    HubwayGeminiProvider.from_environment(Path(self.temp.name))
+            with patch.dict("os.environ", {"HUBWAY_API_KEY": ""}):
+                with self.assertRaises(ValueError):
+                    HubwayGeminiProvider.from_environment(Path(self.temp.name))
+        self.assertEqual(self.calls, [])
+
+    async def test_hubway_unknown_or_rate_limited_submission_never_reposts(self):
+        for status in (302, 429, 503):
+            with self.subTest(status=status):
+                provider = self.provider(
+                    lambda request, code=status: httpx.Response(
+                        code,
+                        headers={"location": "https://untrusted.example/"},
+                        json={"error": "unavailable"},
+                    ),
+                    provider_class=HubwayGeminiProvider,
+                )
+                intent = uuid4()
+                before = len(self.calls)
+                with self.assertRaises(ProviderUncertain):
+                    await self.submit(provider, intent)
+                with self.assertRaises(ProviderUncertain):
+                    await self.submit(provider, intent)
+                alternate = self.provider(
+                    provider_class=HubwayGeminiProvider, base_url="https://z.hubway.cc"
+                )
+                with self.assertRaises(ProviderUncertain):
+                    await self.submit(alternate, intent)
+                self.assertEqual(len(self.calls) - before, 1)
 
     async def submit(self, provider, intent=None, **kwargs):
         return await provider.submit(
