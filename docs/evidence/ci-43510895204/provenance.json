@@ -1,0 +1,23 @@
+{
+  "run_id": 43510895204,
+  "commit": "9306bf18be597a9d8fbaa1a6672ca8b27c7cc254",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43510895204",
+  "artifact_id": 14078567331,
+  "archive_sha256": "c32b1d6c5388ef402845bbefa21ca3c85d9a40106187f62e6c5d7f7a3826a050",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "eb819d3c7f4d38bc25f0900031da1ac2e6c957d80b9e8d6e36938d322182eae0"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "42c815863bfa4b384597434e11e820733897c94ac029e88aff1cb45e4cb558e0"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "958fe944040cdca21c2b81c6714c31003a62b9cacacfee475e82f0108bd8d10d"
+    }
+  },
+  "scope": "0034 explicit unit budgets candidate"
+}

@@ -225,5 +225,5 @@ class UnitProviderBudgetTests(SupplierEstimateFixture):
                     )
         for table in ("ops.provider_step_limits", "ops.provider_total_limits"):
             with psycopg.connect(self.owner) as c:
-                with self.assertRaises(psycopg.errors.RaiseException):
+                with self.assertRaises(psycopg.errors.ObjectNotInPrerequisiteState):
                     c.execute("DELETE FROM " + table + " WHERE authorization_id=%s", (self.budget,))
