@@ -288,13 +288,14 @@ async def events(
                 return
             async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
                 bounds = await c.fetchrow(
-                    "SELECT min(id) AS first,max(id) AS last FROM app.task_events WHERE task_id=$1",
+                    "SELECT min(id) AS first,max(id) AS last,(SELECT pruned_through FROM app.task_event_retention_cursors WHERE task_id=$1) AS pruned_through FROM app.task_events WHERE task_id=$1",
                     task_id,
                 )
                 reset = bool(
                     position
                     and (
                         not bounds["first"]
+                        or position <= (bounds["pruned_through"] or 0)
                         or position < bounds["first"]
                         or position > bounds["last"]
                     )
