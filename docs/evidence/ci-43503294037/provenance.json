@@ -1,0 +1,58 @@
+{
+  "run_id": 43503294037,
+  "commit": "91740207a6d1c2a6deffe12ae95fa7bcb760d965",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43503294037",
+  "artifact_id": 14075677703,
+  "archive_sha256": "cd7530037dc53a97411d455f4cff7597c40e2f09d8ea34b42ebdd0599cf0b2a2",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "cfa6caa5181e3afdd4d48019294cbedc1ee241db41bc24b33b595f4ae1fd226e"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "59c8bb1ad292d3f5646dacb5fa9eb42d78ca33ba417a24ea316bf2b60a5687e2"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "7f9e106cd23bc2ac0a93748ad06867337a385e1141336af3c337feb69b5694a6"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "f58136bce1166a6c03936314e2ef672d0188499f2439857a9a96d46b0bc7491d"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "403f1ca53bf6fa539c0d07ba673c92fa93187d5a2b2fbdd7291ed2a3d5b0513d"
+    }
+  },
+  "scope": "0033 exact receipt-bound estimates and cost-review blocking with nonempty ledger independent cold restore, complete offline gates",
+  "test_counts_from_original_logs": {
+    "unit.log": {
+      "passed_tests": 128,
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "c98a4d4a8013f986c3bbfe669a4315ebcc5842086d301bd44d92c35bf035111b"
+    },
+    "contracts.log": {
+      "passed_tests": 50,
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "83db976a6ceb6847094852d8d40b19ae35a60cd126a9404131c1b138d5e2873b"
+    },
+    "native-integration.log": {
+      "passed_tests": 164,
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "0160834dffe60af5caf3621fc1d2c9cb93f4745b51c5fbb15ed43ddbede38305"
+    },
+    "browser-production.log": {
+      "passed_tests": 4,
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "8d0977d735735c26985a2252c58289ab38c7dc0a8c7933c7b58dc16e620a823a"
+    },
+    "browser-controlled-faults.log": {
+      "passed_tests": 7,
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "9433532c6f15e347792ada5f856192719e741611e4b2e1ebf1678f830fd73fdc"
+    }
+  }
+}

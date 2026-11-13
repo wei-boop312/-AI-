@@ -2,9 +2,9 @@
 
 ## 当前范围
 
-0032为供应商价表提供私有不可变版本、S3证据归档、明确运营审阅和精确估算。它与用户积分的trial price_version分开；不修改固定任务报价、钱包、原始用量观察或已确认费用，也不启用真实模型。没有默认/种子真实价格。当前估算仍是estimated或unknown，actual_spending_verified始终false。
+0032为供应商价表提供私有不可变版本、S3证据归档、明确运营审阅和精确估算。它与用户积分的trial price_version分开；不修改固定任务报价、钱包、原始用量观察或已确认费用，也不启用真实模型。没有默认/种子真实价格。当前估算仍是estimated或unknown，actual_spending_verified始终false。0033已接入任务估算、超额阻断与带数据冷恢复，9174020整轮通过。
 
-当前普通API仍创建offline Fake报价；新价表绑定通过可信协议演练报价验证。真实商户配置选择、SDK用量到互斥计费项的转换、任务估算记录、供应商账单确认、超额处置及live接线是后续工作，不能用此候选宣称费用已核实。
+当前普通API仍创建offline Fake报价；新价表绑定通过可信协议演练报价验证。SDK互斥计量、任务估算及保守超额阻断已实现；真实商户配置选择、显式多单位授权、供应商账单确认及live接线是后续工作，不能用此候选宣称费用已核实。
 
 ## 私有发布与查看
 
@@ -72,3 +72,5 @@ python scripts/provider_budget.py inspect --authorization <uuid>
 ## 带数据的恢复候选
 
 独立恢复演练新增非空估算账本：固定MockTransport和合成凭据在loopback profile生成已知回执与最终PNG，明确BFL_CREDIT价表不可比较USD预算，故不得产生检测POST。快照新增第5项被隔离任务，恢复验证原估算金额/单位/关联ID/价表SHA与待审阻断完整保留，不变成美元或实际已确认支出。源fixture仅通过受限fail结案释放内部积分，成本记录不删改；目标保持隔离。该演练不证明live私有SDK元数据或真实账单已验，必须单独看当次冷恢复CI结果。
+
+0033与非空账本恢复最终证据：9174020/CI43503294037成功，128单元/50契约/164原生、4+7浏览器、完整Compose/独立冷恢复/重启/P5-02通过，包含cost_estimate_history_and_review_block_preserved。这里只验证合成供应商与估算，不代表真实发票、实际USD支出或Hubway live接通。
