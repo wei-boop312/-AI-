@@ -1,6 +1,7 @@
 """Loopback-only restore fixture with hardwired MockTransports and synthetic credentials."""
 
 import asyncio
+import json
 from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -17,7 +18,7 @@ from visual_platform.storage.s3 import S3Storage
 from visual_platform.worker.runner import Worker
 
 
-def run_cost_review_fixture(profile, settings, task_id, accounts):
+def run_cost_review_fixture(profile, settings, task_id, accounts, *, detect_success=False):
     if profile.get("PROVIDER_PROFILE") != "offline" or any(
         urlsplit(profile[key]).hostname not in ("localhost", "127.0.0.1")
         for key in ("WORKER_DATABASE_URL", "S3_ENDPOINT")
@@ -53,6 +54,40 @@ def run_cost_review_fixture(profile, settings, task_id, accounts):
     def detection(request):
         if request.method == "POST":
             posts["detect"] += 1
+        if detect_success:
+            facts = {
+                "schema_version": 1,
+                "analysis_complete": True,
+                "image_width": 256,
+                "image_height": 256,
+                "text_items": [],
+                "logo_items": [],
+                "watermark_items": [],
+                "background": {"classification": "non_white", "confidence": 0.9},
+                "product_extent": None,
+                "uncertainties": [],
+            }
+            return httpx.Response(
+                200,
+                json={
+                    "modelVersion": "gemini-3.8-flash",
+                    "responseId": "restore-synthetic-detection",
+                    "candidates": [
+                        {
+                            "content": {"role": "model", "parts": [{"text": json.dumps(facts)}]},
+                            "finishReason": "STOP",
+                        }
+                    ],
+                    "usageMetadata": {
+                        "promptTokenCount": 10,
+                        "cachedContentTokenCount": 2,
+                        "candidatesTokenCount": 20,
+                        "thoughtsTokenCount": 3,
+                        "toolUsePromptTokenCount": 0,
+                        "totalTokenCount": 33,
+                    },
+                },
+            )
         return httpx.Response(
             500,
             json={"error": "controlled detector must remain blocked by incomparable price unit"},

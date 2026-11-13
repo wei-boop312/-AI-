@@ -146,6 +146,7 @@ def main(task):
             "known_id_recovered_without_new_generate",
             "provider_budget_revoked_before_new_intent",
             "unit_limits_preserved_without_cross_unit_total",
+            "detection_archive_preserved_without_local_files",
         ):
             if detail.get("verification", {}).get(key) is not True:
                 raise ValueError("recovery guard missing: " + key)

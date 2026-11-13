@@ -85,3 +85,10 @@ python scripts/provider_budget.py inspect --authorization <uuid>
 v3私有快照的 `currency/total_ceiling/reserved_ceiling_total/known_estimate_subtotal` 为 null；请读 `limits_by_currency` 中每个单位的独立金额，`step_limits/holds`也明确带单位。即使两步使用同单位，v3仍使用这套输出，不产生新的全局金额。所有数字均为授权上限或估算，`actual_spending_verified`始终false，不能凭Hubway页面的美元符号或充值比例转换为现金USD。
 
 登记/查看仍使用 `scripts/provider_budget.py register/inspect`；预检 `scripts/provider_smoke.py --preflight` 同时支持v2/v3，并保持execution_enabled=false与零付费调用。真实账单、价格凭证与live供应商接入仍待完成。
+
+
+## 同步检测事实的持久化（0035候选）
+
+Gemini同步响应没有可供恢复查询的远程任务ID；`gemini-<意图UUID>`仅是本地归档标识。新Worker在应用检测回执之前，用单个数据库事务保存已知回执与完整的受限事实归档，含原响应摘要、最终图摘要、原始计量和SDK/提示版本信息；任意一步或审计写入失败都会回滚两者。私有表与受限函数不向API用户暴露，数据不可修改或删除。Worker后续估算和交付读取已存归档，不依赖本地`.facts.json`，不会因文件丢失再次调用检测。
+
+已知响应返回到首次持久化之间仍存在不可消除的进程崩溃窗口：若数据库未保存且本地原结果也丢失，只能保持未知/人工处置，不能自动重发或宣称检测成功。旧回执仅在原本地事实文件仍在时补归档。归档证明保存的是同一次响应，不证明供应商实际质量、发票或商户真实扣费；默认仍双MockTransport。

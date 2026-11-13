@@ -33,6 +33,7 @@ SUITES = {
             "test_supplier_pricing.py",
             "test_supplier_estimates.py",
             "test_unit_provider_budget.py",
+            "test_detection_archives.py",
             "test_detection_delivery.py",
         ],
     },

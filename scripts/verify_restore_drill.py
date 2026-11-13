@@ -488,6 +488,59 @@ if args.command == "prepare":
             and state["cost_review_costs"]["estimates"][0]["ceiling_state"] == "unknown",
             "cost-review estimate fixture invalid",
         )
+        # A completed protocol task adds a nonempty PG facts archive. Its nested local
+        # SDK files are deliberately outside the Fake-only backup file set.
+        protocol_snapshot = json.loads(json.dumps(cost_snapshot))
+        protocol_accounts = {
+            step: {
+                "merchant_fingerprint": price.merchant_fingerprint,
+                "billing_group": price.billing_group,
+            }
+            for step in ("generate", "detect")
+        }
+        protocol_snapshot["_execution"]["provider_accounts"] = protocol_accounts
+        protocol_snapshot["_execution"]["provider_price_versions"]["detect"] = {
+            "id": state["vision_price_id"],
+            "document_sha256": state["vision_price_sha256"],
+        }
+        protocol_quote = uuid4()
+        with psycopg.connect(profile["API_DATABASE_URL"]) as connection:
+            connection.execute("SELECT set_config('app.user_id',%s,true)", (str(uid),))
+            connection.execute(
+                "SELECT app.create_quote(%s,%s,%s,%s::jsonb,%s::jsonb)",
+                (
+                    protocol_quote,
+                    canonical_hash(QuoteRequest.model_validate(body)),
+                    hash_data(protocol_snapshot),
+                    json.dumps(protocol_snapshot),
+                    json.dumps(protocol_snapshot["_execution"]["rules"]),
+                ),
+            )
+        register_drill_budget(protocol_quote, protocol_snapshot, uid, unit_budget=True)
+        created = client.post(
+            "/api/v1/tasks",
+            json={**body, "quote_id": str(protocol_quote)},
+            headers={**headers, "idempotency-key": str(uuid4())},
+        )
+        require(created.status_code == 201, "protocol archive source task failed")
+        state["tasks"]["protocol_completed"] = created.json()["id"]
+        archived_run = run_cost_review_fixture(
+            profile,
+            settings,
+            UUID(state["tasks"]["protocol_completed"]),
+            protocol_accounts,
+            detect_success=True,
+        )
+        require(
+            archived_run["result"] == "succeeded"
+            and archived_run["posts"] == {"generate": 1, "detect": 1},
+            "protocol archive fixture failed",
+        )
+        state["detection_archive"] = admin(
+            "SELECT jsonb_build_object('receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
+            (state["tasks"]["protocol_completed"],),
+        )
+        require(state["detection_archive"]["canonical_hash_valid"], "source archive invalid")
         state["balance"] = client.get("/api/v1/credits/balance").json()
         require(
             (
@@ -495,7 +548,7 @@ if args.command == "prepare":
                 state["balance"]["reserved"],
                 state["balance"]["spent_total"],
             )
-            == (104, 80, 16),
+            == (88, 80, 32),
             "fixture balance mismatch",
         )
     # Keep one reviewed, unused quote in the snapshot: it may have been consumed
@@ -730,6 +783,32 @@ elif args.command == "verify":
                 == Image.new("RGB", (4, 4), (201, 15, 35)).tobytes(),
                 "restored protection pixels mismatch",
             )
+        restored_archive = admin(
+            "SELECT jsonb_build_object('receipt_id',receipt_id,'document_sha256',document_sha256,'document',document,'canonical_hash_valid',encode(sha256(convert_to(canonical_document,'UTF8')),'hex')=document_sha256) FROM ops.detection_archives WHERE task_id=%s",
+            (state["tasks"]["protocol_completed"],),
+        )
+        require(
+            restored_archive == state["detection_archive"]
+            and restored_archive["canonical_hash_valid"],
+            "restored synchronous detection archive changed",
+        )
+        require(
+            not (
+                Path(profile["FAKE_PROVIDER_DIR"])
+                / "protocol-restore"
+                / state["tasks"]["protocol_completed"]
+            ).exists(),
+            "protocol local files unexpectedly restored by Fake-only backup",
+        )
+        protocol_report = client.get(
+            "/api/v1/tasks/" + state["tasks"]["protocol_completed"] + "/compliance"
+        )
+        require(
+            protocol_report.status_code == 200
+            and protocol_report.json()["final_sha256"]
+            == restored_archive["document"]["final_sha256"],
+            "restored detection archive final differs from delivered report",
+        )
         for key in ("queued", "known", "unknown", "degraded", "cost_review"):
             require(
                 client.get("/api/v1/tasks/" + state["tasks"][key]).json()["status"] == "uncertain",
@@ -858,7 +937,7 @@ elif args.command == "verify":
         final_balance = client.get("/api/v1/credits/balance").json()
         require(
             (final_balance["available"], final_balance["reserved"], final_balance["spent_total"])
-            == (104, 48, 48),
+            == (88, 48, 64),
             "post-recovery wallet mismatch",
         )
     result["verification"] = {
@@ -870,6 +949,7 @@ elif args.command == "verify":
         "supplier_price_archive_preserved": True,
         "provider_budget_revoked_before_new_intent": True,
         "unit_limits_preserved_without_cross_unit_total": True,
+        "detection_archive_preserved_without_local_files": True,
         "five_fixture_tasks_quarantined": True,
         "cost_estimate_history_and_review_block_preserved": True,
         "detection_delivery_requires_new_review_after_restore": True,

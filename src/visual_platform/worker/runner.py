@@ -60,7 +60,15 @@ class Worker:
                 )
                 return
             attempt = next(a for a in ctx["attempts"] if a["id"] == str(attempt_id))
-            usage = await self.call_provider(self.provider.observation, attempt["step"], attempt)
+            if attempt["step"] == "detect" and getattr(
+                self.provider, "durable_detection_archive", False
+            ):
+                record = await self.detection_payload(task, fence, attempt)
+                usage = self.provider.observation_from_facts(record)
+            else:
+                usage = await self.call_provider(
+                    self.provider.observation, attempt["step"], attempt
+                )
         await self.db(
             "SELECT app.record_protocol_observation($1,$2,$3,$4,$5,$6::jsonb)",
             task,
@@ -97,15 +105,52 @@ class Worker:
             await asyncio.sleep(20)
             await self.db("SELECT app.renew_lease($1,$2,$3)", task, self.owner, fence)
 
-    async def receipt(self, task, fence, attempt, receipt):
+    async def preserve_detection(self, task, attempt, provider_id, digest):
+        payload = await self.call_provider(self.provider.fetch_facts, provider_id)
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
         identity = await self.db(
-            "SELECT app.append_receipt($1,$2,$3,$4,$5)",
+            "SELECT app.append_detection_receipt($1,$2,$3,$4,$5,$6)",
             task,
             attempt,
-            receipt.provider_id,
-            receipt.response_digest,
-            receipt.polling_url,
+            provider_id,
+            digest,
+            canonical,
+            hashlib.sha256(canonical.encode()).hexdigest(),
         )
+        return identity, payload
+
+    async def detection_payload(self, task, fence, attempt):
+        if not getattr(self.provider, "durable_detection_archive", False):
+            return await self.call_provider(self.provider.fetch_facts, attempt["provider_id"])
+        saved = await self.db(
+            "SELECT app.detection_archive($1,$2,$3,$4)",
+            task,
+            self.owner,
+            fence,
+            UUID(attempt["id"]),
+        )
+        if saved is not None:
+            return json.loads(saved)
+        # A pre-migration receipt can be archived once from its existing local facts.
+        _, payload = await self.preserve_detection(
+            task, UUID(attempt["id"]), attempt["provider_id"], attempt["response_digest"]
+        )
+        return payload
+
+    async def receipt(self, task, fence, attempt, receipt, *, step=None):
+        if step == "detect" and getattr(self.provider, "durable_detection_archive", False):
+            identity, _ = await self.preserve_detection(
+                task, attempt, receipt.provider_id, receipt.response_digest
+            )
+        else:
+            identity = await self.db(
+                "SELECT app.append_receipt($1,$2,$3,$4,$5)",
+                task,
+                attempt,
+                receipt.provider_id,
+                receipt.response_digest,
+                receipt.polling_url,
+            )
         await self.db("SELECT app.apply_receipt($1,$2,$3,$4)", task, self.owner, fence, identity)
         await self.cost(task, fence, attempt, "response")
 
@@ -187,7 +232,7 @@ class Worker:
                 "submission_outcome_unknown",
             )
             return False
-        await self.receipt(task, fence, attempt, result)
+        await self.receipt(task, fence, attempt, result, step=step)
         return True
 
     async def asset(self, task, fence, ctx, kind, data, meta):
@@ -321,9 +366,7 @@ class Worker:
                             )
                             return "uncertain"
                         await self.cost(task, fence, UUID(attempt["id"]), "response")
-                        payload = await self.call_provider(
-                            self.provider.fetch_facts, attempt["provider_id"]
-                        )
+                        payload = await self.detection_payload(task, fence, attempt)
                         try:
                             facts = Facts.model_validate(payload["facts"])
                             if payload.get("final_sha256") != final_hash or (

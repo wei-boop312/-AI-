@@ -20,6 +20,7 @@ BASELINE_ENDPOINTS = {
 class ProtocolProvider:
     execution_profile = "offline_protocol_mock"
     report_profile = "offline_protocol_mock"
+    durable_detection_archive = True
 
     def __init__(self, bfl, gemini, *, merchant_accounts=None):
         if not bfl.offline_transport or not gemini.offline_transport:
@@ -111,6 +112,9 @@ class ProtocolProvider:
                 "provider_cost": record["cost"],
             }
         record = self.gemini.fetch_facts(attempt["provider_id"])
+        return self.observation_from_facts(record)
+
+    def observation_from_facts(self, record):
         return {
             "transport": "offline_mock",
             "response_digest": record["response_digest"],
