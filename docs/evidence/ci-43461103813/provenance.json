@@ -1,0 +1,27 @@
+{
+  "run_id": 43461103813,
+  "commit": "0bd5d4b769816c069871aee8d9db8b8f02e48d2d",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43461103813",
+  "artifact_id": 14055614694,
+  "archive_sha256": "da7e6ea6a33260dd0632a48201b8d6b41fea6c2a18218ac5f832e9489ab3c7be",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "434efdd2cf255ec815faf537c2e93f4fb444688e0ca57840e09fb60ca265af86"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "4a21cffc3c8dd6f3e38f090aafb6e2f84268005357cb2ae607f0ea23267ab046"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "5bbdf1f8a476b60a830583e8c8b739133633e0f77afca18bf879d019d0cb9d00"
+    },
+    "browser-production.log": {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "4b989ffe845407ad87f24ed6656e38c188947d1f85aa13a4e6c82167105caa0f"
+    }
+  },
+  "scope": "Original run: 109 unit/41 contracts/121 native passed, including 0029 archival concurrency and 0028 review. Fourth production browser case fails on duplicate appearance field label after product creation; other browser cases pass. Full restoration/Compose/P5-02 not reached. No paid models or deployment. Later label and Hubway changes excluded."
+}
