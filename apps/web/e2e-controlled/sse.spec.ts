@@ -26,7 +26,7 @@ async function setup(page: Page) {
   expect((await page.request.put(u.upload_url, {data, headers: u.headers})).status()).toBe(200);
   expect((await page.request.post('/api/v1/assets/upload-intents/' + u.intent_id + '/complete', {headers})).status()).toBe(200);
   await page.reload();
-  await expect(page.getByText('已归档原图', {exact: true})).toBeVisible();
+  await expect(page.getByText('已归档原图', {exact: true})).toBeVisible();await page.getByLabel('细节保护',{exact:true}).click();await page.locator('.ant-select-dropdown:visible').getByText('无保护 · 不回贴原图像素',{exact:true}).click();
   return account;
 }
 

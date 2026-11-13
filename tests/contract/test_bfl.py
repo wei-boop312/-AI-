@@ -290,7 +290,16 @@ class BflContracts(unittest.TestCase):
             "prompt": "soft light",
             "output": {"width": 256, "height": 256},
             "protection_mode": "pixel_exact",
-            "regions": [],
+            "regions": [
+                {
+                    "source_x": 0,
+                    "source_y": 0,
+                    "width": 1,
+                    "height": 1,
+                    "target_x": 0,
+                    "target_y": 0,
+                }
+            ],
         }
         request = BflRequest.from_canonical(generation, self.png)
         self.assertIn("white background", request.prompt)

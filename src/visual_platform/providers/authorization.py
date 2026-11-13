@@ -11,7 +11,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from visual_platform.domain.schemas import Generation, Target
+from visual_platform.domain.schemas import Generation, Targets
 
 
 def unique_object(pairs):
@@ -33,7 +33,7 @@ class SmokeAuthorization(BaseModel):
     source_path: Annotated[str, Field(min_length=1, max_length=1000)]
     source_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
     generation: Generation
-    targets: Annotated[list[Target], Field(min_length=1, max_length=3)]
+    targets: Targets
     bfl_model: Literal["flux-3-image"] = "flux-3-image"
     gemini_model: Literal["gemini-3.8-flash"] = "gemini-3.8-flash"
     max_generate_calls: Annotated[int, Field(ge=1, le=1)] = 1

@@ -105,6 +105,79 @@ class RuleOperationsTests(PipelineFixture):
             if own:
                 storage.close()
 
+    def test_request_contract_rejections_do_not_create_quotes_tasks_or_freezes(self):
+        before = self.client.get("/api/v1/credits/balance").json()
+        valid = {
+            "product_id": self.product,
+            "source_asset_version_id": self.version,
+            "generation": {
+                "type": "scene",
+                "prompt": "request validation fixture",
+                "output": {"width": 16, "height": 16},
+                "protection_mode": "pixel_exact",
+                "regions": [
+                    {
+                        "source_x": 0,
+                        "source_y": 0,
+                        "width": 1,
+                        "height": 1,
+                        "target_x": 0,
+                        "target_y": 0,
+                    }
+                ],
+            },
+            "targets": [
+                {
+                    "platform": "amazon",
+                    "marketplace": "US",
+                    "category": "generic",
+                    "image_type": "MAIN",
+                }
+            ],
+        }
+        bad = [
+            {**valid, "targets": valid["targets"] * 2},
+            {**valid, "targets": [{**valid["targets"][0], "category": "界" * 101}]},
+            {**valid, "generation": {**valid["generation"], "prompt": ""}},
+            {**valid, "generation": {**valid["generation"], "regions": []}},
+        ]
+        for body in bad:
+            self.assertEqual(
+                self.client.post(
+                    "/api/v1/quotes", json=body, headers=self.write_headers()
+                ).status_code,
+                422,
+            )
+            self.assertEqual(
+                self.client.post(
+                    "/api/v1/tasks",
+                    json={**body, "quote_id": str(uuid4())},
+                    headers={**self.write_headers(), "idempotency-key": str(uuid4())},
+                ).status_code,
+                422,
+            )
+        self.assertEqual(self.client.get("/api/v1/credits/balance").json(), before)
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.quotes WHERE user_id=%s", (self.user,)
+                ).fetchone()[0],
+                0,
+            )
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.generation_tasks WHERE user_id=%s", (self.user,)
+                ).fetchone()[0],
+                0,
+            )
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM app.credit_transactions WHERE user_id=%s AND type='freeze'",
+                    (self.user,),
+                ).fetchone()[0],
+                0,
+            )
+
     def test_v4_three_platform_quote_delivery_and_rule_discovery(self):
         listed = self.client.get("/api/v1/rules/platforms").json()["items"]
         self.assertEqual({row["platform"] for row in listed}, {"amazon", "temu", "ozon"})
@@ -122,7 +195,16 @@ class RuleOperationsTests(PipelineFixture):
                 "prompt": "three-platform offline fixture",
                 "output": {"width": 16, "height": 16},
                 "protection_mode": "pixel_exact",
-                "regions": [],
+                "regions": [
+                    {
+                        "source_x": 0,
+                        "source_y": 0,
+                        "width": 1,
+                        "height": 1,
+                        "target_x": 0,
+                        "target_y": 0,
+                    }
+                ],
             },
             "targets": [
                 {"platform": p, "marketplace": m, "category": "generic", "image_type": "MAIN"}

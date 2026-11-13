@@ -3,7 +3,7 @@ import json
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 from visual_platform.domain.platforms import Platform
 
@@ -31,14 +31,30 @@ class Output(StrictModel):
 
 
 class Generation(StrictModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "allOf": [
+                {
+                    "if": {"properties": {"protection_mode": {"const": "pixel_exact"}}},
+                    "then": {"properties": {"regions": {"minItems": 1}}},
+                },
+                {
+                    "if": {"properties": {"protection_mode": {"const": "none"}}},
+                    "then": {"properties": {"regions": {"maxItems": 0}}},
+                },
+            ]
+        }
+    )
     type: Literal["white_background", "scene", "lifestyle"]
-    prompt: Annotated[str, Field(strict=True, max_length=4000)]
+    prompt: Annotated[str, Field(strict=True, min_length=1, max_length=4000)]
     output: Output
     protection_mode: Literal["pixel_exact", "none"]
     regions: Annotated[list[Region], Field(max_length=20)] = []
 
     @model_validator(mode="after")
     def geometry(self):
+        if self.protection_mode == "pixel_exact" and not self.regions:
+            raise ValueError("pixel_exact requires at least one protection region")
         if self.protection_mode == "none" and self.regions:
             raise ValueError("regions require pixel_exact")
         if (
@@ -62,9 +78,23 @@ class Generation(StrictModel):
 
 class Target(StrictModel):
     platform: Platform
-    marketplace: Annotated[str, Field(strict=True, min_length=1, max_length=40)]
-    category: Annotated[str, Field(strict=True, min_length=1, max_length=255)]
-    image_type: Annotated[str, Field(strict=True, min_length=1, max_length=40)]
+    marketplace: Annotated[str, Field(strict=True, min_length=1, max_length=32)]
+    category: Annotated[str, Field(strict=True, min_length=1, max_length=100)]
+    image_type: Annotated[str, Field(strict=True, min_length=1, max_length=32)]
+
+
+def unique_targets(value: list[Target]) -> list[Target]:
+    identities = {(t.platform, t.marketplace, t.category, t.image_type) for t in value}
+    if len(identities) != len(value):
+        raise ValueError("duplicate targets")
+    return value
+
+
+Targets = Annotated[
+    list[Target],
+    Field(min_length=1, max_length=3, json_schema_extra={"uniqueItems": True}),
+    AfterValidator(unique_targets),
+]
 
 
 class QuoteRequest(StrictModel):
@@ -72,7 +102,7 @@ class QuoteRequest(StrictModel):
     appearance_profile_id: UUID | None = None
     source_asset_version_id: UUID
     generation: Generation
-    targets: Annotated[list[Target], Field(min_length=1, max_length=3)]
+    targets: Targets
 
 
 class TaskRequest(QuoteRequest):

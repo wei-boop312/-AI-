@@ -40,7 +40,16 @@ class TaskApiFixture(AuthApiFixture):
                 "prompt": "test scene",
                 "output": {"width": 10, "height": 10},
                 "protection_mode": "pixel_exact",
-                "regions": [],
+                "regions": [
+                    {
+                        "source_x": 0,
+                        "source_y": 0,
+                        "width": 1,
+                        "height": 1,
+                        "target_x": 0,
+                        "target_y": 0,
+                    }
+                ],
             },
             "targets": [
                 {

@@ -1,13 +1,36 @@
+import asyncio
 import unittest
+from io import BytesIO
 
 from PIL import Image
 
 from visual_platform.domain.wallet import Wallet
 from visual_platform.imaging.paste import Region, protect
 from visual_platform.providers.fake import FakeProvider
+from visual_platform.services.image_job import transform
 
 
 class CoreTests(unittest.TestCase):
+    def test_zero_regions_cannot_produce_or_verify_an_exact_protection_proof(self):
+        image = Image.new("RGB", (10, 10), "red")
+        with self.assertRaises(ValueError):
+            protect(image, image, [])
+        stream = BytesIO()
+        image.save(stream, format="PNG")
+        for verify in [False, True]:
+            with (
+                self.subTest(verify=verify),
+                self.assertRaisesRegex(ValueError, "pixel_protection_failed"),
+            ):
+                asyncio.run(
+                    transform(
+                        stream.getvalue(),
+                        stream.getvalue(),
+                        {"protection_mode": "pixel_exact", "regions": []},
+                        verify=verify,
+                    )
+                )
+
     def test_charge_once(self):
         w = Wallet(100)
         w.freeze("a", 16)

@@ -16,7 +16,7 @@ async function setup(page:Page){
  const headers={'Origin':profile.APP_ORIGIN,'X-CSRF-Token':(await page.context().cookies()).find(c=>c.name==='visual_csrf')!.value};
  const product=await page.request.post('/api/v1/products',{headers,data:{name:'故障验收隔离产品',category:'generic'}});expect(product.status()).toBe(201);const p=await product.json();const data=readFileSync(new URL('../e2e/fixtures/product.png',import.meta.url));
  const intent=await page.request.post('/api/v1/assets/upload-intents',{headers,data:{product_id:p.id,filename:'fixture.png',mime:'image/png',size:data.length}});expect(intent.status()).toBe(201);const u=await intent.json();expect((await page.request.put(u.upload_url,{data,headers:u.headers})).status()).toBe(200);expect((await page.request.post('/api/v1/assets/upload-intents/'+u.intent_id+'/complete',{headers})).status()).toBe(200);
- await page.reload();await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();return {account,headers};
+ await page.reload();await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();await page.getByLabel('细节保护',{exact:true}).click();await page.locator('.ant-select-dropdown:visible').getByText('无保护 · 不回贴原图像素',{exact:true}).click();return {account,headers};
 }
 async function submit(page:Page){
  await page.getByRole('button',{name:'获取报价并继续'}).click();const created=page.waitForResponse(r=>r.url().endsWith('/api/v1/tasks')&&r.request().method()==='POST'&&r.status()===201);await page.getByRole('dialog',{name:'确认本次生成'}).getByRole('button',{name:'确认并创建任务',exact:true}).click();const task=await(await created).json();

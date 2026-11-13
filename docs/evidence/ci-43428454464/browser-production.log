@@ -1,0 +1,41 @@
+
+Running 4 tests using 1 worker
+
+{"canvas_frame_p95_ms":16.700000000004366,"canvas_duration_ms":60657.29999999999,"api_p95_ms":109.3576669999984,"status_counts":{"200":500},"passed":true}
+  ✓  1 e2e/performance.spec.ts:14:1 › 生产构建：4MP、50绘制对象、60秒真实指针及20并发500次非模型API (1.1m)
+{"event":"storage_archive_observed","observation_id":"cbd95c3a-f348-4731-9d96-be588825218e","observed_at":"2026-11-13T12:53:57.764552+00:00","duration_ms":5.908,"outcome":"success"}
+  ✓  2 e2e/recovery.spec.ts:8:1 › 断线恢复、规则报告版本、Cookie刷新和账号隔离 (14.1s)
+  ✓  3 e2e/recovery.spec.ts:47:1 › 不同产品草稿隔离，刷新恢复当前产品且编辑不创建模型任务 (3.3s)
+  ✘  4 e2e/smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 (5.9s)
+
+
+  1) e2e/smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 ───────────────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: '最终成品检查报告' }).getByText('像素保护 · 已通过')
+    Expected: visible
+    Error: strict mode violation: getByRole('dialog', { name: '最终成品检查报告' }).getByText('像素保护 · 已通过') resolved to 3 elements:
+        1) <span>像素保护 · 已通过</span> aka getByText('像素保护 · 已通过').first()
+        2) <span>像素保护 · 已通过</span> aka getByText('像素保护 · 已通过').nth(1)
+        3) <span>像素保护 · 已通过</span> aka getByText('像素保护 · 已通过').nth(2)
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: '最终成品检查报告' }).getByText('像素保护 · 已通过') with timeout 5000ms
+      - waiting for getByRole('dialog', { name: '最终成品检查报告' }).getByText('像素保护 · 已通过')
+
+
+      35 |  await page.getByRole('button',{name:'获取报价并继续'}).click();const confirm=page.getByRole('dialog',{name:'确认本次生成'});await expect(confirm).toBeVisible();const created=page.waitForResponse(r=>r.url().endsWith('/api/v1/tasks')&&r.request().method()==='POST'&&r.status()===201);await confirm.getByRole('button',{name:'确认并创建任务'}).click();const creation=await created;const task=await creation.json();const submitted=creation.request().postDataJSON();expect(submitted.targets.map((t:any)=>[t.platform,t.marketplace])).toEqual([['amazon','US'],['temu','US'],['ozon','RU']]);if(oldTask)await expect(page.locator('.progress-card')).not.toHaveAttribute('data-task-id',oldTask);
+      36 |  await expect(page.getByRole('link',{name:'下载 PNG'})).toBeVisible({timeout:45000});
+    > 37 |  await page.getByRole('button',{name:'查看检查报告'}).click();const report=page.getByRole('dialog',{name:'最终成品检查报告'});await expect(report.getByText('需要人工复核',{exact:true})).toBeVisible();await expect(report.getByText('像素保护 · 已通过')).toBeVisible();await report.getByRole('button',{name:'关闭',exact:true}).click();
+         |                                                                                                                                                                                                                                  ^
+      38 |  const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('link',{name:'下载 PNG'}).click()]);expect(download.suggestedFilename()).toBe('final.png');await download.saveAs(fileURLToPath(new URL('../../../work/browser-final.png',import.meta.url)));
+      39 |  const completed=await(await page.request.get('/api/v1/tasks/'+task.id)).json();writeFileSync(path.join(root,'work/browser-input.json'),JSON.stringify({task_id:task.id,regions:submitted.generation.regions,final_sha256:completed.result.sha256}));execFileSync(py,['scripts/verify_browser_png.py'],{cwd:root});
+      40 |  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:evidence+'browser-result.png',fullPage:true});
+        at /home/runner/work/-AI-/-AI-/apps/web/e2e/smoke.spec.ts:37:226
+
+    Error Context: ../../work/browser-test-results/smoke-真实服务：登录、产品、上传、Konva选区、生成、报告及移动端/error-context.md
+
+  1 failed
+    e2e/smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 ────────────────────────────────────────
+  3 passed (1.6m)

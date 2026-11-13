@@ -24,6 +24,8 @@ class Region:
 
 
 def protect(source: Image.Image, generated: Image.Image, regions: list[Region]) -> bytes:
+    if not regions:
+        raise ValueError("exact protection requires at least one region")
     if source.mode != "RGB" or generated.mode != "RGB":
         raise ValueError("canonical RGB required")
     if source.size != generated.size:

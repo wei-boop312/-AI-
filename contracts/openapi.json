@@ -1696,6 +1696,40 @@
         "title": "AppearanceCreate"
       },
       "Generation": {
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "protection_mode": {
+                  "const": "pixel_exact"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "regions": {
+                  "minItems": 1
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "protection_mode": {
+                  "const": "none"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "regions": {
+                  "maxItems": 0
+                }
+              }
+            }
+          }
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -1709,6 +1743,7 @@
           "prompt": {
             "type": "string",
             "maxLength": 4000,
+            "minLength": 1,
             "title": "Prompt"
           },
           "output": {
@@ -1897,6 +1932,7 @@
             "type": "array",
             "maxItems": 3,
             "minItems": 1,
+            "uniqueItems": true,
             "title": "Targets"
           }
         },
@@ -1968,19 +2004,19 @@
           },
           "marketplace": {
             "type": "string",
-            "maxLength": 40,
+            "maxLength": 32,
             "minLength": 1,
             "title": "Marketplace"
           },
           "category": {
             "type": "string",
-            "maxLength": 255,
+            "maxLength": 100,
             "minLength": 1,
             "title": "Category"
           },
           "image_type": {
             "type": "string",
-            "maxLength": 40,
+            "maxLength": 32,
             "minLength": 1,
             "title": "Image Type"
           }
@@ -2029,6 +2065,7 @@
             "type": "array",
             "maxItems": 3,
             "minItems": 1,
+            "uniqueItems": true,
             "title": "Targets"
           },
           "quote_id": {

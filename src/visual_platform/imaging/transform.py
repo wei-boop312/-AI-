@@ -19,6 +19,8 @@ def main():
     with Image.open(config["target"]) as im:
         target = im.copy()
     regions = [Region(**r) for r in config["regions"]]
+    if config["mode"] == "pixel_exact" and not regions:
+        raise ValueError("exact protection requires at least one region")
     if config["action"] == "protect":
         if config["mode"] == "pixel_exact":
             result = protect(source, target, regions)

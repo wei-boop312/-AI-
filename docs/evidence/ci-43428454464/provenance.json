@@ -1,0 +1,22 @@
+{
+  "run_id": 43428454464,
+  "commit": "3ce71265ad993a7427058da1975981ed1e69f997",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43428454464",
+  "archive_sha256": "168e7b82735282db0e4871caf38004f15ec9d014a82c382442d825108fd3dabb",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "2999dd8d8a9a2ac5803511f2215fd7ce59a72cb4b40a3b9d10f3e3ff21c53d63"
+    },
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "01410dcfa6e52b5749a445371bcb14bb20479d617a8a9ad9ba57307cb3051bff"
+    },
+    "browser-production.log": {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "0c22f9e15018e38e88e121b7d4ea167e33c74e27d8785a1827b0c7b0b3232ac0"
+    }
+  },
+  "scope": "Original failure evidence: native V4 three-platform delivery and SQL guards passed; browser reached all three platform reports but one-platform pixel-label locator was ambiguous. Later controlled/restore/Compose gates not reached. Raw zip private."
+}

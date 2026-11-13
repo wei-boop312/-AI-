@@ -1,0 +1,817 @@
+test_cancel_refund_once (test_accounting.AccountingTests.test_cancel_refund_once) ... ok
+test_concurrent_replay_one_freeze_and_outbox (test_accounting.AccountingTests.test_concurrent_replay_one_freeze_and_outbox) ... ok
+test_cross_user_reference_rejected (test_accounting.AccountingTests.test_cross_user_reference_rejected) ... ok
+test_quote_consumption_and_append_only (test_accounting.AccountingTests.test_quote_consumption_and_append_only) ... ok
+test_rls_and_financial_permissions (test_accounting.AccountingTests.test_rls_and_financial_permissions) ... ok
+test_animation_rejected (test_assets.AssetTests.test_animation_rejected) ... {"event":"api_request_observed","observation_id":"d8ce7c27-0176-4468-8cef-9ce420f924b7","observed_at":"2026-11-13T12:51:38.776511+00:00","duration_ms":132.772,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"2dba3ad0-e7f2-483f-bee7-9900c5aa0c94","observed_at":"2026-11-13T12:51:38.786835+00:00","duration_ms":8.908,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"fa6307f4-0da6-45e2-a3b4-967de8300cf7","observed_at":"2026-11-13T12:51:38.808885+00:00","duration_ms":15.008,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c95641f0-9cae-42d5-b775-0862589a7f57","observed_at":"2026-11-13T12:51:43.508856+00:00","duration_ms":62.265,"status":422,"outcome":"completed"}
+ok
+test_concurrent_complete_only_two_versions (test_assets.AssetTests.test_concurrent_complete_only_two_versions) ... {"event":"api_request_observed","observation_id":"a891aac7-5338-424e-974e-f14d3007e43a","observed_at":"2026-11-13T12:51:43.774989+00:00","duration_ms":133.908,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"82566a2f-6c9b-4da2-82ba-58f31f134188","observed_at":"2026-11-13T12:51:43.784805+00:00","duration_ms":8.616,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"80ebab1c-ebaf-4d8f-a17b-6d50176fb177","observed_at":"2026-11-13T12:51:43.801468+00:00","duration_ms":13.678,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"546310b1-074c-4523-9049-7659b2a42018","observed_at":"2026-11-13T12:51:43.835918+00:00","duration_ms":15.183,"status":409,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"c67d3abb-2edd-4121-b363-eb618e4f4af3","observed_at":"2026-11-13T12:51:43.895491+00:00","duration_ms":6.103,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d4b0003a-438c-4b25-b017-2771788b69a4","observed_at":"2026-11-13T12:51:43.900413+00:00","duration_ms":4.701,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"27220e96-c059-40fe-b91d-0eb7fd414beb","observed_at":"2026-11-13T12:51:43.904999+00:00","duration_ms":84.488,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1d9d7580-8a9a-4852-9483-947c00a2d634","observed_at":"2026-11-13T12:51:43.909754+00:00","duration_ms":3.486,"status":200,"outcome":"completed"}
+ok
+test_cross_user_upload_intent_hidden (test_assets.AssetTests.test_cross_user_upload_intent_hidden) ... {"event":"api_request_observed","observation_id":"16638cdf-57fb-4a2b-bbdb-3eb81e10901b","observed_at":"2026-11-13T12:51:44.172536+00:00","duration_ms":129.887,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1abd7ede-e1f4-47bf-aa64-0fe7816f407c","observed_at":"2026-11-13T12:51:44.181806+00:00","duration_ms":8.084,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4fa3cd85-19fb-47f6-9fb6-55f30cb44ec9","observed_at":"2026-11-13T12:51:44.194173+00:00","duration_ms":11.278,"status":404,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a701db43-7ad7-4f8c-904f-cef7c7329a8d","observed_at":"2026-11-13T12:51:44.197789+00:00","duration_ms":2.607,"status":404,"outcome":"completed"}
+ok
+test_declared_upload_limits (test_assets.AssetTests.test_declared_upload_limits) ... {"event":"api_request_observed","observation_id":"38e374b6-1fc6-4a9b-88c9-afff4351fd7d","observed_at":"2026-11-13T12:51:44.457871+00:00","duration_ms":132.308,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e22c148a-396e-4e69-ab80-3cfd902a7066","observed_at":"2026-11-13T12:51:44.467382+00:00","duration_ms":8.272,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1796c8d4-fd07-4cc7-8374-6cc96f55dd94","observed_at":"2026-11-13T12:51:44.480973+00:00","duration_ms":12.461,"status":422,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"2917be9f-b1ca-4c69-8bf2-542ef18f44d6","observed_at":"2026-11-13T12:51:44.483789+00:00","duration_ms":1.763,"status":422,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4ba48be8-dd4d-406f-a9dd-0422befede6a","observed_at":"2026-11-13T12:51:44.486437+00:00","duration_ms":1.644,"status":422,"outcome":"completed"}
+ok
+test_invalid_decode_and_mime_are_rejected (test_assets.AssetTests.test_invalid_decode_and_mime_are_rejected) ... {"event":"api_request_observed","observation_id":"338aa0cc-2519-4c65-bba4-f47f32f99f0d","observed_at":"2026-11-13T12:51:44.745180+00:00","duration_ms":130.167,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b5598db4-ca49-4bbc-b7f5-d4891ab5bc75","observed_at":"2026-11-13T12:51:44.755001+00:00","duration_ms":8.635,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"fc944e87-3046-4816-82a0-8e9d1fa2acd5","observed_at":"2026-11-13T12:51:44.769885+00:00","duration_ms":13.62,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"13797215-c221-43b3-aac7-8cffd8e51680","observed_at":"2026-11-13T12:51:44.867826+00:00","duration_ms":81.089,"status":422,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5f84ad98-ed80-4ac9-a821-2f8a80cf80d1","observed_at":"2026-11-13T12:51:44.871914+00:00","duration_ms":2.843,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"64077853-17a1-48c3-b595-f0f9c42dc6a3","observed_at":"2026-11-13T12:51:44.876949+00:00","duration_ms":3.895,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"839f3d23-5667-4287-b32d-909f3805b552","observed_at":"2026-11-13T12:51:44.952549+00:00","duration_ms":58.305,"status":422,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d2ff63ef-e8ab-45f9-9bdf-a6f608d91ebc","observed_at":"2026-11-13T12:51:44.956163+00:00","duration_ms":2.416,"status":200,"outcome":"completed"}
+ok
+test_known_other_user_asset_and_intent_are_hidden (test_assets.AssetTests.test_known_other_user_asset_and_intent_are_hidden) ... {"event":"api_request_observed","observation_id":"058072ae-0956-44f2-9926-b504bce439c1","observed_at":"2026-11-13T12:51:45.218545+00:00","duration_ms":131.356,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"bec792f9-af3b-440c-a01c-68b6aa23cdc1","observed_at":"2026-11-13T12:51:45.228022+00:00","duration_ms":8.302,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a0f8e52e-c0b8-488b-87ef-18f272c30e0f","observed_at":"2026-11-13T12:51:45.243631+00:00","duration_ms":14.044,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"9d4abaf2-384e-429d-a03e-342356c199b9","observed_at":"2026-11-13T12:51:45.330415+00:00","duration_ms":7.832,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"93c1565b-a85e-4ae3-8a4d-d7cd39b917cf","observed_at":"2026-11-13T12:51:45.335446+00:00","duration_ms":4.783,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"57eef6a6-9442-4f36-830d-07dad9b316e2","observed_at":"2026-11-13T12:51:45.340167+00:00","duration_ms":79.236,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a41dadc8-f8b8-454c-bc5e-4880571e2097","observed_at":"2026-11-13T12:51:45.570780+00:00","duration_ms":128.893,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"db00befb-5a76-4fec-983f-e29671f817ba","observed_at":"2026-11-13T12:51:45.574928+00:00","duration_ms":2.984,"status":404,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b7893810-b977-43fb-b48e-68ae9cd02218","observed_at":"2026-11-13T12:51:45.579164+00:00","duration_ms":3.138,"status":404,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"2b42a160-dcc7-4e7a-806c-61583bf19cda","observed_at":"2026-11-13T12:51:45.582835+00:00","duration_ms":2.613,"status":404,"outcome":"completed"}
+ok
+test_storage_conditional_put_preserves_original (test_assets.AssetTests.test_storage_conditional_put_preserves_original) ... {"event":"api_request_observed","observation_id":"c7684e1d-a43d-4038-92a3-58ab1de97500","observed_at":"2026-11-13T12:51:45.844930+00:00","duration_ms":129.01,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e8633f68-61e0-4b0b-b597-674a3d970386","observed_at":"2026-11-13T12:51:45.854396+00:00","duration_ms":8.25,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"99c523f8-14bd-4160-bbd0-eb30d0968bb8","observed_at":"2026-11-13T12:51:45.862922+00:00","duration_ms":8.212,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"7e464636-76fd-4f36-8523-790f986733bf","observed_at":"2026-11-13T12:51:45.868102+00:00","duration_ms":5.087,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"902b4dbc-a322-4af3-b4d8-94ccba532a61","observed_at":"2026-11-13T12:51:45.871654+00:00","duration_ms":3.461,"outcome":"failure"}
+ok
+test_upload_normalize_private_download_and_replay (test_assets.AssetTests.test_upload_normalize_private_download_and_replay) ... {"event":"api_request_observed","observation_id":"6b34acb4-82b4-4ba1-b5aa-dcaf5b98e6e8","observed_at":"2026-11-13T12:51:46.134459+00:00","duration_ms":134.004,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"75d7f5ab-6171-403b-a726-60ab0d00339b","observed_at":"2026-11-13T12:51:46.144409+00:00","duration_ms":8.774,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"01589d06-0f28-40f1-a103-703471bff4d2","observed_at":"2026-11-13T12:51:46.159410+00:00","duration_ms":13.54,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"92d2d6f8-2bb6-488f-be56-c60feba0d769","observed_at":"2026-11-13T12:51:46.244056+00:00","duration_ms":6.434,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"8de7066c-0d1c-43cc-8fb0-afc36ffa11eb","observed_at":"2026-11-13T12:51:46.248938+00:00","duration_ms":4.622,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"6feed5e4-0b39-494b-a91d-ccbf7d4a04c2","observed_at":"2026-11-13T12:51:46.253666+00:00","duration_ms":77.066,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"43bd18a4-f6a5-4f7e-9dc2-e22001773f47","observed_at":"2026-11-13T12:51:46.258326+00:00","duration_ms":3.478,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9a45dbfb-d24d-4305-a78d-453cd6130222","observed_at":"2026-11-13T12:51:46.262933+00:00","duration_ms":3.529,"status":302,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"43887c3f-8cdf-404c-b538-58a7d0145c37","observed_at":"2026-11-13T12:51:46.302814+00:00","duration_ms":3.165,"status":302,"outcome":"completed"}
+ok
+test_disabled_access_immediate (test_auth_api.AuthApiTests.test_disabled_access_immediate) ... {"event":"api_request_observed","observation_id":"d993fc8b-1815-4753-943f-ea5e4fab0043","observed_at":"2026-11-13T12:51:46.622377+00:00","duration_ms":133.756,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e9a56f34-4347-44a9-b71b-6044ee0fae6b","observed_at":"2026-11-13T12:51:46.633482+00:00","duration_ms":2.195,"status":401,"outcome":"completed"}
+ok
+test_disabled_account_and_rate_limit (test_auth_api.AuthApiTests.test_disabled_account_and_rate_limit) ... {"event":"api_request_observed","observation_id":"7cec080f-7141-4134-b340-5c980a59e6e7","observed_at":"2026-11-13T12:51:46.850515+00:00","duration_ms":98.25,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b0d09b9b-a64b-4a9a-9a58-5a0ad476cb27","observed_at":"2026-11-13T12:51:46.948223+00:00","duration_ms":96.634,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"195b7383-859d-46c9-a01d-f9b4b271a9a6","observed_at":"2026-11-13T12:51:47.043969+00:00","duration_ms":94.698,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c6d17d83-6315-489e-973d-220c6162bba3","observed_at":"2026-11-13T12:51:47.141171+00:00","duration_ms":95.996,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c40be283-065f-426d-a090-380109d1c6c5","observed_at":"2026-11-13T12:51:47.235428+00:00","duration_ms":93.2,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"344a3ba7-70fd-422f-b876-b78788effb5a","observed_at":"2026-11-13T12:51:47.329567+00:00","duration_ms":93.087,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"69f663c9-8a07-4b80-a92a-1a7a7524312b","observed_at":"2026-11-13T12:51:47.422296+00:00","duration_ms":91.617,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3157c27b-abf2-4d64-97d1-9d1ef80e74c9","observed_at":"2026-11-13T12:51:47.516871+00:00","duration_ms":93.537,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3fd1c07f-896f-4de2-996f-6f1126aa3815","observed_at":"2026-11-13T12:51:47.612892+00:00","duration_ms":94.902,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9b840e8f-8a70-41c1-a766-977f5d34e2c1","observed_at":"2026-11-13T12:51:47.709012+00:00","duration_ms":95.047,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d2c0d16d-76c0-4e1a-b635-94cedfdefe97","observed_at":"2026-11-13T12:51:47.712369+00:00","duration_ms":2.296,"status":429,"outcome":"completed"}
+ok
+test_ip_limit_is_shared_across_account_names (test_auth_api.AuthApiTests.test_ip_limit_is_shared_across_account_names) ... {"event":"api_request_observed","observation_id":"520345ac-8919-487b-918b-7dba700fe099","observed_at":"2026-11-13T12:51:47.844702+00:00","duration_ms":3.639,"status":429,"outcome":"completed"}
+ok
+test_login_logout_revokes_access (test_auth_api.AuthApiTests.test_login_logout_revokes_access) ... {"event":"api_request_observed","observation_id":"d93a9816-823a-4053-9e5e-341fb6d321e2","observed_at":"2026-11-13T12:51:48.092403+00:00","duration_ms":130.048,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"47341257-b4f3-437b-a555-2b41de0915bd","observed_at":"2026-11-13T12:51:48.095704+00:00","duration_ms":2.08,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"748f1769-857a-4be4-8b32-2453df4bc248","observed_at":"2026-11-13T12:51:48.098898+00:00","duration_ms":2.157,"status":204,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ae611a9b-fb31-40a7-a2d1-0d7e7130b550","observed_at":"2026-11-13T12:51:48.101285+00:00","duration_ms":1.488,"status":401,"outcome":"completed"}
+ok
+test_origin_csrf_and_extra_identity (test_auth_api.AuthApiTests.test_origin_csrf_and_extra_identity) ... {"event":"api_request_observed","observation_id":"8af04fef-be75-4f33-a3a8-c8f6d3404aa2","observed_at":"2026-11-13T12:51:48.221624+00:00","duration_ms":0.441,"status":403,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7dfc9b46-6a86-41cf-9fc3-ddda140e8fb5","observed_at":"2026-11-13T12:51:48.350639+00:00","duration_ms":128.114,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3e7231b5-856b-4270-a173-39f76a656307","observed_at":"2026-11-13T12:51:48.352094+00:00","duration_ms":0.334,"status":403,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"127eb3fb-e218-4648-8a4a-df15a7fe70bb","observed_at":"2026-11-13T12:51:48.362905+00:00","duration_ms":9.825,"status":422,"outcome":"completed"}
+ok
+test_private_account_creation_only_admin (test_auth_api.AuthApiTests.test_private_account_creation_only_admin) ... {"event":"api_request_observed","observation_id":"e0e2aad2-97e4-44d7-bbfd-6e42c8eb36e8","observed_at":"2026-11-13T12:51:48.810357+00:00","duration_ms":129.81,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4c152cb0-93b0-422a-bbfa-fdb0fd539580","observed_at":"2026-11-13T12:51:48.820397+00:00","duration_ms":8.885,"status":200,"outcome":"completed"}
+ok
+test_products_pagination_revision_archive_and_isolation (test_auth_api.AuthApiTests.test_products_pagination_revision_archive_and_isolation) ... {"event":"api_request_observed","observation_id":"af68ff79-6a15-451b-b19b-9d81dbc18bdb","observed_at":"2026-11-13T12:51:49.074132+00:00","duration_ms":128.367,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"66948e19-34a0-470d-9d11-c15c2b19dfe1","observed_at":"2026-11-13T12:51:49.083874+00:00","duration_ms":8.525,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c1cac45f-f7df-41c7-8c97-54ae5718f39e","observed_at":"2026-11-13T12:51:49.087520+00:00","duration_ms":2.523,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0847931f-75ec-4992-9e29-fca636bf5ff2","observed_at":"2026-11-13T12:51:49.090911+00:00","duration_ms":2.373,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"fbcfe108-9b6c-4c5c-a26b-55fa690ec340","observed_at":"2026-11-13T12:51:49.094806+00:00","duration_ms":2.927,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b454903c-bfbe-434e-b412-ed91fdfac1ae","observed_at":"2026-11-13T12:51:49.098042+00:00","duration_ms":2.197,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"aa50ad59-e53f-4a3c-be57-e240fd6b47c5","observed_at":"2026-11-13T12:51:49.102278+00:00","duration_ms":3.199,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cb02fde7-e249-43ac-a892-ef2fa3378f87","observed_at":"2026-11-13T12:51:49.105402+00:00","duration_ms":2.164,"status":409,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e7f2a171-4852-43d7-af4c-482a75681251","observed_at":"2026-11-13T12:51:49.115392+00:00","duration_ms":2.502,"status":404,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3659e361-1105-4ac4-b5b9-945fb8ba4b6d","observed_at":"2026-11-13T12:51:49.118522+00:00","duration_ms":2.25,"status":204,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"99cb3912-4cbe-4e9f-922f-a6473b7db1c6","observed_at":"2026-11-13T12:51:49.121331+00:00","duration_ms":1.919,"status":200,"outcome":"completed"}
+ok
+test_rotation_replay_revokes_family (test_auth_api.AuthApiTests.test_rotation_replay_revokes_family) ... {"event":"api_request_observed","observation_id":"d2e2be53-6e41-4558-8252-75af25811b13","observed_at":"2026-11-13T12:51:49.369023+00:00","duration_ms":126.716,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"eb80eda9-4388-41b0-8d18-2097b5f3fe21","observed_at":"2026-11-13T12:51:49.405366+00:00","duration_ms":35.145,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"26096738-d1af-4003-b148-c5b14a2d63d3","observed_at":"2026-11-13T12:51:49.408291+00:00","duration_ms":1.855,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3c2ac421-38e9-4673-98d1-3e6f83039b89","observed_at":"2026-11-13T12:51:49.411567+00:00","duration_ms":2.271,"status":401,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1248b4e2-4e97-4685-a9f0-042b0a209eb1","observed_at":"2026-11-13T12:51:49.414011+00:00","duration_ms":1.465,"status":401,"outcome":"completed"}
+ok
+test_ack_after_recoverable_archive_failure_uses_db_scanner (test_broker.BrokerTests.test_ack_after_recoverable_archive_failure_uses_db_scanner) ... {"event":"api_request_observed","observation_id":"8736653a-6552-4c6a-93e5-cf61573170ea","observed_at":"2026-11-13T12:51:49.746519+00:00","duration_ms":134.498,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b220b89b-d9a0-44f1-a0fe-719f45dcbfb6","observed_at":"2026-11-13T12:51:49.755912+00:00","duration_ms":8.196,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d06b2c88-32a4-4d09-9dca-a9026cc833c4","observed_at":"2026-11-13T12:51:49.771535+00:00","duration_ms":14.065,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"1524db37-03a3-4235-b412-3d37288140f3","observed_at":"2026-11-13T12:51:49.854282+00:00","duration_ms":6.988,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"9e7f172a-bb4f-4841-8e76-e5f2f8f41609","observed_at":"2026-11-13T12:51:49.858841+00:00","duration_ms":4.342,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"1c0d1549-f42d-4f17-9ad9-80c631cec471","observed_at":"2026-11-13T12:51:49.863307+00:00","duration_ms":74.641,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"34d35fac-a972-4efe-b694-5f96520ae5f3","observed_at":"2026-11-13T12:51:49.879411+00:00","duration_ms":6.757,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0dff0fec-3f4b-483e-8686-f5cacfa114b8","observed_at":"2026-11-13T12:51:49.888318+00:00","duration_ms":7.724,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"d623d660-34ee-4d6c-8dff-716a32cb126c","observed_at":"2026-11-13T12:51:50.097030+00:00","duration_ms":6.775,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d438b0c9-a9df-4f6b-88db-891a304aaea2","observed_at":"2026-11-13T12:51:50.170855+00:00","duration_ms":5.818,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"03c60835-0d87-4f6a-a6cc-1fa897d2a2f2","observed_at":"2026-11-13T12:51:50.245417+00:00","duration_ms":5.817,"outcome":"success"}
+ok
+test_commit_before_ack_redelivery_does_not_repeat_charge (test_broker.BrokerTests.test_commit_before_ack_redelivery_does_not_repeat_charge) ... {"event":"api_request_observed","observation_id":"2e915962-16d7-44b0-8793-fcc48ec3a37f","observed_at":"2026-11-13T12:51:50.552521+00:00","duration_ms":129.199,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"eb0d38e8-bfd3-4ad7-bb5d-6f73d64e86d7","observed_at":"2026-11-13T12:51:50.561945+00:00","duration_ms":8.225,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"85b67be9-fec6-4119-a745-624629051c58","observed_at":"2026-11-13T12:51:50.577454+00:00","duration_ms":14.073,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"67542fb8-13a0-4979-a11d-19c0a221bc76","observed_at":"2026-11-13T12:51:50.658596+00:00","duration_ms":6.105,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"960cf612-000b-4713-b06b-8e14596db904","observed_at":"2026-11-13T12:51:50.663162+00:00","duration_ms":4.327,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"f62fdf7e-1bd8-402d-8006-3cf0c8662059","observed_at":"2026-11-13T12:51:50.667796+00:00","duration_ms":73.184,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"812cb20d-13d3-422a-b9af-7dba7e3a0547","observed_at":"2026-11-13T12:51:50.683590+00:00","duration_ms":6.247,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b72fb55a-c385-4cfb-af4a-46f9965dd99a","observed_at":"2026-11-13T12:51:50.692035+00:00","duration_ms":7.346,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"eecd5c8e-bd12-4086-9cb6-140bfd71ca42","observed_at":"2026-11-13T12:51:50.808482+00:00","duration_ms":6.596,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"f91c8372-4a73-4e7a-90b6-f04c979b6f47","observed_at":"2026-11-13T12:51:50.884372+00:00","duration_ms":5.9,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"8b2630ec-e228-4af1-8db7-423c21331e88","observed_at":"2026-11-13T12:51:50.960956+00:00","duration_ms":6.129,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"8f2339bb-6d1c-4491-a02c-1b86a077bb2c","observed_at":"2026-11-13T12:51:50.989713+00:00","duration_ms":2.689,"status":200,"outcome":"completed"}
+ok
+test_confirmed_persistent_delivery_runs_full_pipeline (test_broker.BrokerTests.test_confirmed_persistent_delivery_runs_full_pipeline) ... {"event":"api_request_observed","observation_id":"f7b2bfc1-f8c6-432b-b143-cf068a8883e7","observed_at":"2026-11-13T12:51:51.251292+00:00","duration_ms":128.18,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6550c7ca-d794-49af-8444-39c22b1caee8","observed_at":"2026-11-13T12:51:51.260702+00:00","duration_ms":8.231,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"195e697e-d9c7-4145-97d5-ba2972181be6","observed_at":"2026-11-13T12:51:51.275919+00:00","duration_ms":13.767,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"25a4b4ce-c70f-49e9-b144-02f34554d13b","observed_at":"2026-11-13T12:51:51.357822+00:00","duration_ms":6.138,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e8e424e9-72f8-4afa-9ed4-1a4348411402","observed_at":"2026-11-13T12:51:51.362493+00:00","duration_ms":4.458,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"3fdbfc26-acc1-490c-bf48-0f3649a696fe","observed_at":"2026-11-13T12:51:51.366924+00:00","duration_ms":73.927,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e7ad2111-039c-43cd-a477-7fb828141d3d","observed_at":"2026-11-13T12:51:51.382575+00:00","duration_ms":6.293,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d44b8c89-8d24-4082-a5ec-4a9d6cbf5557","observed_at":"2026-11-13T12:51:51.390799+00:00","duration_ms":7.137,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"8c624a60-4780-4ab9-a537-08d680a1caaf","observed_at":"2026-11-13T12:51:51.512695+00:00","duration_ms":6.699,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"9e3c251d-5422-40ae-9ba7-85ed310067d1","observed_at":"2026-11-13T12:51:51.588170+00:00","duration_ms":5.953,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"7a95507d-ab4e-47d6-9348-fab25dceb8a3","observed_at":"2026-11-13T12:51:51.664709+00:00","duration_ms":5.924,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"0c2ac8f2-f4b8-48ec-b8d2-7a4635a997b1","observed_at":"2026-11-13T12:51:51.691140+00:00","duration_ms":3.252,"status":200,"outcome":"completed"}
+ok
+test_invalid_body_is_dead_lettered (test_broker.BrokerTests.test_invalid_body_is_dead_lettered) ... {"event":"api_request_observed","observation_id":"bf7d43ee-56a8-4c85-afd1-a922b39d5893","observed_at":"2026-11-13T12:51:51.954149+00:00","duration_ms":135.614,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d129a1fd-adcb-4c84-b318-6146c7539416","observed_at":"2026-11-13T12:51:51.963545+00:00","duration_ms":8.152,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b0335fb0-c32e-4fb0-9372-b2c444688dcc","observed_at":"2026-11-13T12:51:51.979215+00:00","duration_ms":14.18,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"5a0e8104-4f5b-42fd-aa84-05750bccd76d","observed_at":"2026-11-13T12:51:52.060351+00:00","duration_ms":6.003,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d8835266-d6bb-48c2-be89-d492ac70622c","observed_at":"2026-11-13T12:51:52.065194+00:00","duration_ms":4.637,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"23c3f07c-5574-415a-8415-75876c77ca22","observed_at":"2026-11-13T12:51:52.069655+00:00","duration_ms":73.451,"status":200,"outcome":"completed"}
+ok
+test_lost_confirmation_duplicate_does_not_regenerate (test_broker.BrokerTests.test_lost_confirmation_duplicate_does_not_regenerate) ... {"event":"api_request_observed","observation_id":"45200455-3e01-4aab-93f8-f344e16c8bda","observed_at":"2026-11-13T12:51:52.445620+00:00","duration_ms":133.041,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7a5a87b8-0d48-4e40-a26f-df5d530ee120","observed_at":"2026-11-13T12:51:52.455070+00:00","duration_ms":8.193,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"2e1960ef-5562-4041-a45c-fc89b894bcfc","observed_at":"2026-11-13T12:51:52.470559+00:00","duration_ms":13.982,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"7cfaf1a9-20d7-4b9b-9802-13d7a1dbce4b","observed_at":"2026-11-13T12:51:52.553312+00:00","duration_ms":6.341,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"8d55308f-4c5c-441c-a8d6-4efde4968b73","observed_at":"2026-11-13T12:51:52.558115+00:00","duration_ms":4.581,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"c23e695e-4d64-4d55-827a-3a772dc7a022","observed_at":"2026-11-13T12:51:52.562973+00:00","duration_ms":75.233,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"83921734-2423-44e9-afee-776d0ec789b1","observed_at":"2026-11-13T12:51:52.579513+00:00","duration_ms":6.381,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"449aceb2-7684-4c53-973e-b1e209f54c46","observed_at":"2026-11-13T12:51:52.587800+00:00","duration_ms":7.166,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"f4089ba8-a7f8-46d5-a5a5-42eb929f6986","observed_at":"2026-11-13T12:51:52.711964+00:00","duration_ms":6.793,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"0497a4fa-9069-4023-be2b-35ed3c3b48e9","observed_at":"2026-11-13T12:51:52.785682+00:00","duration_ms":5.587,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ba0b16d4-cca0-4c16-8d62-35b5aa9ccf49","observed_at":"2026-11-13T12:51:52.861745+00:00","duration_ms":5.801,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"521a8afd-ec44-4673-a814-291bb462f423","observed_at":"2026-11-13T12:51:52.893378+00:00","duration_ms":2.763,"status":200,"outcome":"completed"}
+ok
+test_recovery_limit_persists_manual_queue_message (test_broker.BrokerTests.test_recovery_limit_persists_manual_queue_message) ... {"event":"api_request_observed","observation_id":"431c65fe-0fbf-437b-b7fc-abc336524079","observed_at":"2026-11-13T12:51:53.155035+00:00","duration_ms":128.946,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8e3193b9-6bd2-45fd-98a6-36c955d98af4","observed_at":"2026-11-13T12:51:53.164457+00:00","duration_ms":8.205,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d6b5268d-9ec2-44be-9214-581f07730fdb","observed_at":"2026-11-13T12:51:53.179866+00:00","duration_ms":13.936,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"210f7e8b-7562-40f8-8d82-118324af24ab","observed_at":"2026-11-13T12:51:53.262781+00:00","duration_ms":6.225,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"f8841b47-342f-4c76-a7e3-17ce4df26f82","observed_at":"2026-11-13T12:51:53.267677+00:00","duration_ms":4.68,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"4f07a15a-688c-42f5-a279-e05c0b0a0268","observed_at":"2026-11-13T12:51:53.272200+00:00","duration_ms":75.096,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"55da8190-b80c-4e3c-bb44-5cc2b36dfeb8","observed_at":"2026-11-13T12:51:53.287926+00:00","duration_ms":6.214,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d1f90d1b-07cf-4b8e-a58f-b5d288bf9650","observed_at":"2026-11-13T12:51:53.296175+00:00","duration_ms":7.036,"status":201,"outcome":"completed"}
+ok
+test_unroutable_publish_keeps_outbox_pending (test_broker.BrokerTests.test_unroutable_publish_keeps_outbox_pending) ... {"event":"api_request_observed","observation_id":"79e09227-0b87-411c-8686-172588e690a1","observed_at":"2026-11-13T12:51:53.665187+00:00","duration_ms":131.141,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9dc22589-7353-4574-8e3f-cd0d31e6e020","observed_at":"2026-11-13T12:51:53.674687+00:00","duration_ms":8.268,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d368e57a-5dbc-424a-b6f4-a1321233e130","observed_at":"2026-11-13T12:51:53.690358+00:00","duration_ms":14.235,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"a7cc97db-383a-4ea9-ac9e-a473fa2bd590","observed_at":"2026-11-13T12:51:53.771411+00:00","duration_ms":6.109,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"281326b2-847b-4786-a7a8-9e96afff7208","observed_at":"2026-11-13T12:51:53.776293+00:00","duration_ms":4.649,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"feba099e-d31c-4ef9-a617-9b247847c958","observed_at":"2026-11-13T12:51:53.780944+00:00","duration_ms":73.445,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cfcd5643-dabc-449e-98dc-a7c18730c487","observed_at":"2026-11-13T12:51:53.796961+00:00","duration_ms":6.353,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d04438d8-e717-4981-a893-efa15b2a7cff","observed_at":"2026-11-13T12:51:53.805518+00:00","duration_ms":7.405,"status":201,"outcome":"completed"}
+ok
+test_duplicate_phase_events_are_coalesced_and_aggregate_role_cannot_read_rows (test_business_metrics.BusinessMetricsTests.test_duplicate_phase_events_are_coalesced_and_aggregate_role_cannot_read_rows) ... {"event":"api_request_observed","observation_id":"78e43fae-a6d9-419d-8e9d-71bcce6b6341","observed_at":"2026-11-13T12:51:54.348528+00:00","duration_ms":132.67,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5a3756d2-f934-441e-b3ee-9eef53b6ab89","observed_at":"2026-11-13T12:51:54.357884+00:00","duration_ms":8.157,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"86ee80b3-489c-4890-bccb-a771f7c5afb5","observed_at":"2026-11-13T12:51:54.373587+00:00","duration_ms":14.248,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"9d4dc9dd-1bf2-4614-8fe3-c04b62d1f647","observed_at":"2026-11-13T12:51:54.455364+00:00","duration_ms":6.322,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"28501d36-607d-43b8-84fb-351b31431137","observed_at":"2026-11-13T12:51:54.460294+00:00","duration_ms":4.705,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"515bb350-0f7a-4cb7-8e49-f28c77c973ad","observed_at":"2026-11-13T12:51:54.464964+00:00","duration_ms":74.155,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"37c4b341-fb98-491e-aafb-6fcbd200c409","observed_at":"2026-11-13T12:51:54.481003+00:00","duration_ms":6.355,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c5fcdc5f-31d5-4f37-b992-5710a6802c45","observed_at":"2026-11-13T12:51:54.489484+00:00","duration_ms":7.296,"status":201,"outcome":"completed"}
+ok
+test_real_offline_pipeline_populates_aggregates_without_user_or_request_contents (test_business_metrics.BusinessMetricsTests.test_real_offline_pipeline_populates_aggregates_without_user_or_request_contents) ... {"event":"api_request_observed","observation_id":"4c045971-50a4-402c-a851-3424444c33fa","observed_at":"2026-11-13T12:51:54.795577+00:00","duration_ms":131.276,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9e17b61b-2c6e-4b4a-b650-7ad193bb72f0","observed_at":"2026-11-13T12:51:54.805634+00:00","duration_ms":8.877,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"aaa6193f-e368-42f2-92f5-ccb28de9e431","observed_at":"2026-11-13T12:51:54.821027+00:00","duration_ms":13.984,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"044eef3d-bba5-46a8-9469-d57be116d9da","observed_at":"2026-11-13T12:51:54.905193+00:00","duration_ms":6.392,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"9e6ca69f-1b3d-4316-b44f-033d85be0223","observed_at":"2026-11-13T12:51:54.910134+00:00","duration_ms":4.691,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"f2bde9af-41a5-41a6-912d-8983a31ca5b4","observed_at":"2026-11-13T12:51:54.914942+00:00","duration_ms":76.522,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c1f5f271-21d5-4497-83c9-72aad1f0fd0b","observed_at":"2026-11-13T12:51:54.940897+00:00","duration_ms":6.801,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6026a07d-fa97-4053-8ac7-d409347d4789","observed_at":"2026-11-13T12:51:54.949374+00:00","duration_ms":7.325,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"25825dc7-90ed-4719-bd0a-9d7174dfaf70","observed_at":"2026-11-13T12:51:55.043984+00:00","duration_ms":6.644,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"dd905282-0692-434f-ad1b-f55df67929ce","observed_at":"2026-11-13T12:51:55.117690+00:00","duration_ms":5.748,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"bf59ac0b-9cc1-489e-8237-0a4fdb8d20c7","observed_at":"2026-11-13T12:51:55.194783+00:00","duration_ms":6.042,"outcome":"success"}
+ok
+test_settlement_does_not_double_count_later_estimate_or_mix_its_currency (test_business_metrics.BusinessMetricsTests.test_settlement_does_not_double_count_later_estimate_or_mix_its_currency) ... {"event":"api_request_observed","observation_id":"3de059c2-140f-42d1-8709-e6b9d9df580e","observed_at":"2026-11-13T12:51:55.476684+00:00","duration_ms":132.352,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b801ed2f-8ce2-46c9-84df-67bd4e4f4266","observed_at":"2026-11-13T12:51:55.485970+00:00","duration_ms":8.047,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f06b128d-ff94-406e-82a0-2a436f0bbbd3","observed_at":"2026-11-13T12:51:55.501525+00:00","duration_ms":14.021,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"e973150a-5915-426e-964d-273a0552cf42","observed_at":"2026-11-13T12:51:55.583961+00:00","duration_ms":6.252,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"dac49488-e032-48b2-be22-ab6e112bcde4","observed_at":"2026-11-13T12:51:55.588832+00:00","duration_ms":4.645,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"f23ae189-88b8-4240-916f-9079061c314e","observed_at":"2026-11-13T12:51:55.593528+00:00","duration_ms":74.675,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"94e3c5e7-6acf-40b1-9e1f-4c9175c3b541","observed_at":"2026-11-13T12:51:55.609434+00:00","duration_ms":6.463,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9f195c10-4681-41d9-a748-60945f26cdeb","observed_at":"2026-11-13T12:51:55.617865+00:00","duration_ms":7.302,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"b46ee4ba-8cbc-4db6-87f6-abff050ab356","observed_at":"2026-11-13T12:51:55.707077+00:00","duration_ms":6.466,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"855562cd-df5f-40d8-9896-8513c69e8b1a","observed_at":"2026-11-13T12:51:55.782422+00:00","duration_ms":6.098,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"bbf0be7d-3358-4544-82fd-2aa6ef64bb1d","observed_at":"2026-11-13T12:51:55.865008+00:00","duration_ms":6.081,"outcome":"success"}
+ok
+test_unknown_cost_keeps_unknown_currency_and_null_amount (test_business_metrics.BusinessMetricsTests.test_unknown_cost_keeps_unknown_currency_and_null_amount) ... {"event":"api_request_observed","observation_id":"774a5cae-1341-4dcc-9bb6-c80f41b18c99","observed_at":"2026-11-13T12:51:56.164842+00:00","duration_ms":131.713,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c772024e-5f23-4b58-80a3-ec44ee36d43f","observed_at":"2026-11-13T12:51:56.174399+00:00","duration_ms":8.358,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cd49b5a7-7b21-40f1-8f74-0f0a79da773a","observed_at":"2026-11-13T12:51:56.189925+00:00","duration_ms":14.034,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"c39afe67-c47e-4307-90e9-0c2453b2c9a5","observed_at":"2026-11-13T12:51:56.273444+00:00","duration_ms":6.44,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"be1c0c05-a7fe-4831-9e28-80ada2497a64","observed_at":"2026-11-13T12:51:56.278622+00:00","duration_ms":4.952,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"69c37464-4db1-4304-9363-f306a068df8a","observed_at":"2026-11-13T12:51:56.283194+00:00","duration_ms":75.945,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"64292fb4-ab54-47a2-9383-ace43e4ae0f1","observed_at":"2026-11-13T12:51:56.299150+00:00","duration_ms":6.384,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"dd9592b7-74ca-40c0-8a32-f927565c970e","observed_at":"2026-11-13T12:51:56.307505+00:00","duration_ms":7.202,"status":201,"outcome":"completed"}
+ok
+test_invalid_cursor_and_unknown_task_are_rejected (test_events.EventTests.test_invalid_cursor_and_unknown_task_are_rejected) ... {"event":"api_request_observed","observation_id":"a00076f8-f211-4289-941f-f1c86a3a163c","observed_at":"2026-11-13T12:51:56.682380+00:00","duration_ms":132.15,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"83ce8b96-93f4-4cf9-abbe-2d257db83da0","observed_at":"2026-11-13T12:51:56.691725+00:00","duration_ms":8.174,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b4fa844e-c519-4fb7-bdca-6c3a37d6bc76","observed_at":"2026-11-13T12:51:56.707204+00:00","duration_ms":13.992,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"45651da4-3db0-4694-8230-c96207c39301","observed_at":"2026-11-13T12:51:56.790547+00:00","duration_ms":6.312,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e7d2c706-55e6-441c-bb20-a6fa4d7a6356","observed_at":"2026-11-13T12:51:56.795221+00:00","duration_ms":4.453,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"8e9ea800-571c-457d-868c-3d48d79f9e07","observed_at":"2026-11-13T12:51:56.799951+00:00","duration_ms":75.7,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f333aac1-0181-4681-bbff-8a985138abaa","observed_at":"2026-11-13T12:51:56.816136+00:00","duration_ms":6.336,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"024ff15e-0708-439f-a9d1-ac3c378ba083","observed_at":"2026-11-13T12:51:56.824586+00:00","duration_ms":7.231,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"3fcd018d-2417-4391-afce-fe0a79a37af3","observed_at":"2026-11-13T12:51:56.920161+00:00","duration_ms":6.525,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"c695038c-cafb-4b50-849f-4e0c475cfcfb","observed_at":"2026-11-13T12:51:56.993974+00:00","duration_ms":5.895,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"24364d19-001a-4de4-a9d7-12ea1d99b9be","observed_at":"2026-11-13T12:51:57.069632+00:00","duration_ms":5.968,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"4f2c7435-c6d7-49e7-b2d0-a6039c6dc770","observed_at":"2026-11-13T12:51:57.099395+00:00","duration_ms":2.394,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c43f9b1d-684a-48ce-ba33-66858bbf8f61","observed_at":"2026-11-13T12:51:57.102412+00:00","duration_ms":2.127,"status":200,"outcome":"completed"}
+ok
+test_last_event_cursor_replays_only_later_persisted_events (test_events.EventTests.test_last_event_cursor_replays_only_later_persisted_events) ... {"event":"api_request_observed","observation_id":"6383e70d-238a-467f-b7b9-075546653135","observed_at":"2026-11-13T12:51:57.366745+00:00","duration_ms":130.471,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"46faf0e4-6ddc-4f96-a344-d3911a41dcf5","observed_at":"2026-11-13T12:51:57.376204+00:00","duration_ms":8.254,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"31b4e4e9-c0ff-44f2-8e03-33e6f4f4eb39","observed_at":"2026-11-13T12:51:57.391850+00:00","duration_ms":14.133,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"819d7964-e504-4c30-84d4-c6ae95d9f93b","observed_at":"2026-11-13T12:51:57.474533+00:00","duration_ms":6.292,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"943c8833-1974-4884-ad54-4e84085e3579","observed_at":"2026-11-13T12:51:57.479269+00:00","duration_ms":4.51,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"30773b04-76ad-44c1-93e0-adccf6390e66","observed_at":"2026-11-13T12:51:57.483917+00:00","duration_ms":74.854,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8c93a454-d358-4f73-b2f5-622d14b40a33","observed_at":"2026-11-13T12:51:57.500135+00:00","duration_ms":6.586,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d938f2b9-a985-4213-bdd1-11f368904c49","observed_at":"2026-11-13T12:51:57.508484+00:00","duration_ms":7.19,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"af85a48d-b2e3-4ead-9ca9-cfb6e542c577","observed_at":"2026-11-13T12:51:57.598816+00:00","duration_ms":6.783,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"c94254fd-40fb-4735-87ab-b603ee1cc3ea","observed_at":"2026-11-13T12:51:57.672900+00:00","duration_ms":5.698,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"085e8336-b375-41b1-a8c0-3caad3ec91f5","observed_at":"2026-11-13T12:51:57.748039+00:00","duration_ms":5.901,"outcome":"success"}
+ok
+test_retention_and_empty_stream_reset_cursor (test_events.EventTests.test_retention_and_empty_stream_reset_cursor) ... {"event":"api_request_observed","observation_id":"9f32a12b-0e6b-4a48-87c5-936d8f7d51fb","observed_at":"2026-11-13T12:51:58.048418+00:00","duration_ms":128.452,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3c1c26fb-f38e-48ec-9e4c-983ec6010da8","observed_at":"2026-11-13T12:51:58.057809+00:00","duration_ms":8.166,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b80a78d4-8a7e-4833-9257-a80b54a24a68","observed_at":"2026-11-13T12:51:58.073434+00:00","duration_ms":14.177,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"dd28e37f-ad8d-40d4-933c-4fce37496589","observed_at":"2026-11-13T12:51:58.155832+00:00","duration_ms":6.068,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"313c864a-c0a5-41d2-8ffe-8e3484ad376b","observed_at":"2026-11-13T12:51:58.160554+00:00","duration_ms":4.497,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"1f283397-0a23-48a4-af4e-44920796f56d","observed_at":"2026-11-13T12:51:58.165069+00:00","duration_ms":74.551,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"11eedfe4-8ca9-4f39-b6c1-7e833b87332e","observed_at":"2026-11-13T12:51:58.181869+00:00","duration_ms":6.216,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e16b78ec-7c61-41aa-b16f-a00e55ab53e3","observed_at":"2026-11-13T12:51:58.190400+00:00","duration_ms":7.336,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"44f65c99-956b-48b2-acfe-8bed3a3afb96","observed_at":"2026-11-13T12:51:58.277584+00:00","duration_ms":6.174,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"cf63a9b4-532f-413c-997a-b3fa45b51b0d","observed_at":"2026-11-13T12:51:58.350007+00:00","duration_ms":5.798,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"b99b00bd-bdaf-47df-86bd-fd390d5db5ed","observed_at":"2026-11-13T12:51:58.425986+00:00","duration_ms":5.624,"outcome":"success"}
+ok
+test_asset_version_rejects_cross_user_and_product (test_foreign_keys.ForeignKeyTests.test_asset_version_rejects_cross_user_and_product) ... ok
+test_current_pointer_cannot_use_another_asset_same_product (test_foreign_keys.ForeignKeyTests.test_current_pointer_cannot_use_another_asset_same_product) ... ok
+test_invalid_task_status_rejected_and_history_has_no_cascade (test_foreign_keys.ForeignKeyTests.test_invalid_task_status_rejected_and_history_has_no_cascade) ... ok
+test_task_source_and_final_must_belong_to_same_user_product (test_foreign_keys.ForeignKeyTests.test_task_source_and_final_must_belong_to_same_user_product) ... ok
+test_pool_exhaustion_is_bounded_and_recovers (test_health.HealthTests.test_pool_exhaustion_is_bounded_and_recovers) ... {"event":"api_request_observed","observation_id":"c25841f1-3537-434a-a3d3-9e582fa304f8","observed_at":"2026-11-13T12:51:58.904935+00:00","duration_ms":131.113,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1bab14b7-289e-4545-81cf-db1029390dfc","observed_at":"2026-11-13T12:51:58.914402+00:00","duration_ms":8.265,"status":201,"outcome":"completed"}
+ok
+test_real_dependencies_ready_without_secret_disclosure (test_health.HealthTests.test_real_dependencies_ready_without_secret_disclosure) ... {"event":"api_request_observed","observation_id":"39bcc282-0766-43d2-8219-09b40478659c","observed_at":"2026-11-13T12:52:00.733574+00:00","duration_ms":128.121,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9005f8ad-5bfe-4ab5-b372-ce45c53e3eb5","observed_at":"2026-11-13T12:52:00.743092+00:00","duration_ms":8.335,"status":201,"outcome":"completed"}
+ok
+test_s3_access_denied_marks_only_storage_unavailable (test_health.HealthTests.test_s3_access_denied_marks_only_storage_unavailable) ... {"event":"api_request_observed","observation_id":"abab431e-cf62-4824-99ab-1613902ba6f6","observed_at":"2026-11-13T12:52:01.013481+00:00","duration_ms":132.55,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8eaf1a9d-5946-4b75-86d0-349510f421d9","observed_at":"2026-11-13T12:52:01.023313+00:00","duration_ms":8.65,"status":201,"outcome":"completed"}
+ok
+test_minimum_entities_and_head_exist_with_forced_rls (test_migrations.MigrationTests.test_minimum_entities_and_head_exist_with_forced_rls) ... ok
+test_upgrade_head_is_idempotent_for_tables_functions_and_constraints (test_migrations.MigrationTests.test_upgrade_head_is_idempotent_for_tables_functions_and_constraints) ... ok
+test_cli_sanitizes_and_rejects_owner_identity (test_monitoring.MonitoringTests.test_cli_sanitizes_and_rejects_owner_identity) ... {"event":"api_request_observed","observation_id":"7180db38-541c-4967-846e-d5aed98277a7","observed_at":"2026-11-13T12:52:01.739580+00:00","duration_ms":134.144,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9f13a82e-73e6-43d2-a77e-d5cfcf02851e","observed_at":"2026-11-13T12:52:01.748936+00:00","duration_ms":8.104,"status":201,"outcome":"completed"}
+ok
+test_financial_inconsistency_detected_and_rollback_clears_it (test_monitoring.MonitoringTests.test_financial_inconsistency_detected_and_rollback_clears_it) ... {"event":"api_request_observed","observation_id":"bd57c283-0ae8-4cc2-bc1e-82a90a9695e8","observed_at":"2026-11-13T12:52:02.540080+00:00","duration_ms":130.562,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"894567c1-fc35-46e8-ad2c-cd6591358fb3","observed_at":"2026-11-13T12:52:02.550172+00:00","duration_ms":8.87,"status":201,"outcome":"completed"}
+ok
+test_heartbeat_identity_staleness_and_background_cancellation (test_monitoring.MonitoringTests.test_heartbeat_identity_staleness_and_background_cancellation) ... {"event":"api_request_observed","observation_id":"5ed00bf5-b3e5-4321-b0dc-d17c38268db6","observed_at":"2026-11-13T12:52:02.838040+00:00","duration_ms":129.941,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"dc900af2-c94c-4ff8-8069-f66486bec57b","observed_at":"2026-11-13T12:52:02.848453+00:00","duration_ms":9.232,"status":201,"outcome":"completed"}
+ok
+test_only_aggregate_access_and_no_operator_or_business_writes (test_monitoring.MonitoringTests.test_only_aggregate_access_and_no_operator_or_business_writes) ... {"event":"api_request_observed","observation_id":"017c4d9f-db4d-40a3-bb2b-4fdaeb07b9b2","observed_at":"2026-11-13T12:52:03.186015+00:00","duration_ms":132.483,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7c580236-15ea-4653-ad7f-ed56a3a80bfb","observed_at":"2026-11-13T12:52:03.199587+00:00","duration_ms":12.395,"status":201,"outcome":"completed"}
+ok
+test_unknown_backlog_age_and_no_duplicate_financial_action (test_monitoring.MonitoringTests.test_unknown_backlog_age_and_no_duplicate_financial_action) ... {"event":"api_request_observed","observation_id":"45123a7a-3283-46e2-9c5c-7588a1b20bdf","observed_at":"2026-11-13T12:52:03.505652+00:00","duration_ms":129.499,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"bc915763-a86e-4fc6-a3c6-acc41660c619","observed_at":"2026-11-13T12:52:03.515626+00:00","duration_ms":8.772,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6fcf66b7-afb1-4375-9cb3-2ef8335e8b07","observed_at":"2026-11-13T12:52:03.544635+00:00","duration_ms":8.486,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"241770f7-82fa-4b52-af2d-5fd6b726bbf1","observed_at":"2026-11-13T12:52:03.556724+00:00","duration_ms":10.942,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e148bb36-b892-48a7-ac0e-ea2a4fd4b0af","observed_at":"2026-11-13T12:52:03.585786+00:00","duration_ms":2.593,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5acb2d60-04c7-4d90-b35d-c83c62bd7cb4","observed_at":"2026-11-13T12:52:03.605460+00:00","duration_ms":2.486,"status":200,"outcome":"completed"}
+ok
+test_rls_catalog (test_native.NativeTests.test_rls_catalog) ... ok
+test_runtime_permission_groups_are_unprivileged_and_not_table_owners (test_native.NativeTests.test_runtime_permission_groups_are_unprivileged_and_not_table_owners) ... ok
+test_archive_failure_restarts_only_local_steps (test_offline_pipeline.OfflinePipelineTests.test_archive_failure_restarts_only_local_steps) ... {"event":"api_request_observed","observation_id":"8736629e-7dd8-47f7-84e7-d565113a07f1","observed_at":"2026-11-13T12:52:03.963212+00:00","duration_ms":135.477,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"98ebdecd-feea-4817-896f-6ea824e37077","observed_at":"2026-11-13T12:52:03.973741+00:00","duration_ms":9.193,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3dbd084c-35ab-4eaf-a678-9e59eba3b4a1","observed_at":"2026-11-13T12:52:03.989172+00:00","duration_ms":13.972,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"75d59a2a-0ccb-4e1f-b07d-94176a0c413f","observed_at":"2026-11-13T12:52:04.071569+00:00","duration_ms":7.386,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"c3071a90-d443-4cdd-91ee-1c14bc615350","observed_at":"2026-11-13T12:52:04.076283+00:00","duration_ms":4.488,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"71272c6d-eef5-4abf-bbe4-1f7ae3301dc4","observed_at":"2026-11-13T12:52:04.080962+00:00","duration_ms":74.838,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d4541f58-76a0-45cc-bc23-59340fff3b85","observed_at":"2026-11-13T12:52:04.096703+00:00","duration_ms":6.239,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8818d713-8a7b-4f74-a699-6dd45326cdfe","observed_at":"2026-11-13T12:52:04.105090+00:00","duration_ms":7.227,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"12ca9196-2343-4d2d-9a7e-78da09da1878","observed_at":"2026-11-13T12:52:04.273865+00:00","duration_ms":7.989,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ebb96e47-7535-4c11-853f-c9e1ed30bfc0","observed_at":"2026-11-13T12:52:04.346955+00:00","duration_ms":5.724,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"f7883ff6-363b-435a-a63d-e6302137ef3d","observed_at":"2026-11-13T12:52:04.423844+00:00","duration_ms":5.518,"outcome":"success"}
+ok
+test_explicit_supplier_failure_refunds (test_offline_pipeline.OfflinePipelineTests.test_explicit_supplier_failure_refunds) ... {"event":"api_request_observed","observation_id":"39e44e4a-b992-43ee-bf99-3d412dc5466d","observed_at":"2026-11-13T12:52:04.695956+00:00","duration_ms":133.37,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"da26e32d-236c-453f-9f0a-3fc5cedf2710","observed_at":"2026-11-13T12:52:04.705481+00:00","duration_ms":8.313,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9be30a05-dfbb-48dd-a137-9a17fbecccca","observed_at":"2026-11-13T12:52:04.720779+00:00","duration_ms":13.816,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"99ddb4f7-0117-44c5-a3c7-739fea01ab06","observed_at":"2026-11-13T12:52:04.803315+00:00","duration_ms":6.209,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"cc000d88-0b6d-48b9-b77d-a573855ae47b","observed_at":"2026-11-13T12:52:04.808407+00:00","duration_ms":4.864,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"12ed5ba6-75c2-4e8a-b0d8-bfff2d115dd9","observed_at":"2026-11-13T12:52:04.813111+00:00","duration_ms":75.218,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"85662dce-6b86-4c5d-863b-b17b824442f0","observed_at":"2026-11-13T12:52:04.829617+00:00","duration_ms":6.417,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"513ff2bb-dd65-4629-be67-f79e7109cc43","observed_at":"2026-11-13T12:52:04.837988+00:00","duration_ms":7.231,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e760c237-4de4-4341-8316-6613bdd4cb90","observed_at":"2026-11-13T12:52:04.872665+00:00","duration_ms":2.738,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9ca74774-0073-49e8-86ef-1db35ee6fa55","observed_at":"2026-11-13T12:52:04.875866+00:00","duration_ms":2.165,"status":200,"outcome":"completed"}
+ok
+test_malformed_model_facts_require_review_and_still_deliver (test_offline_pipeline.OfflinePipelineTests.test_malformed_model_facts_require_review_and_still_deliver) ... {"event":"api_request_observed","observation_id":"5da00463-3eb4-4f6b-a3d9-0ac14c163715","observed_at":"2026-11-13T12:52:05.141865+00:00","duration_ms":132.067,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ba7f24de-3cbc-4e06-861d-58a296b73f73","observed_at":"2026-11-13T12:52:05.151609+00:00","duration_ms":8.575,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c23c01f9-0bbe-4e14-8771-ba7540d8a7f6","observed_at":"2026-11-13T12:52:05.166943+00:00","duration_ms":13.851,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"b9d2dc40-1333-4ddd-98eb-013b1149e523","observed_at":"2026-11-13T12:52:05.248466+00:00","duration_ms":6.225,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"03b91783-220f-4022-92da-1fc1f7bb02cf","observed_at":"2026-11-13T12:52:05.253372+00:00","duration_ms":4.682,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"fcdb57a1-4f2a-4c7e-82ad-b4a331875b6a","observed_at":"2026-11-13T12:52:05.257924+00:00","duration_ms":73.993,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a70d8609-8e92-4d84-a635-ca56fd1c6553","observed_at":"2026-11-13T12:52:05.274082+00:00","duration_ms":6.165,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ab60a972-8d95-4a4e-bbe1-7a1e504a17d4","observed_at":"2026-11-13T12:52:05.282214+00:00","duration_ms":7.009,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"79eea909-ed03-4981-9d7f-be6b78b854d3","observed_at":"2026-11-13T12:52:05.370703+00:00","duration_ms":6.464,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ebee8ed5-6953-4758-b0c2-921af5eee967","observed_at":"2026-11-13T12:52:05.445197+00:00","duration_ms":5.883,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"fd94e3ca-44ba-46ba-b8af-85fa327cd474","observed_at":"2026-11-13T12:52:05.521617+00:00","duration_ms":5.881,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"e3706a2c-e8e8-4836-8153-75aafb04af0d","observed_at":"2026-11-13T12:52:05.537333+00:00","duration_ms":4.42,"status":200,"outcome":"completed"}
+ok
+test_real_upload_through_final_download_report_and_charge (test_offline_pipeline.OfflinePipelineTests.test_real_upload_through_final_download_report_and_charge) ... {"event":"api_request_observed","observation_id":"b54e4f68-9fc3-4506-b89e-cac0bab7bbe8","observed_at":"2026-11-13T12:52:05.795575+00:00","duration_ms":128.735,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5d78e5a2-0e64-44c4-8988-1e38c56c3fea","observed_at":"2026-11-13T12:52:05.804836+00:00","duration_ms":8.063,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"40538b6b-141f-4bc9-a2cd-9c3237d39e1c","observed_at":"2026-11-13T12:52:05.820259+00:00","duration_ms":13.988,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"9d408449-77f3-4528-97bc-f787c17fbbbb","observed_at":"2026-11-13T12:52:05.902027+00:00","duration_ms":6.043,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ccab8d7c-4680-4035-bbda-240986a5ba9e","observed_at":"2026-11-13T12:52:05.906681+00:00","duration_ms":4.436,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"391ff7c5-55e8-421d-a5c4-ec51ab0f8062","observed_at":"2026-11-13T12:52:05.911640+00:00","duration_ms":74.028,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ac003ca6-a7dd-4825-be9f-fe4716fa52dc","observed_at":"2026-11-13T12:52:05.927512+00:00","duration_ms":6.48,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"dd22191c-82f9-40e6-9414-ff32625d5dde","observed_at":"2026-11-13T12:52:05.936052+00:00","duration_ms":7.436,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"e403365c-6209-4ec1-b98b-d7c5e40aaf04","observed_at":"2026-11-13T12:52:06.030316+00:00","duration_ms":6.78,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"2cdaa342-65ee-48b3-8181-ca6c81eb341d","observed_at":"2026-11-13T12:52:06.103962+00:00","duration_ms":5.784,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"97240b10-ac39-4ac2-806a-d8dd509e8ce0","observed_at":"2026-11-13T12:52:06.180274+00:00","duration_ms":5.893,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"54ef234e-fa0c-4004-9c53-4a445f793073","observed_at":"2026-11-13T12:52:06.194635+00:00","duration_ms":2.969,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ea9c398f-9d84-48c3-9c7f-67126fc8a398","observed_at":"2026-11-13T12:52:06.199150+00:00","duration_ms":3.427,"status":302,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f3eb38d7-0765-47e6-beeb-19021a17797c","observed_at":"2026-11-13T12:52:06.219412+00:00","duration_ms":3.726,"status":302,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"907a12eb-39c4-4f20-a456-33470f303285","observed_at":"2026-11-13T12:52:06.237642+00:00","duration_ms":2.29,"status":200,"outcome":"completed"}
+ok
+test_unknown_stays_reserved_and_never_resubmits (test_offline_pipeline.OfflinePipelineTests.test_unknown_stays_reserved_and_never_resubmits) ... {"event":"api_request_observed","observation_id":"a07ad601-4eff-4d20-84e0-fe35aa21fe95","observed_at":"2026-11-13T12:52:06.535791+00:00","duration_ms":131.99,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d87e5fbb-03ad-4d1e-b671-a10f2943653c","observed_at":"2026-11-13T12:52:06.545648+00:00","duration_ms":8.61,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"733c795b-dbbb-4ec2-ac57-11ff2e898ff4","observed_at":"2026-11-13T12:52:06.561299+00:00","duration_ms":14.177,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"7dc87972-3baf-4a11-bee8-a793e78e7e73","observed_at":"2026-11-13T12:52:06.642447+00:00","duration_ms":6.169,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"7c02f1ae-1765-44d1-a81e-3ee435a4e818","observed_at":"2026-11-13T12:52:06.647225+00:00","duration_ms":4.56,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"78b16da3-c374-4f9b-bdc2-bc77cd2001ca","observed_at":"2026-11-13T12:52:06.651880+00:00","duration_ms":73.345,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"755b83bc-cbca-4bdf-917e-88f9c25cfe7b","observed_at":"2026-11-13T12:52:06.667795+00:00","duration_ms":6.217,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8d62d09a-1da4-47b8-a9fa-4ec1f8075871","observed_at":"2026-11-13T12:52:06.676127+00:00","duration_ms":7.158,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e8e82a1e-7a23-4e38-83dc-30973e9f6f4c","observed_at":"2026-11-13T12:52:06.729603+00:00","duration_ms":2.861,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d0f195e8-0fbd-4ca0-8ae2-de3e8497f8d9","observed_at":"2026-11-13T12:52:06.733020+00:00","duration_ms":2.317,"status":200,"outcome":"completed"}
+ok
+test_worker_cli_runs_in_independent_process (test_offline_pipeline.OfflinePipelineTests.test_worker_cli_runs_in_independent_process) ... {"event":"api_request_observed","observation_id":"6e041328-ba8c-4f03-bde1-a63729db2a7c","observed_at":"2026-11-13T12:52:06.993865+00:00","duration_ms":133.165,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e86b50ac-0dac-4cbd-b430-d27358478cfb","observed_at":"2026-11-13T12:52:07.003358+00:00","duration_ms":8.3,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"39c3602f-2aea-4195-8360-d7c9b4433b6a","observed_at":"2026-11-13T12:52:07.018825+00:00","duration_ms":14.034,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"1b1bd0c3-b505-4a06-a9a2-14e4d39c33e6","observed_at":"2026-11-13T12:52:07.100430+00:00","duration_ms":6.292,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d90bc4b3-b550-4600-bafc-acbf741e9bf2","observed_at":"2026-11-13T12:52:07.105354+00:00","duration_ms":4.675,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"30e152f9-0d24-45f3-95ec-fd0e833c3c2f","observed_at":"2026-11-13T12:52:07.110073+00:00","duration_ms":74.247,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"487b0e3f-b5d9-4a3c-8748-61e53a83fbc1","observed_at":"2026-11-13T12:52:07.125854+00:00","duration_ms":6.284,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5e89c75b-4387-486a-9c1e-cae1d4fe2259","observed_at":"2026-11-13T12:52:07.134293+00:00","duration_ms":7.173,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e8ff3034-2dea-4b5c-81b4-819e066dfe1e","observed_at":"2026-11-13T12:52:07.847727+00:00","duration_ms":3.526,"status":200,"outcome":"completed"}
+ok
+test_concurrent_context_exception_and_cancel (test_pool_context.PoolTests.test_concurrent_context_exception_and_cancel) ... ok
+test_reject_owner_pool (test_pool_context.PoolTests.test_reject_owner_pool) ... ok
+test_archive_failure_restarts_without_generate_resubmit (test_protocol_pipeline.ProtocolPipelineTests.test_archive_failure_restarts_without_generate_resubmit) ... {"event":"api_request_observed","observation_id":"11bd7aa4-e039-4d9a-bd59-41a97fcc7193","observed_at":"2026-11-13T12:52:08.536609+00:00","duration_ms":133.267,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1fb422bc-38c8-4c8c-b036-6aedba69351d","observed_at":"2026-11-13T12:52:08.546181+00:00","duration_ms":8.321,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0d15f4c9-bf07-4b3d-8671-0719a7705f06","observed_at":"2026-11-13T12:52:08.561867+00:00","duration_ms":14.216,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"9e5ac4d4-a4cf-4c2e-b21c-3992e8b21bfb","observed_at":"2026-11-13T12:52:08.643061+00:00","duration_ms":6.235,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"17929d78-32d5-46a6-a048-3f639745d2ba","observed_at":"2026-11-13T12:52:08.647960+00:00","duration_ms":4.653,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"670552db-f4d4-4e1b-aeb0-7c2e19fa0c78","observed_at":"2026-11-13T12:52:08.652689+00:00","duration_ms":73.811,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e91f9f47-cc36-47c7-9efa-df50e0622566","observed_at":"2026-11-13T12:52:08.667337+00:00","duration_ms":3.859,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"129ca80f-5474-4d02-bf13-f825613728ad","observed_at":"2026-11-13T12:52:08.746474+00:00","duration_ms":5.273,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d4f7b748-89d7-4f4b-95eb-ec8f6c405d60","observed_at":"2026-11-13T12:52:08.751080+00:00","duration_ms":4.404,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"62281d73-0c36-4d5f-8dc1-2ac714df89a9","observed_at":"2026-11-13T12:52:08.754366+00:00","duration_ms":70.418,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a59b6fad-a1ae-457b-8a40-23c63cc4f63c","observed_at":"2026-11-13T12:52:08.762088+00:00","duration_ms":6.26,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6637e7a7-58de-4aa4-bb71-6633b238eb24","observed_at":"2026-11-13T12:52:08.779817+00:00","duration_ms":7.277,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"dde51a4f-bcf6-4f92-a008-45b0e214cd40","observed_at":"2026-11-13T12:52:09.015989+00:00","duration_ms":8.241,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"5e615d70-93b9-4484-83b1-f74adee7134d","observed_at":"2026-11-13T12:52:09.092421+00:00","duration_ms":5.682,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"dd706e11-5c4d-4929-ab21-5461ddb69d46","observed_at":"2026-11-13T12:52:09.258058+00:00","duration_ms":5.805,"outcome":"success"}
+ok
+test_detection_response_loss_keeps_frozen_and_never_reposts (test_protocol_pipeline.ProtocolPipelineTests.test_detection_response_loss_keeps_frozen_and_never_reposts) ... {"event":"api_request_observed","observation_id":"60f5b48b-8521-4704-8509-3a9bf394e4cc","observed_at":"2026-11-13T12:52:09.532710+00:00","duration_ms":133.853,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"2195f977-8e07-42e9-89aa-393d8cf84de7","observed_at":"2026-11-13T12:52:09.542057+00:00","duration_ms":8.089,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"06127bac-bce1-4f38-b776-93dda350de9a","observed_at":"2026-11-13T12:52:09.557598+00:00","duration_ms":13.901,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"9e299c1f-131a-4596-ae4f-0dc4888e9175","observed_at":"2026-11-13T12:52:09.641062+00:00","duration_ms":7.883,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"a7a9a7c8-6cb7-4bbf-8ece-9f85cf90f755","observed_at":"2026-11-13T12:52:09.645757+00:00","duration_ms":4.455,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"63baeb1f-081e-4766-8991-99adbe25a6d1","observed_at":"2026-11-13T12:52:09.650419+00:00","duration_ms":75.775,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c456b720-5ede-44f3-9a5a-7aca02e76845","observed_at":"2026-11-13T12:52:09.665270+00:00","duration_ms":3.847,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"b5bfe37f-1a16-4219-91e8-7a2c8adc7f76","observed_at":"2026-11-13T12:52:09.745152+00:00","duration_ms":5.685,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"606dc958-da10-4b6f-a12f-e50f1748355f","observed_at":"2026-11-13T12:52:09.749978+00:00","duration_ms":4.576,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"d1679cb4-5621-4efa-84f6-b486524e6fcd","observed_at":"2026-11-13T12:52:09.753488+00:00","duration_ms":71.481,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6858cf1b-231c-4862-afb7-0749c76ee2c5","observed_at":"2026-11-13T12:52:09.761117+00:00","duration_ms":6.121,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"22efa010-9f16-4d9e-a071-bf1c7aa99527","observed_at":"2026-11-13T12:52:09.779060+00:00","duration_ms":7.475,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"63f88596-b066-4d70-bfdf-6d080b68b077","observed_at":"2026-11-13T12:52:09.900194+00:00","duration_ms":6.648,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"1441bb00-0789-44ef-9111-27181d0741fe","observed_at":"2026-11-13T12:52:09.977808+00:00","duration_ms":5.982,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"98842fdb-5ea0-4094-bc78-b14c397268bf","observed_at":"2026-11-13T12:52:10.109673+00:00","duration_ms":2.901,"status":200,"outcome":"completed"}
+ok
+test_full_protocol_worker_final_png_cost_observations_and_single_charge (test_protocol_pipeline.ProtocolPipelineTests.test_full_protocol_worker_final_png_cost_observations_and_single_charge) ... {"event":"api_request_observed","observation_id":"845ac2f1-d79a-41cc-9355-a621e642a1b2","observed_at":"2026-11-13T12:52:10.386097+00:00","duration_ms":137.632,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8da4c707-1281-4785-91c2-bc9c356da8b8","observed_at":"2026-11-13T12:52:10.395473+00:00","duration_ms":8.121,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b747b509-b103-4992-8021-36e0f6e2cad2","observed_at":"2026-11-13T12:52:10.410861+00:00","duration_ms":13.89,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"d14fffcf-3b74-44b1-8a6d-65b4182ebdb8","observed_at":"2026-11-13T12:52:10.493294+00:00","duration_ms":6.069,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"fdc8b905-b271-4086-8d34-64b17a22eae7","observed_at":"2026-11-13T12:52:10.498010+00:00","duration_ms":4.502,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"46233fbf-2cdb-4e5b-b6cb-49971a19aa33","observed_at":"2026-11-13T12:52:10.502524+00:00","duration_ms":74.618,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6520f659-1e0b-437c-8798-d0850d5c7bb4","observed_at":"2026-11-13T12:52:10.516961+00:00","duration_ms":3.837,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"44e46a6b-8629-4c28-9ba0-446b819ffe27","observed_at":"2026-11-13T12:52:10.596852+00:00","duration_ms":5.496,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"700c2327-b0ac-4bd0-aad9-c93a69dea084","observed_at":"2026-11-13T12:52:10.601489+00:00","duration_ms":4.425,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"9a8c0f35-90c5-4a78-a526-0354534f02d8","observed_at":"2026-11-13T12:52:10.604965+00:00","duration_ms":71.237,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0ed4b37f-cc12-46d8-85d7-4258b10c301a","observed_at":"2026-11-13T12:52:10.612659+00:00","duration_ms":6.204,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"963e3b94-b068-44c2-b4a4-12229b2c9fa2","observed_at":"2026-11-13T12:52:10.630392+00:00","duration_ms":7.346,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"effb6883-a67e-4dbc-a495-c27aa9b402f7","observed_at":"2026-11-13T12:52:10.752611+00:00","duration_ms":6.724,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"8935fd8b-3919-4c79-b2f7-dda209bdbc5d","observed_at":"2026-11-13T12:52:10.830042+00:00","duration_ms":6.01,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"77a61422-7902-49e8-9255-bfa3551ed1c3","observed_at":"2026-11-13T12:52:10.967691+00:00","duration_ms":5.886,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"48ee0be4-c4e1-4c88-9980-106b8e34e131","observed_at":"2026-11-13T12:52:11.031993+00:00","duration_ms":3.532,"status":302,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a2899e3b-486e-4689-a7f1-caa5714b5629","observed_at":"2026-11-13T12:52:11.052523+00:00","duration_ms":3.365,"status":302,"outcome":"completed"}
+ok
+test_generate_response_loss_keeps_frozen_and_never_reposts (test_protocol_pipeline.ProtocolPipelineTests.test_generate_response_loss_keeps_frozen_and_never_reposts) ... {"event":"api_request_observed","observation_id":"336f306b-fd54-4aac-99ea-29c58b7e70e1","observed_at":"2026-11-13T12:52:11.338171+00:00","duration_ms":132.282,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a1e6a984-2a69-4762-aee8-e82066a7cbdb","observed_at":"2026-11-13T12:52:11.347923+00:00","duration_ms":8.461,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b0d3f148-7f35-4b7d-83cb-3aa0196e5906","observed_at":"2026-11-13T12:52:11.366590+00:00","duration_ms":17.122,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"6919a807-fc56-4f55-9467-bed9583291cb","observed_at":"2026-11-13T12:52:11.449411+00:00","duration_ms":6.225,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"29b527ef-4518-4126-b12a-18ab8c0052d6","observed_at":"2026-11-13T12:52:11.454305+00:00","duration_ms":4.675,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"b9169c5f-6b65-4420-a24b-487ed92fa080","observed_at":"2026-11-13T12:52:11.458955+00:00","duration_ms":75.108,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0d62f48f-6ad7-4a85-9d70-1683cb6689bb","observed_at":"2026-11-13T12:52:11.473943+00:00","duration_ms":3.916,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"6b2274d4-49b4-4be0-b8ea-b82d6ba3ec66","observed_at":"2026-11-13T12:52:11.554873+00:00","duration_ms":5.763,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"86b82e4d-5c95-408f-b6b0-b22a90ea08cf","observed_at":"2026-11-13T12:52:11.559826+00:00","duration_ms":4.729,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"9aac6caf-ade3-4f6b-9ea6-e1721eaf27ce","observed_at":"2026-11-13T12:52:11.563205+00:00","duration_ms":72.377,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0f78e735-7971-4685-852b-cc8ebae4c0e0","observed_at":"2026-11-13T12:52:11.571025+00:00","duration_ms":6.348,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d1b21425-6589-4512-8c27-00dfaabd4af1","observed_at":"2026-11-13T12:52:11.589280+00:00","duration_ms":7.691,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"52318bd3-2728-4468-888a-7487eaae469d","observed_at":"2026-11-13T12:52:11.699461+00:00","duration_ms":2.86,"status":200,"outcome":"completed"}
+ok
+test_observation_fencing_permissions_and_append_only (test_protocol_pipeline.ProtocolPipelineTests.test_observation_fencing_permissions_and_append_only) ... {"event":"api_request_observed","observation_id":"59637f72-f28f-45c1-b5d1-6ed03aba0c97","observed_at":"2026-11-13T12:52:11.968998+00:00","duration_ms":135.671,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"63dc49c9-6dac-4574-a56e-f266a3e00e91","observed_at":"2026-11-13T12:52:11.978588+00:00","duration_ms":8.352,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"da13936d-a516-4bbe-b126-3191fcb8577a","observed_at":"2026-11-13T12:52:11.994273+00:00","duration_ms":14.261,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"44f0c141-ddf0-410a-8bef-5ef606110f15","observed_at":"2026-11-13T12:52:12.079183+00:00","duration_ms":6.271,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"9dafa834-1d64-4f49-a124-810443e4b36d","observed_at":"2026-11-13T12:52:12.083914+00:00","duration_ms":4.49,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"6a6ffa52-0b8c-4f03-a99a-aa37b2443070","observed_at":"2026-11-13T12:52:12.088548+00:00","duration_ms":76.975,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"18c14907-9c96-4da0-9e94-9511fa6ae1c3","observed_at":"2026-11-13T12:52:12.103146+00:00","duration_ms":4.108,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"b4a5b44d-27dc-4117-84a9-e0a7c86630c5","observed_at":"2026-11-13T12:52:12.183688+00:00","duration_ms":5.557,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"a3a92d39-6d6c-4122-b6c7-bb67105fca82","observed_at":"2026-11-13T12:52:12.188518+00:00","duration_ms":4.593,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"5bb48f9a-d88f-4999-99d4-d69a2e8ff58a","observed_at":"2026-11-13T12:52:12.191949+00:00","duration_ms":72.011,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e5a1af71-beb2-4251-bd58-cbab1694072f","observed_at":"2026-11-13T12:52:12.199749+00:00","duration_ms":6.292,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a9666f43-dda4-45a8-9560-6d2401e90165","observed_at":"2026-11-13T12:52:12.217779+00:00","duration_ms":7.384,"status":201,"outcome":"completed"}
+ok
+test_pending_known_receipt_and_private_metadata_loss_only_query_again (test_protocol_pipeline.ProtocolPipelineTests.test_pending_known_receipt_and_private_metadata_loss_only_query_again) ... {"event":"api_request_observed","observation_id":"581f3aa0-58ab-46de-9402-55f7d6068be5","observed_at":"2026-11-13T12:52:12.509845+00:00","duration_ms":129.568,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4189953f-ee85-43c1-aad2-c0f72c58af61","observed_at":"2026-11-13T12:52:12.519013+00:00","duration_ms":7.963,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4dfe39ff-9852-43c6-a848-0701b23acda7","observed_at":"2026-11-13T12:52:12.534261+00:00","duration_ms":13.759,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"f0c088c5-16f8-46ae-ae96-c912a2b9fd25","observed_at":"2026-11-13T12:52:12.615426+00:00","duration_ms":6.176,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"7c12d56f-74c6-4912-a605-b27dd409b745","observed_at":"2026-11-13T12:52:12.620013+00:00","duration_ms":4.363,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"f35ecd9b-4030-4323-b0b3-a74526e0fe7e","observed_at":"2026-11-13T12:52:12.624494+00:00","duration_ms":72.886,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"994ba22c-857f-4f9f-b495-000a4887af5b","observed_at":"2026-11-13T12:52:12.639953+00:00","duration_ms":3.975,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"4f019a1f-82b0-4dab-93dd-4aaf1feb6b95","observed_at":"2026-11-13T12:52:12.720541+00:00","duration_ms":5.728,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"fb1a210b-b56f-4f66-8992-d292e1a62782","observed_at":"2026-11-13T12:52:12.725439+00:00","duration_ms":4.669,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"e9aaf776-b5e0-4efb-bc20-7f9f78b26f91","observed_at":"2026-11-13T12:52:12.728859+00:00","duration_ms":72.208,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"27e363f0-7b76-4285-ab17-cf162ee2490c","observed_at":"2026-11-13T12:52:12.736742+00:00","duration_ms":6.331,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9d4c4cb7-2339-4545-a0d9-ae4f4b8be2d9","observed_at":"2026-11-13T12:52:12.754639+00:00","duration_ms":7.42,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"35a1c740-8e0a-47e4-9cfe-c17f218b5597","observed_at":"2026-11-13T12:52:12.929418+00:00","duration_ms":8.265,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"873c7ddf-11b9-47de-aba9-3688a8a4da2d","observed_at":"2026-11-13T12:52:13.007035+00:00","duration_ms":5.92,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"4f5c8ffe-4c9b-41d5-8907-cceb7050cd14","observed_at":"2026-11-13T12:52:13.150121+00:00","duration_ms":5.984,"outcome":"success"}
+ok
+test_terminal_poll_failure_refunds_without_detection (test_protocol_pipeline.ProtocolPipelineTests.test_terminal_poll_failure_refunds_without_detection) ... {"event":"api_request_observed","observation_id":"3ad81b31-2a85-415d-b9ce-9d7114a9403a","observed_at":"2026-11-13T12:52:13.423480+00:00","duration_ms":130.113,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4e3ebac6-cb4d-4f1a-97a9-7b545be89a1e","observed_at":"2026-11-13T12:52:13.432882+00:00","duration_ms":8.169,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"057ac046-5d69-4a15-ad41-4a275ef3810e","observed_at":"2026-11-13T12:52:13.448663+00:00","duration_ms":14.214,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"e7c56fe5-0d20-4cb2-a7d9-d92b9cb01625","observed_at":"2026-11-13T12:52:13.531629+00:00","duration_ms":6.235,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"12dc006d-d0b7-451d-881a-f0066a6e4192","observed_at":"2026-11-13T12:52:13.536561+00:00","duration_ms":4.712,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"487dbcf4-9d7c-4a75-b9b3-38ffe0d2bcaa","observed_at":"2026-11-13T12:52:13.541360+00:00","duration_ms":75.418,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d3ecbe09-d7cb-4211-9341-927ec21132a8","observed_at":"2026-11-13T12:52:13.556204+00:00","duration_ms":4.33,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"57655e8f-bced-41f2-97a3-d3daed5f9d31","observed_at":"2026-11-13T12:52:13.637352+00:00","duration_ms":6.137,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"5c38c2db-e413-4b15-aaec-63ee8e58b8b8","observed_at":"2026-11-13T12:52:13.642435+00:00","duration_ms":4.83,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"cee20642-eb0c-4a27-8a55-72d6e8fe4ca6","observed_at":"2026-11-13T12:52:13.646085+00:00","duration_ms":72.84,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1aafde22-6f52-4a41-a848-76642e7ad662","observed_at":"2026-11-13T12:52:13.653827+00:00","duration_ms":6.238,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4e3a451a-e987-47b3-bf13-1d6ba0538715","observed_at":"2026-11-13T12:52:13.671736+00:00","duration_ms":7.504,"status":201,"outcome":"completed"}
+ok
+test_wrong_generated_dimensions_quarantined_before_detection (test_protocol_pipeline.ProtocolPipelineTests.test_wrong_generated_dimensions_quarantined_before_detection) ... {"event":"api_request_observed","observation_id":"d226dfe5-4dd6-4c92-926a-762267be7924","observed_at":"2026-11-13T12:52:14.055273+00:00","duration_ms":132.563,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c6b9bd58-d880-45a3-a5b8-8d1c05d8ae7c","observed_at":"2026-11-13T12:52:14.064841+00:00","duration_ms":8.333,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cb383c9f-cd62-424c-9106-b1940925d450","observed_at":"2026-11-13T12:52:14.082925+00:00","duration_ms":16.527,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"90c504d8-691f-4555-bca0-ba42fe790a93","observed_at":"2026-11-13T12:52:14.164412+00:00","duration_ms":6.301,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e5a313e9-8483-4900-b28c-3c237ceb0448","observed_at":"2026-11-13T12:52:14.169309+00:00","duration_ms":4.674,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"89f30d16-059a-4770-996a-b783838a60c4","observed_at":"2026-11-13T12:52:14.174122+00:00","duration_ms":74.084,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"065b279b-0d14-4f66-962e-e444abfaa9ae","observed_at":"2026-11-13T12:52:14.188973+00:00","duration_ms":3.934,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"ff70d830-0cdb-4dc7-afb3-5dab7e001f81","observed_at":"2026-11-13T12:52:14.269709+00:00","duration_ms":5.887,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"9ea24646-bf82-4be4-a7af-b664cafa18b1","observed_at":"2026-11-13T12:52:14.274379+00:00","duration_ms":4.418,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"ca71de9c-c057-4416-952d-8183a01ac7d5","observed_at":"2026-11-13T12:52:14.277858+00:00","duration_ms":72.169,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5e66b660-4b32-4e22-b233-5d388156312c","observed_at":"2026-11-13T12:52:14.285675+00:00","duration_ms":6.259,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1e5dd4cc-8403-4ed4-a515-63543e696bec","observed_at":"2026-11-13T12:52:14.303447+00:00","duration_ms":7.34,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"38b278c1-d85d-4ace-b9f1-6423208827db","observed_at":"2026-11-13T12:52:14.431217+00:00","duration_ms":2.994,"status":200,"outcome":"completed"}
+ok
+test_wrong_provider_cannot_run_locked_quote (test_protocol_pipeline.ProtocolPipelineTests.test_wrong_provider_cannot_run_locked_quote) ... {"event":"api_request_observed","observation_id":"05f5745f-c295-49a9-8186-b1d69a5a18d6","observed_at":"2026-11-13T12:52:14.692356+00:00","duration_ms":130.267,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d3228332-2827-49ff-8113-cc45f534f1d8","observed_at":"2026-11-13T12:52:14.701827+00:00","duration_ms":8.223,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"21113c0b-54da-4c9d-a143-a35d06b6e7dc","observed_at":"2026-11-13T12:52:14.717252+00:00","duration_ms":13.942,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"a13b9324-f6ae-4107-9338-446d9aa0beac","observed_at":"2026-11-13T12:52:14.799889+00:00","duration_ms":6.315,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"06819626-0c63-4685-aa9e-36297d7cef2f","observed_at":"2026-11-13T12:52:14.804589+00:00","duration_ms":4.471,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"e5f9adda-9e4f-49bd-8714-b849feced3ff","observed_at":"2026-11-13T12:52:14.809314+00:00","duration_ms":74.778,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"520ae68c-776a-47a6-8413-2e08964c5c87","observed_at":"2026-11-13T12:52:14.823862+00:00","duration_ms":3.805,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"19f9a61f-db77-402b-8be2-04dba05ffb99","observed_at":"2026-11-13T12:52:14.905227+00:00","duration_ms":6.123,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e463fe25-1ed7-40e1-8bbd-4bf8107c0a80","observed_at":"2026-11-13T12:52:14.910143+00:00","duration_ms":4.646,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"3deb4445-38ec-4d74-8974-8bf0c531f132","observed_at":"2026-11-13T12:52:14.913633+00:00","duration_ms":72.858,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"214669dc-ded1-4bd1-8b3a-9b2ac9c17814","observed_at":"2026-11-13T12:52:14.921302+00:00","duration_ms":6.211,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8a1ef15c-dc0e-4545-8666-f21b372102e7","observed_at":"2026-11-13T12:52:14.939526+00:00","duration_ms":7.693,"status":201,"outcome":"completed"}
+ok
+test_catalog_invoker_barrier_and_minimal_acls (test_readonly.ReadonlyTests.test_catalog_invoker_barrier_and_minimal_acls) ... {"event":"api_request_observed","observation_id":"5ec21f68-9bdf-42ab-b0af-2b41a6d3e78b","observed_at":"2026-11-13T12:52:15.392616+00:00","duration_ms":131.268,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5ba7cbce-8799-41c8-8ac7-217cf00459c7","observed_at":"2026-11-13T12:52:15.402876+00:00","duration_ms":9.041,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b71d03fb-7320-4675-953f-57e7046ef8ce","observed_at":"2026-11-13T12:52:15.422759+00:00","duration_ms":8.465,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"36a8824a-18f0-4a70-bb91-6fdbbd49e307","observed_at":"2026-11-13T12:52:15.435155+00:00","duration_ms":11.237,"status":201,"outcome":"completed"}
+ok
+test_pool_context_survives_concurrency_cancel_and_statement_timeout (test_readonly.ReadonlyTests.test_pool_context_survives_concurrency_cancel_and_statement_timeout) ... {"event":"api_request_observed","observation_id":"1aa196aa-05df-46a1-85f5-36c4b6b30099","observed_at":"2026-11-13T12:52:15.808462+00:00","duration_ms":134.182,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"087782ed-cc91-4c49-a853-972db4c49742","observed_at":"2026-11-13T12:52:15.818557+00:00","duration_ms":8.887,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f865726f-460e-4561-b01e-935262fa0a7c","observed_at":"2026-11-13T12:52:15.838028+00:00","duration_ms":8.39,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"aaf8b0a0-fd11-4035-a2c8-33e240613e49","observed_at":"2026-11-13T12:52:15.850822+00:00","duration_ms":11.688,"status":201,"outcome":"completed"}
+ok
+test_secret_columns_mutations_and_elevation_are_denied (test_readonly.ReadonlyTests.test_secret_columns_mutations_and_elevation_are_denied) ... {"event":"api_request_observed","observation_id":"2efc44c6-57de-4134-ab71-bc1cef4f0783","observed_at":"2026-11-13T12:52:16.295665+00:00","duration_ms":136.399,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ba6d74be-94fe-4375-b081-c85b617d6e2d","observed_at":"2026-11-13T12:52:16.305766+00:00","duration_ms":8.851,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6c29f0de-68d2-467a-9b96-528b525efd6a","observed_at":"2026-11-13T12:52:16.325230+00:00","duration_ms":8.277,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"348367bd-53fe-44e3-af6f-14bedecd5286","observed_at":"2026-11-13T12:52:16.337256+00:00","duration_ms":10.846,"status":201,"outcome":"completed"}
+ok
+test_views_enforce_tenant_and_no_context_reads_nothing (test_readonly.ReadonlyTests.test_views_enforce_tenant_and_no_context_reads_nothing) ... {"event":"api_request_observed","observation_id":"b00f4c1f-73d8-4b53-9ceb-14465bf232e0","observed_at":"2026-11-13T12:52:16.779407+00:00","duration_ms":129.477,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"febd1b72-ea07-40b8-82b7-3e2a3010e9ed","observed_at":"2026-11-13T12:52:16.788666+00:00","duration_ms":8.062,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"85ec378c-ff75-4c08-8dea-431fc09e32c3","observed_at":"2026-11-13T12:52:16.807783+00:00","duration_ms":8.113,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"12385ea1-ecdc-4e81-8e41-9a59f601dbab","observed_at":"2026-11-13T12:52:16.820371+00:00","duration_ms":11.477,"status":201,"outcome":"completed"}
+ok
+test_archive_failure_metric_does_not_change_known_result_retry_or_credits (test_request_archive_metrics.RequestArchiveMetricsTests.test_archive_failure_metric_does_not_change_known_result_retry_or_credits) ... {"event":"api_request_observed","observation_id":"9c09e813-6de7-4bec-9da1-6c3667018ad0","observed_at":"2026-11-13T12:52:17.266304+00:00","duration_ms":129.306,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1570e824-2398-4190-8bcd-f08eb4b0fa06","observed_at":"2026-11-13T12:52:17.275402+00:00","duration_ms":7.881,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f69b55df-9a04-42c8-9f4f-f08013276ace","observed_at":"2026-11-13T12:52:17.290310+00:00","duration_ms":13.439,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"2a0db5d4-d45c-48d0-a90d-c3c37d2b1610","observed_at":"2026-11-13T12:52:17.372894+00:00","duration_ms":6.375,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"bae83698-65a5-4399-8f1f-4dc0d1b5bce6","observed_at":"2026-11-13T12:52:17.377852+00:00","duration_ms":4.742,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"4454995d-4059-4413-bf93-42633cb479b3","observed_at":"2026-11-13T12:52:17.382538+00:00","duration_ms":75.091,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cfd49c77-041b-4c96-ae7a-564a9e911b78","observed_at":"2026-11-13T12:52:17.398612+00:00","duration_ms":6.373,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b3f80826-47ad-46c4-84d4-8960cee6985a","observed_at":"2026-11-13T12:52:17.407048+00:00","duration_ms":7.302,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7d379562-e9de-46d7-8aa5-da31f2a7bc79","observed_at":"2026-11-13T12:52:17.501489+00:00","duration_ms":2.912,"status":200,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"9ecbca4a-97a0-4e3b-96b6-b5b2eb3d58da","observed_at":"2026-11-13T12:52:17.582902+00:00","duration_ms":8.049,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"2f7d927d-7f0d-4a65-87e2-7b2a4f6a4072","observed_at":"2026-11-13T12:52:17.659539+00:00","duration_ms":6.242,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ee915324-c953-4cd0-a9c6-ff1aac90220f","observed_at":"2026-11-13T12:52:17.738831+00:00","duration_ms":6.296,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"6d7f36c2-5b4d-4b1b-81a5-1ceb7678df3e","observed_at":"2026-11-13T12:52:17.753052+00:00","duration_ms":2.466,"status":200,"outcome":"completed"}
+ok
+test_real_api_success_and_injected_503_are_observed_without_request_details (test_request_archive_metrics.RequestArchiveMetricsTests.test_real_api_success_and_injected_503_are_observed_without_request_details) ... {"event":"api_request_observed","observation_id":"3c8695de-2ee6-4672-b4de-c90c68d7ec06","observed_at":"2026-11-13T12:52:18.013695+00:00","duration_ms":130.808,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"99e1a107-f43f-4da2-9089-b9fba8748e2c","observed_at":"2026-11-13T12:52:18.023059+00:00","duration_ms":8.151,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"09136de5-e2a7-49b2-a451-18cf1eabbd7a","observed_at":"2026-11-13T12:52:18.038672+00:00","duration_ms":14.221,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"2602e85f-b98d-4690-9c1c-47c4a61b5bbb","observed_at":"2026-11-13T12:52:18.121518+00:00","duration_ms":6.157,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"4d30f96d-b94d-4b5d-859d-a778eba239f7","observed_at":"2026-11-13T12:52:18.126189+00:00","duration_ms":4.456,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"366eef4c-9a66-4f4f-8c35-26a6b05dda49","observed_at":"2026-11-13T12:52:18.130852+00:00","duration_ms":74.954,"status":200,"outcome":"completed"}
+ok
+test_concurrent_review_append_only_keeps_auto_report (test_reviews_reconciliation.ReviewReconciliationTests.test_concurrent_review_append_only_keeps_auto_report) ... {"event":"api_request_observed","observation_id":"fbaef3f6-8db0-495e-9dc6-5c4eae6566ae","observed_at":"2026-11-13T12:52:18.483468+00:00","duration_ms":133.269,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"36cc890a-dda7-4a0d-ba89-f87312b2a2cf","observed_at":"2026-11-13T12:52:18.492728+00:00","duration_ms":8.041,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"733341e4-cb31-4dbe-b008-7439ee764491","observed_at":"2026-11-13T12:52:18.508213+00:00","duration_ms":14.058,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"769dcd8f-c80a-40d7-8d6c-cafd0dada8d7","observed_at":"2026-11-13T12:52:18.591132+00:00","duration_ms":6.252,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"f9d7c998-b883-45ac-81d7-6930e8dd8090","observed_at":"2026-11-13T12:52:18.595948+00:00","duration_ms":4.577,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"92d49d5f-3a2b-49ad-9804-b2a53bc6cc17","observed_at":"2026-11-13T12:52:18.600573+00:00","duration_ms":75.289,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"652ffe11-067e-42d2-acca-bfe1efe8a33a","observed_at":"2026-11-13T12:52:18.615989+00:00","duration_ms":6.259,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a5b7099c-9608-4386-be7d-f807fd750edb","observed_at":"2026-11-13T12:52:18.624461+00:00","duration_ms":7.316,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"0f9b3d2b-1961-4e64-8b3f-0ed04321864b","observed_at":"2026-11-13T12:52:18.713690+00:00","duration_ms":6.661,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"6b8617ae-dbbb-4dcb-866a-b6fb7a32969a","observed_at":"2026-11-13T12:52:18.787459+00:00","duration_ms":5.719,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"054b0837-14a7-4444-acc9-a1d99d21fff3","observed_at":"2026-11-13T12:52:18.863675+00:00","duration_ms":5.708,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"63c5e8d7-b695-4ca9-94d4-fe96f893d796","observed_at":"2026-11-13T12:52:18.879063+00:00","duration_ms":4.292,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f005e59a-c487-4563-9bf8-263c1331a5b2","observed_at":"2026-11-13T12:52:18.927969+00:00","duration_ms":3.751,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3628857f-0d7e-4666-b668-c3939ebde22c","observed_at":"2026-11-13T12:52:18.933567+00:00","duration_ms":4.449,"status":200,"outcome":"completed"}
+ok
+test_late_known_receipt_resumes_without_new_generate (test_reviews_reconciliation.ReviewReconciliationTests.test_late_known_receipt_resumes_without_new_generate) ... {"event":"api_request_observed","observation_id":"3a1af776-bb0a-4d28-9f58-bc9ee480aefa","observed_at":"2026-11-13T12:52:19.211059+00:00","duration_ms":135.789,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"441f790e-7611-4942-bdf6-8258cf8bb530","observed_at":"2026-11-13T12:52:19.220320+00:00","duration_ms":8.042,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"95870bf9-2e03-4d75-a0f4-59ec3cc403d7","observed_at":"2026-11-13T12:52:19.235576+00:00","duration_ms":13.808,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"2be8f7ce-89c7-4163-8f84-71ed26ff34b2","observed_at":"2026-11-13T12:52:19.316524+00:00","duration_ms":6.035,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e1324315-ca06-4b16-a6cd-cce739910828","observed_at":"2026-11-13T12:52:19.321229+00:00","duration_ms":4.46,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"e2ac2d0f-2c8e-4e37-a8e3-fc3a50297318","observed_at":"2026-11-13T12:52:19.325724+00:00","duration_ms":72.91,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d81fbe54-1444-4b9e-943a-db8e71ee23f0","observed_at":"2026-11-13T12:52:19.341590+00:00","duration_ms":6.317,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"96306665-a892-4c83-8c5d-b20a68c6cdba","observed_at":"2026-11-13T12:52:19.349868+00:00","duration_ms":7.194,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"0c41697a-eb9a-4c4a-a3ec-c67c42639c93","observed_at":"2026-11-13T12:52:19.493558+00:00","duration_ms":8.038,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ae2f5bd0-06f8-4ead-b50a-225e242dada4","observed_at":"2026-11-13T12:52:19.566755+00:00","duration_ms":5.592,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"58810d10-c8c4-461b-9ad8-3c971d48afc7","observed_at":"2026-11-13T12:52:19.643373+00:00","duration_ms":5.626,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"e9ef6617-42c5-403a-a41f-6abbfdae1ce6","observed_at":"2026-11-13T12:52:19.657673+00:00","duration_ms":2.901,"status":200,"outcome":"completed"}
+ok
+test_manual_close_unknown_refunds_once_and_cli_inspects (test_reviews_reconciliation.ReviewReconciliationTests.test_manual_close_unknown_refunds_once_and_cli_inspects) ... {"event":"api_request_observed","observation_id":"ccb60f03-7e35-4542-abb4-747c9c3bf006","observed_at":"2026-11-13T12:52:19.919487+00:00","duration_ms":131.297,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7bac2509-fb84-4c88-8d87-e15c276da865","observed_at":"2026-11-13T12:52:19.928704+00:00","duration_ms":8.072,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b42d9946-d0bf-4697-a04a-2dd9c17acf85","observed_at":"2026-11-13T12:52:19.944516+00:00","duration_ms":14.369,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"802d6dc1-f928-4a6b-bf33-3a1e8fb60696","observed_at":"2026-11-13T12:52:20.032003+00:00","duration_ms":7.613,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"7f0e839f-1727-4bd5-beaa-2fba62dd3490","observed_at":"2026-11-13T12:52:20.037960+00:00","duration_ms":5.708,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"b13f6e60-9a9d-452a-917f-1556462aa314","observed_at":"2026-11-13T12:52:20.044805+00:00","duration_ms":83.151,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"68dc736a-fc4b-473e-ace3-f94b6945d3f5","observed_at":"2026-11-13T12:52:20.066872+00:00","duration_ms":7.256,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3a6dbc75-d609-4b54-ae24-e1ac250f49c4","observed_at":"2026-11-13T12:52:20.075301+00:00","duration_ms":7.228,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1d2ac1ae-dd05-473c-bd72-d1acabb16355","observed_at":"2026-11-13T12:52:20.476536+00:00","duration_ms":3.175,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"95303c4e-7694-428c-9c20-b6ca95e4f2ca","observed_at":"2026-11-13T12:52:20.480127+00:00","duration_ms":2.443,"status":200,"outcome":"completed"}
+ok
+test_cli_unverified_publish_and_no_sensitive_exception (test_rule_operations.RuleOperationsTests.test_cli_unverified_publish_and_no_sensitive_exception) ... {"event":"api_request_observed","observation_id":"8fc66c93-8ffd-4f63-bdfe-e218d93721cb","observed_at":"2026-11-13T12:52:20.813124+00:00","duration_ms":128.351,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e3a90002-d0b3-4f9b-9c72-4dd8d48a5609","observed_at":"2026-11-13T12:52:20.822974+00:00","duration_ms":8.559,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6b730d2e-fa8e-4f2e-8b3a-3ce3a9a77d23","observed_at":"2026-11-13T12:52:20.839188+00:00","duration_ms":14.7,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"35a0c99f-02be-4abc-b203-6b3927d99f1e","observed_at":"2026-11-13T12:52:20.920517+00:00","duration_ms":6.179,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"cb6f355d-3b44-4d80-963d-f3f9c601516e","observed_at":"2026-11-13T12:52:20.925262+00:00","duration_ms":4.511,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"4a93fe92-b40f-4eca-a424-5707a80ed844","observed_at":"2026-11-13T12:52:20.929800+00:00","duration_ms":73.405,"status":200,"outcome":"completed"}
+ok
+test_database_guards_reject_incomplete_and_mismatched_pass_results (test_rule_operations.RuleOperationsTests.test_database_guards_reject_incomplete_and_mismatched_pass_results) ... {"event":"api_request_observed","observation_id":"d99b481d-7ab5-4d3a-80be-acd4b318ab0d","observed_at":"2026-11-13T12:52:22.738416+00:00","duration_ms":132.788,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a4dedf5e-b1f1-4f21-a434-d032f5c05f30","observed_at":"2026-11-13T12:52:22.748332+00:00","duration_ms":8.588,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"65324171-3f89-4fc6-af10-f379bfa9e505","observed_at":"2026-11-13T12:52:22.763483+00:00","duration_ms":13.65,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"ec9970bc-a349-4d65-9a2d-180da9c1ba41","observed_at":"2026-11-13T12:52:22.844306+00:00","duration_ms":6.094,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"6f415aca-596f-4421-bffe-ffb24b1d33ab","observed_at":"2026-11-13T12:52:22.848953+00:00","duration_ms":4.427,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"aa037151-6728-4078-9873-e5c1b101f2d6","observed_at":"2026-11-13T12:52:22.853531+00:00","duration_ms":73.062,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a5c85337-108a-4df8-babc-875f8bf78511","observed_at":"2026-11-13T12:52:22.905261+00:00","duration_ms":6.995,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"341797ce-39f5-4bf5-b714-516193d7af01","observed_at":"2026-11-13T12:52:22.913913+00:00","duration_ms":7.481,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"cfa52c08-146c-45c9-a26a-a60bb977edad","observed_at":"2026-11-13T12:52:23.006764+00:00","duration_ms":6.794,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"045cbdd4-4047-476a-b26c-f72cab8b09df","observed_at":"2026-11-13T12:52:23.080071+00:00","duration_ms":5.524,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"3632b4f5-7cd8-4045-a293-89311dbcc5f5","observed_at":"2026-11-13T12:52:23.157172+00:00","duration_ms":5.969,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"284c8bc6-623e-4dff-b5b0-5974a536de2d","observed_at":"2026-11-13T12:52:23.173134+00:00","duration_ms":4.259,"status":200,"outcome":"completed"}
+ok
+test_database_publish_rejects_substituted_platforms_and_wrong_verified_hosts (test_rule_operations.RuleOperationsTests.test_database_publish_rejects_substituted_platforms_and_wrong_verified_hosts) ... {"event":"api_request_observed","observation_id":"f36ed82d-ec06-4336-98eb-d225e19f0d6d","observed_at":"2026-11-13T12:52:23.461362+00:00","duration_ms":128.427,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"bde9e669-1ceb-4c89-9abd-58e3dc2ac637","observed_at":"2026-11-13T12:52:23.471054+00:00","duration_ms":8.521,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"78d1747f-a64c-43c8-b9c8-f5182b5b3121","observed_at":"2026-11-13T12:52:23.486341+00:00","duration_ms":13.807,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"5509b948-104d-466f-8ec1-3c93f38a4429","observed_at":"2026-11-13T12:52:23.567398+00:00","duration_ms":6.106,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"a9ff8d9a-99cf-45f8-b68c-f0d98905b44f","observed_at":"2026-11-13T12:52:23.571980+00:00","duration_ms":4.368,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"281dfcdf-39f5-47a6-b0fe-20d9fa0ba2f8","observed_at":"2026-11-13T12:52:23.576597+00:00","duration_ms":73.127,"status":200,"outcome":"completed"}
+ok
+test_known_cross_user_versions_and_downloads_are_hidden (test_rule_operations.RuleOperationsTests.test_known_cross_user_versions_and_downloads_are_hidden) ... {"event":"api_request_observed","observation_id":"ff7b19b8-a5c4-4357-adee-fc20ca0b0309","observed_at":"2026-11-13T12:52:23.872531+00:00","duration_ms":129.196,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"44dd321a-a625-4e2d-8a07-b326dabd4740","observed_at":"2026-11-13T12:52:23.883543+00:00","duration_ms":9.771,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3c6c4d06-87de-4f04-8b9c-bd984df2ccec","observed_at":"2026-11-13T12:52:23.898686+00:00","duration_ms":13.644,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"bfea8cf4-a17e-481a-8f75-fa6ac84328f9","observed_at":"2026-11-13T12:52:23.980631+00:00","duration_ms":6.45,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e25c0a26-ce0f-4395-b624-ee2bed7d8811","observed_at":"2026-11-13T12:52:23.985369+00:00","duration_ms":4.517,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"5478403f-7074-4200-a77a-5178c86653e0","observed_at":"2026-11-13T12:52:23.989975+00:00","duration_ms":74.068,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"77ef08c6-85fb-4001-acb4-9fefe9073b01","observed_at":"2026-11-13T12:52:24.005983+00:00","duration_ms":6.638,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"64712cc0-2d5d-411c-895c-07f94d02b63a","observed_at":"2026-11-13T12:52:24.014494+00:00","duration_ms":7.401,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"627ae72f-a281-49c8-8ca5-cea64b1ef551","observed_at":"2026-11-13T12:52:24.102372+00:00","duration_ms":6.375,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"7d6fd490-ac0a-4ef8-82ea-581bfa8d3dd1","observed_at":"2026-11-13T12:52:24.176679+00:00","duration_ms":5.73,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"c6153745-b0da-4b14-8e3b-484447b97c03","observed_at":"2026-11-13T12:52:24.253029+00:00","duration_ms":5.691,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"94da96dd-ba86-4223-98d7-a592f79d7e88","observed_at":"2026-11-13T12:52:24.269172+00:00","duration_ms":4.307,"status":200,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"a4ca81b1-5d7d-4077-8db6-5914ea648e2d","observed_at":"2026-11-13T12:52:24.318975+00:00","duration_ms":5.64,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"b37120cc-a225-4ba5-8fe3-8172da89c757","observed_at":"2026-11-13T12:52:24.558173+00:00","duration_ms":127.826,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"94dbb222-d672-4011-9b0a-0d38ad7a7a2a","observed_at":"2026-11-13T12:52:24.562483+00:00","duration_ms":3.15,"status":404,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1066fd74-8cc1-45c4-9077-b384c6442816","observed_at":"2026-11-13T12:52:24.565809+00:00","duration_ms":2.263,"status":404,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5d7344fe-d2de-4aa4-b890-710b6efe39a5","observed_at":"2026-11-13T12:52:24.569213+00:00","duration_ms":2.345,"status":404,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"42811d42-e397-4874-976c-6f9bd78733e7","observed_at":"2026-11-13T12:52:24.573210+00:00","duration_ms":3.015,"status":404,"outcome":"completed"}
+ok
+test_publish_concurrent_idempotent_immutable_and_restricted (test_rule_operations.RuleOperationsTests.test_publish_concurrent_idempotent_immutable_and_restricted) ... {"event":"api_request_observed","observation_id":"af60fc49-557b-4756-aacd-0fba435b2f36","observed_at":"2026-11-13T12:52:24.836635+00:00","duration_ms":130.989,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c13ae1cb-3609-4265-bddf-9ee7b955f3ba","observed_at":"2026-11-13T12:52:24.846423+00:00","duration_ms":8.481,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"17740494-081b-4b5e-9dfb-8581843c2288","observed_at":"2026-11-13T12:52:24.861883+00:00","duration_ms":13.999,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"0f36cf9c-abad-4e98-9bf0-380b8da14755","observed_at":"2026-11-13T12:52:24.944129+00:00","duration_ms":6.291,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"aeaf9302-02d4-4176-b1c8-7b90fc75f478","observed_at":"2026-11-13T12:52:24.948889+00:00","duration_ms":4.529,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"b7968cc7-30fa-43b3-abd4-1510ab41cd76","observed_at":"2026-11-13T12:52:24.953558+00:00","duration_ms":74.59,"status":200,"outcome":"completed"}
+ok
+test_recheck_versions_keep_original_review_charge_and_provider_attempts (test_rule_operations.RuleOperationsTests.test_recheck_versions_keep_original_review_charge_and_provider_attempts) ... {"event":"api_request_observed","observation_id":"614f584f-9dc3-4948-b8e9-d872c16909ef","observed_at":"2026-11-13T12:52:25.351004+00:00","duration_ms":132.902,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ba9e5f4e-5652-469a-9c1a-7998ec3af8f3","observed_at":"2026-11-13T12:52:25.360905+00:00","duration_ms":8.692,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a4a4a900-ca53-487b-b703-ea1544295487","observed_at":"2026-11-13T12:52:25.376037+00:00","duration_ms":13.707,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"25321ab5-b069-4700-be30-c28889bd127a","observed_at":"2026-11-13T12:52:25.457334+00:00","duration_ms":6.084,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"91959e42-2208-4a52-9ea7-6a563750dfa5","observed_at":"2026-11-13T12:52:25.462099+00:00","duration_ms":4.547,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"b809d4a8-66b1-4efd-934b-4293b653fa92","observed_at":"2026-11-13T12:52:25.466819+00:00","duration_ms":73.668,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"83d454d5-998e-4465-8f1a-df0d2e200df2","observed_at":"2026-11-13T12:52:25.483750+00:00","duration_ms":7.104,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f25a863d-1162-4526-b972-877812996a6c","observed_at":"2026-11-13T12:52:25.492453+00:00","duration_ms":7.571,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"6419606d-851e-478e-a01e-3d439f029e89","observed_at":"2026-11-13T12:52:25.584709+00:00","duration_ms":6.602,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d1885b63-6f9e-4861-b657-8dc1ec433cdc","observed_at":"2026-11-13T12:52:25.659755+00:00","duration_ms":5.997,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"eab0802e-63f6-4a2e-bfce-db177bb43f0f","observed_at":"2026-11-13T12:52:25.736025+00:00","duration_ms":6.298,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"e590f04f-f107-4b4a-8b5b-d1794af4d340","observed_at":"2026-11-13T12:52:25.752533+00:00","duration_ms":4.342,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d601471f-bc1c-42ea-b4ea-e8e426b1e78b","observed_at":"2026-11-13T12:52:25.755926+00:00","duration_ms":2.315,"status":200,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"632e0e09-dbee-4728-b89c-19f0dbc0021b","observed_at":"2026-11-13T12:52:25.847702+00:00","duration_ms":16.482,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"222d2157-67bc-4f16-87a9-efd477a0cba0","observed_at":"2026-11-13T12:52:25.848645+00:00","duration_ms":14.928,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"bf51af08-e775-43b7-ae93-77b0b76a0cde","observed_at":"2026-11-13T12:52:25.849598+00:00","duration_ms":10.884,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"e7103a84-00e0-44aa-87da-196f11250f0f","observed_at":"2026-11-13T12:52:25.877517+00:00","duration_ms":3.763,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d1ceaed4-ee99-4cd9-a723-2d36ecf8d91d","observed_at":"2026-11-13T12:52:25.881558+00:00","duration_ms":2.921,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8a99c31f-26c8-449e-a8ba-f17868dfcc2c","observed_at":"2026-11-13T12:52:25.885732+00:00","duration_ms":3.106,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"50647c06-75a5-4ab9-99a1-eae4c1e6215c","observed_at":"2026-11-13T12:52:25.889832+00:00","duration_ms":2.998,"status":302,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"096e2edd-be96-4e9a-b352-ebbac75b2468","observed_at":"2026-11-13T12:52:25.908468+00:00","duration_ms":2.1,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"59bd528e-e366-4ea9-bf47-a7b27d7b3f98","observed_at":"2026-11-13T12:52:25.921257+00:00","duration_ms":3.5,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"64cd1c55-a069-46ba-a6cf-0d74cb8f8554","observed_at":"2026-11-13T12:52:25.925255+00:00","duration_ms":3.049,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d152f399-fabb-4170-a6c3-7bd1d58f4ab6","observed_at":"2026-11-13T12:52:25.930086+00:00","duration_ms":3.826,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"2ef3e6bf-03d3-48e0-b246-67209c2a11c0","observed_at":"2026-11-13T12:52:25.933306+00:00","duration_ms":2.188,"status":404,"outcome":"completed"}
+ok
+test_scope_mismatch_and_corrupt_storage_never_append (test_rule_operations.RuleOperationsTests.test_scope_mismatch_and_corrupt_storage_never_append) ... {"event":"api_request_observed","observation_id":"2dfc393a-30ee-4545-b966-264e9b1449db","observed_at":"2026-11-13T12:52:26.210452+00:00","duration_ms":137.877,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6a635632-9aab-4c79-a037-47940f18cc61","observed_at":"2026-11-13T12:52:26.219987+00:00","duration_ms":8.346,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"985da70e-dbf8-4116-9481-cdadedd827df","observed_at":"2026-11-13T12:52:26.235589+00:00","duration_ms":14.136,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"92630006-862a-47fd-af1d-2014c0f5885f","observed_at":"2026-11-13T12:52:26.319010+00:00","duration_ms":7.795,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e483eeee-e62f-4b8c-8086-3dac17fa49ab","observed_at":"2026-11-13T12:52:26.323881+00:00","duration_ms":4.633,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"8e95e9a1-eaf4-4199-8299-912ce0f6bdd2","observed_at":"2026-11-13T12:52:26.328589+00:00","duration_ms":75.489,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4965dd30-ca3a-4b21-9a91-8fa8dc43fc87","observed_at":"2026-11-13T12:52:26.344989+00:00","duration_ms":6.825,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"bb699963-66b7-4dd2-8e5e-4c141a876f97","observed_at":"2026-11-13T12:52:26.353624+00:00","duration_ms":7.491,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"8297fe8a-a179-4623-8620-09db0eb30cbc","observed_at":"2026-11-13T12:52:26.443027+00:00","duration_ms":6.653,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d4f5392a-20a5-4e0a-bc74-3559c8c6db65","observed_at":"2026-11-13T12:52:26.518178+00:00","duration_ms":5.956,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"d048a9cd-7734-4ca2-8101-8dde1e8c83e7","observed_at":"2026-11-13T12:52:26.595344+00:00","duration_ms":5.838,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"d9b74c73-8b2c-4def-93fa-14358c3f981d","observed_at":"2026-11-13T12:52:26.611203+00:00","duration_ms":4.313,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"4128f17e-3876-4c86-8e9d-3a8a6638bcec","observed_at":"2026-11-13T12:52:26.692155+00:00","duration_ms":3.685,"status":200,"outcome":"completed"}
+ok
+test_v4_three_platform_quote_delivery_and_rule_discovery (test_rule_operations.RuleOperationsTests.test_v4_three_platform_quote_delivery_and_rule_discovery) ... {"event":"api_request_observed","observation_id":"5702bb97-aa38-4e87-ab1f-c94187efa775","observed_at":"2026-11-13T12:52:26.958268+00:00","duration_ms":135.38,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e815c588-2a5b-410d-9a75-6c9e78e0d7f6","observed_at":"2026-11-13T12:52:26.968009+00:00","duration_ms":8.521,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a0f9e1de-f593-4ec5-8d40-428b9d28ccb8","observed_at":"2026-11-13T12:52:26.983894+00:00","duration_ms":14.387,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"55f0ddbf-5d57-477a-bffb-42911a71639b","observed_at":"2026-11-13T12:52:27.067390+00:00","duration_ms":6.518,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"1e73ecb4-1055-46b5-afe4-531a8e95f25d","observed_at":"2026-11-13T12:52:27.072155+00:00","duration_ms":4.534,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"b44a4cc9-5663-4d8b-aa2f-1976e0bc5633","observed_at":"2026-11-13T12:52:27.077085+00:00","duration_ms":75.822,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"37a5b7e4-4f49-451d-bf46-d0ad75d61dc7","observed_at":"2026-11-13T12:52:27.089162+00:00","duration_ms":2.278,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a3d588f4-35f6-4808-a497-fb1ae9be7f26","observed_at":"2026-11-13T12:52:27.121415+00:00","duration_ms":3.808,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"94ba87c8-18b5-4ab7-96ff-951a5acfd78a","observed_at":"2026-11-13T12:52:27.147085+00:00","duration_ms":2.9,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"50ba32f0-4374-42e0-ab23-cc2184c325bb","observed_at":"2026-11-13T12:52:27.154860+00:00","duration_ms":6.723,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"455778d8-36b5-4f1d-9abe-03af138081a4","observed_at":"2026-11-13T12:52:27.166036+00:00","duration_ms":10.091,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"2e12fbb7-d00d-49a2-a41b-7ab77dc23a22","observed_at":"2026-11-13T12:52:27.255783+00:00","duration_ms":6.882,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"33ac8ada-a047-4ada-afda-bd13c35c2da7","observed_at":"2026-11-13T12:52:27.329651+00:00","duration_ms":5.818,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"9fd8a568-e761-4a4d-aaa3-88787b2e8742","observed_at":"2026-11-13T12:52:27.405997+00:00","duration_ms":5.833,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"f6985c4e-cabb-47f6-8b93-080c786a2682","observed_at":"2026-11-13T12:52:27.422202+00:00","duration_ms":4.429,"status":200,"outcome":"completed"}
+ok
+test_verified_requires_real_archive_hash_and_private_storage (test_rule_operations.RuleOperationsTests.test_verified_requires_real_archive_hash_and_private_storage) ... {"event":"api_request_observed","observation_id":"adffd8b9-8425-4b98-aa0d-5a741e10d303","observed_at":"2026-11-13T12:52:27.686572+00:00","duration_ms":132.509,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0c6e1c81-c0f3-42e7-946e-a76e2e94f5dd","observed_at":"2026-11-13T12:52:27.696157+00:00","duration_ms":8.384,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1a237bd1-cffa-4aca-93cf-3605f3fd6be0","observed_at":"2026-11-13T12:52:27.711870+00:00","duration_ms":14.136,"status":201,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"2fbba163-e5ca-4d60-9b35-61a21c03e0b0","observed_at":"2026-11-13T12:52:27.793518+00:00","duration_ms":6.106,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"226a6e57-92ce-4b88-b4ea-da105d005c64","observed_at":"2026-11-13T12:52:27.798228+00:00","duration_ms":4.468,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"34057913-3eb4-480c-b3af-0957f7994ba3","observed_at":"2026-11-13T12:52:27.802994+00:00","duration_ms":73.941,"status":200,"outcome":"completed"}
+{"event":"storage_archive_observed","observation_id":"2c0a8de2-3bdb-4404-b16a-009526a75c0d","observed_at":"2026-11-13T12:52:27.862149+00:00","duration_ms":8.227,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"c490d905-0abd-4273-8fe0-9db4fdc73049","observed_at":"2026-11-13T12:52:27.891874+00:00","duration_ms":7.799,"outcome":"success"}
+ok
+test_appearance_snapshot_survives_edit (test_task_api.TaskApiTests.test_appearance_snapshot_survives_edit) ... {"event":"api_request_observed","observation_id":"d2ec8dcc-763d-4e45-97a3-a449881886d4","observed_at":"2026-11-13T12:52:28.227899+00:00","duration_ms":139.511,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b2c396ae-4a30-43c4-9172-abd2ef0cc96c","observed_at":"2026-11-13T12:52:28.238925+00:00","duration_ms":9.749,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"9def1cb2-a0df-4b22-a883-b9bf7926b3bd","observed_at":"2026-11-13T12:52:28.254510+00:00","duration_ms":4.258,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e2417f4a-f1de-4090-95ca-3c9ba9cc96c5","observed_at":"2026-11-13T12:52:28.264296+00:00","duration_ms":8.705,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8541173d-e203-4205-a571-99954a3e73ce","observed_at":"2026-11-13T12:52:28.269026+00:00","duration_ms":3.572,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d88935cf-ffd1-4412-90db-5c1f25111634","observed_at":"2026-11-13T12:52:28.281599+00:00","duration_ms":11.481,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e0fecd76-473d-4d0e-9f36-f5354958af3c","observed_at":"2026-11-13T12:52:28.292270+00:00","duration_ms":3.755,"status":200,"outcome":"completed"}
+ok
+test_expired_quote_replay_immutability (test_task_api.TaskApiTests.test_expired_quote_replay_immutability) ... {"event":"api_request_observed","observation_id":"4c320a33-6721-4bd3-be54-6ffbd91c6747","observed_at":"2026-11-13T12:52:28.545505+00:00","duration_ms":130.781,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5a406fe1-5a61-47b4-ba74-2dd8676c9e78","observed_at":"2026-11-13T12:52:28.555555+00:00","duration_ms":8.87,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b630308d-8ffe-40e3-977c-be811cf64128","observed_at":"2026-11-13T12:52:28.575728+00:00","duration_ms":8.903,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3a243749-cbb3-49e2-b536-99942900e8cb","observed_at":"2026-11-13T12:52:28.588075+00:00","duration_ms":11.266,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"35a2afb8-7ab8-450c-aad7-2ef87db2f5ba","observed_at":"2026-11-13T12:52:28.598745+00:00","duration_ms":3.586,"status":200,"outcome":"completed"}
+ok
+test_http_concurrent_replay_binding_cancel (test_task_api.TaskApiTests.test_http_concurrent_replay_binding_cancel) ... {"event":"api_request_observed","observation_id":"4f94b124-e3e6-4093-814e-17f5f39ae8e1","observed_at":"2026-11-13T12:52:28.857436+00:00","duration_ms":130.209,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"05c988a0-4639-474e-81f7-a576393b67d4","observed_at":"2026-11-13T12:52:28.866931+00:00","duration_ms":8.31,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"3b0bec01-9963-4823-a051-63f6f42ee607","observed_at":"2026-11-13T12:52:28.887072+00:00","duration_ms":8.678,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"aadc7304-14b0-4ced-8531-e7c683bad25a","observed_at":"2026-11-13T12:52:28.981541+00:00","duration_ms":84.385,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"fb57be6d-8cb8-4281-8d04-f4016cfb2195","observed_at":"2026-11-13T12:52:28.993663+00:00","duration_ms":83.922,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7708288c-a0cb-4333-8492-41e5aea21f6e","observed_at":"2026-11-13T12:52:29.000073+00:00","duration_ms":95.8,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a548dbcf-d40c-49d0-a2b7-cf8a42bcb58d","observed_at":"2026-11-13T12:52:29.002853+00:00","duration_ms":98.493,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"af0bfba2-6205-435b-b076-911898fe1a22","observed_at":"2026-11-13T12:52:29.005797+00:00","duration_ms":93.846,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"10f3e63d-754c-41c9-9a22-712c45fab141","observed_at":"2026-11-13T12:52:29.008348+00:00","duration_ms":104.733,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8a6b1ed1-f660-45f9-8a2e-88140beeb49a","observed_at":"2026-11-13T12:52:29.011696+00:00","duration_ms":107.774,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6dd393bf-a2c5-4c2e-8219-ad574a0b8484","observed_at":"2026-11-13T12:52:29.015024+00:00","duration_ms":117.732,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"bcb88e4b-71da-4ceb-8b45-86c275469f9b","observed_at":"2026-11-13T12:52:29.017142+00:00","duration_ms":107.567,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"0dad87c0-1719-42c1-ada0-2d983df36a89","observed_at":"2026-11-13T12:52:29.019977+00:00","duration_ms":115.654,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f6553879-e173-4d33-935d-755205305288","observed_at":"2026-11-13T12:52:29.021715+00:00","duration_ms":117.799,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c8efd62a-5459-43bf-8e77-9e58f22af070","observed_at":"2026-11-13T12:52:29.024191+00:00","duration_ms":119.547,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6725613f-ffa5-4999-8484-9262ef93b4b2","observed_at":"2026-11-13T12:52:29.026027+00:00","duration_ms":117.3,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"12062f23-34f7-44b6-a2c9-dc9a2a9a589e","observed_at":"2026-11-13T12:52:29.028386+00:00","duration_ms":118.795,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cdfe8740-28bd-48b4-baf3-a7a5f329334c","observed_at":"2026-11-13T12:52:29.030683+00:00","duration_ms":121.214,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7ab520d0-cfb8-4929-859d-fb2f5e37bc29","observed_at":"2026-11-13T12:52:29.031846+00:00","duration_ms":127.469,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ffca21ee-6a95-4f27-8868-8026d1eaa620","observed_at":"2026-11-13T12:52:29.033290+00:00","duration_ms":129.429,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c1ac250e-b577-44bd-b541-be9f0cffdb49","observed_at":"2026-11-13T12:52:29.034719+00:00","duration_ms":132.448,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"d566099a-4dd4-4541-be28-b78a31562ac1","observed_at":"2026-11-13T12:52:29.036081+00:00","duration_ms":132.423,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6bb1c0e5-118d-4e71-b2a1-99d9a0c355af","observed_at":"2026-11-13T12:52:29.036553+00:00","duration_ms":132.406,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"84a0d9fa-01de-425e-ab4a-42c6ca5ffd57","observed_at":"2026-11-13T12:52:29.041784+00:00","duration_ms":3.078,"status":409,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e79191b5-1ab9-4e28-b5cc-06cd65fe6a71","observed_at":"2026-11-13T12:52:29.045763+00:00","duration_ms":3.078,"status":409,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"5bce610e-7b18-49e4-9694-829ebd55b999","observed_at":"2026-11-13T12:52:29.052301+00:00","duration_ms":5.497,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"fa3a3f31-15c7-4bba-ac82-1bffbe5bc392","observed_at":"2026-11-13T12:52:29.056151+00:00","duration_ms":2.77,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e65b48a8-a7f2-4355-b561-9f7116656255","observed_at":"2026-11-13T12:52:29.059072+00:00","duration_ms":2.041,"status":200,"outcome":"completed"}
+ok
+test_outbox_failure_rolls_back_task_wallet_quote (test_task_api.TaskApiTests.test_outbox_failure_rolls_back_task_wallet_quote) ... {"event":"api_request_observed","observation_id":"fa48d50f-6c36-46f8-9d65-bea280fc1d39","observed_at":"2026-11-13T12:52:29.328170+00:00","duration_ms":129.548,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ad0576a7-cd1b-4f00-815d-3bbf0d808bcb","observed_at":"2026-11-13T12:52:29.339003+00:00","duration_ms":9.574,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a8601df3-fc89-45bf-9a5c-ba402bbd7235","observed_at":"2026-11-13T12:52:29.360395+00:00","duration_ms":8.604,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"53aa033f-8f2b-4bec-a1f0-bcb9f1ae7253","observed_at":"2026-11-13T12:52:29.378151+00:00","duration_ms":10.076,"status":503,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8ed97112-dc9d-4bb2-9ec0-ce39cb2bc4b2","observed_at":"2026-11-13T12:52:29.398014+00:00","duration_ms":5.709,"status":201,"outcome":"completed"}
+ok
+test_racing_quotes (test_task_api.TaskApiTests.test_racing_quotes) ... {"event":"api_request_observed","observation_id":"28c98ba4-9518-4f8e-a826-d229ef62431f","observed_at":"2026-11-13T12:52:29.654193+00:00","duration_ms":133.888,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8643d318-5c72-4b57-944a-c3ab7fb44de1","observed_at":"2026-11-13T12:52:29.663727+00:00","duration_ms":8.241,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"704e2f2d-2510-4e0e-8af4-dfb8d5b34a82","observed_at":"2026-11-13T12:52:29.683987+00:00","duration_ms":8.774,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"e88f4c65-e688-46a6-b639-3a5bf5801369","observed_at":"2026-11-13T12:52:29.689290+00:00","duration_ms":4.058,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7e1ff968-ee2a-4a7b-968d-3afbab01f4b8","observed_at":"2026-11-13T12:52:29.707645+00:00","duration_ms":15.999,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"dd9f363b-5625-4cc3-8a8d-fe307dd65347","observed_at":"2026-11-13T12:52:29.714145+00:00","duration_ms":22.461,"status":409,"outcome":"completed"}
+ok
+test_size_and_archive (test_task_api.TaskApiTests.test_size_and_archive) ... {"event":"api_request_observed","observation_id":"1b1f1056-e279-4c2e-b39d-5b5328c7edc9","observed_at":"2026-11-13T12:52:29.970762+00:00","duration_ms":132.747,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"eadc84eb-0512-4698-bc1e-036768985b5b","observed_at":"2026-11-13T12:52:29.981232+00:00","duration_ms":9.214,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"7336ec21-13d5-4c28-a8ec-b87a673798d3","observed_at":"2026-11-13T12:52:29.997730+00:00","duration_ms":5.134,"status":422,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"a3ef6c9a-1a9f-488c-9c15-26a4cfcb7837","observed_at":"2026-11-13T12:52:30.001361+00:00","duration_ms":2.542,"status":204,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"730c1682-a08c-45f3-9dc4-3f591e0274d9","observed_at":"2026-11-13T12:52:30.007397+00:00","duration_ms":4.974,"status":404,"outcome":"completed"}
+ok
+test_two_products_compete_for_one_wallet_reservation (test_task_api.TaskApiTests.test_two_products_compete_for_one_wallet_reservation) ... {"event":"api_request_observed","observation_id":"70a812aa-ebc2-4563-aa5f-223ad2c3013b","observed_at":"2026-11-13T12:52:30.264593+00:00","duration_ms":135.956,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"403ca3e9-3258-41ea-90ee-87a7bb5831b7","observed_at":"2026-11-13T12:52:30.275099+00:00","duration_ms":9.268,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"14dcf582-a833-4ceb-ad2e-9d0c197a46ed","observed_at":"2026-11-13T12:52:30.289617+00:00","duration_ms":3.194,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ae2a4e2d-24e5-4cb1-a61d-05d71e0dc113","observed_at":"2026-11-13T12:52:30.306505+00:00","duration_ms":8.569,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cff0ab32-23a2-4510-a0e0-54dac6f90e2e","observed_at":"2026-11-13T12:52:30.311592+00:00","duration_ms":3.984,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"1f5531f4-675a-4e6c-ae08-574849dabaab","observed_at":"2026-11-13T12:52:30.334838+00:00","duration_ms":21.248,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"92d3d4f8-b30a-40e8-a4b5-f9a34b31eddc","observed_at":"2026-11-13T12:52:30.337969+00:00","duration_ms":24.35,"status":409,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"413c9f6a-96cb-43cc-88f8-74f98c657d3b","observed_at":"2026-11-13T12:52:30.341295+00:00","duration_ms":2.178,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b4c622e7-8d0f-4f10-95eb-8863f0d9b0ed","observed_at":"2026-11-13T12:52:30.353815+00:00","duration_ms":5.79,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"94ea8ffc-2c02-41b8-8afb-bb367b4e8484","observed_at":"2026-11-13T12:52:30.356738+00:00","duration_ms":1.979,"status":200,"outcome":"completed"}
+ok
+test_charge_refund_race_has_single_terminal_ledger (test_worker_db.WorkerDbTests.test_charge_refund_race_has_single_terminal_ledger) ... {"event":"api_request_observed","observation_id":"c42d93c9-bb14-410e-9359-fb411f0e3cae","observed_at":"2026-11-13T12:52:30.644459+00:00","duration_ms":132.67,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"39e96189-52fc-48ab-94ae-5978414cc562","observed_at":"2026-11-13T12:52:30.654902+00:00","duration_ms":9.211,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"61cfd167-31a7-4cb9-abe0-f167b82d9dd4","observed_at":"2026-11-13T12:52:30.674841+00:00","duration_ms":8.461,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"fc81782a-dcf4-4e01-8319-548d4d2f1b32","observed_at":"2026-11-13T12:52:30.687014+00:00","duration_ms":11.099,"status":201,"outcome":"completed"}
+ok
+test_concurrent_claim_fencing_and_null_token_rejection (test_worker_db.WorkerDbTests.test_concurrent_claim_fencing_and_null_token_rejection) ... {"event":"api_request_observed","observation_id":"20dda95a-df35-4811-afa2-a978632ff3ef","observed_at":"2026-11-13T12:52:31.031409+00:00","duration_ms":131.138,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"b16d1c1a-6fa3-4e7d-b3f7-7b6a01b8bd44","observed_at":"2026-11-13T12:52:31.041010+00:00","duration_ms":8.405,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"195c786e-9b9d-4a93-9f83-71bfeada82e1","observed_at":"2026-11-13T12:52:31.061455+00:00","duration_ms":9.151,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"944111af-6f41-4d6c-b059-dbfdbb06a1f4","observed_at":"2026-11-13T12:52:31.074533+00:00","duration_ms":11.928,"status":201,"outcome":"completed"}
+ok
+test_delivery_settles_once_manual_review_allowed (test_worker_db.WorkerDbTests.test_delivery_settles_once_manual_review_allowed) ... {"event":"api_request_observed","observation_id":"009eb03a-f157-4d97-beb5-7c68f011e64e","observed_at":"2026-11-13T12:52:31.404282+00:00","duration_ms":128.171,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"8c4692a0-7b09-4c9e-bcd8-2ea8d48b80a9","observed_at":"2026-11-13T12:52:31.414582+00:00","duration_ms":9.063,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"cc14648f-4982-465d-aba4-a403fbc63367","observed_at":"2026-11-13T12:52:31.435047+00:00","duration_ms":8.958,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"90d49895-3541-437a-90c8-99b3fd40643f","observed_at":"2026-11-13T12:52:31.447651+00:00","duration_ms":11.501,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"c170999c-53f1-4de5-bcad-cd5b9c48265b","observed_at":"2026-11-13T12:52:31.539124+00:00","duration_ms":3.199,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"ebe36dd1-0ed5-457f-88db-f00d048241bf","observed_at":"2026-11-13T12:52:31.544081+00:00","duration_ms":3.809,"status":200,"outcome":"completed"}
+ok
+test_no_report_no_settlement_and_definite_failure_refunds (test_worker_db.WorkerDbTests.test_no_report_no_settlement_and_definite_failure_refunds) ... {"event":"api_request_observed","observation_id":"0f14a9f0-22bc-468b-8942-7ebf6e3b9052","observed_at":"2026-11-13T12:52:31.797931+00:00","duration_ms":129.034,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"6179f8bf-d0a4-4bf0-8e14-3fd2c88b8f47","observed_at":"2026-11-13T12:52:31.807417+00:00","duration_ms":8.286,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"aaa2d64b-ba71-47e2-a93c-a1f33fd7f324","observed_at":"2026-11-13T12:52:31.827667+00:00","duration_ms":8.672,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"89555592-fca3-40b4-8648-8258702b4a19","observed_at":"2026-11-13T12:52:31.840562+00:00","duration_ms":11.795,"status":201,"outcome":"completed"}
+ok
+test_unknown_never_reclaimed_and_late_receipt_append_only (test_worker_db.WorkerDbTests.test_unknown_never_reclaimed_and_late_receipt_append_only) ... {"event":"api_request_observed","observation_id":"0bde813a-a933-45de-a583-628452e733c2","observed_at":"2026-11-13T12:52:32.131551+00:00","duration_ms":127.59,"status":200,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"895cfc0e-5842-48ff-a596-85970fd708e1","observed_at":"2026-11-13T12:52:32.141809+00:00","duration_ms":9.048,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"f6cef8e9-7054-408e-bcd9-622d392aa8eb","observed_at":"2026-11-13T12:52:32.161712+00:00","duration_ms":8.737,"status":201,"outcome":"completed"}
+{"event":"api_request_observed","observation_id":"01eb284a-2d2f-4815-81fa-a4c239180472","observed_at":"2026-11-13T12:52:32.174099+00:00","duration_ms":11.3,"status":201,"outcome":"completed"}
+ok
+
+----------------------------------------------------------------------
+Ran 98 tests in 54.184s
+
+OK

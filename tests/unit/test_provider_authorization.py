@@ -38,7 +38,16 @@ class ProviderAuthorizationTests(unittest.IsolatedAsyncioTestCase):
                 "type": "scene",
                 "prompt": "Review fixture",
                 "protection_mode": "pixel_exact",
-                "regions": [],
+                "regions": [
+                    {
+                        "source_x": 0,
+                        "source_y": 0,
+                        "width": 1,
+                        "height": 1,
+                        "target_x": 0,
+                        "target_y": 0,
+                    }
+                ],
                 "output": {"width": 256, "height": 256, "format": "png"},
             },
             "targets": [
@@ -71,6 +80,10 @@ class ProviderAuthorizationTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(original, self.load(changed)[1])
         changed = {**self.data, "total_ceiling": "0.13"}
         self.assertNotEqual(original, self.load(changed)[1])
+
+    def test_duplicate_targets_cannot_expand_reviewed_scope(self):
+        with self.assertRaisesRegex(ValueError, "duplicate targets"):
+            self.load({**self.data, "targets": self.data["targets"] * 2})
 
     def test_duplicate_fields_are_rejected_before_model_validation(self):
         self.path.write_text('{"max_generate_calls":1,"max_generate_calls":2}')
