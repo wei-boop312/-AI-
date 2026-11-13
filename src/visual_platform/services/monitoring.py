@@ -52,6 +52,9 @@ def prometheus(snapshot,thresholds=Thresholds(),dependencies=None):
         unknown=sum(row['attempts'] for row in business.get('provider_cost',[]) if row.get('provider')==provider and row.get('cost_status')=='unknown')
         if unknown:gauge('provider_unknown_cost_attempts_24h',unknown,'{provider="'+provider+'"}')
     for field in ('samples','manual_review','non_compliant','manual_review_rate'):gauge('compliance_24h_'+field,business.get('compliance',{}).get(field))
+    telemetry=snapshot.get('request_archive_metrics',{})
+    for field in ('api_samples','api_p95_ms','api_5xx_count','api_incomplete_or_interrupted','archive_operations','archive_failure_count','archive_interrupted'):
+        gauge(field,telemetry.get(field))
     for component in ('mq','storage'):
         if dependencies is not None:gauge('dependency_up',int(dependencies.get(component)=='ready'),'{component="'+component+'"}')
     return '\n'.join(values)+'\n'

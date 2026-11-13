@@ -10,6 +10,7 @@ from alembic.script import ScriptDirectory
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'src'))
 from visual_platform.services.recovery_objectives import assess_recovery
+from visual_platform.services.metrics_evidence import validate_runtime_evidence
 
 def main():
     commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
@@ -44,6 +45,7 @@ def main():
         require(metrics.get('result')=='PASS' and metrics.get('commit')==commit and metrics.get('paid_calls')==0,'runtime metrics evidence failed or stale')
         required={'api_p95_ms','api_5xx_count','task_stage_duration','archive_failure_count','provider_submission_count','provider_cost_by_currency','provider_cost_unknown_records','rule_manual_review_rate'}
         require(required<=set(metrics.get('metrics',{})),'full plan runtime metrics coverage incomplete')
+        validate_runtime_evidence(metrics,commit)
         report.update(result='PASS',runtime_metrics='PASS');code=0
     except EnvironmentError as error:report.update(result='BLOCKED_ENV',reason=str(error));code=3
     except Exception as error:report.update(result='FAIL',reason=str(error));code=1

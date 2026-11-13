@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 from verify_sources import verify
 from verify_delivery import verify_static,verify_run
+from visual_platform.services.metrics_evidence import validate_runtime_evidence
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -54,6 +55,9 @@ def main(task):
         for key in ('api_ready','old_access_rejected','post_snapshot_marker_absent','completed_report_review_and_download_hash_preserved','pixel_protection_preserved','three_fixture_tasks_quarantined','unknown_and_queued_cannot_submit','known_id_recovered_without_new_generate'):
             if detail.get('verification',{}).get(key) is not True:raise ValueError('recovery guard missing: '+key)
         report['versioned_backup_restore']='PASS'
+        metrics_path=evidence/'runtime-metrics.json'
+        if not metrics_path.is_file():raise EnvironmentError('BLOCKED_ENV: current runtime API/archive/business metrics evidence missing')
+        report['runtime_metrics']=validate_runtime_evidence(json.loads(metrics_path.read_text(encoding='utf-8-sig')),report['commit'])
         plan=json.loads((ROOT/'docs/specification/CODEX_EXECUTION/tasks.json').read_text(encoding='utf-8-sig'))
         report['verified_tasks']=[x['id'] for x in plan['tasks'] if x['phase'] in ('P0','P1','P2','P3')]+['P4-01 (mock HTTP)','P4-02 (mock SDK HTTP)','P5-01']
         report['result']='OFFLINE_READY';code=0

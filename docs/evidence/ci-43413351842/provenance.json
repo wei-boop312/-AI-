@@ -1,0 +1,32 @@
+{
+  "run_id": 43413351842,
+  "commit": "0008ce1ea8592f9865afe1fd984ad3dbd927b122",
+  "conclusion": "success",
+  "scope": "0025 business aggregates with 67 unit/94 native tests; full Compose and versioned restore. No request/archive telemetry proof at this commit.",
+  "files": [
+    {
+      "path": "native-restore-v2.json",
+      "original_artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "1ea16959d6260826c02048d8b9e0ec6f942a9e15d5f3779cee7ef35556021bcc"
+    },
+    {
+      "path": "native-result.json",
+      "original_artifact_path": "work/ci-public/native-result.json",
+      "sha256": "97d221e1e1fd0a1c2f87f26bb5ef339dc3ddaf56f7abf3a16aae5a95818dc58f"
+    },
+    {
+      "path": "offline-gate.json",
+      "original_artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "b34a70f27d1ce85a53349cad7306eb6f16b714693cd478608ef19fafb1b52bec"
+    },
+    {
+      "path": "monitor-after-recovery.json",
+      "original_artifact_path": "work/ci-public/monitor-after-recovery.log",
+      "sha256": "ac349ac9d59db143071a335562fbcb2706dd44a8ae323eb782b9cc5f7ac9dc1b"
+    }
+  ],
+  "test_counts": {
+    "unit": 67,
+    "native-integration": 94
+  }
+}

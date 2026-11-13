@@ -13,7 +13,8 @@ import psycopg
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from visual_platform.services.monitoring import Thresholds,alerts,prometheus
 from visual_platform.storage.s3 import S3Storage
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('--prometheus',action='store_true');p.add_argument('--probe-dependencies',action='store_true');p.add_argument('--unknown-seconds',type=float,default=300);p.add_argument('--outbox-seconds',type=float,default=30);p.add_argument('--heartbeat-seconds',type=float,default=15);args=p.parse_args()
+from visual_platform.services.telemetry_reader import summarize_telemetry
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--prometheus',action='store_true');p.add_argument('--probe-dependencies',action='store_true');p.add_argument('--unknown-seconds',type=float,default=300);p.add_argument('--outbox-seconds',type=float,default=30);p.add_argument('--heartbeat-seconds',type=float,default=15);p.add_argument('--api-log',type=Path,action='append',default=[]);p.add_argument('--archive-log',type=Path,action='append',default=[]);args=p.parse_args()
 logging.getLogger('aiormq').setLevel(logging.CRITICAL);logging.getLogger('aio_pika').setLevel(logging.CRITICAL)
 async def dependencies():
     async def mq():
@@ -53,6 +54,14 @@ try:
         if not row or any(row[:4]) or not row[4] or row[5]:raise ValueError('monitor runtime role must be unprivileged and non-owner')
         snapshot=c.execute("SELECT ops.monitor_snapshot() || jsonb_build_object('business_metrics',ops.business_metrics_snapshot())").fetchone()[0]
     deps=asyncio.run(dependencies()) if args.probe_dependencies else None
+    if args.api_log or args.archive_log:
+        telemetry=summarize_telemetry(args.api_log,args.archive_log)
+        snapshot['request_archive_metrics']=telemetry
+        if not telemetry['coverage_complete_for_supplied_files']:raise ValueError('incomplete telemetry inputs')
+        missing=[]
+        if not telemetry['api_samples']:missing.append('api_duration_and_5xx')
+        if not telemetry['archive_operations']:missing.append('archive_failure_count')
+        snapshot['measurement_coverage']={'missing':missing,'scope':telemetry['scope']}
     findings=alerts(snapshot,thresholds,deps)
     if args.prometheus:print(prometheus(snapshot,thresholds,deps),end='')
     else:print(json.dumps({'snapshot':snapshot,'dependencies':deps,'alerts':findings},ensure_ascii=False))

@@ -70,7 +70,7 @@ def main():
     def pg_ready(dsn):
         with psycopg.connect(dsn,connect_timeout=1) as connection:return connection.execute('SELECT 1').fetchone()[0]==1
     def start(component):
-        output=(private/(component+'.log')).open('wb');log_handles.append(output)
+        output=(private/(component+'.log')).open('ab');log_handles.append(output)
         process=subprocess.Popen([sys.executable,'scripts/run_local.py',component],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,start_new_session=True)
         processes.append(process);return process
     def stop(process):
@@ -112,6 +112,7 @@ def main():
         publisher=start('publisher');worker=start('worker')
         wait(lambda:subprocess.run([sys.executable,'scripts/run_local.py','monitor'],cwd=ROOT,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0,'recovered service heartbeats')
         command([sys.executable,'scripts/run_local.py','monitor'],name='monitor-after-recovery')
+        command([sys.executable,'scripts/verify_runtime_metrics.py'],name='runtime-metrics')
         build_manifest={'commit':os.environ.get('GITHUB_SHA'),'files':{str(p.relative_to(ROOT)) :hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT/'apps/web/dist').rglob('*')) if p.is_file()},'images':images,'steps':steps,'paid_calls':0,'result':'PASS'}
         (public/'native-result.json').write_text(json.dumps(build_manifest,indent=2)+'\n')
     except Exception:

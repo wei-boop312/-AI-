@@ -55,7 +55,7 @@ def main():
     destination={**env,'RESTORE_DATABASE_URL':'postgresql://restore_owner:'+quote(password,safe='')+'@127.0.0.1:55434/postgres',
                  'S3_ENDPOINT':'http://127.0.0.1:18334','S3_ACCESS_KEY':access,'S3_SECRET_KEY':secret,'S3_BUCKET':source['S3_BUCKET'],'S3_REGION':source['S3_REGION']}
     prefix='visual-restore-'+identity[:12];containers=[]
-    report={'result':'FAIL','commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'observed_at':datetime.now(timezone.utc).isoformat(),
+    report={'result':'FAIL','commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'observed_at':datetime.now(timezone.utc).isoformat(),'archive_probe_log':str((logs/'prepare.log').relative_to(ROOT)),
             'paid_calls':0,'scope':'cold independent Docker PG/S3 restore using native PG tools; offline Fake only; no deployment','stage':'prepare'}
     def command(arguments,name,values=env):
         with (logs/(name+'.log')).open('wb') as output:

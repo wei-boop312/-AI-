@@ -45,7 +45,10 @@ def task(client,body,headers):
     r=client.post('/api/v1/tasks',json={**body,'quote_id':q.json()['quote_id']},headers={**headers,'idempotency-key':str(uuid4())});require(r.status_code==201,'drill task failed');return r.json()['id']
 def run_worker(task_id,mode='success',broken=False):
     class ArchiveOutage(S3Storage):
-        def put_immutable(self,*args,**kwargs):raise StorageError('controlled archive outage')
+        def __init__(self,*args,**kwargs):
+            super().__init__(*args,**kwargs)
+            def fail(*args,**kwargs):raise StorageError('controlled archive outage')
+            self.client.put_object=fail
     async def run():
         pool=await open_pool(profile['WORKER_DATABASE_URL'],'app_worker');storage=(ArchiveOutage if broken else S3Storage)(settings)
         try:return await Worker(pool,storage,DurableFakeProvider(Path(profile['FAKE_PROVIDER_DIR']),mode=mode)).run(task_id)

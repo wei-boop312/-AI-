@@ -11,6 +11,7 @@ from visual_platform.db.pool import open_pool
 from visual_platform.storage.s3 import S3Storage
 from visual_platform.services.readiness import Readiness
 from visual_platform.core.lifecycle import clear_api_shutdown_marker,record_api_shutdown
+from visual_platform.services.telemetry import RequestTelemetry
 from visual_platform.api import auth,products,credits,quotes,tasks,rules,assets,reviews
 
 
@@ -80,6 +81,7 @@ def create_app(settings: Settings | None=None):
         result=await app.state.readiness.check()
         return JSONResponse(status_code=200 if result["status"]=="ready" else 503,content=result)
     app.include_router(auth.router); app.include_router(products.router); app.include_router(credits.router); app.include_router(quotes.router); app.include_router(tasks.router); app.include_router(rules.router); app.include_router(assets.router); app.include_router(reviews.router)
+    app.add_middleware(RequestTelemetry)
     return app
 
 app=create_app()

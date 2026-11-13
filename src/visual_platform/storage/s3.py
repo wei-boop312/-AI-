@@ -2,6 +2,7 @@ import hashlib
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
+from visual_platform.services.telemetry import archive_observed
 
 class StorageError(Exception): pass
 class S3Storage:
@@ -28,6 +29,7 @@ class S3Storage:
             if len(data)>limit: raise ValueError('file_size')
             return data,result.get('ContentType'),result.get('VersionId')
         finally: result['Body'].close()
+    @archive_observed
     def put_immutable(self,key,data,mime):
         sha=hashlib.sha256(data).hexdigest()
         try:
