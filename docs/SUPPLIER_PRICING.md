@@ -92,3 +92,19 @@ v3私有快照的 `currency/total_ceiling/reserved_ceiling_total/known_estimate_
 Gemini同步响应没有可供恢复查询的远程任务ID；`gemini-<意图UUID>`仅是本地归档标识。新Worker在应用检测回执之前，用单个数据库事务保存已知回执与完整的受限事实归档，含原响应摘要、最终图摘要、原始计量和SDK/提示版本信息；任意一步或审计写入失败都会回滚两者。私有表与受限函数不向API用户暴露，数据不可修改或删除。Worker后续估算和交付读取已存归档，不依赖本地`.facts.json`，不会因文件丢失再次调用检测。
 
 已知响应返回到首次持久化之间仍存在不可消除的进程崩溃窗口：若数据库未保存且本地原结果也丢失，只能保持未知/人工处置，不能自动重发或宣称检测成功。旧回执仅在原本地事实文件仍在时补归档。归档证明保存的是同一次响应，不证明供应商实际质量、发票或商户真实扣费；默认仍双MockTransport。
+
+
+## 账单作用域预检（0036候选，尚未确认真实费用）
+
+私有Ops命令：
+
+```sh
+python scripts/supplier_pricing.py billing-context --task <uuid> --attempt <uuid>
+python scripts/supplier_pricing.py review-bill --document <私有账单映射JSON> --evidence-file <私有证据文件> --attest-reviewed
+```
+
+账单映射包含schema_version=1、task_id/attempt_id、quote_input_sha256、provider/model/endpoint_origin、merchant_fingerprint/billing_group、provider_request_id/response_digest、currency/amount、evidence_kind/evidence_sha256、statement_fingerprint/line_fingerprint。金额为非负精确字符串，最多12位整数和8位小数；指纹均为SHA256，不放API密钥或完整账单账号。配置最多64KiB并拒绝重复键；证据最多20MiB，必须与审核映射SHA一致。
+
+上下文只从PG原回执/冻结价格/归档结果取值。生成使用BFL已知请求ID；同步检测必须用真实响应里的provider_response_id，不能把本地gemini-意图ID当供应商请求编号。缺远程ID、商户/分组/根地址/模型/报价SHA/单位不一致或未应用回执均拒绝。Hubway余额仍保持HUBWAY_BALANCE_UNIT。
+
+当前只验offline_fixture和offline_protocol_mock，reviewed_statement或live组合拒绝。输出仅OFFLINE_BILL_SCOPE_MATCHED、单步上限关系及同单位估算差额；未知/不同单位估算的差额为null，全预算累计尚未核对。actual_spending_verified、confirmation_enabled、evidence_archived始终false，无账单入账、预算重开或积分变动。真实证据归档、去重、正式账单确认与live上下文仍需后续实现和独立验收。

@@ -74,3 +74,11 @@ def supplier_task_costs(dsn: str, task: UUID):
     with psycopg.connect(dsn) as connection:
         assert_operator(connection)
         return required_row(connection.execute("SELECT ops.supplier_task_costs(%s)", (task,)))[0]
+
+
+def supplier_billing_context(dsn: str, task: UUID, attempt: UUID):
+    with psycopg.connect(dsn) as connection:
+        assert_operator(connection)
+        return required_row(
+            connection.execute("SELECT ops.supplier_billing_context(%s,%s)", (task, attempt))
+        )[0]

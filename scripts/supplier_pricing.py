@@ -12,9 +12,11 @@ from uuid import UUID
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.domain.provider_pricing import SupplierMeteringContext, SupplierPriceVersion
+from visual_platform.domain.supplier_billing import load_bill_review, review_supplier_bill
 from visual_platform.services.provider_pricing import (
     estimate_reviewed_price,
     publish_supplier_price,
+    supplier_billing_context,
     supplier_price_context,
     supplier_task_costs,
 )
@@ -37,6 +39,13 @@ def main():
     estimate.add_argument("--metering-context", type=Path, required=True)
     task = modes.add_parser("task-costs")
     task.add_argument("--task", type=UUID, required=True)
+    billing = modes.add_parser("billing-context")
+    billing.add_argument("--task", type=UUID, required=True)
+    billing.add_argument("--attempt", type=UUID, required=True)
+    bill = modes.add_parser("review-bill")
+    bill.add_argument("--document", type=Path, required=True)
+    bill.add_argument("--evidence-file", type=Path, required=True)
+    bill.add_argument("--attest-reviewed", action="store_true", required=True)
     args = parser.parse_args()
     storage = None
     dsn = os.environ.get("ADMIN_DATABASE_URL")
@@ -88,6 +97,23 @@ def main():
             output = supplier_price_context(dsn, UUID(identity))
         elif args.mode == "inspect":
             output = supplier_price_context(dsn, args.price)
+        elif args.mode == "billing-context":
+            output = supplier_billing_context(dsn, args.task, args.attempt)
+        elif args.mode == "review-bill":
+            review = load_bill_review(args.document)
+            if (
+                args.evidence_file.is_symlink()
+                or not args.evidence_file.is_file()
+                or not 0 < args.evidence_file.stat().st_size <= 20 * 1024 * 1024
+            ):
+                raise ValueError("bounded regular bill evidence required")
+            context = supplier_billing_context(dsn, review.task_id, review.attempt_id)
+            output = review_supplier_bill(
+                review,
+                context,
+                args.evidence_file.read_bytes(),
+                evidence_reviewed=args.attest_reviewed,
+            )
         elif args.mode == "task-costs":
             output = supplier_task_costs(dsn, args.task)
         else:

@@ -23,6 +23,7 @@ SUITES = {
         "unit": [
             "test_late_fake.py",
             "test_provider_pricing.py",
+            "test_supplier_billing.py",
             "test_gemini_usage.py",
             "test_budget_worker.py",
         ],
@@ -34,6 +35,7 @@ SUITES = {
             "test_supplier_estimates.py",
             "test_unit_provider_budget.py",
             "test_detection_archives.py",
+            "test_supplier_billing.py",
             "test_detection_delivery.py",
         ],
     },
