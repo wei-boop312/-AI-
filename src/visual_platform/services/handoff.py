@@ -33,14 +33,14 @@ def safe_member(name):
     ):
         raise ValueError("unsafe_bundle_member")
     parts = name.rstrip("/").split("/")
-    device_names = {"CON", "PRN", "AUX", "NUL"} | {
+    device_names = {"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$"} | {
         prefix + digit for prefix in ("COM", "LPT") for digit in "123456789¹²³"
     }
     if any(
         p in ("", ".", "..")
         or p.endswith((" ", "."))
         or any(c in '<>"|?*' for c in p)
-        or p.split(".", 1)[0].upper() in device_names
+        or p.split(".", 1)[0].rstrip(" ").upper() in device_names
         or p.lower() in (".git", ".local", ".venv", "node_modules", "work", "__pycache__")
         for p in parts
     ):

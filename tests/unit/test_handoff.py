@@ -155,6 +155,9 @@ class HandoffTests(unittest.TestCase):
         for name in (
             "CON",
             "nul.txt",
+            "nul .txt",
+            "CONIN$.txt",
+            "conout$",
             "Aux.tar.gz",
             "COM9/data",
             "lpt¹.txt",
