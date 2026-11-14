@@ -120,7 +120,7 @@ def estimate_supplier_cost(
         "amount": None,
         "currency": None,
         "actual_spending_verified": False,
-        "calculation_version": "exact-rational-v1",
+        "calculation_version": "exact-rational-24-decimal-v2",
         "evidence_kind": price.evidence_kind,
         "price_sha256": hashlib.sha256(canonical_price(price)).hexdigest(),
         "price_version": price.version,
@@ -146,7 +146,7 @@ def estimate_supplier_cost(
         quantity = quantities[rate.measure]
         if rate.measure == "bfl_credit":
             if type(quantity) is not str or not re.fullmatch(
-                r"(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?", quantity
+                r"(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,24})?", quantity
             ):
                 return {**result, "reason": "invalid_usage"}
         elif type(quantity) is not int or not 0 <= quantity <= 1_000_000_000_000:

@@ -1,5 +1,9 @@
 # 百炼国内图片编辑接入
 
+后续配置阶段：已实现Qwen+Gemini双MockTransport组合工厂及schema2运行身份登记候选，区别于旧BFL schema1；尚未开放百炼PG报价/预算与实际Worker任务。0053登记不等于授权执行，旧准备报价入口必须拒绝Qwen身份，避免错误套用BFL预算。
+
+本地连接工具：`python scripts/bailian_connection.py --prepare-local --endpoint-origin https://ws-EXAMPLE.cn-beijing.maas.aliyuncs.com --output-dir .local/bailian-connection`。请用真实北京业务空间域名替换示例（示例本身不可用），工具仅从本机DASHSCOPE_API_KEY取指纹，写入全新私有目录，不保存密钥、不请求HTTP、不建立PG授权。`--config .local/bailian-connection/connection.json`默认不读凭据，附加`--check-credentials`才比较当前密钥指纹。配置输出仅供后续审阅，不能绕过真实样本/费率/预算/质量验收。
+
 2026-11-15 用户已完成实名认证并确认创建北京默认业务空间项目专用API Key，控制台访问范围限定Qwen-Image-3.0。账号当时提示余额不足，未充值或调用模型。真实密钥、业务空间域名与账户标识不进入仓库。
 
 ## 当前交付边界

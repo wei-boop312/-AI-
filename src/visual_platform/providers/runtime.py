@@ -17,11 +17,13 @@ from visual_platform.providers.gemini import HUBWAY_ORIGINS, MODEL, OFFICIAL_ORI
 from visual_platform.providers.gemini_usage import unique_object
 from visual_platform.providers.hubway import HubwayGeminiProvider
 from visual_platform.providers.pipeline import ProtocolProvider
+from visual_platform.providers.qwen_image import ASYNC_PATH, QwenImageProvider, workspace_origin
+from visual_platform.providers.qwen_pipeline import QwenProtocolProvider
 
 
 class RuntimeStep(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    provider: Literal["bfl", "google_gemini", "hubway_gemini"]
+    provider: Literal["bfl", "google_gemini", "hubway_gemini", "aliyun_bailian"]
     model: str
     endpoint_origin: str
     merchant_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
@@ -37,6 +39,11 @@ class RuntimeStep(BaseModel):
 
     @model_validator(mode="after")
     def identity(self):
+        if self.provider == "aliyun_bailian":
+            workspace_origin(self.endpoint_origin)
+            if self.model != "qwen-image-3.0":
+                raise ValueError("unreviewed_runtime_identity")
+            return self
         allowed = {
             "bfl": ("flux-3-image", {"https://api.bfl.ai"}),
             "google_gemini": (MODEL, {OFFICIAL_ORIGIN}),
@@ -53,19 +60,21 @@ class RuntimeStep(BaseModel):
             "bfl": "BFL_API_KEY",
             "google_gemini": "GEMINI_API_KEY",
             "hubway_gemini": "HUBWAY_API_KEY",
+            "aliyun_bailian": "DASHSCOPE_API_KEY",
         }[self.provider]
 
 
 class ProviderRuntime(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    schema_version: Annotated[int, Field(ge=1, le=1)]
+    schema_version: Annotated[int, Field(ge=1, le=2)]
     version: Annotated[str, Field(min_length=1, max_length=80, pattern=r"^[A-Za-z0-9_.-]+$")]
     generate: RuntimeStep
     detect: RuntimeStep
 
     @model_validator(mode="after")
     def stages(self):
-        if self.generate.provider != "bfl" or self.detect.provider not in (
+        expected_generator = "bfl" if self.schema_version == 1 else "aliyun_bailian"
+        if self.generate.provider != expected_generator or self.detect.provider not in (
             "google_gemini",
             "hubway_gemini",
         ):
@@ -92,7 +101,8 @@ class ProviderRuntime(BaseModel):
                 for name, step in (("generate", self.generate), ("detect", self.detect))
             },
             "provider_endpoints": {
-                "generate": self.generate.endpoint_origin + "/v1/flux-3-image",
+                "generate": self.generate.endpoint_origin
+                + (ASYNC_PATH if self.schema_version == 2 else "/v1/flux-3-image"),
                 "detect": self.detect.endpoint_origin
                 + "/v1beta/models/"
                 + MODEL
@@ -167,7 +177,16 @@ async def offline_runtime(
         )
     ):
         raise ValueError("runtime_credential_mismatch")
-    bfl = BflProvider(generate_key, directory / "bfl", transport=generate_transport)
+    bfl = (
+        QwenImageProvider(
+            generate_key,
+            directory / "bailian",
+            endpoint_origin=runtime.generate.endpoint_origin,
+            transport=generate_transport,
+        )
+        if runtime.schema_version == 2
+        else BflProvider(generate_key, directory / "bfl", transport=generate_transport)
+    )
     gemini = None
     try:
         detector = (
@@ -179,7 +198,8 @@ async def offline_runtime(
             transport=detect_transport,
             base_url=runtime.detect.endpoint_origin,
         )
-        yield ProtocolProvider(
+        composition = QwenProtocolProvider if runtime.schema_version == 2 else ProtocolProvider
+        yield composition(
             bfl,
             gemini,
             merchant_accounts=runtime.execution_binding()["provider_accounts"],

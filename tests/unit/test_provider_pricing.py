@@ -16,6 +16,25 @@ from visual_platform.domain.provider_pricing import (
 
 
 class SupplierPricingTests(unittest.TestCase):
+    def test_bfl_wire_quantities_round_up_without_losing_sub_quantum_remainders(self):
+        price = self.price(
+            provider="bfl",
+            model="flux-3-image",
+            endpoint_origin="https://api.bfl.ai",
+            rates=[{"measure": "bfl_credit", "amount": "0.05", "per": 1}],
+        )
+        for quantity, expected in (
+            ("0.0600000000000000001", "0.00300001"),
+            ("0.000000000000000000000001", "0.00000001"),
+            ("0.060000000000000000000000", "0.00300000"),
+        ):
+            with self.subTest(quantity=quantity):
+                result = self.estimate({"bfl_credit": quantity}, price=price)
+                self.assertEqual(result["amount"], expected)
+                self.assertFalse(result["actual_spending_verified"])
+        invalid = self.estimate({"bfl_credit": "0.0000000000000000000000001"}, price=price)
+        self.assertEqual(invalid["cost_status"], "unknown")
+
     def setUp(self):
         self.now = datetime.now(timezone.utc)
         self.document = {

@@ -1,0 +1,23 @@
+{
+  "run_id": 43620597029,
+  "commit": "63a1ca0a509364c1103bf0355a6cf35acd403935",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43620597029",
+  "artifact_id": 14124615247,
+  "archive_sha256": "edd3817eb922ba1aee4f6ac5bfdbf4ff8846ffdb8e513ab9644a5b42b4b43d4f",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "3d4d4343a1409950e47e04d3290a3d753484ad774bb7489c75e2723c1dc84247"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "bf07ba5c0b2b6f0ce5edce2ba602a1c9f2da1ffdebb3a4bb317df4d50817d4b9"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "356b97c2319747b7abe5ad4ea94a9b99e547afe8e19afe2166c80dc9ab18be48"
+    }
+  },
+  "scope": "BFL wire precision candidate before forward SQL precision migration"
+}

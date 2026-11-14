@@ -272,6 +272,32 @@ class QwenImageProvider:
         except (ValueError, KeyError, TypeError, IndexError):
             raise ProviderUncertain("Qwen existing result requires reconciliation") from None
 
+    def receipt_record(self, intent_id):
+        """Rebuild a receipt from original bytes; never authorizes resubmission."""
+        try:
+            path = self._path(intent_id, ".response.body")
+            if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_BODY:
+                raise ValueError("qwen_receipt_unavailable")
+            with path.open("rb") as stream:
+                raw = stream.read(MAX_BODY + 1)
+            if not 1 <= len(raw) <= MAX_BODY:
+                raise ValueError("qwen_receipt_oversized")
+            body = strict_document(raw)
+            output = body["output"]
+            identity = task_id(output["task_id"])
+            if body.get("code") or output["task_status"] not in ("PENDING", "RUNNING", "SUCCEEDED"):
+                raise ValueError("qwen_receipt_unconfirmed")
+            return {
+                "provider_id": identity,
+                "polling_url": self.endpoint_origin + "/api/v1/tasks/" + identity,
+                "response_digest": hashlib.sha256(raw).hexdigest(),
+                "response_body_base64": base64.b64encode(raw).decode("ascii"),
+                "provider_cost": None,
+                "source": "bailian_async_submit_no_billing_usage",
+            }
+        except (OSError, ValueError, KeyError, TypeError):
+            raise ProviderUncertain("Qwen receipt unavailable; do not resubmit") from None
+
     def fetch_result(self, poll):
         if not isinstance(poll, QwenImagePoll) or poll.status != "Ready":
             raise ValueError("Ready Qwen result required")

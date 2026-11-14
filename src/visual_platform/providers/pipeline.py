@@ -18,6 +18,8 @@ BASELINE_ENDPOINTS = {
 
 
 class ProtocolProvider:
+    generation_model = "flux-3-image"
+    request_type = BflRequest
     execution_profile = "offline_protocol_mock"
     report_profile = "offline_protocol_mock"
     durable_detection_archive = True
@@ -64,7 +66,7 @@ class ProtocolProvider:
 
     def verify_execution_scope(self, execution):
         expected_models = (
-            {"generate": "flux-3-image", "detect": MODEL} if self.runtime_sha256 else None
+            {"generate": self.generation_model, "detect": MODEL} if self.runtime_sha256 else None
         )
         if (
             execution.get("provider_runtime_sha256") != self.runtime_sha256
@@ -79,10 +81,12 @@ class ProtocolProvider:
             raise ValueError("locked_provider_endpoint_mismatch")
 
     def prepare_generate(self, generation, source, appearance=None):
-        return BflRequest.from_canonical(generation, source, appearance).model_dump()
+        return self.request_type.from_canonical(generation, source, appearance).model_dump()
 
     async def submit_generate(self, intent, payload):
-        return await asyncio.to_thread(self.bfl.submit, intent, BflRequest.model_validate(payload))
+        return await asyncio.to_thread(
+            self.bfl.submit, intent, self.request_type.model_validate(payload)
+        )
 
     async def retrieve_image(self, attempt):
         receipt = Receipt(
