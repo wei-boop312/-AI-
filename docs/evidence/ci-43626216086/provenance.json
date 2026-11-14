@@ -1,0 +1,27 @@
+{
+  "run_id": 43626216086,
+  "commit": "005aeb5c31ede02e16e6170e3aaa262db8931878",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43626216086",
+  "artifact_id": 14126412935,
+  "archive_sha256": "d7e34350fd36674a35b67e55345a1d8510d7d714767050315171640b49697b63",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "44fb4db2bdaeb36e11c222dde17ef73778c27bcfcefc606206d0c61ea574ed29"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "488ed81d60767da9a64f68af5b58d87fb04c58c088ba0d9707abb83399749e90"
+    },
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "4e705784059ba8ad944c12b177547423b2f345bea3420e0d25ebf97aa77d4f2f"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "c2534accc03b545da51d52ffb6ed35e0d730da38bcfa136dfaa61d816aa50aec"
+    }
+  },
+  "scope": "Pre-0059 run; known Ops raw generation archive permission failure; preserve actual failure"
+}

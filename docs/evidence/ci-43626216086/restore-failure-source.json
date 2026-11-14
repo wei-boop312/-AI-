@@ -1,0 +1,14 @@
+{
+  "run_id": 43626216086,
+  "conclusion": "failure",
+  "files": [
+    {
+      "path": "work/ci-public/native-restore-v2-diagnostics.log",
+      "sha256": "42ce87af7a0d01a5897989d34ba307da93853424d33c0186e963e273699407d6"
+    },
+    {
+      "path": "work/ci-public/native-restore-v2.log",
+      "sha256": "4477487025cea938c4dd7008f334c256108acc50eda1ecb5f059cdc4ea10096e"
+    }
+  ]
+}

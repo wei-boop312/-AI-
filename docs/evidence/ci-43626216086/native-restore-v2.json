@@ -1,0 +1,12 @@
+{
+  "result": "FAIL",
+  "commit": "005aeb5c31ede02e16e6170e3aaa262db8931878",
+  "observed_at": "2026-11-14T18:34:49.616063+00:00",
+  "archive_probe_log": "work/ci-restore-f7b60df92e71474abd3c0f445ed6db0f/logs/prepare.log",
+  "paid_calls": 0,
+  "scope": "cold independent Docker PG/S3 restore using native PG tools; offline Fake only; no deployment",
+  "stage": "prepare",
+  "exception": "RuntimeError",
+  "source_fixture_cleanup": false,
+  "destination_containers_removed": true
+}
