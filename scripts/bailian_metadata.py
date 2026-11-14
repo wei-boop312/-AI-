@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--kind", choices=("catalogue", "permissions"), default="catalogue")
+    parser.add_argument("--model", choices=("qwen-image-3.0", "qwen3.8-flash"))
     args = parser.parse_args()
     if not args.probe:
         print(
@@ -55,7 +56,7 @@ def main():
                 )
             )
             return 3
-        report, body = probe_metadata(configuration, key, kind=args.kind)
+        report, body = probe_metadata(configuration, key, kind=args.kind, model=args.model)
         destination.mkdir(mode=0o700)
         for name, data in (
             ("response.body", body),

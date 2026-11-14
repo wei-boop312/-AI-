@@ -12,16 +12,19 @@ from visual_platform.providers.runtime import credential_fingerprint
 MAX_METADATA_BODY = 2 * 1024 * 1024
 
 
-def probe_metadata(configuration, key, *, kind="catalogue", transport=None):
+def probe_metadata(configuration, key, *, kind="catalogue", model=None, transport=None):
     if kind not in ("catalogue", "permissions"):
         raise ValueError("unsupported_read_only_metadata_kind")
     configuration = BailianConnection.model_validate(configuration.model_dump(), strict=True)
+    model = configuration.model if model is None else model
+    if model not in (configuration.model, "qwen3.8-flash"):
+        raise ValueError("unsupported_metadata_model")
     if not hmac.compare_digest(configuration.credential_fingerprint, credential_fingerprint(key)):
         raise ValueError("metadata_credential_mismatch")
     report = {
         "result": "METADATA_UNREACHABLE",
         "configuration_sha256": configuration.digest(),
-        "model": configuration.model,
+        "model": model,
         "metadata_kind": kind,
         "metadata_get_requests": 1,
         "model_inference_requests": 0,
@@ -36,7 +39,7 @@ def probe_metadata(configuration, key, *, kind="catalogue", transport=None):
         "captured_body_complete": False,
     }
     captured = bytearray()
-    parameters = {"model": configuration.model, "page_no": 1, "page_size": 1}
+    parameters = {"model": model, "page_no": 1, "page_size": 1}
     parameters.update(
         {"language": "zh-CN"}
         if kind == "catalogue"
@@ -97,9 +100,7 @@ def probe_metadata(configuration, key, *, kind="catalogue", transport=None):
                     ):
                         raise ValueError("unexpected_catalogue_models")
                     report["remote_authentication_observed"] = True
-                    report["model_listed"] = (
-                        len(models) == 1 and models[0]["model"] == configuration.model
-                    )
+                    report["model_listed"] = len(models) == 1 and models[0]["model"] == model
                     report["image_generation_capability_listed"] = bool(
                         report["model_listed"]
                         and type(models[0].get("capabilities")) is list

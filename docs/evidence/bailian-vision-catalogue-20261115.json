@@ -1,0 +1,15 @@
+{
+  "result": "REMOTE_MODEL_METADATA_READ",
+  "model": "qwen3.8-flash",
+  "http_status": 200,
+  "model_listed": true,
+  "metadata_get_requests": 1,
+  "model_inference_requests": 0,
+  "paid_model_calls": 0,
+  "provider_verified": false,
+  "price_reviewed": false,
+  "execution_enabled": false,
+  "captured_body_sha256": "719b9f2390c9a7a3ac595169c633fe7e55f18c181b0983cc55cc73fdd766a90f",
+  "raw_body_location": "private_local_only",
+  "scope": "Exact model catalogue presence only; not inference authorization, model quality or billing validation"
+}

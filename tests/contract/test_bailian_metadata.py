@@ -14,6 +14,41 @@ from visual_platform.providers.runtime import credential_fingerprint
 
 
 class BailianMetadataContracts(unittest.TestCase):
+    def test_optional_vision_model_requires_exact_catalogue_row_without_generation_claim(self):
+        requests = []
+
+        def route(request):
+            requests.append(request)
+            return httpx.Response(
+                200,
+                json={
+                    "success": True,
+                    "output": {"models": [{"model": "qwen3.8-flash", "capabilities": ["VL"]}]},
+                },
+            )
+
+        report, _ = probe_metadata(
+            self.configuration,
+            self.key,
+            model="qwen3.8-flash",
+            transport=httpx.MockTransport(route),
+        )
+        self.assertEqual(len(requests), 1)
+        self.assertEqual(requests[0].method, "GET")
+        self.assertEqual(requests[0].url.params["model"], "qwen3.8-flash")
+        self.assertTrue(report["model_listed"])
+        self.assertFalse(report["image_generation_capability_listed"])
+        self.assertFalse(report["execution_enabled"])
+        self.assertEqual(report["model_inference_requests"], 0)
+        with self.assertRaisesRegex(ValueError, "unsupported_metadata_model"):
+            probe_metadata(
+                self.configuration,
+                self.key,
+                model="unreviewed-model",
+                transport=httpx.MockTransport(route),
+            )
+        self.assertEqual(len(requests), 1)
+
     def test_cli_without_probe_never_reads_configuration_or_requests_metadata(self):
         script = Path(__file__).resolve().parents[2] / "scripts" / "bailian_metadata.py"
         process = subprocess.run(
