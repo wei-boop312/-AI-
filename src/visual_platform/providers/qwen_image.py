@@ -83,7 +83,7 @@ def image_url(value):
         or parsed.port not in (None, 443)
         or parsed.fragment
         or not re.fullmatch(
-            r"dashscope-result-[a-z0-9-]+\.oss-cn-[a-z0-9-]+\.aliyuncs\.com",
+            r"dashscope-result-[a-z0-9-]+\.oss-cn-(?:beijing|shanghai|hangzhou|shenzhen)\.aliyuncs\.com",
             parsed.hostname or "",
         )
         or not parsed.path.endswith(".png")

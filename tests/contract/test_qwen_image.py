@@ -207,6 +207,8 @@ class QwenImageContracts(unittest.TestCase):
 
     def test_download_url_ssrf_and_dimension_copy_bypass_rejected(self):
         for url in (
+            URL.replace("oss-cn-beijing", "oss-cn-beijing-internal"),
+            URL.replace("oss-cn-beijing", "oss-cn-invented-region"),
             "http://127.0.0.1/a.png",
             URL.replace("aliyuncs.com", "aliyuncs.com.evil.invalid"),
             URL.replace("https://", "https://user:pass@"),
