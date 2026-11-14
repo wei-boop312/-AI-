@@ -14,23 +14,69 @@ from visual_platform.db.pool import open_pool
 from visual_platform.providers.bfl import BflProvider
 from visual_platform.providers.gemini import GeminiProvider
 from visual_platform.providers.pipeline import ProtocolProvider
+from visual_platform.providers.runtime import offline_runtime
 from visual_platform.storage.s3 import S3Storage
 from visual_platform.worker.runner import Worker
 
 
-def run_cost_review_fixture(profile, settings, task_id, accounts, *, detect_success=False):
+def run_cost_review_fixture(
+    profile, settings, task_id, accounts, *, detect_success=False, runtime=None
+):
     if profile.get("PROVIDER_PROFILE") != "offline" or any(
         urlsplit(profile[key]).hostname not in ("localhost", "127.0.0.1")
         for key in ("WORKER_DATABASE_URL", "S3_ENDPOINT")
     ):
         raise ValueError("restore protocol fixture requires explicit offline loopback profile")
     posts = {"generate": 0, "detect": 0}
+    if runtime is not None and (
+        runtime.schema_version != 2 or accounts != runtime.execution_binding()["provider_accounts"]
+    ):
+        raise ValueError("explicit synthetic Qwen runtime required")
+    edge = 512 if runtime is not None else 256
     provider_id = "restore-" + str(UUID(str(task_id)))
     stream = BytesIO()
-    Image.new("RGB", (256, 256), (160, 190, 210)).save(stream, "PNG")
+    Image.new("RGB", (edge, edge), (160, 190, 210)).save(stream, "PNG")
     png = stream.getvalue()
 
     def generation(request):
+        if runtime is not None:
+            if request.method == "POST":
+                posts["generate"] += 1
+                return httpx.Response(
+                    200, json={"output": {"task_id": provider_id, "task_status": "PENDING"}}
+                )
+            if request.url.host == "dashscope-result-bj.oss-cn-beijing.aliyuncs.com":
+                return httpx.Response(200, content=png, headers={"content-type": "image/png"})
+            return httpx.Response(
+                200,
+                json={
+                    "output": {
+                        "task_id": provider_id,
+                        "task_status": "SUCCEEDED",
+                        "choices": [
+                            {
+                                "finish_reason": "stop",
+                                "message": {
+                                    "role": "assistant",
+                                    "content": [
+                                        {
+                                            "image": "https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/synthetic.png?Expires=1"
+                                        }
+                                    ],
+                                },
+                            }
+                        ],
+                    },
+                    "usage": {
+                        "output_width": edge,
+                        "output_height": edge,
+                        "input_image_count": 1,
+                        "output_image_count": 1,
+                        "input_image_type": "qima_input_1k",
+                        "output_image_type": "qima_output_1k",
+                    },
+                },
+            )
         if request.method == "POST":
             posts["generate"] += 1
             return httpx.Response(
@@ -58,8 +104,8 @@ def run_cost_review_fixture(profile, settings, task_id, accounts, *, detect_succ
             facts = {
                 "schema_version": 1,
                 "analysis_complete": True,
-                "image_width": 256,
-                "image_height": 256,
+                "image_width": edge,
+                "image_height": edge,
                 "text_items": [],
                 "logo_items": [],
                 "watermark_items": [],
@@ -95,6 +141,22 @@ def run_cost_review_fixture(profile, settings, task_id, accounts, *, detect_succ
 
     async def run():
         directory = Path(profile["FAKE_PROVIDER_DIR"]) / "protocol-restore" / str(task_id)
+        if runtime is not None:
+            async with offline_runtime(
+                runtime,
+                directory,
+                generate_key="offline-restore-fixture",
+                detect_key="offline-restore-fixture",
+                generate_transport=httpx.MockTransport(generation),
+                detect_transport=httpx.MockTransport(detection),
+            ) as provider:
+                qwen_pool = await open_pool(profile["WORKER_DATABASE_URL"], "app_worker")
+                qwen_storage = S3Storage(settings)
+                try:
+                    return await Worker(qwen_pool, qwen_storage, provider).run(task_id)
+                finally:
+                    await qwen_pool.close()
+                    qwen_storage.close()
         bfl = BflProvider(
             "offline-restore-fixture", directory / "bfl", transport=httpx.MockTransport(generation)
         )

@@ -148,6 +148,7 @@ def main(task):
             "unit_limits_preserved_without_cross_unit_total",
             "detection_archive_preserved_without_local_files",
             "generation_wire_archive_preserved_without_local_files",
+            "qwen_query_meter_and_protected_final_preserved_without_local_files",
             "detection_wire_and_sdk_response_preserved",
             "bill_fixture_evidence_preserved_not_settled",
             "recheck_receipt_replayed_after_independent_restore",

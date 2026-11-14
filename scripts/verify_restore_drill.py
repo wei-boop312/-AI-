@@ -21,6 +21,7 @@ from psycopg.types.json import Jsonb
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from restore_protocol_fixture import run_cost_review_fixture
+from restore_qwen_fixture import prepare_qwen_restore, verify_qwen_restore
 
 from visual_platform.api.main import create_app
 from visual_platform.core.identity import hash_password
@@ -746,6 +747,7 @@ if args.command == "prepare":
     before_budget = provider_budget_snapshot(profile["ADMIN_DATABASE_URL"], scope.authorization_id)
     state["unit_limits"] = before_budget["limits_by_currency"]
     state["step_limits"] = before_budget["step_limits"]
+    state["qwen_restore"] = prepare_qwen_restore(profile, settings)
     args.state.parent.mkdir(parents=True, exist_ok=True)
     args.state.write_text(json.dumps(state))
     print("Prepared isolated restore fixtures; private state retained in work.")
@@ -1294,6 +1296,7 @@ elif args.command == "verify":
             == (88, 48, 64),
             "post-recovery wallet mismatch",
         )
+    verify_qwen_restore(profile, settings, state["qwen_restore"])
     result["verification"] = {
         "api_ready": True,
         "old_access_rejected": True,
@@ -1305,6 +1308,7 @@ elif args.command == "verify":
         "unit_limits_preserved_without_cross_unit_total": True,
         "detection_archive_preserved_without_local_files": True,
         "generation_wire_archive_preserved_without_local_files": True,
+        "qwen_query_meter_and_protected_final_preserved_without_local_files": True,
         "detection_wire_and_sdk_response_preserved": True,
         "bill_fixture_evidence_preserved_not_settled": True,
         "recheck_receipt_replayed_after_independent_restore": True,

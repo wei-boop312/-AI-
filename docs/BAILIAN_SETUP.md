@@ -1,41 +1,35 @@
 # 百炼国内图片编辑接入
 
-0058费率审阅候选支持四档图片计量的CNY完整价格正文及私有证据归档，全部数字必须来自明确审核，不预置任何真实费率。数量按精确有理数计算，估算始终不是账单；现阶段仅可审阅/发布价格证据，尚未允许将百炼价格绑定到报价或触发真实调用。不能复用BFL积分或把Gemini Token单价用于图片计量。
+当前适配固定使用北京业务空间的 `qwen-image-3.0`，检测保留独立 Gemini/Hubway 身份。百炼适配仅接受显式 MockTransport，默认 Fake 不变；创建密钥和离线验收不表示真实出图已接通。账号此前提示余额不足，尚未充值或调用真实供应商。
 
-0057候选将成功查询写PG并关联已下载字节及隔离规范图；PG独立核原始JSON整数词法/分辨率档位/原提交ID和SHA，生成图接受前再核规范图SHA。缺失或不合规计量保留unknown。存储重试中新的签名链接不能覆盖第一份原文；只有图片字节、规范图和计量完全一致才重放原记录。查询费用观察仍无金额/币种，不算账单或真实支出；百炼非空查询的独立冷恢复仍待验。
+## 本机配置密钥
 
-成功查询计量验证器候选已区分提交响应、SUCCEEDED查询原文及原下载/规范图SHA；只有图片数、尺寸、档位一致才产生四个图片计量。缺失用量不能当免费，查询用量不是账单。查询原文的PG持久化/延后估算尚待下一阶段，当前供应商成本仍unknown。
-
-0056归档候选：原始异步提交回执可随PG保存并从租约受限函数恢复，原文/JSON唯一键/请求意图/任务ID/模型/业务空间都检查；私有本地响应文件丢失不能触发重发。此处归档的是提交响应，不等于SUCCEEDED查询的图片计量或人民币账单；后者仍待专门实现和验收。真正独立恢复的新flag须以当次CI成功为准。
-
-0055补充：百炼编辑输出的总像素至少512²、至多项目4MP，单边256–6256且长短边比例不超过8；配置准备及PG报价/任务写入都独立检查。旧通用256×256选项不适用于百炼编辑，不会为了沿用它而静默放大或更改用户尺寸。
-
-0054演练候选已准备百炼API报价到独立schema4预算、Worker、私有S3链路，等待原生CI。旧BFL预算不能复用；无百炼预算不产生供应商意图。schema4只允许固定Qwen模型、CNY生成与USD/Hubway单位检测，所有调用仍为显式MockTransport。原始供应商成本保持unknown，尚不接受百炼价格绑定，不能把内部16积分扣费视为阿里云人民币账单。前述0053“旧报价入口拒绝”是阶段记录，0054只为显式百炼演练开放，不自动改旧任务。
-
-后续配置阶段：已实现Qwen+Gemini双MockTransport组合工厂及schema2运行身份登记候选，区别于旧BFL schema1；尚未开放百炼PG报价/预算与实际Worker任务。0053登记不等于授权执行，旧准备报价入口必须拒绝Qwen身份，避免错误套用BFL预算。
-
-本地连接工具：`python scripts/bailian_connection.py --prepare-local --endpoint-origin https://ws-EXAMPLE.cn-beijing.maas.aliyuncs.com --output-dir .local/bailian-connection`。请用真实北京业务空间域名替换示例（示例本身不可用），工具仅从本机DASHSCOPE_API_KEY取指纹，写入全新私有目录，不保存密钥、不请求HTTP、不建立PG授权。`--config .local/bailian-connection/connection.json`默认不读凭据，附加`--check-credentials`才比较当前密钥指纹。配置输出仅供后续审阅，不能绕过真实样本/费率/预算/质量验收。
-
-2026-11-15 用户已完成实名认证并确认创建北京默认业务空间项目专用API Key，控制台访问范围限定Qwen-Image-3.0。账号当时提示余额不足，未充值或调用模型。真实密钥、业务空间域名与账户标识不进入仓库。
-
-## 当前交付边界
-
-新增`providers/qwen_image.py`：固定qwen-image-3.0、北京业务空间域名，按官方异步编辑协议提交原图与编辑指令，再按同一业务空间查询已知任务。仅接受显式MockTransport；没有开放真实模型执行入口。原BFL/Gemini协议、默认Fake和既有报价/预算不自动切换。尚未接通百炼的PG报价/预算、计费版本和Worker组合，不能把创建密钥或离线契约通过称为真实出图成功。
-
-官方[模型API文档](https://help.aliyun.com/zh/model-studio/qwen-image-generation-and-editing-api-reference)包含同步和异步两种不同地址。本适配选用异步：POST `/api/v1/services/aigc/image-generation/generation`，设置`X-DashScope-Async: enable`，收到task_id后GET `/api/v1/tasks/{task_id}`。同步multimodal地址、OpenAI兼容地址不可混用。输出usage是图片数量/分辨率档位，不是token、BFL积分或账户余额；费用仍未知，不推断免费额度或自动采用网页单价。
-
-## 本机保存密钥
-
-在自己的PowerShell运行：
+在自己的 PowerShell 执行下面命令，按遮蔽提示输入控制台密钥，不要发送到聊天或提交到仓库：
 
 ```powershell
-& ./scripts/configure_provider_key.ps1 -Provider bailian
+& "C:/Users/MECHREVO/Documents/Codex/2026-11-12/ai/outputs/visual-production-platform/scripts/configure_provider_key.ps1" -Provider bailian
 ```
 
-输入遮蔽，变量名DASHSCOPE_API_KEY；仅写本机Windows用户/当前进程环境，不上传或调用接口。环境变量不是加密保险库。服务进程使用专有环境配置，浏览器端不放密钥。已有本机值不会无提示替换；显式空进程值不会回退旧用户值。`-ExplainOnly`仅说明、不读写密钥。下载的原始密钥文件不要放入工程目录，也不要发送到聊天。
+工具保存本机 Windows 用户/当前进程变量 `DASHSCOPE_API_KEY`，不请求模型；已有值不会无提示替换。环境变量不是加密保险库。若控制台已无法再次查看密钥，需要在控制台创建新的专用密钥，再本机输入。
 
-## 传输与恢复边界
+本机连接预检使用下面命令；将示例域名替换为实际北京业务空间域名，输出目录必须全新：
 
-单次意图以排他本地文件先落盘，超时、429/5xx及未知结果均不自动重发。原始提交响应私有保存并用原始字节SHA关联回执；任务查询只读且验证任务ID/业务空间。下载仅允许明确的阿里云结果OSS主机，禁重定向、代理继承和认证头转发，限PNG/大小，后续仍须通过已有隔离解码及实际尺寸/保护像素校验。
+```powershell
+.venv/Scripts/python.exe scripts/bailian_connection.py --prepare-local --endpoint-origin https://ws-EXAMPLE.cn-beijing.maas.aliyuncs.com --output-dir .local/bailian-connection
+```
 
-图片输入最多3张、单图最多10MiB、输出限定项目4MP上限及供应商最小面积/宽高比；固定单张输出、不自动改写提示词。原任务必须保持原模型/商户/端点，百炼需要新的明确配置与审阅。持久化PG原文恢复、真实质量与账单验收仍待完成，现有BFL预算及费用不能套用于百炼。
+该命令只读本机密钥、写连接身份与指纹，不保存密钥、不发 HTTP、不建立执行授权。`--config .local/bailian-connection/connection.json` 默认不读凭据，附加 `--check-credentials` 才比较本机密钥指纹。目前本机预检为 `WAITING_PRIVATE_CREDENTIAL`，未生成真实连接文件。
+
+## 协议与验收范围
+
+按[阿里云官方接口文档](https://help.aliyun.com/zh/model-studio/qwen-image-generation-and-editing-api-reference)，适配使用异步 POST `/api/v1/services/aigc/image-generation/generation`，带 `X-DashScope-Async: enable`，再以已知 task_id 查询 `/api/v1/tasks/{task_id}`。不混用同步或 OpenAI 兼容接口。项目限定最多三张输入图、输出面积 512² 至 4MP；下载隔离认证信息、禁止重定向，并独立规范化 PNG。
+
+显式运行身份采用 schema2，百炼演练预算采用 schema4，生成 CNY 与检测 USD/Hubway 单位分别约束，不换汇或合并。不能复用旧 BFL 预算。原始提交与成功查询回执分别保存到不可变私有 PG 记录，查询计量绑定原下载和规范图 SHA；缺失或不合规计量保持 unknown。
+
+价格必须经过私有证据审阅发布，再以生成/检测两个版本 ID 与 SHA 显式绑定到报价。百炼四档图片计量不得套用 BFL 积分或 Gemini token。异步 POST/PENDING 不提前估算；成功查询有完整计量后才派生精确估算。缺失计量或超过 CNY 上限时停止后续检测、保留图片和冻结。估算不是账单，内部积分不是供应商人民币支出。
+
+最新完整通过基线为 a18bcc87 / CI43623239955：206 单元、81 契约、249 原生、4 普通与 11 受控浏览器，以及 Compose、独立恢复和离线交付包验证。后续回执归档、价格接线与百炼非空冷恢复必须由各自 CI 重新证明；详细候选及失败记录见 STATUS.md。
+
+## 尚需完成
+
+本机密钥及真实业务空间预检、实际价格证据与预算、经明确授权的真实图像样本、质量评估、真实账单核对及部署仍未完成。离线测试不替代这些验收；现阶段不开放真实付费调用。

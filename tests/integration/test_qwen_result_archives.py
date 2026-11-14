@@ -4,6 +4,7 @@ import base64
 import copy
 import hashlib
 import json
+from uuid import uuid4
 
 import httpx
 import psycopg
@@ -14,6 +15,37 @@ from visual_platform.storage.s3 import S3Storage, StorageError
 
 
 class QwenResultArchiveTests(BailianFixture):
+    def test_ops_result_integrity_is_scoped_and_does_not_expose_wire_body(self):
+        task = self.qwen_task()
+        self.assertEqual(self.run_qwen(task), "succeeded")
+        row = self.result_row(task)
+        with psycopg.connect(self.operator_dsn) as connection:
+            summary = connection.execute(
+                "SELECT ops.qwen_result_integrity(%s,%s)", (self.user, task)
+            ).fetchone()[0]
+            self.assertIsNone(
+                connection.execute(
+                    "SELECT ops.qwen_result_integrity(%s,%s)", (uuid4(), task)
+                ).fetchone()[0]
+            )
+        self.assertEqual(summary["document_sha256"], row[2])
+        self.assertTrue(
+            all(
+                summary[field]
+                for field in (
+                    "submission_bound",
+                    "generated_image_bound",
+                    "wire_hash_valid",
+                    "canonical_hash_valid",
+                )
+            )
+        )
+        for field in ("document", "response_body_base64", "download_url"):
+            self.assertNotIn(field, summary)
+        with psycopg.connect(self.worker_dsn) as connection:
+            with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                connection.execute("SELECT ops.qwen_result_integrity(%s,%s)", (self.user, task))
+
     def result_row(self, task):
         with psycopg.connect(self.owner) as connection:
             return connection.execute(
