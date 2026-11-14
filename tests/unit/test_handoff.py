@@ -218,6 +218,22 @@ class HandoffTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             verify_handoff_data(self.bundle(files, duplicate=True))
 
+    def test_special_unix_member_types_are_rejected_before_content_verification(self):
+        original = self.bundle(self.fixture())
+        for mode in (stat.S_IFIFO, stat.S_IFCHR, stat.S_IFBLK, stat.S_IFSOCK):
+            output = io.BytesIO()
+            with (
+                zipfile.ZipFile(io.BytesIO(original)) as source,
+                zipfile.ZipFile(output, "w") as target,
+            ):
+                for info in source.infolist():
+                    if info.filename == "source/uv.lock":
+                        info.create_system = 3
+                        info.external_attr = (mode | 0o600) << 16
+                    target.writestr(info, source.read(info.filename))
+            with self.subTest(mode=mode), self.assertRaisesRegex(ValueError, "unsafe_type"):
+                verify_handoff_data(output.getvalue())
+
     def test_missing_or_changed_packaged_legal_text_cannot_be_resealed(self):
         files = self.fixture()
         files.pop("supply-chain/third_party/licenses/fixture-LICENSE")
