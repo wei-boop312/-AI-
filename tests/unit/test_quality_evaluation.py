@@ -321,3 +321,29 @@ class QualityEvaluationTests(unittest.TestCase):
         self.assertEqual(json.loads(result.stdout)["result"], "QUALITY_INPUT_REJECTED")
         self.assertNotIn(str(self.root), result.stdout)
         self.assertNotIn(str(self.root), result.stderr)
+
+    def test_recheck_report_profiles_retain_model_lineage_or_explicit_unknown(self):
+        file = self.root / "0.json"
+        report = json.loads(file.read_bytes())
+        report["provider_profile"] = "rule_only_recheck"
+
+        def store():
+            raw = json.dumps(report).encode()
+            file.write_bytes(raw)
+            self.samples[0]["report_sha256"] = hashlib.sha256(raw).hexdigest()
+
+        report["source_provider_profile"] = "offline_fake"
+        store()
+        result = self.evaluate()
+        self.assertEqual(result["provider_profiles"], ["offline_fake"])
+        self.assertEqual(result["report_profiles"], ["offline_fake", "rule_only_recheck"])
+        self.assertTrue(result["source_lineage_complete"])
+        report.pop("source_provider_profile")
+        store()
+        with self.assertRaisesRegex(ValueError, "synthetic_quality_requires_offline_report"):
+            self.evaluate()
+        document = {**self.document, "dataset_kind": "real_product_set"}
+        result = self.evaluate(document)
+        self.assertIn("unrecorded", result["provider_profiles"])
+        self.assertFalse(result["source_lineage_complete"])
+        self.assertFalse(result["provider_verified"])

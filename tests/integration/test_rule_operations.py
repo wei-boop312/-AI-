@@ -630,3 +630,167 @@ class RuleOperationsTests(PipelineFixture):
         result = subprocess.run(command, env=env, capture_output=True, text=True, timeout=15)
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("sensitive-do-not-echo", result.stderr)
+
+    def test_recheck_receipt_replay_survives_engine_change_without_pg_transaction_or_write(self):
+        from unittest.mock import patch
+
+        task = self.submit()
+        self.assertEqual(self.run_worker(task), "succeeded")
+        source = self.client.get(f"/api/v1/tasks/{task}/compliance").json()["id"]
+        identity = self.publish()["rule_id"]
+        operation = uuid4()
+        first = self.recheck(task, source, [identity], operation)
+        balance = self.client.get("/api/v1/credits/balance").json()
+        case = self
+
+        class ReadOnlyStorage(S3Storage):
+            def get(inner, *args, **kwargs):
+                with psycopg.connect(case.owner) as c:
+                    case.assertEqual(
+                        c.execute(
+                            "SELECT count(*) FROM pg_stat_activity WHERE usename=%s AND state='idle in transaction'",
+                            (case.admin_role,),
+                        ).fetchone()[0],
+                        0,
+                    )
+                return super().get(*args, **kwargs)
+
+            def put_immutable(inner, *args, **kwargs):
+                raise AssertionError("receipt replay must not create a new report")
+
+        storage = ReadOnlyStorage(self.settings)
+        try:
+            with patch(
+                "visual_platform.services.rule_operations.evaluate_rules",
+                side_effect=AssertionError("changed engine must not run on replay"),
+            ):
+                self.assertEqual(
+                    self.recheck(task, source, [identity], operation, storage=storage), first
+                )
+        finally:
+            storage.close()
+
+        class CorruptStorage(S3Storage):
+            def get(inner, *args, **kwargs):
+                return b"changed original receipt object", "application/json", None
+
+        storage = CorruptStorage(self.settings)
+        try:
+            with self.assertRaisesRegex(ValueError, "existing recheck report hash mismatch"):
+                self.recheck(task, source, [identity], operation, storage=storage)
+        finally:
+            storage.close()
+        self.assertEqual(self.client.get("/api/v1/credits/balance").json(), balance)
+        self.assertEqual(
+            len(self.client.get(f"/api/v1/tasks/{task}/compliance/versions").json()["items"]), 2
+        )
+
+    def test_recheck_receipt_rejects_changed_scope_and_is_not_an_api_capability(self):
+        task = self.submit()
+        self.assertEqual(self.run_worker(task), "succeeded")
+        source = self.client.get(f"/api/v1/tasks/{task}/compliance").json()["id"]
+        identity = self.publish()["rule_id"]
+        operation = uuid4()
+        self.recheck(task, source, [identity], operation)
+        for changed_source, rules, reason in (
+            (str(uuid4()), [identity], "re-evaluate existing facts; no provider call"),
+            (source, [str(uuid4())], "re-evaluate existing facts; no provider call"),
+            (source, [identity], "different request"),
+        ):
+            with (
+                psycopg.connect(self.admin_dsn) as c,
+                self.assertRaisesRegex(psycopg.errors.RaiseException, "operation_conflict"),
+            ):
+                c.execute(
+                    "SELECT ops.recheck_operation(%s,%s,%s,%s,%s)",
+                    (task, changed_source, [UUID(x) for x in rules], operation, reason),
+                )
+        with (
+            psycopg.connect(self.settings.api_database_url) as c,
+            self.assertRaises(psycopg.errors.InsufficientPrivilege),
+        ):
+            c.execute(
+                "SELECT ops.recheck_operation(%s,%s,%s,%s,'deny')",
+                (task, source, [UUID(identity)], operation),
+            )
+        with psycopg.connect(self.owner) as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT count(*) FROM ops.audit_events WHERE request_id=%s", (operation,)
+                ).fetchone()[0],
+                1,
+            )
+
+    def test_chained_rechecks_preserve_original_detector_profile_for_offline_quality(self):
+        import tempfile
+
+        from visual_platform.services.quality_evaluation import evaluate_dataset
+
+        task = self.submit()
+        self.assertEqual(self.run_worker(task), "succeeded")
+        source = self.client.get(f"/api/v1/tasks/{task}/compliance").json()["id"]
+        identity = self.publish()["rule_id"]
+        first = self.recheck(task, source, [identity])
+        second = self.recheck(task, first["check_id"], [identity])
+        url = self.client.get(
+            f"/api/v1/tasks/{task}/report/download",
+            params={"check_id": second["check_id"]},
+            follow_redirects=False,
+        ).headers["location"]
+        raw = httpx.get(url, timeout=10).content
+        report = json.loads(raw)
+        self.assertEqual(report["provider_profile"], "rule_only_recheck")
+        self.assertEqual(report["source_provider_profile"], "offline_fake")
+        image = httpx.get(
+            self.client.get(f"/api/v1/tasks/{task}/download", follow_redirects=False).headers[
+                "location"
+            ],
+            timeout=10,
+        ).content
+        target = report["per_platform"][0]
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / "final.png").write_bytes(image)
+            (folder / "report.json").write_bytes(raw)
+            manifest = folder / "manifest.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "dataset_kind": "synthetic_fixture",
+                        "human_reviewed_attested": True,
+                        "usage_rights_attested": True,
+                        "samples": [
+                            {
+                                "sample_id": "synthetic-rule-recheck",
+                                "image_file": "final.png",
+                                "image_sha256": hashlib.sha256(image).hexdigest(),
+                                "report_file": "report.json",
+                                "report_sha256": hashlib.sha256(raw).hexdigest(),
+                                "platform": target["platform"],
+                                "marketplace": target["marketplace"],
+                                "category": target["category"],
+                                "image_type": target["image_type"],
+                                "rule_version": target["rule_version"],
+                                "human_label": "compliant",
+                                "annotator_fingerprint": "a" * 64,
+                                "features": {
+                                    "visible_text": False,
+                                    "on_product_logo": False,
+                                    "added_watermark": False,
+                                    "dark_background": False,
+                                    "category_exception": False,
+                                },
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            metrics = evaluate_dataset(manifest)
+        self.assertEqual(metrics["provider_profiles"], ["offline_fake"])
+        self.assertEqual(metrics["report_profiles"], ["rule_only_recheck"])
+        self.assertTrue(metrics["source_lineage_complete"])
+        self.assertFalse(metrics["provider_verified"])
+        self.assertEqual(len(list(Path(self.folder.name).glob("*.intent"))), 2)
+        self.assertEqual(self.client.get("/api/v1/credits/balance").json()["spent_total"], 16)

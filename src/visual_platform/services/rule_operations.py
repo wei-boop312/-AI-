@@ -58,9 +58,37 @@ def publish_rule(dsn, storage, document, evidence, operation, reason, *, evidenc
 def recheck_report(dsn, storage, task, source_check, rule_ids, operation, reason):
     with psycopg.connect(dsn) as c:
         assert_operator(c)
-        ctx = required_row(
-            c.execute("SELECT ops.recheck_context(%s,%s,%s)", (task, source_check, rule_ids))
+        existing = required_row(
+            c.execute(
+                "SELECT ops.recheck_operation(%s,%s,%s,%s,%s)",
+                (task, source_check, rule_ids, operation, reason),
+            )
         )[0]
+        ctx = (
+            None
+            if existing
+            else required_row(
+                c.execute("SELECT ops.recheck_context(%s,%s,%s)", (task, source_check, rule_ids))
+            )[0]
+        )
+    if existing:
+        if existing["report_bucket"] != storage.bucket:
+            raise ValueError("storage bucket mismatch")
+        raw, _, _ = storage.get(
+            existing["report_object_key"],
+            version=existing["report_storage_version_id"],
+            limit=8 * 1024 * 1024,
+        )
+        if hashlib.sha256(raw).hexdigest() != existing["report_sha256"]:
+            raise ValueError("existing recheck report hash mismatch")
+        return {
+            "check_id": existing["check_id"],
+            "auto_overall": existing["auto_overall"],
+            "provider_submissions": 0,
+            "credits_charged": 0,
+        }
+    if ctx is None:
+        raise ValueError("recheck_context_unavailable")
     source = ctx["source_check"]
     final = ctx["final"]
     if source["report_bucket"] != storage.bucket or final["bucket"] != storage.bucket:
@@ -113,6 +141,12 @@ def recheck_report(dsn, storage, task, source_check, rule_ids, operation, reason
         "recomputed_from_check_id": str(source_check),
         "operation_id": str(operation),
         "provider_profile": "rule_only_recheck",
+        "source_provider_profile": original.get("source_provider_profile")
+        or (
+            original.get("provider_profile")
+            if original.get("provider_profile") != "rule_only_recheck"
+            else None
+        ),
     }
     data = json.dumps(report, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
     identity = uuid5(operation, "rule-only-recheck")

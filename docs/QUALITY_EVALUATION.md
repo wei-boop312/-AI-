@@ -22,3 +22,5 @@ manifest的schema见`contracts/quality-dataset.schema.json`。样本必须列人
 视觉混淆矩阵行是人工present/absent，列是模型present/absent/uncertain。误检率=false positive/人工absent总数，漏检率=false negative/人工present总数，不确定率=uncertain/总数；可评估覆盖率和准确率只在明确present/absent的子集计算，零分母null。多平台对同图的合规结论可分别统计，但视觉存在性按唯一图片SHA只计一次；同图物理标注冲突或不同报告存在性结论冲突会拒绝，模型对照请分开数据集，不自动挑选更好的结果。
 
 深色背景与类目例外继续只作为人工分层条件；Facts的non_white不等于深色，类目例外也不是视觉模型能直接输出的事实，不编造这两种识别准确率。当前仅合成夹具验证统计，真实产品集/实际供应商质量仍NOT_RUN。CLI输出额外记录开始/结束时间、Python版本、工具/计算模块SHA和脱敏命令；不记录输入文件路径或图片内容。
+
+规则重检报告使用独立report_profiles记录rule_only_recheck，并从source_provider_profile追溯原检测模式。来源字段缺失或仍只有工作流标识时不推断供应商；真实产品集可计算统计但标unrecorded/source_lineage_complete=false，合成数据集则拒绝不能确认offline来源的报告。完整标识仅说明文件中的来源记录齐全，不证明实际供应商接通，provider_verified始终false。

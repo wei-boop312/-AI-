@@ -221,6 +221,8 @@ def evaluate_dataset(manifest: Path):
     unavailable_facts = 0
     visual_seen: dict[str, tuple[dict[str, str], bool]] = {}
     profiles = set()
+    report_profiles = set()
+    lineage_complete = True
     for sample in data.samples:
         image = private_read(root, sample.image_file, 100 * 1024 * 1024)
         report_raw = private_read(root, sample.report_file, 8 * 1024 * 1024)
@@ -270,6 +272,18 @@ def evaluate_dataset(manifest: Path):
         profile = report.get("provider_profile")
         if type(profile) is not str or not re.fullmatch(r"[a-z0-9_]{1,64}", profile):
             raise ValueError("quality_report_profile_required")
+        report_profiles.add(profile)
+        if profile == "rule_only_recheck":
+            source_profile = report.get("source_provider_profile")
+            if (
+                type(source_profile) is str
+                and source_profile != "rule_only_recheck"
+                and re.fullmatch(r"[a-z0-9_]{1,64}", source_profile)
+            ):
+                profile = source_profile
+            else:
+                profile = "unrecorded"
+                lineage_complete = False
         if data.dataset_kind == "synthetic_fixture" and profile not in (
             "offline_fake",
             "offline_protocol_mock",
@@ -300,6 +314,8 @@ def evaluate_dataset(manifest: Path):
         "human_labels_independently_verified": False,
         "category_scope_independently_verified": False,
         "provider_profiles": sorted(profiles),
+        "report_profiles": sorted(report_profiles),
+        "source_lineage_complete": lineage_complete,
         "provider_verified": False,
         "release_authorized": False,
         "paid_calls": 0,
