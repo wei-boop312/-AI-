@@ -16,6 +16,10 @@ credential_fingerprint由前缀ASCII字节visual-provider-credential-v1、一个
 
 ## 受限离线协议报价准备
 
+0049候选先持久化登记已审阅的运行元数据（不包含密钥）：`python scripts/provider_runtime.py --config work/private-runtime/runtime.json --register-config --reviewed-sha256 <运行配置SHA> --operation-id <登记操作uuid> --reason <配置审阅原因>`。此模式与check-credentials、prepare-protocol-quote互斥，单独配置审阅不是费用授权。版本正文和摘要存入Ops私有FORCE RLS表，只能追加，API/Worker无原始读写权限；登记与唯一审计同事务，相同正文可复用版本但不同审阅操作各留审计。
+
+数据库在新报价和调用意图插入时独立核对登记的完整模型/端点/商户绑定，未登记的运行SHA和与登记正文不一致的字段拒绝；未使用运行配置的历史Fake/mock任务保持原兼容性。登记版本可通过受限provider_runtime_context函数读取并重建对象，不依赖创建时的本地JSON文件。密钥只保留领域隔离摘要，商户归属和兼容性仍未验证；备份恢复不会因此恢复费用授权。
+
 0048候选提供Ops入口，使用普通API刚创建且未消费的Fake报价作为业务来源：
 
 `python scripts/provider_runtime.py --config work/private-runtime/runtime.json --prepare-protocol-quote --user <uuid> --source-quote <uuid> --reviewed-sha256 <运行配置SHA> --operation-id <uuid> --reason <审阅原因>`

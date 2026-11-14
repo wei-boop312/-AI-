@@ -72,15 +72,17 @@ class ProviderRuntime(BaseModel):
             raise ValueError("unsupported_runtime_stage")
         return self
 
-    def digest(self):
-        raw = json.dumps(
+    def canonical(self):
+        return json.dumps(
             self.model_dump(mode="json"),
             sort_keys=True,
             separators=(",", ":"),
             ensure_ascii=False,
             allow_nan=False,
         ).encode()
-        return hashlib.sha256(raw).hexdigest()
+
+    def digest(self):
+        return hashlib.sha256(self.canonical()).hexdigest()
 
     def execution_binding(self):
         return {
