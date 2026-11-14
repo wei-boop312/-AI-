@@ -3,11 +3,14 @@
 import copy
 import hashlib
 import json
+import re
+from pathlib import Path
 from uuid import UUID, uuid5
 
 import psycopg
 
 from visual_platform.db.result import required_row
+from visual_platform.providers.gemini_usage import unique_object
 from visual_platform.providers.qwen_image import checked_dimensions
 from visual_platform.providers.runtime import ProviderRuntime
 from visual_platform.services.rule_operations import assert_operator
@@ -55,7 +58,38 @@ def revoke_runtime_configuration(dsn, digest, operation, reason):
     return str(identity)
 
 
-def runtime_snapshot(source, runtime):
+def validate_price_bindings(price_versions):
+    if type(price_versions) is not dict or set(price_versions) != {"generate", "detect"}:
+        raise ValueError("invalid_runtime_price_bindings")
+    for binding in price_versions.values():
+        if type(binding) is not dict or set(binding) != {"id", "document_sha256"}:
+            raise ValueError("invalid_runtime_price_bindings")
+        if (
+            type(binding["id"]) is not str
+            or str(UUID(binding["id"])) != binding["id"]
+            or type(binding["document_sha256"]) is not str
+            or not re.fullmatch(r"[0-9a-f]{64}", binding["document_sha256"])
+        ):
+            raise ValueError("invalid_runtime_price_bindings")
+    return copy.deepcopy(price_versions)
+
+
+def load_price_bindings(path: Path):
+    def invalid(value):
+        raise ValueError("nonstandard_price_binding_json")
+
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 16384:
+        raise ValueError("invalid_price_binding_file")
+    with path.open("rb") as stream:
+        raw = stream.read(16385)
+    if len(raw) > 16384:
+        raise ValueError("invalid_price_binding_file")
+    return validate_price_bindings(
+        json.loads(raw, object_pairs_hook=unique_object, parse_constant=invalid)
+    )
+
+
+def runtime_snapshot(source, runtime, price_versions=None):
     document = copy.deepcopy(source["input_snapshot"])
     if runtime.schema_version == 2:
         output = document["generation"]["output"]
@@ -66,10 +100,16 @@ def runtime_snapshot(source, runtime):
         provider_model=runtime.generate.model + "-protocol-mock",
         price_version="trial-protocol-mock-v1",
     )
+    if price_versions is not None:
+        if runtime.schema_version != 2:
+            raise ValueError("invalid_runtime_price_bindings")
+        document["_execution"]["provider_price_versions"] = validate_price_bindings(price_versions)
     return document
 
 
-def prepare_runtime_quote(dsn, user, source_quote, runtime, reviewed_sha256, operation, reason):
+def prepare_runtime_quote(
+    dsn, user, source_quote, runtime, reviewed_sha256, operation, reason, *, price_versions=None
+):
     runtime = ProviderRuntime.model_validate(runtime.model_dump(mode="json"), strict=True)
     if reviewed_sha256 != runtime.digest():
         raise ValueError("runtime_configuration_not_reviewed")
@@ -78,7 +118,7 @@ def prepare_runtime_quote(dsn, user, source_quote, runtime, reviewed_sha256, ope
         source = required_row(
             connection.execute("SELECT ops.runtime_quote_source(%s,%s)", (user, source_quote))
         )[0]
-    snapshot = runtime_snapshot(source, runtime)
+    snapshot = runtime_snapshot(source, runtime, price_versions)
     canonical = json.dumps(
         snapshot, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
     )

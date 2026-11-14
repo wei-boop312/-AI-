@@ -420,6 +420,14 @@ class Worker:
                             result_text,
                             hashlib.sha256(result_text.encode()).hexdigest(),
                         )
+                        # Qwen billing meters arrive on successful GET, not the initial POST.
+                        await self.db(
+                            "SELECT app.record_supplier_estimate($1,$2,$3,$4)",
+                            task,
+                            self.owner,
+                            fence,
+                            UUID(attempt["id"]),
+                        )
                     await self.asset(task, fence, ctx, "generated", canonical, meta)
                 elif phase == "protecting":
                     source = await self.read(ctx["source"])

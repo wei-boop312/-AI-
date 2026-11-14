@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.providers.runtime import credential_status, load_runtime
 from visual_platform.services.runtime_quote import (
+    load_price_bindings,
     prepare_runtime_quote,
     register_runtime_configuration,
     registered_runtime_context,
@@ -30,9 +31,12 @@ def main():
         parser.add_argument("--" + name, type=UUID)
     parser.add_argument("--reviewed-sha256")
     parser.add_argument("--reason")
+    parser.add_argument("--price-bindings", type=Path)
     args = parser.parse_args()
     try:
         runtime = load_runtime(args.config)
+        if args.price_bindings is not None and not args.prepare_protocol_quote:
+            raise ValueError("price_bindings_only_for_explicit_quote_preparation")
         write_args = (
             args.user,
             args.source_quote,
@@ -84,6 +88,11 @@ def main():
         if args.prepare_protocol_quote:
             if any(value is None for value in write_args):
                 raise ValueError("explicit_runtime_quote_scope_required")
+            price_versions = (
+                load_price_bindings(args.price_bindings)
+                if args.price_bindings is not None
+                else None
+            )
             dsn = os.environ.get("ADMIN_DATABASE_URL")
             if not dsn:
                 print(json.dumps({"result": "BLOCKED_ENV", "paid_calls": 0}))
@@ -96,6 +105,7 @@ def main():
                 args.reviewed_sha256,
                 args.operation_id,
                 args.reason,
+                price_versions=price_versions,
             )
             print(json.dumps({"result": "OFFLINE_RUNTIME_QUOTE_PREPARED", **result}))
             return 0

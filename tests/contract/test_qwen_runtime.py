@@ -16,6 +16,7 @@ from visual_platform.providers.runtime import (
     credential_fingerprint,
     offline_runtime,
 )
+from visual_platform.services.runtime_quote import load_price_bindings, runtime_snapshot
 
 
 def qwen_runtime_document():
@@ -31,6 +32,38 @@ def qwen_runtime_document():
 
 
 class QwenRuntimeContracts(unittest.IsolatedAsyncioTestCase):
+    def test_price_binding_scope_is_complete_secret_free_and_copied_into_new_snapshot(self):
+        runtime = ProviderRuntime.model_validate(qwen_runtime_document(), strict=True)
+        source = {
+            "input_snapshot": {
+                "generation": {"output": {"width": 512, "height": 512}},
+                "_execution": {},
+            }
+        }
+        bindings = {
+            "generate": {"id": str(uuid4()), "document_sha256": "a" * 64},
+            "detect": {"id": str(uuid4()), "document_sha256": "b" * 64},
+        }
+        snapshot = runtime_snapshot(source, runtime, bindings)
+        bindings["generate"]["id"] = str(uuid4())
+        self.assertNotEqual(snapshot["_execution"]["provider_price_versions"], bindings)
+        self.assertEqual(source["input_snapshot"]["_execution"], {})
+        for malformed in (
+            {"generate": bindings["generate"]},
+            {**bindings, "api_key": "synthetic"},
+            {**bindings, "generate": {**bindings["generate"], "api_key": "synthetic"}},
+        ):
+            with self.assertRaises(ValueError):
+                runtime_snapshot(source, runtime, malformed)
+
+    def test_price_binding_file_rejects_duplicate_nonstandard_and_oversized_json(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "prices.json"
+            for raw in (b'{"generate":{},"generate":{}}', b'{"generate":NaN}', b"A" * 16385):
+                path.write_bytes(raw)
+                with self.assertRaises(ValueError):
+                    load_price_bindings(path)
+
     async def test_qwen_factory_scope_and_reconstructed_unknown_cost_are_bound(self):
         calls = []
 
