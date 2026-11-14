@@ -404,6 +404,22 @@ class Worker:
                         generation["output"]["height"],
                     ):
                         raise ValueError("generated_dimensions_mismatch")
+                    if getattr(self.provider, "durable_generation_result_archive", False):
+                        result_record = self.provider.prepare_generation_result(
+                            attempt, artifact, canonical, meta
+                        )
+                        result_text = json.dumps(
+                            result_record, sort_keys=True, separators=(",", ":"), allow_nan=False
+                        )
+                        await self.db(
+                            "SELECT app.append_qwen_result($1,$2,$3,$4,$5,$6)",
+                            task,
+                            self.owner,
+                            fence,
+                            UUID(attempt["id"]),
+                            result_text,
+                            hashlib.sha256(result_text.encode()).hexdigest(),
+                        )
                     await self.asset(task, fence, ctx, "generated", canonical, meta)
                 elif phase == "protecting":
                     source = await self.read(ctx["source"])

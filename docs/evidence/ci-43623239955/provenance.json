@@ -1,0 +1,91 @@
+{
+  "run_id": 43623239955,
+  "commit": "a18bcc873a1c617e2305f3f2dbd93193247ff3f7",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43623239955",
+  "artifact_id": 14125856954,
+  "archive_sha256": "4053ca1d7cf2fe42f6f9217cfadf330d2881aad4fd6acabcdc6b43da00ffe2b5",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "10b711e52d08dfbe532d140a24804789e642e463c78dc52a20965862ffd929e8"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "9e7592db24e1a5c358d481881419dfa5f1f014ead49fada4398b422e64e1b76f"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "92b859a82f34c80183f69da44c96e3b52d9d40c4ea235f394e5a54add7901aba"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "5fbe0640d2f6c67db4c9b86960530dcdb4bcfd9a1f66d8e1876de29b3e01f05b"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "6a3ea3aaa17464f03ce5602ed0e366212a6d5c931f61b6cd4a0ab16ac4301d24"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "c584218b458444c1689a77b21e24e5ea6cbe463e5e8f189b2312f463edb93aee"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "80714f72f55e5243c20cde69dc211e64a23cfde893122f2f7ecfb73fb7509984"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "a1b23ef05c0682f3a464c2d1140a4cc8a6d45a942f399a27a1fc4c62c8720b2d"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "79f4cfc1b1ece8f239fe32be2fa6870c698ce13b510f32285a50d6db5ac13409"
+    }
+  },
+  "scope": "Explicit Qwen API quote, schema4 budgets, Worker S3 pipeline and supplier dimension guards",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "6040ed9df8b310ec20a62246656eead4b9f45ee39b70ebfe17b85a8bba4a8576",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "02e44b3d460868aea36d5183313268f87511b0a32566d18b73e3bf4e22c5e82c",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "dc6c091b43f7f29c86461c68f3860aa2c7df7b5260d950cbd56244b4debdc1b9",
+      "passed_tests": [
+        81
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "d39914e3e6182804c398338efa8d260f2d27151771e66359531015f963f85459",
+      "passed_tests": [
+        249
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "38379d23aaf132cbe8e63b4622a618b0cbd56670c421aa89579d21e8e0c48ed3",
+      "passed_tests": [
+        206
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43623239955-offline-handoff.zip",
+    "sha256": "9aeb2b959a7c07655c60e28d8a69f125843de875ffdf40fb37a19601ced848ae",
+    "size": 5995071,
+    "files": 1573,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}

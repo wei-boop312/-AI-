@@ -6,11 +6,16 @@ from visual_platform.providers.contract import ProviderUncertain
 from visual_platform.providers.generation_archive import validate_generation_archive
 from visual_platform.providers.pipeline import ProtocolProvider
 from visual_platform.providers.qwen_image import MODEL, QwenImageProvider, QwenImageRequest
+from visual_platform.providers.qwen_result import build_qwen_result
 
 
 class QwenProtocolProvider(ProtocolProvider):
+    durable_generation_result_archive = True
     generation_model = MODEL
     request_type = QwenImageRequest
+
+    def prepare_generation_result(self, attempt, artifact, canonical, meta):
+        return build_qwen_result(attempt, artifact, canonical, meta, self.bfl.endpoint_origin)
 
     def fetch_generation_record(self, intent):
         receipt = self.bfl.receipt_record(intent)

@@ -166,7 +166,7 @@ class BailianFixture(RuntimeFixture):
         self.assertEqual(response.status_code, 201, response.text)
         return response.json()["id"]
 
-    def run_qwen(self, task):
+    def run_qwen(self, task, storage_class=S3Storage):
         async def run():
             async with offline_runtime(
                 self.qwen_runtime,
@@ -177,7 +177,7 @@ class BailianFixture(RuntimeFixture):
                 detect_transport=httpx.MockTransport(self.qwen_detector),
             ) as provider:
                 pool = await open_pool(self.worker_dsn, "app_worker")
-                storage = S3Storage(self.settings)
+                storage = storage_class(self.settings)
                 try:
                     return await Worker(pool, storage, provider).run(task)
                 finally:
