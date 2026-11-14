@@ -13,6 +13,47 @@ from visual_platform.worker.runner import Worker
 
 
 class RuleConstraintTests(ProviderBudgetFixture):
+    def test_longest_side_native_guard_is_orientation_independent_strict_and_inclusive(self):
+        config = {"min_longest_edge": 500, "max_longest_edge": 10000}
+        with psycopg.connect(self.owner) as connection:
+            for width, height, expected in (
+                (500, 80, True),
+                (80, 500, True),
+                (499, 80, False),
+                (10000, 80, True),
+                (80, 10001, False),
+            ):
+                with self.subTest(width=width, height=height):
+                    actual = connection.execute(
+                        "SELECT app.rule_local_constraints_pass(%s,%s,%s,1000)",
+                        (Jsonb([{"config": config}]), width, height),
+                    ).fetchone()[0]
+                    self.assertEqual(actual, expected)
+            for bad in (
+                {"min_longest_edge": True},
+                {"min_longest_edge": 500.0},
+                {"max_longest_edge": 1000001},
+                {"min_longest_edge": 1000, "max_longest_edge": 500},
+            ):
+                with self.subTest(bad=bad):
+                    self.assertFalse(
+                        connection.execute(
+                            "SELECT app.valid_rule_config(%s)", (Jsonb(bad),)
+                        ).fetchone()[0]
+                    )
+
+    def test_forged_compliant_report_cannot_bypass_actual_longest_edge(self):
+        report = self.forged_report({"max_longest_edge": 255})
+        self.assertEqual(report["auto_overall"], "non_compliant")
+        self.assertIn(
+            "max_longest_edge",
+            [
+                reason["code"]
+                for platform in report["per_platform_results"]
+                for reason in platform["reasons"]
+            ],
+        )
+
     evidence = b"Synthetic technical rule evidence; not a real marketplace verification."
 
     def setUp(self):

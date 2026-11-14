@@ -1,0 +1,91 @@
+{
+  "run_id": 43640102150,
+  "commit": "b6a9d69621fb85fc77d52af37856d0e593ecf8fe",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43640102150",
+  "artifact_id": 14132112733,
+  "archive_sha256": "8857891e335273aead72a5149377da7b7942ffc0c5566acbc7f1a52f2d2eee6d",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "6247b7338c52940c187fade3786fca65703ad5698e7c668548254eb5732aa47a"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "8c58e9cbe197b2addf2fc279b93fd741154ac2a9be63b68c5fe10c5ccada6a0f"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "90ee01a82a4b6dc9f8606316f20737e801b429fe6fc112b5a66d8060660fd56c"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "a176bda7f1a662fdd94c637ba6fea91a49b93f7ec441445b1f36f608e6ac4137"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "5e6e80fd1f57669e2bcbfaa668d33584c7e927cb33a36f38e9685fd905ff97ad"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "ce8f2bdb16a82a784d0e7a9f47d370610d9da72f2819d13c8b1c17d77166b2b9"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "70ff23455bfe08d098b3aace630266fcd8b7edef5d5c2adf9ef3877cfdfe96b6"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "31574444a64caeef63717001325c191337940da4016956c9db7174f0b25b4ebf"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "ca6bb3b2fcb049a26eab4c0e23d58dac56378481e5933d5353dfd18aaf82ec56"
+    }
+  },
+  "scope": "Dual Bailian metadata registration and independent visual price review",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "1c0c6e3be51b35a90785a46bb1320a6b9d145d78d320883635e1724d14981e96",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "e1b1d487bb7975ae3d8819bc7b9e0b7a901d7db9ada5e9c499bb00578802e08f",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "f26052690476dd608aad911521d0257c9cf410d297bd4074e5cad470be3ad8a7",
+      "passed_tests": [
+        114
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "32de74a1485f6af02f428b5b832f10989879b0130462b936f9701626b0aaa974",
+      "passed_tests": [
+        274
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "43da7530ea1fa43a6d77c9f67209a5b9ea06d6bd1eca259b2b1ebd5bcd448e54",
+      "passed_tests": [
+        221
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43640102150-offline-handoff.zip",
+    "sha256": "89f2397adf16d1f19fbe9ede26867a402af6c71accabe2e0f1c6cd3751c930c5",
+    "size": 6546451,
+    "files": 1729,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}

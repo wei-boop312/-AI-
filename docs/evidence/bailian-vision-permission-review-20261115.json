@@ -1,0 +1,13 @@
+{
+  "result": "WORKSPACE_PERMISSION_NOT_CONFIRMED",
+  "model": "qwen3.8-flash",
+  "http_status": 200,
+  "metadata_get_requests": 1,
+  "remote_authentication_observed": true,
+  "exact_authorized_inference_filter_empty": true,
+  "model_inference_requests": 0,
+  "paid_calls": 0,
+  "execution_enabled": false,
+  "scope": "Read-only permission metadata. Empty explicit grants do not establish denied or authorized inference, particularly in a default workspace. No key or workspace permissions were modified.",
+  "raw_response": "private_local_only"
+}

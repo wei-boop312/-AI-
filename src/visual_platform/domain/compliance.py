@@ -92,6 +92,27 @@ def evaluate_rules(final_sha256, rules, facts, local, *, sampling_selected=False
                 local.get("height", 0) <= config.max_height,
                 {"actual": local.get("height"), "maximum": config.max_height},
             )
+        if config.min_longest_edge is not None or config.max_longest_edge is not None:
+            width, height = local.get("width"), local.get("height")
+            valid = type(width) is int and type(height) is int and width > 0 and height > 0
+            if not valid:
+                reason("local_dimensions_invalid")
+            else:
+                longest = max(width, height)
+                for identity, threshold, passed in (
+                    (
+                        "min_longest_edge",
+                        config.min_longest_edge,
+                        config.min_longest_edge is None or longest >= config.min_longest_edge,
+                    ),
+                    (
+                        "max_longest_edge",
+                        config.max_longest_edge,
+                        config.max_longest_edge is None or longest <= config.max_longest_edge,
+                    ),
+                ):
+                    if threshold is not None:
+                        check(identity, passed, {"actual": longest, "threshold": threshold})
         if config.required_aspect_ratio is not None:
             ratio = config.required_aspect_ratio
             width, height = local.get("width"), local.get("height")

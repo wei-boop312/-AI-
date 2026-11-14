@@ -14,4 +14,6 @@
 
 RuleConfig支持max_width、max_height（1..1,000,000整数）与required_aspect_ratio={width,height}（每项1..10,000整数，精确交叉相乘、不用浮点容差），并拒绝倒置的最小/最大范围。旧配置缺这些字段时保留原行为。真实生成容量、上传边界与平台要求是分别核验的约束，不能把平台上限视为当前模型可生成的尺寸。
 
+0066候选另增min_longest_edge/max_longest_edge（1..1,000,000严格整数，可为空），分别比较max(width,height)，而非同时限制两条边。PG发布与compliant报告/重检门槛独立重算；横竖矩形等价，等号包含，倒置/浮点/布尔拒绝。Amazon公开文章可供一般最长边尺寸参考，`ops/amazon-us-main-size-draft.example.json`仅表达该项，unverified且complete_rule_set=false；待用户确认目标及运营核实完整站点/类目资料，不发布或升级旧规则，也不据此放宽平台/模型容量。
+
 PG发布函数独立验证字段/类型/范围。record_report与record_recheck在允许compliant前，继续保留原证据/完整规则/抽检/事实约束，并以不可变final asset的实际宽高/字节数重新核对本地尺寸规则和事实尺寸；不信任调用者只传一份“passed”列表。部分/未核验规则仍走现有人工流程。所有新增原生案例使用合成规则与MockTransport，不冒称当前平台真实样本验收。

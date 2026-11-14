@@ -21,6 +21,8 @@ class RuleConfig(StrictModel):
     max_bytes: Positive | None = None
     max_width: Annotated[int, Field(strict=True, ge=1, le=1000000)] | None = None
     max_height: Annotated[int, Field(strict=True, ge=1, le=1000000)] | None = None
+    min_longest_edge: Annotated[int, Field(strict=True, ge=1, le=1000000)] | None = None
+    max_longest_edge: Annotated[int, Field(strict=True, ge=1, le=1000000)] | None = None
     required_aspect_ratio: RequiredAspectRatio | None = None
     require_white_background: bool = Field(default=False, strict=True)
     forbid_added_text: bool = Field(default=False, strict=True)
@@ -36,6 +38,7 @@ class RuleConfig(StrictModel):
         for minimum, maximum in (
             (self.min_width, self.max_width),
             (self.min_height, self.max_height),
+            (self.min_longest_edge, self.max_longest_edge),
         ):
             if minimum is not None and maximum is not None and minimum > maximum:
                 raise ValueError("rule minimum exceeds maximum")

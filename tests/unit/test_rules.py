@@ -14,6 +14,37 @@ from visual_platform.domain.schemas import Target
 
 
 class RuleTests(unittest.TestCase):
+    def test_longest_edge_constraints_allow_rectangles_in_both_orientations(self):
+        from visual_platform.domain.rules import RuleConfig
+
+        self.rule["config"] = {
+            "min_longest_edge": 500,
+            "max_longest_edge": 10000,
+            "complete_rule_set": True,
+            "require_identity_review": False,
+        }
+        for width, height, expected in (
+            (500, 80, "compliant"),
+            (80, 500, "compliant"),
+            (499, 80, "non_compliant"),
+            (10000, 80, "compliant"),
+            (10001, 80, "non_compliant"),
+        ):
+            with self.subTest(width=width, height=height):
+                self.facts.update(image_width=width, image_height=height, product_extent=None)
+                self.local.update(width=width, height=height)
+                self.assertEqual(self.report()["auto_overall"], expected)
+        self.rule["evidence_status"] = "unverified"
+        self.assertEqual(self.report()["auto_overall"], "manual_review")
+        for change in (
+            {"min_longest_edge": True},
+            {"min_longest_edge": 500.0},
+            {"max_longest_edge": 1000001},
+            {"min_longest_edge": 1000, "max_longest_edge": 500},
+        ):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                RuleConfig.model_validate(change)
+
     # Synthetic policy fixture, not a statement of any current marketplace policy.
     def setUp(self):
         self.rule = {
