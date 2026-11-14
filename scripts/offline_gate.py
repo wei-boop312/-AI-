@@ -149,6 +149,7 @@ def main(task):
             "detection_archive_preserved_without_local_files",
             "detection_wire_and_sdk_response_preserved",
             "bill_fixture_evidence_preserved_not_settled",
+            "recheck_receipt_replayed_after_independent_restore",
         ):
             if detail.get("verification", {}).get(key) is not True:
                 raise ValueError("recovery guard missing: " + key)

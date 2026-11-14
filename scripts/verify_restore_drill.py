@@ -58,7 +58,7 @@ from visual_platform.services.provider_pricing import (
     supplier_task_costs,
 )
 from visual_platform.services.quotes import hash_data
-from visual_platform.services.rule_operations import publish_rule
+from visual_platform.services.rule_operations import publish_rule, recheck_report
 from visual_platform.storage.s3 import S3Storage, StorageError
 from visual_platform.worker.runner import Worker
 
@@ -391,6 +391,25 @@ if args.command == "prepare":
                 Jsonb(["local:restore-drill"]),
             ),
         )
+        state["recheck_operation_id"] = str(uuid4())
+        state["recheck_source_id"] = report["id"]
+        recheck_storage = S3Storage(settings)
+        try:
+            state["recheck_receipt"] = recheck_report(
+                profile["ADMIN_DATABASE_URL"],
+                recheck_storage,
+                UUID(state["tasks"]["completed"]),
+                UUID(report["id"]),
+                [UUID(state["rule_id"])],
+                UUID(state["recheck_operation_id"]),
+                "synthetic original operation for independent restore replay",
+            )
+        finally:
+            recheck_storage.close()
+        state["recheck_report_sha256"] = client.get(
+            "/api/v1/tasks/" + state["tasks"]["completed"] + "/compliance",
+            params={"check_id": state["recheck_receipt"]["check_id"]},
+        ).json()["report_sha256"]
         state["tasks"]["known"] = task(client, body, headers)
         require(
             run_worker(state["tasks"]["known"], broken=True) == "retryable",
@@ -816,6 +835,48 @@ elif args.command == "verify":
             and report["effective_source"] == "human_review",
             "restored report/review mismatch",
         )
+        before_replay_balance = client.get("/api/v1/credits/balance").json()
+        recheck_storage = S3Storage(settings)
+        try:
+            replayed = recheck_report(
+                profile["ADMIN_DATABASE_URL"],
+                recheck_storage,
+                UUID(state["tasks"]["completed"]),
+                UUID(state["recheck_source_id"]),
+                [UUID(state["rule_id"])],
+                UUID(state["recheck_operation_id"]),
+                "synthetic original operation for independent restore replay",
+            )
+        finally:
+            recheck_storage.close()
+        require(replayed == state["recheck_receipt"], "restored recheck receipt changed")
+        require(
+            client.get("/api/v1/credits/balance").json() == before_replay_balance,
+            "recheck receipt replay moved credits",
+        )
+        replay_metadata = admin(
+            "SELECT ops.recheck_operation(%s,%s,%s,%s,%s)",
+            (
+                UUID(state["tasks"]["completed"]),
+                UUID(state["recheck_source_id"]),
+                [UUID(state["rule_id"])],
+                UUID(state["recheck_operation_id"]),
+                "synthetic original operation for independent restore replay",
+            ),
+        )
+        require(
+            replay_metadata["operation_audit_count"] == 1
+            and replay_metadata["task_report_count"] == 2,
+            "recheck receipt replay appended audit or report",
+        )
+        replay_report = client.get(
+            "/api/v1/tasks/" + state["tasks"]["completed"] + "/compliance",
+            params={"check_id": replayed["check_id"]},
+        ).json()
+        require(
+            replay_report["report_sha256"] == state["recheck_report_sha256"],
+            "restored rule recheck report bytes changed",
+        )
         download = client.get(
             "/api/v1/tasks/" + state["tasks"]["completed"] + "/download", follow_redirects=False
         )
@@ -1028,6 +1089,7 @@ elif args.command == "verify":
         "detection_archive_preserved_without_local_files": True,
         "detection_wire_and_sdk_response_preserved": True,
         "bill_fixture_evidence_preserved_not_settled": True,
+        "recheck_receipt_replayed_after_independent_restore": True,
         "five_fixture_tasks_quarantined": True,
         "cost_estimate_history_and_review_block_preserved": True,
         "detection_delivery_requires_new_review_after_restore": True,

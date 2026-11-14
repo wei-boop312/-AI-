@@ -794,3 +794,78 @@ class RuleOperationsTests(PipelineFixture):
         self.assertFalse(metrics["provider_verified"])
         self.assertEqual(len(list(Path(self.folder.name).glob("*.intent"))), 2)
         self.assertEqual(self.client.get("/api/v1/credits/balance").json()["spent_total"], 16)
+
+    def test_recheck_receipt_accepts_only_provider_local_version_rebinding_with_original_bytes(
+        self,
+    ):
+        from unittest.mock import patch
+
+        task = self.submit()
+        self.assertEqual(self.run_worker(task), "succeeded")
+        source = self.client.get(f"/api/v1/tasks/{task}/compliance").json()["id"]
+        identity = self.publish()["rule_id"]
+        operation = uuid4()
+        receipt = self.recheck(task, source, [identity], operation)
+        with psycopg.connect(self.owner) as c:
+            original = c.execute(
+                "SELECT report_storage_version_id FROM app.compliance_checks WHERE id=%s",
+                (receipt["check_id"],),
+            ).fetchone()[0]
+        with (
+            psycopg.connect(self.admin_dsn) as c,
+            self.assertRaises(psycopg.errors.InsufficientPrivilege),
+        ):
+            c.execute(
+                "UPDATE app.compliance_checks SET report_storage_version_id='forbidden' WHERE id=%s",
+                (receipt["check_id"],),
+            )
+        rebound = "controlled-new-provider-version"
+        with psycopg.connect(self.owner) as c:
+            c.execute("SET LOCAL session_replication_role=replica")
+            c.execute(
+                "UPDATE app.compliance_checks SET report_storage_version_id=%s WHERE id=%s",
+                (rebound, receipt["check_id"]),
+            )
+        case = self
+
+        class MappedVersion(S3Storage):
+            def get(inner, key, *, version=None, **kwargs):
+                case.assertEqual(version, rebound)
+                return super().get(key, version=original, **kwargs)
+
+            def put_immutable(inner, *args, **kwargs):
+                raise AssertionError("restored receipt must reuse original bytes")
+
+        storage = MappedVersion(self.settings)
+        try:
+            with patch(
+                "visual_platform.services.rule_operations.evaluate_rules",
+                side_effect=AssertionError("receipt must not recompute"),
+            ):
+                self.assertEqual(
+                    self.recheck(task, source, [identity], operation, storage=storage), receipt
+                )
+            with psycopg.connect(self.admin_dsn) as c:
+                metadata = c.execute(
+                    "SELECT ops.recheck_operation(%s,%s,%s,%s,%s)",
+                    (
+                        task,
+                        source,
+                        [UUID(identity)],
+                        operation,
+                        "re-evaluate existing facts; no provider call",
+                    ),
+                ).fetchone()[0]
+            self.assertEqual(metadata["original_storage_version_id"], original)
+            self.assertEqual(metadata["report_storage_version_id"], rebound)
+            self.assertEqual(
+                (metadata["operation_audit_count"], metadata["task_report_count"]), (1, 2)
+            )
+        finally:
+            storage.close()
+            with psycopg.connect(self.owner) as c:
+                c.execute("SET LOCAL session_replication_role=replica")
+                c.execute(
+                    "UPDATE app.compliance_checks SET report_storage_version_id=%s WHERE id=%s",
+                    (original, receipt["check_id"]),
+                )

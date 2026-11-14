@@ -41,3 +41,5 @@ python scripts/rules.py recheck --task <UUID> --source-check <原报告UUID> --r
 规则重检先用受限ops.recheck_operation核对task/source check/规则ID顺序/operation/reason。存在已完成回执时，PG检查原审计和不可变检查记录的报告SHA/私有指针一致，随后关闭事务，再从S3读取原报告并核对SHA；直接返回原检查ID/自动结论，不重新运行当前规则引擎、不重写原对象、无模型提交和积分变动。不同参数重用operation拒绝；原文件缺失或摘要变化拒绝，不能把重新计算的新文件当旧回执。首次并发仍由原record_recheck的事务锁和唯一operation保证一条审计，当前实现升级后重放也不依赖引擎输出保持逐字相同。
 
 新报告provider_profile仍为rule_only_recheck，source_provider_profile从已经校验的原始报告继承；多次重检继续传递原检测来源。历史重检没有该字段时保持未知，不根据当前运行环境冒填offline_fake或真实模型。质量工具分别列report_profiles与provider_profiles；source_lineage_complete仅表示来源标识已记录，不是供应商签名或独立真实性证明。合成统计要求能追溯offline来源；真实数据集的旧未知来源仅列unrecorded、保持provider_verified=false。
+
+0046恢复边界候选：S3版本ID属于存储实例，独立恢复在核对整库/对象SHA之后只重绑该定位符，不能强求它等于原不可变审计里的旧ID。回执读取仍严格匹配原操作、桶、对象键与内容SHA，返回当前定位符和原定位符供运维核对；服务实际读取当前版本再核对原报告SHA。API/Ops账号没有直接改检查记录的权限，版本重绑仅限原有隔离恢复工具的owner流程；不修改旧审计。新增原生受控版本映射负例/权限验证，另独立冷恢复种入真实非空重检报告，恢复后重放原操作、比较原SHA、唯一审计/两报告和余额不变，综合门槛要求该新证据。

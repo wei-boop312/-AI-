@@ -87,6 +87,7 @@ def main():
             "detection_archive_preserved_without_local_files",
             "detection_wire_and_sdk_response_preserved",
             "bill_fixture_evidence_preserved_not_settled",
+            "recheck_receipt_replayed_after_independent_restore",
         ):
             require(verification[field] is True, "recovery guard failed: " + field)
         require(
