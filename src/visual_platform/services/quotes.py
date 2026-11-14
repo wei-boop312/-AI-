@@ -39,6 +39,10 @@ def db_conflict(exc):
         "upload_rejected",
         "upload_expired",
         "upload_lease_lost",
+        "provider_runtime_revoked",
+        "unregistered_runtime_configuration",
+        "registered_runtime_binding_mismatch",
+        "runtime_profile_not_enabled",
     }
     if code in known:
         raise HTTPException(404 if code in invisible else 409, code)

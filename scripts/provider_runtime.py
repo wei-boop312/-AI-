@@ -13,6 +13,8 @@ from visual_platform.providers.runtime import credential_status, load_runtime
 from visual_platform.services.runtime_quote import (
     prepare_runtime_quote,
     register_runtime_configuration,
+    registered_runtime_context,
+    revoke_runtime_configuration,
 )
 
 
@@ -23,6 +25,7 @@ def main():
     mode.add_argument("--check-credentials", action="store_true")
     mode.add_argument("--prepare-protocol-quote", action="store_true")
     mode.add_argument("--register-config", action="store_true")
+    mode.add_argument("--revoke-config", action="store_true")
     for name in ("user", "source-quote", "operation-id"):
         parser.add_argument("--" + name, type=UUID)
     parser.add_argument("--reviewed-sha256")
@@ -37,7 +40,7 @@ def main():
             args.reviewed_sha256,
             args.reason,
         )
-        if args.register_config:
+        if args.register_config or args.revoke_config:
             if (
                 args.user is not None
                 or args.source_quote is not None
@@ -47,21 +50,32 @@ def main():
                 )
             ):
                 raise ValueError("explicit_runtime_registration_scope_required")
+            if args.reviewed_sha256 != runtime.digest():
+                raise ValueError("runtime_configuration_not_reviewed")
             dsn = os.environ.get("ADMIN_DATABASE_URL")
             if not dsn:
                 print(json.dumps({"result": "BLOCKED_ENV", "paid_calls": 0}))
                 return 3
-            identity = register_runtime_configuration(
-                dsn, runtime, args.reviewed_sha256, args.operation_id, args.reason
+            identity = (
+                revoke_runtime_configuration(dsn, runtime.digest(), args.operation_id, args.reason)
+                if args.revoke_config
+                else register_runtime_configuration(
+                    dsn, runtime, args.reviewed_sha256, args.operation_id, args.reason
+                )
             )
+            context = registered_runtime_context(dsn, runtime.digest())
             print(
                 json.dumps(
                     {
-                        "result": "OFFLINE_RUNTIME_CONFIG_REGISTERED",
+                        "result": "RUNTIME_CONFIG_REVOKED"
+                        if args.revoke_config
+                        else "OFFLINE_RUNTIME_CONFIG_REGISTERED",
                         "runtime_id": identity,
                         "configuration_sha256": runtime.digest(),
                         "execution_enabled": False,
                         "merchant_identity_verified": False,
+                        "runtime_revoked": context["revoked"],
+                        "previously_committed_intents_may_have_outcomes": True,
                         "paid_calls": 0,
                     }
                 )

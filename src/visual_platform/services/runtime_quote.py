@@ -43,6 +43,17 @@ def registered_runtime_context(dsn, digest):
     return context
 
 
+def revoke_runtime_configuration(dsn, digest, operation, reason):
+    with psycopg.connect(dsn) as connection:
+        assert_operator(connection)
+        identity = required_row(
+            connection.execute(
+                "SELECT ops.revoke_provider_runtime(%s,%s,%s)", (digest, operation, reason)
+            )
+        )[0]
+    return str(identity)
+
+
 def runtime_snapshot(source, runtime):
     document = copy.deepcopy(source["input_snapshot"])
     document["_execution"].update(runtime.execution_binding())

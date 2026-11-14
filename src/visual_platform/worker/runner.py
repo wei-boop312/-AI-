@@ -180,10 +180,20 @@ class Worker:
                 "provider_budget_exhausted",
                 "provider_budget_cost_review_required",
                 "provider_price_expired",
+                "provider_runtime_revoked",
+                "unregistered_runtime_configuration",
+                "registered_runtime_binding_mismatch",
+                "runtime_profile_not_enabled",
             }:
                 raise
             needs_review = code == "provider_budget_cost_review_required"
-            if code == "provider_price_expired":
+            runtime_denial = code in {
+                "provider_runtime_revoked",
+                "unregistered_runtime_configuration",
+                "registered_runtime_binding_mismatch",
+                "runtime_profile_not_enabled",
+            }
+            if code == "provider_price_expired" or runtime_denial:
                 context = await self.context(task, fence)
                 needs_review = bool(context["attempts"])
             # The denied step rolled back intent and hold; earlier steps may already have cost.
@@ -192,7 +202,11 @@ class Worker:
                 task,
                 self.owner,
                 fence,
-                "provider_cost_review_required" if needs_review else "provider_budget_denied",
+                "provider_cost_review_required"
+                if needs_review
+                else "provider_runtime_denied"
+                if runtime_denial
+                else "provider_budget_denied",
                 needs_review,
             )
             return False

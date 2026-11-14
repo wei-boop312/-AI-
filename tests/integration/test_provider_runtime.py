@@ -29,9 +29,10 @@ from visual_platform.storage.s3 import S3Storage
 from visual_platform.worker.runner import Worker
 
 
-class ProviderRuntimeTests(ProviderBudgetFixture):
+class RuntimeFixture(ProviderBudgetFixture):
     def setUp(self):
         super().setUp()
+        self.runtime_version_prefix = uuid4().hex
         runtime = self.runtime()
         self.runtime_id = register_runtime_configuration(
             self.operator_dsn,
@@ -81,7 +82,7 @@ class ProviderRuntimeTests(ProviderBudgetFixture):
 
     def runtime(self, version="synthetic-v1"):
         data = json.loads(Path("ops/provider-runtime.example.json").read_text())
-        data["version"] = version
+        data["version"] = self.runtime_version_prefix + "-" + version
         for index, name in enumerate(("generate", "detect"), start=1):
             data[name]["merchant_fingerprint"] = str(index) * 64
             data[name]["billing_group"] = "synthetic-runtime-group"
@@ -110,6 +111,8 @@ class ProviderRuntimeTests(ProviderBudgetFixture):
 
         return asyncio.run(run())
 
+
+class ProviderRuntimeTests(RuntimeFixture):
     def test_frozen_runtime_drives_actual_pipeline_and_single_budgeted_charge(self):
         runtime = self.runtime()
         context = registered_runtime_context(self.operator_dsn, runtime.digest())

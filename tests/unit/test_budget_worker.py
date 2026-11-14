@@ -80,3 +80,33 @@ class BudgetWorkerTests(unittest.IsolatedAsyncioTestCase):
             self.assertFalse(await worker.submit(uuid4(), 1, "generate", {}))
             self.assertEqual(calls[-1][1][-1], bool(attempts))
             self.assertEqual(len(calls), 2)
+
+    async def test_runtime_denial_preserves_prior_possible_cost_and_rolls_back_new_intent(self):
+        for reason in (
+            "provider_runtime_revoked",
+            "unregistered_runtime_configuration",
+            "registered_runtime_binding_mismatch",
+            "runtime_profile_not_enabled",
+        ):
+            for attempts in ([], [{"id": "existing-provider-receipt"}]):
+                calls = []
+                worker = Worker(None, None, object(), owner="synthetic-worker")
+
+                async def database(query, *args):
+                    calls.append((query, args))
+                    if "record_intent" in query:
+                        raise asyncpg.RaiseError(reason)
+
+                async def context(*args):
+                    return {"attempts": attempts}
+
+                worker.db = database
+                worker.context = context
+                with self.subTest(reason=reason, prior=bool(attempts)):
+                    self.assertFalse(await worker.submit(uuid4(), 1, "detect", b"fixture"))
+                    self.assertEqual(calls[-1][1][-1], bool(attempts))
+                    self.assertEqual(
+                        calls[-1][1][-2],
+                        "provider_cost_review_required" if attempts else "provider_runtime_denied",
+                    )
+                    self.assertEqual(len(calls), 2)
