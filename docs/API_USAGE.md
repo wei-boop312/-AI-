@@ -33,3 +33,6 @@ GET /api/v1/health/live只看API存活；ready只探测api/auth PG及S3，检查
 新增容器运行候选验收 `scripts/container_smoke.py`：在 Linux CI 建立独立临时 Compose 基础服务，运行刚构建的 API/Nginx/Publisher/Worker 四个非 root 容器，经过 Nginx 登录、私有上传、MQ 消费、最终图/报告下载、保护 RGB 和唯一结算检查。报告 container-runtime.json 绑定当前 commit 与两个实际镜像 ID，并纳入 P5-01；代码存在不等于该轮已通过，必须等待实际 CI。
 
 该候选现改为完整compose.app.yaml编排，Linux host network访问回环基础服务，Origin为http://127.0.0.1:8080；不提供生产网络/TLS配置。每容器仅接收自身数据库角色，迁移/admin凭据不传给容器；JWT单文件只读挂载、私有父目录0700。Fake缓存改为受保护的命名卷，并新增8服务资源/健康/实际回环socket、SIGTERM退出、4应用容器删除重建后缓存/会话/最终图/账务不变检查。仅按owner标签清理临时资源；原生恢复另有P5-02实测。早期f53fc1f仅手写docker run/一次性缓存的结果不能代表新Compose重建候选已通过，详见COMPOSE与当前CI。
+
+
+上传工作台新增真实字节进度与独立校验阶段；HTTP上传成功不等于图片ready。暂时校验失败可用原意图“重新校验”，不重传、不触发模型。切换产品或退出会中止旧浏览器流程；服务器已经归档的图片仍归原产品，再选回原产品可查看，未完成临时上传按UPLOAD_CLEANUP的单独运维流程处理。该变更需当次生产浏览器CI验证。

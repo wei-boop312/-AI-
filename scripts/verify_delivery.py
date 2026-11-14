@@ -329,7 +329,7 @@ def verify_run(evidence):
             re.search(r"^OK\s*$", text, re.M) is not None and "skipped=" not in text,
             "unittest failure or skipped coverage",
         )
-    for name, count in (("browser-production", 4), ("browser-controlled-faults", 7)):
+    for name, count in (("browser-production", 4), ("browser-controlled-faults", 9)):
         text = (evidence / (name + ".log")).read_text(encoding="utf-8-sig")
         require(
             re.search(r"\b" + str(count) + r" passed\b", text) is not None,
@@ -341,6 +341,45 @@ def verify_run(evidence):
             item.get("passed") is True and item.get("base_commit") == commit,
             "browser evidence stale or failed",
         )
+    uploads = load(evidence / "frontend-uploads.json")
+    require(
+        uploads.get("result") == "PASS"
+        and uploads.get("commit") == commit
+        and uploads.get("paid_calls") == 0
+        and uploads.get("expected_cases") == 2
+        and uploads.get("test_sha256") == sha(ROOT / "apps/web/e2e-controlled/uploads.spec.ts"),
+        "upload browser evidence missing or stale",
+    )
+    upload_cases = {item["case"]: item for item in uploads.get("cases", [])}
+    require(
+        set(upload_cases)
+        == {"upload_progress_and_same_intent_retry", "upload_scope_change_aborts_stale_work"},
+        "upload browser cases incomplete",
+    )
+    retry_upload = upload_cases["upload_progress_and_same_intent_retry"]
+    require(
+        retry_upload.get("transferring_visible") is True
+        and retry_upload.get("validating_visible") is True
+        and (retry_upload.get("intents"), retry_upload.get("puts"), retry_upload.get("completions"))
+        == (1, 1, 2),
+        "upload retry duplicated transfer or missed lifecycle",
+    )
+    scoped_upload = upload_cases["upload_scope_change_aborts_stale_work"]
+    require(
+        scoped_upload.get("late_completed_asset_remains_in_original_product") is True
+        and scoped_upload.get("stale_intent_not_put") is True
+        and (
+            scoped_upload.get("puts"),
+            scoped_upload.get("intents"),
+            scoped_upload.get("completions"),
+        )
+        == (1, 1, 1)
+        and all(
+            item.get("model_tasks") == 0 and item.get("credits_unchanged") is True
+            for item in upload_cases.values()
+        ),
+        "upload scope isolation or financial proof missing",
+    )
     audit = load(evidence / "dependency-audit.json")
     require(
         audit["result"] == "PASS"
