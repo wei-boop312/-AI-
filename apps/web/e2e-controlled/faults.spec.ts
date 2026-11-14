@@ -52,7 +52,7 @@ test('已创建意图的取消竞争返回409，未知保持冻结并接收运�
  await page.route(exact,async route=>{await barrier;await route.continue()});
  try{
   expect(worker(task.id,'uncertain').result).toBe('stopped');
-  const refused=page.waitForResponse(r=>r.url().endsWith('/'+task.id+'/cancel')&&r.status()===409);await page.getByRole('button',{name:'取消排队任务',exact:true}).click();await refused;await expect(page.getByText('任务已开始，暂不支持取消',{exact:true})).toBeVisible();
+  const refused=page.waitForResponse(r=>r.url().endsWith('/'+task.id+'/cancel')&&r.status()===409);await page.getByRole('button',{name:'取消排队任务',exact:true}).click();const rejection=await(await refused).json();expect(rejection.error.request_id).toMatch(/^[0-9a-f]{8}-[0-9a-f-]{27}$/);await expect(page.getByText('任务已开始，暂不支持取消（问题编号：'+rejection.error.request_id+'）',{exact:true})).toBeVisible();
  }finally{release();await page.unrouteAll({behavior:'wait'})}
  await expect(page.getByText('结果或费用尚未确认，积分保持冻结。请等待管理员对账，勿重复创建同一生成请求。',{exact:true})).toBeVisible();
  const b=await balance(page);expect([b.available,b.reserved,b.spent_total]).toEqual([184,16,0]);expect(worker(task.id,'success').result).toBe('not_claimed');
