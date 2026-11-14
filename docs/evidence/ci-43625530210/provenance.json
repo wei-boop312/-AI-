@@ -1,0 +1,34 @@
+{
+  "run_id": 43625530210,
+  "commit": "2059fda42e6dbe7562d2d06fd52d73ce34473445",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43625530210",
+  "artifact_id": 14125139381,
+  "archive_sha256": "57a33927a93e9fe311247cd6029f0eb5bc7727b8821daa441b246301efb4ca77",
+  "files": {
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "246d5be33b57d97ce708b0ca28acd0110c8682011e9e498281f330307413dd92"
+    }
+  },
+  "scope": "Terminal Qwen archive candidate before SQLAlchemy colon regex correction",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "feb25b8bac3b9360c8076d2850609dc27205698d5953f30f6e1feafa40c3c84c",
+      "tests_run": [
+        206
+      ],
+      "outcome": "failed",
+      "failure_summary": [
+        "FAILED (failures=2)"
+      ]
+    }
+  ],
+  "not_executed": [
+    "native PG/MQ/S3",
+    "browser acceptance",
+    "Compose",
+    "independent restore"
+  ]
+}

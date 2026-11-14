@@ -71,7 +71,7 @@ BEGIN
  THEN RAISE EXCEPTION 'qwen_result_scope_mismatch'; END IF;
  url:=body->'output'->'choices'->0->'message'->'content'->0->>'image';
  IF length(url)>8192 OR url ~ '[[:space:][:cntrl:]]' OR position(chr(92) IN url)>0
- OR url !~ '^https://dashscope-result-[a-z0-9-]+[.]oss-cn-(beijing|shanghai|hangzhou|shenzhen)[.]aliyuncs[.]com(:443)?/[^?#]*[.]png([?][^#]*)?$'
+ OR url !~ '^https://dashscope-result-[a-z0-9-]+[.]oss-cn-(beijing|shanghai|hangzhou|shenzhen)[.]aliyuncs[.]com([:]443)?/[^?#]*[.]png([?][^#]*)?$'
  THEN RAISE EXCEPTION 'qwen_result_url_mismatch'; END IF;
  usage:=lexical->'usage'; suffix:=CASE WHEN p_width::bigint*p_height<=2250000 THEN '1k' ELSE '2k' END;
  IF usage IS NULL OR json_typeof(usage)='null' THEN integrity:='missing';

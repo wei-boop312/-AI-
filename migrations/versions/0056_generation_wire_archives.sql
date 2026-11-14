@@ -63,7 +63,7 @@ BEGIN
   OR jsonb_typeof(body->'id') IS DISTINCT FROM 'string' OR jsonb_typeof(body->'polling_url') IS DISTINCT FROM 'string'
   OR COALESCE(endpoint,'https://api.bfl.ai/v1/flux-3-image')<>'https://api.bfl.ai/v1/flux-3-image'
   OR body->>'id' IS DISTINCT FROM p_provider_id OR body->>'polling_url' IS DISTINCT FROM d->>'polling_url'
-  OR d->>'polling_url' !~ '^https://api([.][a-z0-9-]+)?[.]bfl[.]ai(:443)?/v1/get_result[?]id=[A-Za-z0-9_-]{1,200}$'
+  OR d->>'polling_url' !~ '^https://api([.][a-z0-9-]+)?[.]bfl[.]ai([:]443)?/v1/get_result[?]id=[A-Za-z0-9_-]{1,200}$'
   OR split_part(d->>'polling_url','?id=',2) IS DISTINCT FROM p_provider_id THEN RAISE EXCEPTION 'generation_archive_scope_mismatch'; END IF;
  ELSE
   IF a.model<>'qwen-image-3.0' OR d->>'endpoint_origin' !~ '^https://ws-[a-z0-9]{1,64}[.]cn-beijing[.]maas[.]aliyuncs[.]com$'

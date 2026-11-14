@@ -1,0 +1,34 @@
+{
+  "run_id": 43624737810,
+  "commit": "5b6d42192de9e0cd68ba38bbaad6b6502a288fb9",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43624737810",
+  "artifact_id": 14125892149,
+  "archive_sha256": "5821a79d365d3190e7105d305421160d2438da6926fe45d70a7b51c972d7dd7c",
+  "files": {
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "6cd8a23bb2f5f13a38b23947e66df18b76e616d986edbd63ff3b69dfc9cee2dd"
+    }
+  },
+  "scope": "Generation submission wire archive and independent restore candidate",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "74c31c95cbd9c9285ae3ac87f08e3eb39ef24dc49a3256fe8cb8250628850714",
+      "tests_run": [
+        206
+      ],
+      "outcome": "failed",
+      "failure_summary": [
+        "FAILED (failures=1)"
+      ]
+    }
+  ],
+  "not_executed": [
+    "native PG/MQ/S3",
+    "browser acceptance",
+    "Compose",
+    "independent restore"
+  ]
+}
