@@ -2,21 +2,57 @@
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
+from uuid import UUID
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.providers.runtime import credential_status, load_runtime
+from visual_platform.services.runtime_quote import prepare_runtime_quote
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--check-credentials", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--check-credentials", action="store_true")
+    mode.add_argument("--prepare-protocol-quote", action="store_true")
+    for name in ("user", "source-quote", "operation-id"):
+        parser.add_argument("--" + name, type=UUID)
+    parser.add_argument("--reviewed-sha256")
+    parser.add_argument("--reason")
     args = parser.parse_args()
     try:
         runtime = load_runtime(args.config)
+        write_args = (
+            args.user,
+            args.source_quote,
+            args.operation_id,
+            args.reviewed_sha256,
+            args.reason,
+        )
+        if args.prepare_protocol_quote:
+            if any(value is None for value in write_args):
+                raise ValueError("explicit_runtime_quote_scope_required")
+            dsn = os.environ.get("ADMIN_DATABASE_URL")
+            if not dsn:
+                print(json.dumps({"result": "BLOCKED_ENV", "paid_calls": 0}))
+                return 3
+            result = prepare_runtime_quote(
+                dsn,
+                args.user,
+                args.source_quote,
+                runtime,
+                args.reviewed_sha256,
+                args.operation_id,
+                args.reason,
+            )
+            print(json.dumps({"result": "OFFLINE_RUNTIME_QUOTE_PREPARED", **result}))
+            return 0
+        if any(value is not None for value in write_args):
+            raise ValueError("unexpected_runtime_quote_scope")
         keys = credential_status(runtime) if args.check_credentials else None
         ready = keys is None or all(keys.values())
         print(
