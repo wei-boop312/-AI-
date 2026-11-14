@@ -16,6 +16,73 @@ from visual_platform.domain.provider_pricing import (
 
 
 class SupplierPricingTests(unittest.TestCase):
+    def qwen_price(self, **changes):
+        return self.price(
+            schema_version=2,
+            provider="aliyun_bailian",
+            model="qwen-image-3.0",
+            endpoint_origin="https://ws-synthetic.cn-beijing.maas.aliyuncs.com",
+            currency="CNY",
+            rates=[
+                {"measure": "qima_input_1k", "amount": "0.12345678", "per": 1},
+                {"measure": "qima_output_1k", "amount": "0.98765432", "per": 1},
+                {"measure": "qima_input_2k", "amount": "0.25", "per": 1},
+                {"measure": "qima_output_2k", "amount": "0.75", "per": 1},
+            ],
+            **changes,
+        )
+
+    def test_reviewed_qwen_rate_card_uses_disjoint_image_counts_and_exact_cny(self):
+        price = self.qwen_price()
+        quantities = {
+            "qima_input_1k": 1,
+            "qima_input_2k": 0,
+            "qima_output_1k": 1,
+            "qima_output_2k": 0,
+        }
+        result = self.estimate(quantities, price=price)
+        self.assertEqual((result["amount"], result["currency"]), ("1.11111110", "CNY"))
+        self.assertFalse(result["actual_spending_verified"])
+        self.assertEqual(result["evidence_kind"], "offline_fixture")
+        rates = [rate.model_dump() for rate in price.rates]
+        for rate in rates:
+            rate["per"] = 3
+        divided = SupplierPriceVersion.model_validate({**price.model_dump(), "rates": rates})
+        self.assertEqual(self.estimate(quantities, price=divided)["amount"], "0.37037037")
+
+    def test_qwen_prices_require_complete_tiers_reviewed_model_origin_currency_and_schema(self):
+        valid = self.qwen_price().model_dump()
+        for change in (
+            {"schema_version": 1},
+            {"currency": "USD"},
+            {"model": "qwen-image-3.0-pro"},
+            {"endpoint_origin": "https://ws-synthetic.ap-southeast-1.maas.aliyuncs.com"},
+            {"rates": valid["rates"][:-1]},
+        ):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                SupplierPriceVersion.model_validate({**valid, **change})
+        with self.assertRaises(ValueError):
+            self.price(rates=valid["rates"])
+
+    def test_qwen_missing_boolean_float_cross_tier_or_extra_usage_stays_unknown(self):
+        valid = {"qima_input_1k": 1, "qima_input_2k": 0, "qima_output_1k": 1, "qima_output_2k": 0}
+        cases = [
+            {},
+            {**valid, "qima_input_1k": True},
+            {**valid, "qima_input_1k": 1.0},
+            {**valid, "qima_output_1k": 0, "qima_output_2k": 1},
+            {**valid, "qima_input_2k": 1},
+            {**valid, "qima_input_1k": 4},
+            {**valid, "input_tokens": 1},
+        ]
+        for quantities in cases:
+            with self.subTest(quantities=quantities):
+                result = self.estimate(quantities, price=self.qwen_price())
+                self.assertEqual(
+                    (result["cost_status"], result["amount"], result["currency"]),
+                    ("unknown", None, None),
+                )
+
     def test_bfl_wire_quantities_round_up_without_losing_sub_quantum_remainders(self):
         price = self.price(
             provider="bfl",

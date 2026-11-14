@@ -10,6 +10,8 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from visual_platform.providers.qwen_image import workspace_origin
+
 Measure = Literal[
     "bfl_credit",
     "input_tokens",
@@ -17,6 +19,10 @@ Measure = Literal[
     "cached_input_tokens",
     "cache_write_tokens",
     "thinking_tokens",
+    "qima_input_1k",
+    "qima_input_2k",
+    "qima_output_1k",
+    "qima_output_2k",
 ]
 Money = Annotated[str, Field(pattern=r"^(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?$")]
 IDENTITIES = {
@@ -37,8 +43,8 @@ class UnitRate(BaseModel):
 
 class SupplierPriceVersion(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    schema_version: Literal[1] = 1
-    provider: Literal["bfl", "gemini"]
+    schema_version: Literal[1, 2] = 1
+    provider: Literal["bfl", "gemini", "aliyun_bailian"]
     model: str
     endpoint_origin: str
     merchant_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
@@ -75,9 +81,18 @@ class SupplierPriceVersion(BaseModel):
 
     @model_validator(mode="after")
     def scoped(self):
-        model, origins = IDENTITIES[self.provider]
-        if self.model != model or self.endpoint_origin not in origins:
-            raise ValueError("unreviewed supplier identity")
+        if self.provider == "aliyun_bailian":
+            workspace_origin(self.endpoint_origin)
+            if self.schema_version != 2 or self.model != "qwen-image-3.0" or self.currency != "CNY":
+                raise ValueError("unreviewed supplier identity")
+        else:
+            model, origins = IDENTITIES[self.provider]
+            if (
+                self.schema_version != 1
+                or self.model != model
+                or self.endpoint_origin not in origins
+            ):
+                raise ValueError("unreviewed supplier identity")
         for instant in (self.valid_from, self.valid_until):
             if instant.tzinfo is None or instant.utcoffset() != timedelta(0):
                 raise ValueError("explicit UTC required")
@@ -86,8 +101,24 @@ class SupplierPriceVersion(BaseModel):
         measures = [rate.measure for rate in self.rates]
         if len(set(measures)) != len(measures):
             raise ValueError("duplicate price meter")
-        if (self.provider == "bfl" and measures != ["bfl_credit"]) or (
-            self.provider == "gemini" and "bfl_credit" in measures
+        if (
+            (self.provider == "bfl" and measures != ["bfl_credit"])
+            or (
+                self.provider == "gemini"
+                and not set(measures)
+                <= {
+                    "input_tokens",
+                    "output_tokens",
+                    "cached_input_tokens",
+                    "cache_write_tokens",
+                    "thinking_tokens",
+                }
+            )
+            or (
+                self.provider == "aliyun_bailian"
+                and set(measures)
+                != {"qima_input_1k", "qima_input_2k", "qima_output_1k", "qima_output_2k"}
+            )
         ):
             raise ValueError("price meter does not match provider")
         return self
@@ -141,6 +172,20 @@ def estimate_supplier_cost(
         return {**result, "reason": "price_not_effective"}
     if type(quantities) is not dict or set(quantities) != {rate.measure for rate in price.rates}:
         return {**result, "reason": "incomplete_or_unpriced_usage"}
+    if price.provider == "aliyun_bailian":
+        if any(type(value) is not int or value < 0 for value in quantities.values()):
+            return {**result, "reason": "invalid_usage"}
+        incoming = quantities["qima_input_1k"] + quantities["qima_input_2k"]
+        outgoing = quantities["qima_output_1k"] + quantities["qima_output_2k"]
+        if (
+            not 1 <= incoming <= 3
+            or outgoing != 1
+            or any(
+                (quantities["qima_input_" + tier] > 0) != (quantities["qima_output_" + tier] == 1)
+                for tier in ("1k", "2k")
+            )
+        ):
+            return {**result, "reason": "invalid_usage"}
     exact = Fraction(0)
     for rate in price.rates:
         quantity = quantities[rate.measure]
