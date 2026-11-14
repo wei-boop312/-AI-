@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, R
 
 from visual_platform.api.auth import current_user
 from visual_platform.api.products import cursor_decode, cursor_encode
+from visual_platform.core.event_replay import requires_event_reset
 from visual_platform.db.transactions import tenant_transaction
 from visual_platform.domain.schemas import QuoteRequest, TaskRequest, canonical_hash
 from visual_platform.services.quotes import db_conflict, hash_data
@@ -281,6 +282,7 @@ async def events(
     async def stream():
         nonlocal position
         heartbeat = 0
+        acknowledged_prune = 0
         while not await request.is_disconnected():
             try:
                 await current_user(request)
@@ -291,17 +293,16 @@ async def events(
                     "SELECT min(id) AS first,max(id) AS last,(SELECT pruned_through FROM app.task_event_retention_cursors WHERE task_id=$1) AS pruned_through FROM app.task_events WHERE task_id=$1",
                     task_id,
                 )
-                reset = bool(
-                    position
-                    and (
-                        not bounds["first"]
-                        or position <= (bounds["pruned_through"] or 0)
-                        or position < bounds["first"]
-                        or position > bounds["last"]
-                    )
+                reset = requires_event_reset(
+                    position,
+                    bounds["first"],
+                    bounds["last"],
+                    bounds["pruned_through"] or 0,
+                    acknowledged_prune,
                 )
                 if reset:
                     position = 0
+                acknowledged_prune = max(acknowledged_prune, bounds["pruned_through"] or 0)
                 rows = await c.fetch(
                     "SELECT id,type,payload FROM app.task_events WHERE task_id=$1 AND id>$2 ORDER BY id LIMIT 100",
                     task_id,

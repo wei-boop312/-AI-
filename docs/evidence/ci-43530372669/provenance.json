@@ -1,0 +1,23 @@
+{
+  "run_id": 43530372669,
+  "commit": "45ff24cbe62cd2c88c5919f3b825a05e1974a1e9",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43530372669",
+  "artifact_id": 14087965840,
+  "archive_sha256": "8e50c344fae1eda48f7b986c20c39ad75c93d9cee13265f854ccb2947bf55440",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "4f05bdc9449b79cb220609f92de9b22e37dfa992e70ab69d3b7567478ae156e2"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "5a994676e7d30a48eb5926a21dcfac206c2b7e161abdc2971ea14dcb9795e758"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "70e4f0cc898b211fbdda3902883a663599391e96a84d59428918fee895832cb0"
+    }
+  },
+  "scope": "0043 all report outcomes bound to frozen rule identity; preceding cleanup audit defect still present"
+}

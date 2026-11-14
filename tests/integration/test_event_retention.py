@@ -208,3 +208,79 @@ class EventRetentionTests(ProviderBudgetFixture):
                     sql.SQL("DROP TRIGGER {} ON ops.audit_events").format(sql.Identifier(hook))
                 )
                 c.execute(sql.SQL("DROP FUNCTION ops.{}()").format(sql.Identifier(hook)))
+
+    def test_active_stream_acknowledges_sparse_high_watermark_once_per_connection(self):
+        import asyncio
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock, patch
+        from uuid import UUID
+
+        from visual_platform.api.tasks import events
+        from visual_platform.db.pool import open_pool
+
+        task = PipelineFixture.submit(self)
+        with psycopg.connect(self.owner) as c:
+            for age in ("0 days", "31 days"):
+                c.execute(
+                    'INSERT INTO app.task_events(user_id,task_id,type,payload,created_at) VALUES(%s,%s,\'task.updated\',\'{"status":"queued","revision":1}\',clock_timestamp()-%s::interval)',
+                    (self.user, task, age),
+                )
+            ids = [
+                row[0]
+                for row in c.execute(
+                    "SELECT id FROM app.task_events WHERE task_id=%s ORDER BY id", (task,)
+                ).fetchall()
+            ]
+        event_retention(
+            self.operator_dsn,
+            self.user,
+            operation=uuid4(),
+            reason="high sparse watermark active stream",
+        )
+
+        async def collect(cursor):
+            pool = await open_pool(self.settings.api_database_url, "app_api")
+            iterations = 0
+
+            async def disconnected():
+                nonlocal iterations
+                iterations += 1
+                return iterations > 2
+
+            request = SimpleNamespace(
+                app=SimpleNamespace(state=SimpleNamespace(api_pool=pool)),
+                state=SimpleNamespace(),
+                is_disconnected=disconnected,
+            )
+            try:
+                with patch(
+                    "visual_platform.api.tasks.current_user",
+                    new=AsyncMock(return_value={"id": self.user}),
+                ):
+                    response = await events(
+                        UUID(task),
+                        request,
+                        last_event_id=cursor,
+                        cursor=None,
+                        user={"id": self.user},
+                    )
+                    return "".join([chunk async for chunk in response.body_iterator])
+            finally:
+                await pool.close()
+
+        try:
+            # Real PG and generator; authentication heartbeat/disconnect are controlled,
+            # while separate endpoint tests cover actual HTTP authentication.
+            output = asyncio.run(collect(str(ids[-1])))
+            self.assertEqual(output.count("event: stream.reset"), 1)
+            self.assertEqual(output.count("event: task.updated"), len(ids) - 1)
+            initial = asyncio.run(collect("0"))
+            self.assertEqual(initial.count("event: stream.reset"), 0)
+            self.assertEqual(initial.count("event: task.updated"), len(ids) - 1)
+        finally:
+            self.assertEqual(
+                self.client.post(
+                    f"/api/v1/tasks/{task}/cancel", headers=self.write_headers()
+                ).status_code,
+                200,
+            )
