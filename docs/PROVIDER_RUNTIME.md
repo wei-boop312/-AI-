@@ -20,6 +20,8 @@ credential_fingerprint由前缀ASCII字节visual-provider-credential-v1、一个
 
 数据库在新报价和调用意图插入时独立核对登记的完整模型/端点/商户绑定，未登记的运行SHA和与登记正文不一致的字段拒绝；未使用运行配置的历史Fake/mock任务保持原兼容性。登记版本可通过受限provider_runtime_context函数读取并重建对象，不依赖创建时的本地JSON文件。密钥只保留领域隔离摘要，商户归属和兼容性仍未验证；备份恢复不会因此恢复费用授权。
 
+独立冷恢复候选加入非空运行登记及原协议报价。恢复后仅从PG正文重建配置并重放原操作，必须保留原ID、配置/报价SHA及报价到期时间，不追加报价、不续期、不改变积分。0050用受限计数函数核对原登记/报价各一份审计及唯一报价，不扩大Ops对审计或业务表的原始读取权限。该标记须在真实独立PG/S3恢复中通过；离线语法分析不能替代恢复证明。
+
 0048候选提供Ops入口，使用普通API刚创建且未消费的Fake报价作为业务来源：
 
 `python scripts/provider_runtime.py --config work/private-runtime/runtime.json --prepare-protocol-quote --user <uuid> --source-quote <uuid> --reviewed-sha256 <运行配置SHA> --operation-id <uuid> --reason <审阅原因>`

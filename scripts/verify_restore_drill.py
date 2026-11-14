@@ -38,6 +38,7 @@ from visual_platform.providers.authorization import (
 )
 from visual_platform.providers.fake import DurableFakeProvider
 from visual_platform.providers.pipeline import BASELINE_ENDPOINTS
+from visual_platform.providers.runtime import ProviderRuntime, credential_fingerprint
 from visual_platform.services.backup import require
 from visual_platform.services.config_backup import validate_configuration
 from visual_platform.services.detection_delivery import (
@@ -59,6 +60,11 @@ from visual_platform.services.provider_pricing import (
 )
 from visual_platform.services.quotes import hash_data
 from visual_platform.services.rule_operations import publish_rule, recheck_report
+from visual_platform.services.runtime_quote import (
+    prepare_runtime_quote,
+    register_runtime_configuration,
+    registered_runtime_context,
+)
 from visual_platform.storage.s3 import S3Storage, StorageError
 from visual_platform.worker.runner import Worker
 
@@ -226,6 +232,24 @@ if args.command == "prepare":
         (uid, state["email"], hash_password(state["password"])),
     )
     admin("SELECT app.grant_credits(%s,%s,200,'offline restore fixture credits')", (uid, uuid4()))
+    runtime_data = json.loads((ROOT / "ops/provider-runtime.example.json").read_text())
+    runtime_data["version"] = "restore-" + uuid4().hex
+    for name in ("generate", "detect"):
+        runtime_data[name]["credential_fingerprint"] = credential_fingerprint(
+            "synthetic-restore-" + name
+        )
+        runtime_data[name]["billing_group"] = "synthetic-restore-runtime"
+    runtime = ProviderRuntime.model_validate(runtime_data, strict=True)
+    state["runtime_sha256"] = runtime.digest()
+    state["runtime_registration_operation"] = str(uuid4())
+    state["runtime_registration_reason"] = "synthetic metadata restoration, not live activation"
+    state["runtime_id"] = register_runtime_configuration(
+        profile["ADMIN_DATABASE_URL"],
+        runtime,
+        runtime.digest(),
+        UUID(state["runtime_registration_operation"]),
+        state["runtime_registration_reason"],
+    )
     storage = S3Storage(settings)
     evidence = (
         b"Offline synthetic rule archive for backup restoration; not current platform policy."
@@ -621,6 +645,21 @@ if args.command == "prepare":
         headers = login(client, state)
         quotation = client.post("/api/v1/quotes", json=body, headers=headers)
         require(quotation.status_code == 201, "unused budget quote source failed")
+    state["runtime_source_quote"] = quotation.json()["quote_id"]
+    state["runtime_quote_operation"] = str(uuid4())
+    state["runtime_quote_reason"] = "synthetic runtime quote restore replay"
+    state["runtime_quote_receipt"] = prepare_runtime_quote(
+        profile["ADMIN_DATABASE_URL"],
+        uid,
+        UUID(state["runtime_source_quote"]),
+        runtime,
+        runtime.digest(),
+        UUID(state["runtime_quote_operation"]),
+        state["runtime_quote_reason"],
+    )
+    state["runtime_quote_expires_at"] = provider_quote_review(
+        profile["ADMIN_DATABASE_URL"], uid, UUID(state["runtime_quote_receipt"]["quote_id"])
+    )["expires_at"]
     with psycopg.connect(profile["API_DATABASE_URL"]) as c:
         c.execute("SELECT set_config('app.user_id',%s,true)", (str(uid),))
         snapshot = required_row(
@@ -810,6 +849,70 @@ elif args.command == "verify":
         )
         restored_price = supplier_price_context(
             profile["ADMIN_DATABASE_URL"], UUID(state["supplier_price_id"])
+        )
+        runtime_context = registered_runtime_context(
+            profile["ADMIN_DATABASE_URL"], state["runtime_sha256"]
+        )
+        restored_runtime = ProviderRuntime.model_validate(runtime_context["document"], strict=True)
+        require(
+            runtime_context["id"] == state["runtime_id"]
+            and restored_runtime.digest() == state["runtime_sha256"],
+            "runtime configuration changed on restore",
+        )
+        require(
+            register_runtime_configuration(
+                profile["ADMIN_DATABASE_URL"],
+                restored_runtime,
+                restored_runtime.digest(),
+                UUID(state["runtime_registration_operation"]),
+                state["runtime_registration_reason"],
+            )
+            == state["runtime_id"],
+            "runtime review replay changed version",
+        )
+        require(
+            prepare_runtime_quote(
+                profile["ADMIN_DATABASE_URL"],
+                UUID(state["user_id"]),
+                UUID(state["runtime_source_quote"]),
+                restored_runtime,
+                restored_runtime.digest(),
+                UUID(state["runtime_quote_operation"]),
+                state["runtime_quote_reason"],
+            )
+            == state["runtime_quote_receipt"],
+            "runtime quote replay changed receipt",
+        )
+        require(
+            provider_quote_review(
+                profile["ADMIN_DATABASE_URL"],
+                UUID(state["user_id"]),
+                UUID(state["runtime_quote_receipt"]["quote_id"]),
+            )["expires_at"]
+            == state["runtime_quote_expires_at"],
+            "restored runtime quote validity extended",
+        )
+        runtime_status = admin(
+            "SELECT ops.runtime_operation_status(%s,%s,%s)",
+            (
+                state["runtime_sha256"],
+                state["runtime_registration_operation"],
+                state["runtime_quote_operation"],
+            ),
+        )
+        require(
+            runtime_status
+            == {
+                "runtime_registered": True,
+                "registration_audit_count": 1,
+                "preparation_audit_count": 1,
+                "prepared_quote_count": 1,
+            },
+            "runtime restore duplicated or lost metadata",
+        )
+        require(
+            client.get("/api/v1/credits/balance").json() == state["balance"],
+            "runtime restore replay changed money",
         )
         require(
             restored_price["document_sha256"] == state["supplier_price_sha256"],
@@ -1090,6 +1193,7 @@ elif args.command == "verify":
         "detection_wire_and_sdk_response_preserved": True,
         "bill_fixture_evidence_preserved_not_settled": True,
         "recheck_receipt_replayed_after_independent_restore": True,
+        "runtime_configuration_and_quote_preserved_without_local_files": True,
         "five_fixture_tasks_quarantined": True,
         "cost_estimate_history_and_review_block_preserved": True,
         "detection_delivery_requires_new_review_after_restore": True,
