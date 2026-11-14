@@ -137,6 +137,7 @@ def main(task):
             "completed_report_review_and_download_hash_preserved",
             "pixel_protection_preserved",
             "supplier_price_archive_preserved",
+            "dual_bailian_metadata_and_price_evidence_preserved_without_execution",
             "five_fixture_tasks_quarantined",
             "cost_estimate_history_and_review_block_preserved",
             "detection_delivery_requires_new_review_after_restore",

@@ -20,6 +20,7 @@ from psycopg.types.json import Jsonb
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+from restore_dual_bailian_fixture import prepare_dual_bailian_restore, verify_dual_bailian_restore
 from restore_protocol_fixture import run_cost_review_fixture
 from restore_qwen_fixture import prepare_qwen_restore, verify_qwen_restore
 
@@ -271,6 +272,7 @@ if args.command == "prepare":
         UUID(state["runtime_revocation_operation"]),
         state["runtime_revocation_reason"],
     )
+    state["dual_bailian_restore"] = prepare_dual_bailian_restore(profile, settings)
     storage = S3Storage(settings)
     evidence = (
         b"Offline synthetic rule archive for backup restoration; not current platform policy."
@@ -1297,6 +1299,7 @@ elif args.command == "verify":
             "post-recovery wallet mismatch",
         )
     verify_qwen_restore(profile, settings, state["qwen_restore"])
+    verify_dual_bailian_restore(profile, settings, state["dual_bailian_restore"])
     result["verification"] = {
         "api_ready": True,
         "old_access_rejected": True,
@@ -1304,6 +1307,7 @@ elif args.command == "verify":
         "completed_report_review_and_download_hash_preserved": True,
         "pixel_protection_preserved": True,
         "supplier_price_archive_preserved": True,
+        "dual_bailian_metadata_and_price_evidence_preserved_without_execution": True,
         "provider_budget_revoked_before_new_intent": True,
         "unit_limits_preserved_without_cross_unit_total": True,
         "detection_archive_preserved_without_local_files": True,
