@@ -6,6 +6,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from uuid import UUID
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,7 +19,12 @@ from visual_platform.providers.authorization import (
 )
 from visual_platform.providers.bailian_connection import load_connection
 from visual_platform.providers.runtime import credential_status, load_runtime
-from visual_platform.services.provider_preflight import load_bound_review, review_bound_scope
+from visual_platform.services.provider_preflight import (
+    load_bound_review,
+    review_bound_scope,
+    verify_price_evidence,
+)
+from visual_platform.storage.s3 import S3Storage
 
 
 async def main():
@@ -31,6 +37,7 @@ async def main():
     parser.add_argument("--quote", type=UUID)
     parser.add_argument("--check-credentials", action="store_true")
     parser.add_argument("--offline-fixtures", action="store_true")
+    parser.add_argument("--check-price-evidence", action="store_true")
     args = parser.parse_args()
     bound_options = (
         args.runtime,
@@ -38,6 +45,7 @@ async def main():
         args.quote,
         args.check_credentials,
         args.offline_fixtures,
+        args.check_price_evidence,
     )
     if (
         args.bound_review
@@ -81,6 +89,30 @@ async def main():
                 allow_offline_fixture=args.offline_fixtures,
             )
             report["sample"] = sample
+            report["price_evidence_check_performed"] = False
+            if args.check_price_evidence and report["scope_checks_passed"]:
+                storage = S3Storage(
+                    SimpleNamespace(
+                        s3_endpoint=os.environ["S3_ENDPOINT"],
+                        s3_bucket=os.environ["S3_BUCKET"],
+                        s3_access_key=os.environ["S3_ACCESS_KEY"],
+                        s3_secret_key=os.environ["S3_SECRET_KEY"],
+                        s3_region=os.environ.get("S3_REGION", "us-east-1"),
+                    )
+                )
+                try:
+                    evidence = verify_price_evidence(storage, bundle)
+                finally:
+                    storage.close()
+                report["price_evidence_check_performed"] = True
+                report["checks"]["price_evidence_readback"] = all(evidence.values())
+                report["price_evidence_verified"] = evidence
+                if not all(evidence.values()):
+                    report["failures"].append("price_evidence_readback")
+                    report["scope_checks_passed"] = False
+                    report["result"] = "BOUND_SCOPE_REJECTED"
+                else:
+                    report["not_verified"].remove("current S3 price evidence availability")
             print(json.dumps(report))
             return 0 if report["scope_checks_passed"] else 1
     except Exception as error:

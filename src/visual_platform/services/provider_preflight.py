@@ -2,11 +2,13 @@
 
 import hashlib
 import json
+import re
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from uuid import UUID
 
 import psycopg
+from botocore.exceptions import BotoCoreError, ClientError
 
 from visual_platform.db.result import required_row
 from visual_platform.domain.provider_pricing import (
@@ -22,10 +24,11 @@ from visual_platform.providers.bailian_connection import BailianConnection
 from visual_platform.providers.runtime import ProviderRuntime
 from visual_platform.services.rule_operations import assert_operator
 from visual_platform.services.runtime_quote import validate_price_bindings
+from visual_platform.storage.s3 import StorageError
 
 
 def load_bound_review(dsn, user: UUID, quote: UUID, runtime_sha: str, authorization: UUID):
-    """One read-only repeatable-read snapshot, using existing scoped Ops functions only."""
+    """One read-only snapshot using scoped Ops functions and existing price-read permissions."""
     with psycopg.connect(dsn) as connection:
         connection.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
         assert_operator(connection)
@@ -45,8 +48,49 @@ def load_bound_review(dsn, user: UUID, quote: UUID, runtime_sha: str, authorizat
                 step: value("SELECT ops.supplier_price_context(%s)", (UUID(binding["id"]),))
                 for step, binding in bindings.items()
             },
+            "price_evidence": {
+                step: required_row(
+                    connection.execute(
+                        "SELECT evidence_bucket,evidence_object_key,evidence_storage_version_id,evidence_sha256 "
+                        "FROM ops.supplier_price_versions WHERE id=%s AND document_sha256=%s",
+                        (UUID(binding["id"]), binding["document_sha256"]),
+                    )
+                )
+                for step, binding in bindings.items()
+            },
             "projection": value("SELECT ops.qwen_generation_projection(%s,%s)", (user, quote)),
         }
+
+
+def verify_price_evidence(storage, bundle):
+    """Read exact private immutable evidence versions; never return their content or location."""
+    verified = {}
+    for step in ("generate", "detect"):
+        verified[step] = False
+        reference = bundle["price_evidence"].get(step)
+        price = bundle["prices"].get(step)
+        if reference is None or price is None or len(reference) != 4:
+            continue
+        bucket, key, version, digest = reference
+        if (
+            bucket != storage.bucket
+            or type(key) is not str
+            or type(digest) is not str
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)
+            or not re.fullmatch(r"private/supplier-price/[0-9a-f-]{36}/" + digest, key)
+            or digest != price["document"].get("evidence_sha256")
+        ):
+            continue
+        try:
+            data, _, actual_version = storage.get(key, version=version, limit=20 * 1024 * 1024)
+            verified[step] = (
+                bool(data)
+                and hashlib.sha256(data).hexdigest() == digest
+                and (version is None or actual_version == version)
+            )
+        except (BotoCoreError, ClientError, StorageError, OSError, ValueError):
+            continue
+    return verified
 
 
 def review_bound_scope(

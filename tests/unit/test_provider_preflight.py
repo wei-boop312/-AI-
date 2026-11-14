@@ -14,10 +14,57 @@ from visual_platform.providers.authorization import (
 )
 from visual_platform.providers.bailian_connection import BailianConnection
 from visual_platform.providers.runtime import ProviderRuntime
-from visual_platform.services.provider_preflight import review_bound_scope
+from visual_platform.services.provider_preflight import review_bound_scope, verify_price_evidence
 
 
 class BoundPreflightTests(unittest.TestCase):
+    def test_evidence_readback_checks_hash_version_and_never_returns_bytes(self):
+        payload = b"synthetic price evidence, no real price"
+        digest = hashlib.sha256(payload).hexdigest()
+        bundle = {"price_evidence": {}, "prices": {}}
+        for step in ("generate", "detect"):
+            bundle["price_evidence"][step] = (
+                "synthetic-bucket",
+                "private/supplier-price/" + str(uuid4()) + "/" + digest,
+                "v1",
+                digest,
+            )
+            bundle["prices"][step] = {"document": {"evidence_sha256": digest}}
+
+        class Storage:
+            bucket = "synthetic-bucket"
+            returned = payload
+            version = "v1"
+            calls = 0
+
+            def get(self, key, *, version, limit):
+                self.calls += 1
+                return self.returned, "application/octet-stream", self.version
+
+        storage = Storage()
+        self.assertEqual(verify_price_evidence(storage, bundle), {"generate": True, "detect": True})
+        storage.returned = b"wrong evidence"
+        self.assertEqual(
+            verify_price_evidence(storage, bundle), {"generate": False, "detect": False}
+        )
+        storage.returned = payload
+        storage.version = "v2"
+        self.assertEqual(
+            verify_price_evidence(storage, bundle), {"generate": False, "detect": False}
+        )
+        before = storage.calls
+        for step in ("generate", "detect"):
+            bundle["price_evidence"][step] = (
+                "other-bucket",
+                "private/credentials/forbidden",
+                "v1",
+                digest,
+            )
+        self.assertEqual(
+            verify_price_evidence(storage, bundle), {"generate": False, "detect": False}
+        )
+        self.assertEqual(storage.calls, before)
+
     def setUp(self):
         self.now = datetime.now(timezone.utc)
         self.user, self.product, self.source, self.quote, self.authorization = [

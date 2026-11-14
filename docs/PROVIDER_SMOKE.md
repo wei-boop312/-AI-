@@ -27,3 +27,5 @@ python scripts/provider_smoke.py --config .local/private-scope/authorization.jso
 默认要求两份reviewed_price；合成CI演练才显式使用--offline-fixtures，报告review_mode明确不同。默认不读凭据；--check-credentials额外读取两个所选本机密钥并只报告布尔匹配，不能据此证明远端认证。
 
 BOUND_PROTOCOL_SCOPE_REVIEW只代表当次元数据快照与样本审阅通过，不是执行授权或付费开关。不会登记预算、创建任务/意图、写成本或请求供应商。事务结束后停用/到期/使用状态仍可能变化，真正调用意图必须重新通过既有PG原子检查。原价格证据的当前S3可读性、真实商户/兼容性、质量和账单仍独立待验。
+
+可选--check-price-evidence会在上述元数据检查全部通过后，读取同一数据库快照中两份已冻结费率的私有证据位置，使用S3_ENDPOINT/S3_BUCKET/S3_REGION/S3_ACCESS_KEY/S3_SECRET_KEY回读精确对象版本并检查原SHA。沿用Ops已有费率读权限；端点继续执行项目HTTPS/回环HTTP校验。读取有界20MiB，跨桶或非费率归档路径在发请求前拒绝。默认不请求S3，模型密钥读取仍由独立--check-credentials控制。输出仅有每步布尔结果，不包含正文、bucket/key或存储密钥；回读成功只证明当次对象可读，不证明资料真实、费率仍适用于远端商户或未来可用性。
