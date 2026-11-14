@@ -22,7 +22,7 @@ class ProtocolProvider:
     report_profile = "offline_protocol_mock"
     durable_detection_archive = True
 
-    def __init__(self, bfl, gemini, *, merchant_accounts=None):
+    def __init__(self, bfl, gemini, *, merchant_accounts=None, runtime_sha256=None):
         if not bfl.offline_transport or not gemini.offline_transport:
             raise ValueError(
                 "protocol pipeline requires explicit offline MockTransport on both suppliers"
@@ -46,6 +46,11 @@ class ProtocolProvider:
                     or any(ord(char) < 32 for char in account["billing_group"])
                 ):
                     raise ValueError("invalid merchant account scope")
+        if runtime_sha256 is not None and (
+            type(runtime_sha256) is not str or not re.fullmatch(r"[0-9a-f]{64}", runtime_sha256)
+        ):
+            raise ValueError("invalid_runtime_configuration_digest")
+        self.runtime_sha256 = runtime_sha256
         self.merchant_accounts = copy.deepcopy(merchant_accounts)
         self.bfl = bfl
         self.gemini = gemini
@@ -58,6 +63,14 @@ class ProtocolProvider:
         }
 
     def verify_execution_scope(self, execution):
+        expected_models = (
+            {"generate": "flux-3-image", "detect": MODEL} if self.runtime_sha256 else None
+        )
+        if (
+            execution.get("provider_runtime_sha256") != self.runtime_sha256
+            or execution.get("provider_models") != expected_models
+        ):
+            raise ValueError("locked_provider_runtime_mismatch")
         if execution.get("provider_accounts") != self.merchant_accounts:
             raise ValueError("locked_provider_account_mismatch")
         # Old mock quotes always meant the official endpoints. A new gateway is
