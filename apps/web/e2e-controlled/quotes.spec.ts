@@ -23,6 +23,7 @@ test('迟到的报价不能跨产品或配置弹出，只有当前确认的输�
   expect((await page.request.post('/api/v1/assets/upload-intents/'+intent.intent_id+'/complete',{headers})).status()).toBe(200);
  }
  await page.reload();await page.getByLabel('当前产品',{exact:true}).click();await page.locator('.ant-select-dropdown:visible').getByText('报价产品 A',{exact:true}).click();await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();
+ await page.getByLabel('细节保护',{exact:true}).click();await page.locator('.ant-select-dropdown:visible').getByText('无保护 · 不回贴原图像素',{exact:true}).click();
  const productGate=hold(),configGate=hold();let quoted=0,productFetched=false,configFetched=false,taskPosts=0;let confirmed:any;
  page.on('request',request=>{if(request.method()==='POST'&&request.url().endsWith('/api/v1/tasks'))taskPosts++});
  await page.route('**/api/v1/quotes',async route=>{
@@ -34,8 +35,8 @@ test('迟到的报价不能跨产品或配置弹出，只有当前确认的输�
  const button=page.getByRole('button',{name:'获取报价并继续'});const dialog=page.getByRole('dialog',{name:'确认本次生成'});
  await button.click();await expect.poll(()=>productFetched).toBe(true);
  await page.getByLabel('当前产品',{exact:true}).click();await page.locator('.ant-select-dropdown:visible').getByText('报价产品 B',{exact:true}).click();
- productGate.release();await expect(button).toBeEnabled();await expect(dialog).not.toBeVisible();expect(taskPosts).toBe(0);
- await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();await button.click();await expect.poll(()=>configFetched).toBe(true);
+ productGate.release();await expect(dialog).not.toBeVisible();expect(taskPosts).toBe(0);
+ await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();await page.getByLabel('细节保护',{exact:true}).click();await page.locator('.ant-select-dropdown:visible').getByText('无保护 · 不回贴原图像素',{exact:true}).click();await expect(button).toBeEnabled();await button.click();await expect.poll(()=>configFetched).toBe(true);
  await page.getByLabel('画面描述').fill('这是修改后的当前报价配置');configGate.release();await expect(button).toBeEnabled();await expect(dialog).not.toBeVisible();expect(taskPosts).toBe(0);
  await button.click();await expect(dialog).toBeVisible();await expect(dialog).toContainText('报价产品 B');
  const created=page.waitForResponse(response=>response.request().method()==='POST'&&response.url().endsWith('/api/v1/tasks')&&response.status()===201);

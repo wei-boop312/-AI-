@@ -1,0 +1,35 @@
+{
+  "run_id": 43532854079,
+  "commit": "e8a96c0e2f14a76cada260535e663687ca18a641",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43532854079",
+  "artifact_id": 14087924601,
+  "archive_sha256": "c11ecc6f53ea3ae1dd3fbd9a0128f99ab4e11c395de9fc65c5097629c1e49dd0",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "814d21de9781cf850bdf9cd8601861728b78e6b58c4f2297e95fc6e78f5ea6fd"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "ef8270e5186c41aa94d9e3860de75f3012b8dd71a540595af76aa0730bd5a69c"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "d5c8e404c7a5b489fd62cb0b4b829d433b782fa95608d197ceaf9ffe5ed001d2"
+    },
+    "browser-controlled-faults.log": {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "dd606d5c94c383c43a5c75c425d36910128488eebe827474ba771614481ed8c1"
+    },
+    "browser-production.log": {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "8c5dda72b6d8cf8ff681f77b73ebd5a6a304644c808ea9267dc52e14aee814b1"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "7b81198633b51dccb0fbef3dd9cf59e823b6eb074c7acc5a7398d3dba69af9be"
+    }
+  },
+  "scope": "Quote input fencing and original idempotent replay; previous intercepted PUT fixture remains"
+}

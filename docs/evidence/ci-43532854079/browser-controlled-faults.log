@@ -1,0 +1,57 @@
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e-controlled/faults.spec.ts:32:1 › 排队取消和重复点击只释放一次积分 (3.3s)
+  ✓   2 e2e-controlled/faults.spec.ts:41:1 › 明确供应商失败释放积分，刷新不自动重试 (4.4s)
+  ✓   3 e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 (5.6s)
+{"event":"storage_archive_observed","observation_id":"2041291c-9737-4009-bef8-0c03c14944dc","observed_at":"2026-11-14T00:30:17.160255+00:00","duration_ms":9.56,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"169074dd-73e7-4ec3-856d-89314031faff","observed_at":"2026-11-14T00:30:17.261800+00:00","duration_ms":5.055,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ea6e3b66-ea65-4df9-9136-0a4191171fa1","observed_at":"2026-11-14T00:30:17.351133+00:00","duration_ms":4.876,"outcome":"success"}
+  ✓   4 e2e-controlled/faults.spec.ts:65:1 › 晚到回执恢复查询和归档，原生成意图不重发 (6.2s)
+{"event":"storage_archive_observed","observation_id":"3be7e001-1c78-42a6-bb74-a92d552f00da","observed_at":"2026-11-14T00:30:21.922612+00:00","duration_ms":7.003,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"0f720313-c092-4e76-9a1d-58cde904a262","observed_at":"2026-11-14T00:30:22.025869+00:00","duration_ms":4.949,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"98d10cc1-f69d-4507-af05-ec6c5e68a864","observed_at":"2026-11-14T00:30:22.108937+00:00","duration_ms":4.804,"outcome":"success"}
+  ✓   5 e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (3.8s)
+{"event":"storage_archive_observed","observation_id":"7a9a8776-c11b-46b2-89f0-15c2ca144a4e","observed_at":"2026-11-14T00:30:25.455226+00:00","duration_ms":6.604,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"b028821d-7c6f-45b7-b6d7-9c4d7da0c362","observed_at":"2026-11-14T00:30:25.554854+00:00","duration_ms":5.0,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"41263ac4-2025-4593-8e28-9f3aa3d15c20","observed_at":"2026-11-14T00:30:27.875309+00:00","duration_ms":5.997,"outcome":"success"}
+  ✓   6 e2e-controlled/faults.spec.ts:97:1 › 检测结果未知经运营审批交付，保留未知状态且只结算一次 (6.2s)
+  ✘   7 e2e-controlled/quotes.spec.ts:11:1 › 迟到的报价不能跨产品或配置弹出，只有当前确认的输入能冻结一次积分 (1.5m)
+  ✓   8 e2e-controlled/sse.spec.ts:42:1 › 真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离 (23.5s)
+  ✘   9 e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 (7.1s)
+  ✓  10 e2e-controlled/uploads.spec.ts:62:1 › 切换产品取消旧上传流程，延迟的校验和意图响应不覆盖当前原图 (3.8s)
+
+
+  1) e2e-controlled/quotes.spec.ts:11:1 › 迟到的报价不能跨产品或配置弹出，只有当前确认的输入能冻结一次积分 ─────────────────────────
+
+    Test timeout of 90000ms exceeded.
+
+    Error Context: ../../work/browser-test-results/quotes-迟到的报价不能跨产品或配置弹出，只有当前确认的输入能冻结一次积分/error-context.md
+
+  2) e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 ──────────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      53 |  await page.locator('input[type=file]').first().setInputFiles(fixture);
+      54 |  await expect(page.getByRole('status',{name:'原图上传状态'})).toContainText('正在上传原图');await expect.poll(()=>puts).toBe(1);put.release();
+    > 55 |  await expect.poll(()=>completions).toBe(1);await expect(page.getByRole('status',{name:'原图上传状态'})).toContainText('上传完成，正在校验图片');
+         |                                     ^
+      56 |  completion.release();await expect(page.getByRole('button',{name:'重新校验',exact:true})).toBeVisible();
+      57 |  await page.getByRole('button',{name:'重新校验',exact:true}).click();await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();
+      58 |  expect([intents,puts,completions]).toEqual([1,1,2]);await expect(page.locator('.upload-progress')).toHaveCount(0);await unchanged(page);
+        at /home/runner/work/-AI-/-AI-/apps/web/e2e-controlled/uploads.spec.ts:55:37
+
+    Error Context: ../../work/browser-test-results/uploads-上传显示传输与校验阶段，暂时失败只重试原校验而不重传/error-context.md
+
+    Error Context: ../../work/browser-test-results/uploads-上传显示传输与校验阶段，暂时失败只重试原校验而不重传/error-context.md
+
+  2 failed
+    e2e-controlled/quotes.spec.ts:11:1 › 迟到的报价不能跨产品或配置弹出，只有当前确认的输入能冻结一次积分 ──────────────────────────
+    e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 ───────────────────────────────
+  8 passed (2.6m)
