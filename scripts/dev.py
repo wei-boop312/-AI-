@@ -21,6 +21,7 @@ migrate = sub.add_parser("migrate")
 migrate.add_argument("--compose-profile", type=Path)
 for name in ("up", "down"):
     command_parser = sub.add_parser(name)
+    command_parser.add_argument("--profile", choices=("offline",), default="offline")
     command_parser.add_argument("--profile-dir", type=Path, default=ROOT / ".local/compose")
 bootstrap = sub.add_parser("bootstrap")
 bootstrap.add_argument("--compose-profile", type=Path, default=ROOT / ".local/compose")
@@ -94,6 +95,7 @@ elif args.command in ("up", "down"):
             json.dumps(
                 {
                     "status": args.command,
+                    "profile": args.profile,
                     "profile_dir": str(runtime.folder),
                     "volumes": "retained",
                     "project": runtime.state["project"],

@@ -1,0 +1,54 @@
+
+Running 10 tests using 1 worker
+
+  ✓   1 e2e-controlled/faults.spec.ts:32:1 › 排队取消和重复点击只释放一次积分 (4.2s)
+  ✓   2 e2e-controlled/faults.spec.ts:41:1 › 明确供应商失败释放积分，刷新不自动重试 (4.9s)
+  ✘   3 e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 (9.1s)
+{"event":"storage_archive_observed","observation_id":"93acc1f5-1c10-4aae-b62d-bf555c69239d","observed_at":"2026-11-14T00:51:11.009811+00:00","duration_ms":12.776,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"c233702c-7c32-4850-bb72-7bb683834579","observed_at":"2026-11-14T00:51:11.167028+00:00","duration_ms":7.308,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"cbfd4ea9-a18b-4532-ab79-cae72b5ac1a0","observed_at":"2026-11-14T00:51:11.300033+00:00","duration_ms":7.412,"outcome":"success"}
+  ✓   4 e2e-controlled/faults.spec.ts:65:1 › 晚到回执恢复查询和归档，原生成意图不重发 (7.0s)
+{"event":"storage_archive_observed","observation_id":"6a322d78-9216-41d0-a9ca-c572695adc1f","observed_at":"2026-11-14T00:51:16.706679+00:00","duration_ms":9.709,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"8edebc23-d0d3-48c8-8bf6-a4a303059915","observed_at":"2026-11-14T00:51:16.868239+00:00","duration_ms":7.496,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"8087a23c-9a83-44a0-80d9-7fa5297a76fe","observed_at":"2026-11-14T00:51:16.993757+00:00","duration_ms":7.329,"outcome":"success"}
+  ✓   5 e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (5.0s)
+{"event":"storage_archive_observed","observation_id":"2cb61fdb-fbaa-46f0-99fa-40526d27b216","observed_at":"2026-11-14T00:51:21.853417+00:00","duration_ms":9.251,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"a0ca542b-205f-413a-be7d-2a83b19b7235","observed_at":"2026-11-14T00:51:22.075974+00:00","duration_ms":7.822,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"bbb91361-cb0a-4835-ad9c-c4bc46c11373","observed_at":"2026-11-14T00:51:26.397885+00:00","duration_ms":8.61,"outcome":"success"}
+  ✓   6 e2e-controlled/faults.spec.ts:97:1 › 检测结果未知经运营审批交付，保留未知状态且只结算一次 (10.7s)
+  ✓   7 e2e-controlled/quotes.spec.ts:11:1 › 迟到的报价不能跨产品或配置弹出，只有当前确认的输入能冻结一次积分 (5.6s)
+  ✓   8 e2e-controlled/sse.spec.ts:42:1 › 真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离 (24.0s)
+  ✓   9 e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 (3.2s)
+  ✓  10 e2e-controlled/uploads.spec.ts:62:1 › 切换产品取消旧上传流程，延迟的校验和意图响应不覆盖当前原图 (4.2s)
+
+
+  1) e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 ────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('任务已开始，暂不支持取消', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('任务已开始，暂不支持取消', { exact: true }) with timeout 5000ms
+      - waiting for getByText('任务已开始，暂不支持取消', { exact: true })
+
+
+      53 |  try{
+      54 |   expect(worker(task.id,'uncertain').result).toBe('stopped');
+    > 55 |   const refused=page.waitForResponse(r=>r.url().endsWith('/'+task.id+'/cancel')&&r.status()===409);await page.getByRole('button',{name:'取消排队任务',exact:true}).click();await refused;await expect(page.getByText('任务已开始，暂不支持取消',{exact:true})).toBeVisible();
+         |                                                                                                                                                                                                                                              ^
+      56 |  }finally{release();await page.unrouteAll({behavior:'wait'})}
+      57 |  await expect(page.getByText('结果或费用尚未确认，积分保持冻结。请等待管理员对账，勿重复创建同一生成请求。',{exact:true})).toBeVisible();
+      58 |  const b=await balance(page);expect([b.available,b.reserved,b.spent_total]).toEqual([184,16,0]);expect(worker(task.id,'success').result).toBe('not_claimed');
+        at /home/runner/work/-AI-/-AI-/apps/web/e2e-controlled/faults.spec.ts:55:238
+
+    Error Context: ../../work/browser-test-results/faults-已创建意图的取消竞争返回409，未知保持冻结并接收运营结案/error-context.md
+
+    Error Context: ../../work/browser-test-results/faults-已创建意图的取消竞争返回409，未知保持冻结并接收运营结案/error-context.md
+
+  1 failed
+    e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 ─────────────────────────────
+  9 passed (1.3m)

@@ -61,3 +61,5 @@ Rabbit固定容器hostname以便重建后仍能读取原Mnesia数据；S3工作�
 `python scripts/check.py task P0-02`创建全新work/compose-smoke-UUID profile，实际up、fresh bootstrap/全部迁移和重复upgrade、6角色/FORCE RLS/登录/产品/只读验证，然后写私有S3对象及quorum持久消息。执行保卷down/up后比较PG system identifier及用户数量、S3内容SHA、MQ消息；最后只删除已核对标签的该测试项目资源和测试卷。日常dev down没有删卷入口。
 
 成功输出compose-smoke.json及bootstrap-health-readonly.json，绑定提交和环境；失败保留脱敏诊断，私有凭据不上传。无Docker返回exit3 BLOCKED_ENV，不能称验收成功。CI已加入该真实演练，并要求P5-01消费本次结果；当前候选尚待首次Linux Compose执行，不提前标通过。
+
+主计划§13的原样命令`python scripts/dev.py up --profile offline`现已兼容；up/down的--profile只允许offline，仍可另传--profile-dir选择独立资源目录。它不启用live或真实模型，不改变基础设施启动/显式migrate/bootstrap步骤。--help解析验证不启动服务，真实Compose仍以当次Linux CI演练为证。
