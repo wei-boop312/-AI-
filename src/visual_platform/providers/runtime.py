@@ -18,12 +18,20 @@ from visual_platform.providers.gemini_usage import unique_object
 from visual_platform.providers.hubway import HubwayGeminiProvider
 from visual_platform.providers.pipeline import ProtocolProvider
 from visual_platform.providers.qwen_image import ASYNC_PATH, QwenImageProvider, workspace_origin
-from visual_platform.providers.qwen_pipeline import QwenProtocolProvider
+from visual_platform.providers.qwen_pipeline import (
+    DualBailianProtocolProvider,
+    QwenProtocolProvider,
+)
+from visual_platform.providers.qwen_vision import MODEL as VISION_MODEL
+from visual_platform.providers.qwen_vision import PATH as VISION_PATH
+from visual_platform.providers.qwen_vision import QwenVisionProvider
 
 
 class RuntimeStep(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    provider: Literal["bfl", "google_gemini", "hubway_gemini", "aliyun_bailian"]
+    provider: Literal[
+        "bfl", "google_gemini", "hubway_gemini", "aliyun_bailian", "aliyun_bailian_vision"
+    ]
     model: str
     endpoint_origin: str
     merchant_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
@@ -39,9 +47,11 @@ class RuntimeStep(BaseModel):
 
     @model_validator(mode="after")
     def identity(self):
-        if self.provider == "aliyun_bailian":
+        if self.provider in ("aliyun_bailian", "aliyun_bailian_vision"):
             workspace_origin(self.endpoint_origin)
-            if self.model != "qwen-image-3.0":
+            if self.model != (
+                "qwen-image-3.0" if self.provider == "aliyun_bailian" else VISION_MODEL
+            ):
                 raise ValueError("unreviewed_runtime_identity")
             return self
         allowed = {
@@ -61,12 +71,13 @@ class RuntimeStep(BaseModel):
             "google_gemini": "GEMINI_API_KEY",
             "hubway_gemini": "HUBWAY_API_KEY",
             "aliyun_bailian": "DASHSCOPE_API_KEY",
+            "aliyun_bailian_vision": "DASHSCOPE_API_KEY",
         }[self.provider]
 
 
 class ProviderRuntime(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    schema_version: Annotated[int, Field(ge=1, le=2)]
+    schema_version: Annotated[int, Field(ge=1, le=3)]
     version: Annotated[str, Field(min_length=1, max_length=80, pattern=r"^[A-Za-z0-9_.-]+$")]
     generate: RuntimeStep
     detect: RuntimeStep
@@ -74,11 +85,26 @@ class ProviderRuntime(BaseModel):
     @model_validator(mode="after")
     def stages(self):
         expected_generator = "bfl" if self.schema_version == 1 else "aliyun_bailian"
-        if self.generate.provider != expected_generator or self.detect.provider not in (
-            "google_gemini",
-            "hubway_gemini",
+        expected_detectors = (
+            ("aliyun_bailian_vision",)
+            if self.schema_version == 3
+            else ("google_gemini", "hubway_gemini")
+        )
+        if (
+            self.generate.provider != expected_generator
+            or self.detect.provider not in expected_detectors
         ):
             raise ValueError("unsupported_runtime_stage")
+        if self.schema_version == 3 and any(
+            getattr(self.generate, field) != getattr(self.detect, field)
+            for field in (
+                "endpoint_origin",
+                "credential_fingerprint",
+                "merchant_fingerprint",
+                "billing_group",
+            )
+        ):
+            raise ValueError("dual_bailian_requires_same_workspace_and_account")
         return self
 
     def canonical(self):
@@ -102,11 +128,13 @@ class ProviderRuntime(BaseModel):
             },
             "provider_endpoints": {
                 "generate": self.generate.endpoint_origin
-                + (ASYNC_PATH if self.schema_version == 2 else "/v1/flux-3-image"),
+                + (ASYNC_PATH if self.schema_version >= 2 else "/v1/flux-3-image"),
                 "detect": self.detect.endpoint_origin
-                + "/v1beta/models/"
-                + MODEL
-                + ":generateContent",
+                + (
+                    VISION_PATH
+                    if self.schema_version == 3
+                    else "/v1beta/models/" + MODEL + ":generateContent"
+                ),
             },
             "provider_accounts": {
                 name: {
@@ -184,21 +212,37 @@ async def offline_runtime(
             endpoint_origin=runtime.generate.endpoint_origin,
             transport=generate_transport,
         )
-        if runtime.schema_version == 2
+        if runtime.schema_version >= 2
         else BflProvider(generate_key, directory / "bfl", transport=generate_transport)
     )
-    gemini = None
+    gemini: GeminiProvider | QwenVisionProvider | None = None
     try:
-        detector = (
-            HubwayGeminiProvider if runtime.detect.provider == "hubway_gemini" else GeminiProvider
+        if runtime.schema_version == 3:
+            gemini = QwenVisionProvider(
+                detect_key,
+                directory / "qwen-vision",
+                transport=detect_transport,
+                endpoint_origin=runtime.detect.endpoint_origin,
+            )
+        else:
+            detector = (
+                HubwayGeminiProvider
+                if runtime.detect.provider == "hubway_gemini"
+                else GeminiProvider
+            )
+            gemini = detector(
+                detect_key,
+                directory / "gemini",
+                transport=detect_transport,
+                base_url=runtime.detect.endpoint_origin,
+            )
+        composition = (
+            DualBailianProtocolProvider
+            if runtime.schema_version == 3
+            else QwenProtocolProvider
+            if runtime.schema_version == 2
+            else ProtocolProvider
         )
-        gemini = detector(
-            detect_key,
-            directory / "gemini",
-            transport=detect_transport,
-            base_url=runtime.detect.endpoint_origin,
-        )
-        composition = QwenProtocolProvider if runtime.schema_version == 2 else ProtocolProvider
         yield composition(
             bfl,
             gemini,

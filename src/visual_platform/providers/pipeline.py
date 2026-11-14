@@ -23,6 +23,7 @@ BASELINE_ENDPOINTS = {
 
 class ProtocolProvider:
     generation_model = "flux-3-image"
+    detection_model = MODEL
     request_type = BflRequest
     execution_profile = "offline_protocol_mock"
     report_profile = "offline_protocol_mock"
@@ -66,12 +67,18 @@ class ProtocolProvider:
     def request_endpoints(self):
         return {
             "generate": self.bfl.endpoint,
-            "detect": self.gemini.endpoint_origin + "/v1beta/models/" + MODEL + ":generateContent",
+            "detect": (
+                self.gemini.endpoint_origin + "/v1beta/models/" + MODEL + ":generateContent"
+                if self.detection_model == MODEL
+                else self.gemini.endpoint
+            ),
         }
 
     def verify_execution_scope(self, execution):
         expected_models = (
-            {"generate": self.generation_model, "detect": MODEL} if self.runtime_sha256 else None
+            {"generate": self.generation_model, "detect": self.detection_model}
+            if self.runtime_sha256
+            else None
         )
         if (
             execution.get("provider_runtime_sha256") != self.runtime_sha256

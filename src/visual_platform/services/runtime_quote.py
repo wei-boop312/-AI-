@@ -90,6 +90,8 @@ def load_price_bindings(path: Path):
 
 
 def runtime_snapshot(source, runtime, price_versions=None):
+    if runtime.schema_version == 3:
+        raise ValueError("qwen_vision_quote_budget_path_not_enabled")
     document = copy.deepcopy(source["input_snapshot"])
     if runtime.schema_version == 2:
         output = document["generation"]["output"]

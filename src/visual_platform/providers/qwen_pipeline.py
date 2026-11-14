@@ -7,6 +7,8 @@ from visual_platform.providers.generation_archive import validate_generation_arc
 from visual_platform.providers.pipeline import ProtocolProvider
 from visual_platform.providers.qwen_image import MODEL, QwenImageProvider, QwenImageRequest
 from visual_platform.providers.qwen_result import build_qwen_result
+from visual_platform.providers.qwen_vision import MODEL as VISION_MODEL
+from visual_platform.providers.qwen_vision import QwenVisionProvider, validate_vision_archive
 
 
 class QwenProtocolProvider(ProtocolProvider):
@@ -64,3 +66,44 @@ class QwenProtocolProvider(ProtocolProvider):
             "provider_cost": None,
             "source": record["source"],
         }
+
+
+class DualBailianProtocolProvider(QwenProtocolProvider):
+    """Explicit schema-3 offline composition; PG quote/budget admission remains disabled."""
+
+    detection_model = VISION_MODEL
+
+    def __init__(self, qwen, vision, *, merchant_accounts, runtime_sha256):
+        if not isinstance(vision, QwenVisionProvider):
+            raise ValueError("explicit_qwen_vision_adapter_required")
+        super().__init__(
+            qwen, vision, merchant_accounts=merchant_accounts, runtime_sha256=runtime_sha256
+        )
+
+    def validate_facts_record(self, record):
+        return validate_vision_archive(record)
+
+    @staticmethod
+    def observation_from_facts(record):
+        return {
+            "transport": "offline_mock",
+            "source": "qwen_openai_wire",
+            "response_digest": record["response_digest"],
+            "usage": record["usage"],
+            "quantities": record["quantities"],
+            "billing_usage_integrity": record["billing_usage_integrity"],
+            "reported_model_version": record["reported_model"],
+            "cost": record["cost"],
+            "final_sha256": record["final_sha256"],
+            "archive_version": record["archive_version"],
+            "wire_response_sha256": record["wire_response_sha256"],
+            "response_structure_integrity": record["response_structure_integrity"],
+        }
+
+    def observation(self, step, attempt):
+        if step == "generate":
+            return super().observation(step, attempt)
+        record = self.gemini.fetch_facts(attempt["provider_id"])
+        if record["response_digest"] != attempt["response_digest"]:
+            raise ProviderUncertain("Qwen detector receipt does not match bound attempt")
+        return self.observation_from_facts(record)

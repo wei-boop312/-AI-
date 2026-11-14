@@ -1,6 +1,8 @@
 # 百炼可选视觉检测适配
 
-用户已允许增加百炼qwen3.8-flash检测适配，保留Hubway/Gemini路径。目前新增的是独立协议适配器，尚未接入运行登记、平台报价/预算、PG检测归档或默认Worker；不能使用旧Gemini授权、费率或用量字段调用它。真实传输仍在构造前被拒绝，只接受显式MockTransport。
+用户已允许增加百炼qwen3.8-flash检测适配，保留Hubway/Gemini路径。独立协议适配器及schema 3双百炼离线组合已实现，0064增加运行登记候选；平台报价/预算、PG检测归档和默认Worker尚未开放。不能使用旧Gemini授权、费率或用量字段调用它。真实传输仍在构造前被拒绝，只接受显式MockTransport。
+
+schema 3显式配对qwen-image-3.0与qwen3.8-flash，并要求同北京业务空间、密钥指纹、商户指纹及计费分组。schema 1/2的Hubway检测路径保留。两端事实、请求端点及用量分别绑定；旧Gemini执行范围不能替代新检测范围。登记仅保存身份元数据，准备报价明确返回`qwen_vision_quote_budget_path_not_enabled`，不会借用旧报价和预算开启支出。数据库登记与拒绝报价的真实验收等待该提交的Linux CI。
 
 官方[模型页](https://help.aliyun.com/zh/model-studio/qwen3-8-flash)和[视觉接口](https://help.aliyun.com/zh/model-studio/vision/)确认模型支持图像理解，使用北京业务空间 `/compatible-mode/v1/chat/completions`。仅提交已隔离规范化的最终PNG内联字节，绑定SHA和实际尺寸；项目限制4MP/10,000,000字节。不开流式、工具或自动续轮，显式关闭思考并限制输出8192 token。
 
