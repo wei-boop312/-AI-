@@ -133,19 +133,13 @@ class AuthApiTests(AuthApiFixture):
         self.assertEqual(self.client.get("/api/v1/auth/me").status_code, 401)
 
     def test_origin_csrf_and_extra_identity(self):
-        self.assertEqual(
-            self.client.post(
-                "/api/v1/auth/login", json=dict(email=self.email, password=self.password)
-            ).status_code,
-            403,
+        origin = self.client.post(
+            "/api/v1/auth/login", json=dict(email=self.email, password=self.password)
         )
+        self.assertEqual(origin.status_code, 403)
         self.login()
-        self.assertEqual(
-            self.client.post(
-                "/api/v1/products", json=dict(name="x", category="generic")
-            ).status_code,
-            403,
-        )
+        csrf = self.client.post("/api/v1/products", json=dict(name="x", category="generic"))
+        self.assertEqual(csrf.status_code, 403)
         r = self.client.post(
             "/api/v1/products",
             json=dict(name="x", category="generic", user_id=str(uuid4())),
@@ -153,6 +147,12 @@ class AuthApiTests(AuthApiFixture):
         )
         self.assertEqual(r.status_code, 422)
         self.assertNotIn("password", r.text)
+        for response in (origin, csrf, r):
+            self.assertEqual(
+                response.headers["x-request-id"], response.json()["error"]["request_id"]
+            )
+            self.assertEqual(response.headers["cache-control"], "no-store")
+            self.assertEqual(response.headers["x-content-type-options"], "nosniff")
 
     def test_products_pagination_revision_archive_and_isolation(self):
         self.login()

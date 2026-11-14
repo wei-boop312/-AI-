@@ -64,13 +64,19 @@ def create_app(settings: Settings | None = None):
     app = FastAPI(title="跨境电商 AI 视觉生产平台", version="0.1.0", lifespan=lifespan)
 
     def error(request, status, code):
+        request_id = getattr(request.state, "request_id", None) or str(uuid4())
         return JSONResponse(
             status_code=status,
+            headers={
+                "X-Request-ID": request_id,
+                "X-Content-Type-Options": "nosniff",
+                "Cache-Control": "no-store",
+            },
             content={
                 "error": {
                     "code": code,
                     "message": code,
-                    "request_id": getattr(request.state, "request_id", str(uuid4())),
+                    "request_id": request_id,
                     "retryable": status == 503,
                 }
             },

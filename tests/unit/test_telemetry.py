@@ -8,7 +8,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from visual_platform.services.telemetry import RequestTelemetry, archive_observed
-from visual_platform.services.telemetry_reader import summarize_telemetry
+from visual_platform.services.telemetry_reader import parse_observation, summarize_telemetry
 
 
 class RequestTelemetryTests(unittest.IsolatedAsyncioTestCase):
@@ -86,6 +86,19 @@ class TelemetryReaderTests(unittest.TestCase):
             "duration_ms": 1,
             **fields,
         }
+
+    def test_optional_server_request_id_is_validated_without_changing_legacy_schema(self):
+        old = self.observation("api_request_observed", status=503, outcome="completed")
+        identity = str(uuid4())
+        self.assertEqual(parse_observation(old), self.now)
+        self.assertEqual(parse_observation({**old, "request_id": identity}), self.now)
+        for bad in (None, True, 42, "untrusted-client-value", "https://private.invalid"):
+            with self.subTest(bad=type(bad).__name__), self.assertRaises(ValueError):
+                parse_observation({**old, "request_id": bad})
+        with self.assertRaises(ValueError):
+            parse_observation(
+                self.observation("storage_archive_observed", outcome="success", request_id=identity)
+            )
 
     def test_exact_p95_duplicates_errors_and_archive_failures(self):
         api = [

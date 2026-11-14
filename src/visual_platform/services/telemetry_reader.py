@@ -17,6 +17,13 @@ def parse_observation(value):
     expected = {"event", "observation_id", "observed_at", "duration_ms", "outcome"} | (
         {"status"} if value["event"] == API else set()
     )
+    if value["event"] == API and "request_id" in value:
+        expected.add("request_id")
+        if (
+            type(value["request_id"]) is not str
+            or str(UUID(value["request_id"])) != value["request_id"]
+        ):
+            raise ValueError("noncanonical request identity")
     if set(value) != expected:
         raise ValueError("unexpected telemetry fields")
     if str(UUID(value["observation_id"])) != value["observation_id"]:

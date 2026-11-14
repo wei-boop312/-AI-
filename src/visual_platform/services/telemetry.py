@@ -5,7 +5,7 @@ import logging
 import time
 from datetime import datetime, timezone
 from functools import wraps
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 LOGGER = logging.getLogger("visual_platform.telemetry")
 if not LOGGER.handlers:
@@ -72,11 +72,21 @@ class RequestTelemetry:
                 outcome = "interrupted"
             raise
         finally:
+            correlation = {}
+            state = scope.get("state", {})
+            identity = state.get("request_id") if isinstance(state, dict) else None
+            if type(identity) is str and len(identity) == 36:
+                try:
+                    if str(UUID(identity)) == identity:
+                        correlation["request_id"] = identity
+                except ValueError:
+                    pass
             emit_observation(
                 "api_request_observed",
                 duration_ms=round(((completed_at or time.perf_counter()) - started) * 1000, 3),
                 status=status,
                 outcome=outcome,
+                **correlation,
             )
 
 

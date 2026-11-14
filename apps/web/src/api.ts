@@ -1,4 +1,7 @@
-export class ApiError extends Error { constructor(public status:number,public code:string){super(code)} }
+export class ApiError extends Error {
+ status:number;code:string;requestId?:string;
+ constructor(status:number,code:string,requestId?:string){super(code);this.status=status;this.code=code;this.requestId=requestId&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId)?requestId:undefined}
+}
 export const csrf=()=>document.cookie.split('; ').find(x=>x.startsWith('visual_csrf='))?.split('=').slice(1).join('=')||'';
 let refreshing:Promise<boolean>|null=null;
 async function refresh(){
@@ -9,12 +12,12 @@ export async function api<T>(path:string,options:RequestInit={},retry=true):Prom
  const unsafe=options.method && !['GET','HEAD'].includes(options.method);
  const response=await fetch('/api/v1'+path,{...options,credentials:'same-origin',headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(unsafe?{'X-CSRF-Token':csrf()}:{}),...options.headers}});
  if(response.status===401 && retry && !['/auth/login','/auth/refresh','/auth/logout'].includes(path) && await refresh()) return api<T>(path,options,false);
- if(!response.ok){let code='request_failed';try{code=(await response.json()).error?.code||code}catch{};throw new ApiError(response.status,code)}
+ if(!response.ok){let code='request_failed';let requestId:string|undefined;try{const error=(await response.json()).error;if(typeof error?.code==='string'&&/^[a-z0-9_]{1,80}$/.test(error.code))code=error.code;const id=error?.request_id;if(typeof id==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))requestId=id}catch{};throw new ApiError(response.status,code,requestId)}
  return response.status===204?undefined as T:response.json();
 }
 export const post=<T>(path:string,body?:unknown,headers?:Record<string,string>)=>api<T>(path,{method:'POST',body:body===undefined?undefined:JSON.stringify(body),headers});
-export const errors:Record<string,string>={invalid_credentials:'账号或密码不正确',authentication_required:'登录已过期，请重新登录',login_rate_limited:'尝试次数较多，请稍后再试',insufficient_credits:'可用积分不足',quote_expired:'报价已过期，请重新确认',quote_input_mismatch:'配置已变化，请重新获取报价',idempotency_conflict:'提交配置冲突，请重新确认',already_started:'任务已开始，暂不支持取消',decoder_capacity:'图片校验繁忙，请稍后重试',invalid_image:'图片格式、大小或内容不符合要求',upload_expired:'上传已过期，请重新选择图片',upload_rejected:'此图片未通过校验，请重新选择图片',validation_temporarily_unavailable:'图片校验暂不可用，可重新完成上传',revision_conflict:'内容已更新，请刷新后重试',dependency_unavailable:'服务暂不可用，请稍后重试',not_found:'内容不存在或没有访问权限',source_unavailable:'原图版本不可用',pixel_exact_size_mismatch:'精确保护需要与原图尺寸一致',csrf_rejected:'登录状态已变化，请刷新页面',origin_rejected:'访问地址与服务配置不一致'};
-export function errorText(error:unknown){return error instanceof ApiError?(errors[error.code]||'操作未完成，请重试（'+error.code+'）'):error instanceof Error?error.message:'操作未完成，请重试'}
+export const errors:Record<string,string>={invalid_credentials:'账号或密码不正确',invalid_request:'填写内容不符合要求，请检查后重试',service_not_configured:'服务尚未就绪，请联系管理员',upload_busy:'图片正在校验，请稍候',appearance_unavailable:'外观资料不可用，请重新选择',product_unavailable:'产品已归档或不可用，请重新选择',quote_consumed:'此报价已使用，请在任务记录中查看结果',authentication_required:'登录已过期，请重新登录',login_rate_limited:'尝试次数较多，请稍后再试',insufficient_credits:'可用积分不足',quote_expired:'报价已过期，请重新确认',quote_input_mismatch:'配置已变化，请重新获取报价',idempotency_conflict:'提交配置冲突，请重新确认',already_started:'任务已开始，暂不支持取消',decoder_capacity:'图片校验繁忙，请稍后重试',invalid_image:'图片格式、大小或内容不符合要求',upload_expired:'上传已过期，请重新选择图片',upload_rejected:'此图片未通过校验，请重新选择图片',validation_temporarily_unavailable:'图片校验暂不可用，可重新完成上传',revision_conflict:'内容已更新，请刷新后重试',dependency_unavailable:'服务暂不可用，请稍后重试',not_found:'内容不存在或没有访问权限',source_unavailable:'原图版本不可用',pixel_exact_size_mismatch:'精确保护需要与原图尺寸一致',csrf_rejected:'登录状态已变化，请刷新页面',origin_rejected:'访问地址与服务配置不一致'};
+export function errorText(error:unknown){if(error instanceof ApiError){const message=errors[error.code]||'操作未完成，请稍后重试';return error.requestId?message+'（问题编号：'+error.requestId+'）':message}return error instanceof Error&&/[\u3400-\u9fff]/.test(error.message)?error.message:'连接暂不可用，请检查网络后重试'}
 export type User={id:string,email:string,display_name:string};
 export type Product={id:string,name:string,category:string,revision:number,archived_at:string|null};
 export type AssetVersion={version_id:string,asset_id:string,width:number,height:number,sha256:string,canonical:boolean};
