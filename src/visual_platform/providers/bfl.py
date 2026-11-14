@@ -21,6 +21,46 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from visual_platform.domain.appearance import AppearanceConfig
 from visual_platform.domain.schemas import Generation
 from visual_platform.providers.contract import ProviderFailure, ProviderUncertain, Receipt
+from visual_platform.providers.gemini_usage import unique_object
+
+MAX_BFL_BODY = 1024 * 1024
+MAX_BFL_RECEIPT = 2 * 1024 * 1024
+
+
+def strict_bfl_response(raw):
+    def invalid(value):
+        raise ValueError("nonstandard_bfl_json")
+
+    try:
+        result = json.loads(
+            raw,
+            object_pairs_hook=unique_object,
+            parse_int=Decimal,
+            parse_float=Decimal,
+            parse_constant=invalid,
+        )
+        if type(result) is not dict:
+            raise ValueError("object_required")
+        return result
+    except (ValueError, ArithmeticError, TypeError, RecursionError):
+        raise ValueError("invalid_bfl_response_json") from None
+
+
+def reported_bfl_cost(result, digest):
+    cost = result.get("cost")
+    valid = isinstance(cost, Decimal) and cost.is_finite() and 0 <= cost <= Decimal("1000000000000")
+    if valid:
+        exponent = cost.as_tuple().exponent
+        valid = isinstance(exponent, int) and -24 <= exponent <= 12
+    return {
+        "quantity": format(cost, "f") if valid else None,
+        "validation": "missing" if cost is None else "reported" if valid else "invalid",
+        "unit": "BFL_CREDIT",
+        "money_amount": None,
+        "currency": None,
+        "source": "bfl_submit_response",
+        "source_digest": digest,
+    }
 
 
 class BflRequest(BaseModel):
@@ -148,6 +188,83 @@ def encoded(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
 
 
+def validate_bfl_receipt(record):
+    if type(record) is not dict:
+        raise ValueError("invalid_bfl_receipt")
+    base = {"provider_id", "polling_url", "response_digest", "cost"}
+    version = record.get("archive_version")
+    expected = (
+        base
+        if version is None
+        else base | {"archive_version", "response_body_base64", "wire_response_sha256"}
+    )
+    if set(record) != expected or (
+        version is not None and (type(version) is not int or version != 2)
+    ):
+        raise ValueError("unsupported_bfl_receipt_version")
+    if (
+        type(record["provider_id"]) is not str
+        or not re.fullmatch(r"[A-Za-z0-9_-]{1,200}", record["provider_id"])
+        or type(record["response_digest"]) is not str
+        or not re.fullmatch(r"[0-9a-f]{64}", record["response_digest"])
+    ):
+        raise ValueError("invalid_bfl_receipt")
+    checked_url(record["polling_url"], "poll", record["provider_id"])
+    cost = record["cost"]
+    if type(cost) is not dict or set(cost) != {
+        "quantity",
+        "validation",
+        "unit",
+        "money_amount",
+        "currency",
+        "source",
+        "source_digest",
+    }:
+        raise ValueError("invalid_bfl_receipt_cost")
+    if (
+        cost["unit"] != "BFL_CREDIT"
+        or cost["money_amount"] is not None
+        or cost["currency"] is not None
+        or cost["source"] != "bfl_submit_response"
+        or cost["source_digest"] != record["response_digest"]
+        or cost["validation"] not in ("reported", "missing", "invalid")
+    ):
+        raise ValueError("invalid_bfl_receipt_cost")
+    if cost["validation"] == "reported":
+        quantity = cost["quantity"]
+        pattern = (
+            r"[0-9]{1,13}(?:\.[0-9]{1,24})?"
+            if version == 2
+            else r"[0-9]+(?:\.[0-9]+)?(?:E[+-]?[0-9]{1,4})?"
+        )
+        if type(quantity) is not str or len(quantity) > 4300 or not re.fullmatch(pattern, quantity):
+            raise ValueError("invalid_bfl_receipt_cost")
+    elif cost["quantity"] is not None:
+        raise ValueError("invalid_bfl_receipt_cost")
+    if version == 2:
+        if type(record["response_body_base64"]) is not str or len(
+            record["response_body_base64"]
+        ) > 4 * ((MAX_BFL_BODY + 2) // 3):
+            raise ValueError("invalid_bfl_receipt_wire")
+        raw = base64.b64decode(record["response_body_base64"], validate=True)
+        digest = hashlib.sha256(raw).hexdigest()
+        if (
+            not raw
+            or len(raw) > MAX_BFL_BODY
+            or digest != record["wire_response_sha256"]
+            or digest != record["response_digest"]
+        ):
+            raise ValueError("invalid_bfl_receipt_wire")
+        response = strict_bfl_response(raw)
+        if (
+            response.get("id") != record["provider_id"]
+            or response.get("polling_url") != record["polling_url"]
+            or reported_bfl_cost(response, digest) != cost
+        ):
+            raise ValueError("bfl_receipt_wire_mismatch")
+    return record
+
+
 class BflProvider:
     endpoint = "https://api.bfl.ai/v1/flux-3-image"
 
@@ -180,12 +297,13 @@ class BflProvider:
         return self.directory / (str(UUID(str(intent))) + suffix)
 
     def _write(self, path, value):
-        with path.open("xb") as f:
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(descriptor, "wb") as f:
             f.write(encoded(value))
             f.flush()
             os.fsync(f.fileno())
 
-    def _json(self, method, url, *, payload=None):
+    def _response_body(self, method, url, *, payload=None):
         # There are deliberately no retry loops, including for 429 or connection errors.
         try:
             with self.client.stream(
@@ -207,12 +325,9 @@ class BflProvider:
                 data = bytearray()
                 for chunk in response.iter_bytes(chunk_size=65536):
                     data.extend(chunk)
-                    if len(data) > 1024 * 1024:
+                    if len(data) > MAX_BFL_BODY:
                         raise ProviderUncertain("BFL response exceeds limit")
-                result = json.loads(data)
-                if not isinstance(result, dict):
-                    raise ValueError()
-                return result
+                return bytes(data)
         except (httpx.HTTPError, ValueError, TypeError):
             raise ProviderUncertain("BFL response cannot be confirmed") from None
 
@@ -221,6 +336,11 @@ class BflProvider:
             raise TypeError("validated BflRequest required")
         payload = BflRequest.model_validate(request.model_dump()).model_dump()
         intent = UUID(str(intent_id))
+        if any(
+            path.exists() or path.is_symlink()
+            for path in (self._path(intent, ".receipt.json"), self._path(intent, ".response.body"))
+        ):
+            raise ProviderUncertain("BFL response already recorded; do not resubmit")
         try:
             self._write(
                 self._path(intent, ".intent"),
@@ -230,54 +350,55 @@ class BflProvider:
             raise ProviderUncertain(
                 "BFL intent already attempted; reconcile existing receipt"
             ) from None
-        result = self._json("POST", self.endpoint, payload=payload)
+        raw = self._response_body("POST", self.endpoint, payload=payload)
         try:
+            descriptor = os.open(
+                self._path(intent, ".response.body"), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600
+            )
+            with os.fdopen(descriptor, "wb") as stream:
+                stream.write(raw)
+                stream.flush()
+                os.fsync(stream.fileno())
+            result = strict_bfl_response(raw)
             identity = result["id"]
             if not isinstance(identity, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,200}", identity):
                 raise ValueError()
             polling = checked_url(result["polling_url"], "poll", identity)
-            digest = hashlib.sha256(encoded(result)).hexdigest()
-            cost = result.get("cost")
-            invalid_cost = cost is not None and (
-                type(cost) not in (int, float) or not Decimal(str(cost)).is_finite() or cost < 0
-            )
+            digest = hashlib.sha256(raw).hexdigest()
+            cost = reported_bfl_cost(result, digest)
             # OpenAPI defines cost as credits, not fiat currency or our internal wallet units.
             record = {
+                "archive_version": 2,
+                "response_body_base64": base64.b64encode(raw).decode("ascii"),
+                "wire_response_sha256": digest,
                 "provider_id": identity,
                 "polling_url": polling,
                 "response_digest": digest,
-                "cost": {
-                    "quantity": str(Decimal(str(cost)))
-                    if cost is not None and not invalid_cost
-                    else None,
-                    "validation": "invalid"
-                    if invalid_cost
-                    else "missing"
-                    if cost is None
-                    else "reported",
-                    "unit": "BFL_CREDIT",
-                    "money_amount": None,
-                    "currency": None,
-                    "source": "bfl_submit_response",
-                    "source_digest": digest,
-                },
+                "cost": cost,
             }
+            validate_bfl_receipt(record)
             self._write(self._path(intent, ".receipt.json"), record)
-            if invalid_cost:
+            if cost["validation"] == "invalid":
                 raise ProviderUncertain(
                     "BFL cost malformed; existing receipt preserved for reconciliation"
                 )
             return Receipt(identity, digest, polling)
-        except (KeyError, ValueError, TypeError, OSError):
+        except (KeyError, ValueError, TypeError, OSError, ArithmeticError):
             raise ProviderUncertain("BFL receipt requires reconciliation") from None
 
     def receipt_record(self, intent_id):
         # Trusted private recovery metadata; never treat absence as permission to resubmit.
         try:
-            value = json.loads(self._path(intent_id, ".receipt.json").read_bytes())
-            checked_url(value["polling_url"], "poll", value["provider_id"])
-            return value
-        except (OSError, ValueError, KeyError, TypeError):
+            path = self._path(intent_id, ".receipt.json")
+            if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_BFL_RECEIPT:
+                raise ValueError("invalid_bfl_receipt_file")
+            with path.open("rb") as stream:
+                raw = stream.read(MAX_BFL_RECEIPT + 1)
+            if len(raw) > MAX_BFL_RECEIPT:
+                raise ValueError("invalid_bfl_receipt_file")
+            value = json.loads(raw, object_pairs_hook=unique_object)
+            return validate_bfl_receipt(value)
+        except (OSError, ValueError, KeyError, TypeError, ArithmeticError, RecursionError):
             raise ProviderUncertain("BFL receipt unavailable; do not resubmit") from None
 
     def poll(self, receipt):
@@ -285,7 +406,10 @@ class BflProvider:
             url = checked_url(receipt.polling_url, "poll", receipt.provider_id)
         except ValueError:
             raise ProviderUncertain("BFL polling URL rejected") from None
-        result = self._json("GET", url)
+        try:
+            result = strict_bfl_response(self._response_body("GET", url))
+        except ValueError:
+            raise ProviderUncertain("BFL polling response cannot be confirmed") from None
         status = result.get("status")
         if status in ("Error", "Failed", "Request Moderated", "Content Moderated"):
             raise ProviderFailure("BFL terminal generation failure")

@@ -119,6 +119,18 @@ class ProtocolProvider:
                     "provider_cost": None,
                     "source": "known_db_receipt_private_cost_metadata_unavailable",
                 }
+            if record.get("archive_version") != 2:
+                return {
+                    "transport": "offline_mock",
+                    "response_digest": attempt["response_digest"],
+                    "provider_cost": None,
+                    "source": "legacy_local_receipt_has_no_wire_evidence",
+                }
+            if (
+                record["provider_id"] != attempt["provider_id"]
+                or record["response_digest"] != attempt["response_digest"]
+            ):
+                raise ProviderUncertain("BFL receipt does not match the frozen attempt")
             return {
                 "transport": "offline_mock",
                 "response_digest": record["response_digest"],

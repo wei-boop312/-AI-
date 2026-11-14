@@ -16,6 +16,43 @@ from visual_platform.worker.runner import Worker
 
 
 class SupplierEstimateTests(SupplierEstimateFixture):
+    def test_wire_decimal_precision_survives_pg_observation_and_rounds_up(self):
+        import hashlib
+        import json
+
+        import httpx
+
+        original = self.bfl_route
+        submitted = []
+
+        def route(request):
+            response = original(request)
+            if request.method != "POST":
+                return response
+            value = response.json()
+            value.pop("cost", None)
+            raw = (json.dumps(value)[:-1] + ', "cost": 0.0600000000000000001 }').encode()
+            submitted.append(raw)
+            return httpx.Response(200, content=raw, headers={"content-type": "application/json"})
+
+        self.bfl_route = route
+        task, accounts = self.metered()
+        self.assertEqual(self.run_protocol(task, merchant_accounts=accounts), "succeeded")
+        self.assertEqual(self.costs(task)["estimates"][0]["amount"], "0.00300001")
+        with psycopg.connect(self.owner) as connection:
+            rows = connection.execute(
+                "SELECT c.usage FROM app.task_cost_records c "
+                "JOIN app.provider_attempts a ON a.id=c.attempt_id "
+                "WHERE c.task_id=%s AND c.cost_record_kind='response_observation' "
+                "AND a.step='generate'",
+                (task,),
+            ).fetchall()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][0]["provider_cost"]["quantity"], "0.0600000000000000001")
+        self.assertEqual(rows[0][0]["response_digest"], hashlib.sha256(submitted[0]).hexdigest())
+        self.assert_unknown_original_observations(task)
+        self.assertEqual(self.post_count("bfl"), 1)
+
     def costs(self, task):
         return supplier_task_costs(self.operator_dsn, UUID(task))
 

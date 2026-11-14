@@ -1,6 +1,7 @@
 """Offline HTTP protocol contracts. No BFL account or paid calls."""
 
 import base64
+import copy
 import hashlib
 import json
 import tempfile
@@ -8,6 +9,7 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -17,6 +19,7 @@ from pydantic import ValidationError
 
 from visual_platform.providers.bfl import BflPoll, BflProvider, BflRequest
 from visual_platform.providers.contract import ProviderFailure, ProviderUncertain, Receipt
+from visual_platform.providers.pipeline import ProtocolProvider
 
 
 class BflContracts(unittest.TestCase):
@@ -129,6 +132,117 @@ class BflContracts(unittest.TestCase):
         self.assertNotIn(
             "contract-key", "".join(p.read_text() for p in Path(self.temp.name).iterdir())
         )
+
+    def test_wire_precision_and_digest_survive_without_float_rounding_or_intent_marker(self):
+        raw = (
+            ' {\n"id":"'
+            + self.identity
+            + '","polling_url":"'
+            + self.url
+            + '","cost":0.0600000000000000001}\n'
+        ).encode()
+        provider = self.provider(lambda _: httpx.Response(200, content=raw))
+        intent = uuid4()
+        receipt = provider.submit(intent, self.request)
+        record = provider.receipt_record(intent)
+        self.assertEqual(record["cost"]["quantity"], "0.0600000000000000001")
+        self.assertEqual(record["archive_version"], 2)
+        self.assertEqual(base64.b64decode(record["response_body_base64"]), raw)
+        self.assertEqual(receipt.response_digest, hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["wire_response_sha256"], receipt.response_digest)
+        self.assertEqual(
+            (Path(self.temp.name) / (str(intent) + ".response.body")).read_bytes(), raw
+        )
+        (Path(self.temp.name) / (str(intent) + ".intent")).unlink()
+        with self.assertRaises(ProviderUncertain):
+            provider.submit(intent, self.request)
+        self.assertEqual(len(self.calls), 1)
+
+    def test_duplicate_and_nonstandard_json_preserve_raw_unknown_outcome_without_resubmit(self):
+        for cost in ('0.1,"cost":0.2', "NaN", "Infinity"):
+            raw = (
+                '{"id":"'
+                + self.identity
+                + '","polling_url":"'
+                + self.url
+                + '","cost":'
+                + cost
+                + "}"
+            ).encode()
+            provider = self.provider(lambda _: httpx.Response(200, content=raw))
+            intent = uuid4()
+            before = len(self.calls)
+            with self.subTest(cost=cost), self.assertRaises(ProviderUncertain):
+                provider.submit(intent, self.request)
+            self.assertEqual(
+                (Path(self.temp.name) / (str(intent) + ".response.body")).read_bytes(), raw
+            )
+            with self.assertRaises(ProviderUncertain):
+                provider.submit(intent, self.request)
+            self.assertEqual(len(self.calls), before + 1)
+
+    def test_unrepresentable_credit_precision_keeps_known_receipt_and_stops(self):
+        for cost in ("1e-100000", "1e100000"):
+            raw = (
+                '{"id":"'
+                + self.identity
+                + '","polling_url":"'
+                + self.url
+                + '","cost":'
+                + cost
+                + "}"
+            ).encode()
+            provider = self.provider(lambda _: httpx.Response(200, content=raw))
+            intent = uuid4()
+            with self.subTest(cost=cost), self.assertRaises(ProviderUncertain):
+                provider.submit(intent, self.request)
+            record = provider.receipt_record(intent)
+            self.assertEqual(record["provider_id"], self.identity)
+            self.assertEqual(record["cost"]["validation"], "invalid")
+            self.assertIsNone(record["cost"]["quantity"])
+
+    def test_changed_receipt_fields_cannot_disagree_with_its_original_wire_response(self):
+        provider = self.provider()
+        intent = uuid4()
+        provider.submit(intent, self.request)
+        original = provider.receipt_record(intent)
+        path = Path(self.temp.name) / (str(intent) + ".receipt.json")
+        for field in ("quantity", "wire", "provider_id"):
+            record = copy.deepcopy(original)
+            if field == "quantity":
+                record["cost"]["quantity"] = "0.01"
+            elif field == "wire":
+                record["response_body_base64"] = base64.b64encode(b"{}").decode()
+            else:
+                record["provider_id"] = "changed-id"
+                record["polling_url"] = "https://api.eu2.bfl.ai/v1/get_result?id=changed-id"
+            path.write_text(json.dumps(record))
+            with self.subTest(field=field), self.assertRaises(ProviderUncertain):
+                provider.receipt_record(intent)
+        path.write_text(json.dumps(original))
+        self.assertEqual(provider.receipt_record(intent), original)
+
+    def test_legacy_local_receipt_remains_readable_but_cannot_invent_wire_cost_evidence(self):
+        provider = self.provider()
+        intent = uuid4()
+        receipt = provider.submit(intent, self.request)
+        record = provider.receipt_record(intent)
+        for key in ("archive_version", "response_body_base64", "wire_response_sha256"):
+            record.pop(key)
+        record["cost"]["quantity"] = "1E-30"
+        (Path(self.temp.name) / (str(intent) + ".receipt.json")).write_text(json.dumps(record))
+        self.assertNotIn("wire_response_sha256", provider.receipt_record(intent))
+        observed = ProtocolProvider.observation(
+            SimpleNamespace(bfl=provider),
+            "generate",
+            {
+                "id": str(intent),
+                "provider_id": self.identity,
+                "response_digest": receipt.response_digest,
+            },
+        )
+        self.assertIsNone(observed["provider_cost"])
+        self.assertEqual(observed["source"], "legacy_local_receipt_has_no_wire_evidence")
 
     def test_recreated_adapter_cannot_submit_same_intent(self):
         first = self.provider()
