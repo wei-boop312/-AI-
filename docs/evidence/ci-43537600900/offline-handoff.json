@@ -1,0 +1,12 @@
+{
+  "result": "OFFLINE_HANDOFF_VERIFIED",
+  "commit": "3ef9eeab6fc395b3cc47c3c0c316ea852fba9dba",
+  "files": 1406,
+  "paid_calls": 0,
+  "provider_verified": false,
+  "production_deployed": false,
+  "release_authorized": false,
+  "archive_sha256": "8bf76e10224199928dfb3a32bbe4a1df0b3958bf11d4830d3098c327535ae20a",
+  "archive_size": 5183182,
+  "archive": "offline-handoff.zip"
+}

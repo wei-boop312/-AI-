@@ -28,3 +28,5 @@ python scripts/handoff.py --verify <offline-handoff.zip的路径>
 最新完整基线[8f7687a / CI43531050538](https://github.com/wei-boop312/-AI-/actions/runs/43531050538)的实际包含1362文件、4,678,394字节，侧边SHA为7fc0d641bf1250e3d456dfe126fc3d8d1c6b71550461f0917dd41607bc534a65。本机下载后独立验证OFFLINE_HANDOFF_VERIFIED，原始sidecar、日志计数和来源摘要保存ci-43531050538。它不含后续上传/报价界面及SSE循环修正。
 
 最新完整候选[c4d1105 / CI43536961836](https://github.com/wei-boop312/-AI-/actions/runs/43536961836)：181 Python单元/56契约/223原生/4普通+10受控浏览器及全部门槛PASS，实际包1404文件、5,179,941字节，SHA为07b29b7ab776831cd2ed9af712378f2c6eaa8f7c188793496c5d0362356f9b5f；下载后独立验证通过。原始sidecar和上传/报价专门PASS报告及原日志摘要保存在ci-43536961836。0046独立恢复重放和启动参数兼容是后续提交，不借用此包的已验范围。
+
+[3ef9eea / CI43537600900](https://github.com/wei-boop312/-AI-/actions/runs/43537600900)已进一步通过0046独立存储恢复后的原重检回执重放，181单元/56契约/224原生/4+10浏览器与全部门槛全绿。实际包1406文件、5,183,182字节，SHA为8bf76e10224199928dfb3a32bbe4a1df0b3958bf11d4830d3098c327535ae20a，下载后独立验证通过；原始sidecar及来源见ci-43537600900。
