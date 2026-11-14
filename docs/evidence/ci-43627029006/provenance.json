@@ -1,0 +1,91 @@
+{
+  "run_id": 43627029006,
+  "commit": "779f265fa4c5cd39ee692a884da99d6f5759a860",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43627029006",
+  "artifact_id": 14127360457,
+  "archive_sha256": "3af13b9a03509ae27d502286362582bac5e178c60933314ff57171488d1ac459",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "a9ba53332595009b409772042a42a23375e4f4f506dee850d1dde15501460215"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "ccbb2a68cb90aedb897afa6a3d0deb271af30f95956a78a95df6e00e2a39df71"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "2e837f85f604f53348756963f03b5033e8bdd6401178b1a57789a6352aa2acbd"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "e35862b50f31b3519b03e22f476cb0d2cccd77d39fc9c91a304d8a77a876586b"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "445b0860e925b57877924da6882fd932e1f5be42cd7580d2156111b6cb55e935"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "ae065ff59db161a51b930f85eac376d20e98d81c7822e92973ed0e4612004a36"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "73cc7d1971893d23228611ebc9f2aeb6343390ff7dd88d8b6f2cc4216052a797"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "0c2153f4f2d256be2e6c2cf646a96ab8054b81571e3b372ed8da6a188ad3b41e"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "221dcdfeeb6924bf50547b419b36704d4ae8b4f83c60119be0b5c87df04d86d2"
+    }
+  },
+  "scope": "Scoped generation archive recovery; Qwen price evidence publication; mock suppliers only",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "eae27e825f677a117cd07ea058d3a953ed503f9324a226580f7a509ff65b4c62",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "8dd359a0a6f43af9f2858b94ef9c529f904305567aed6f87f76a99cad893be24",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "88677985102877a80b6c53ddbaa589ab43b066beb9cda92951ac6d3d04b0786f",
+      "passed_tests": [
+        89
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "7c666ff50ebc7e6e2bbb329344d62ea21a68eb3dbdb1e3ae450fd32e74c955bc",
+      "passed_tests": [
+        257
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "63f9ba3cc9b90755c37e01dbfd7e91bf8a38782ef1c32c63eb7a52f7e69c3310",
+      "passed_tests": [
+        209
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43627029006-offline-handoff.zip",
+    "sha256": "0281a7fd8c2a2cf1f53f4c3fe91548b4c852e9d1b9480ef921e33e4c52a6dedf",
+    "size": 6235715,
+    "files": 1617,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}

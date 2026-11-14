@@ -1,0 +1,33 @@
+{
+  "result": "PASS",
+  "commit": "779f265fa4c5cd39ee692a884da99d6f5759a860",
+  "started_at": "2026-11-14T18:44:55.518Z",
+  "finished_at": "2026-11-14T18:45:03.122Z",
+  "paid_calls": 0,
+  "browser": "158.0.8127.18",
+  "scope": "production React app and native PG/S3; browser request boundaries hold and forward real signed PUT/complete responses; one complete 503 injected",
+  "expected_cases": 2,
+  "cases": [
+    {
+      "case": "upload_progress_and_same_intent_retry",
+      "transferring_visible": true,
+      "validating_visible": true,
+      "intents": 1,
+      "puts": 1,
+      "completions": 2,
+      "model_tasks": 0,
+      "credits_unchanged": true
+    },
+    {
+      "case": "upload_scope_change_aborts_stale_work",
+      "late_completed_asset_remains_in_original_product": true,
+      "stale_intent_not_put": true,
+      "puts": 1,
+      "intents": 1,
+      "completions": 1,
+      "model_tasks": 0,
+      "credits_unchanged": true
+    }
+  ],
+  "test_sha256": "01df60b3800e23be7b29c278402a2218b9069e6f58191cbe43ba3995d19e12e5"
+}
