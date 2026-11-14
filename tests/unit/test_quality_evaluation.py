@@ -12,10 +12,123 @@ from pathlib import Path
 
 from PIL import Image
 
-from visual_platform.services.quality_evaluation import evaluate_dataset, summarize
+from visual_platform.services.quality_evaluation import (
+    evaluate_dataset,
+    summarize,
+    summarize_visual,
+    visual_predictions,
+)
 
 
 class QualityEvaluationTests(unittest.TestCase):
+    def facts(self, **changes):
+        return {
+            "schema_version": 1,
+            "analysis_complete": True,
+            "image_width": 256,
+            "image_height": 256,
+            "text_items": [],
+            "logo_items": [],
+            "watermark_items": [],
+            "background": {"classification": "non_white", "confidence": 0.9},
+            "product_extent": None,
+            "uncertainties": [],
+            **changes,
+        }
+
+    def test_visual_missing_incomplete_and_unknown_origins_are_not_negative_claims(self):
+        incomplete = self.facts(analysis_complete=False)
+        self.assertEqual(set(visual_predictions(incomplete, (256, 256))[0].values()), {"uncertain"})
+        self.assertEqual(set(visual_predictions(self.facts(), (256, 256))[0].values()), {"absent"})
+        self.assertFalse(visual_predictions(None, (256, 256))[1])
+        self.assertFalse(visual_predictions(self.facts(), (257, 256))[1])
+        mark = {"text": "fixture", "bbox": [0, 0, 5, 5], "origin": "on_product", "confidence": 0.1}
+        predictions, available = visual_predictions(
+            self.facts(
+                analysis_complete=False,
+                logo_items=[mark],
+                watermark_items=[{**mark, "origin": "unknown"}],
+            ),
+            (256, 256),
+        )
+        self.assertTrue(available)
+        self.assertEqual(
+            predictions,
+            {
+                "visible_text": "uncertain",
+                "on_product_logo": "present",
+                "added_watermark": "uncertain",
+            },
+        )
+
+    def test_visual_confusion_denominators_never_count_uncertainty_as_correct(self):
+        metrics = summarize_visual(
+            [
+                (truth, prediction)
+                for truth in (True, False)
+                for prediction in ("present", "absent", "uncertain")
+            ]
+        )
+        self.assertEqual(metrics["false_positive_rate"], 1 / 3)
+        self.assertEqual(metrics["false_negative_rate"], 1 / 3)
+        self.assertEqual(metrics["uncertain_rate"], 1 / 3)
+        self.assertEqual(metrics["assessable_coverage"], 2 / 3)
+        self.assertEqual(metrics["assessable_accuracy"], 1 / 2)
+        self.assertIsNone(summarize_visual([])["false_negative_rate"])
+        self.assertIsNone(summarize_visual([(True, "uncertain")])["assessable_accuracy"])
+
+    def test_visual_presence_uses_original_report_facts_and_does_not_infer_dark_from_non_white(
+        self,
+    ):
+        file = self.root / "0.json"
+        report = json.loads(file.read_bytes())
+        mark = {"text": "fixture", "bbox": [0, 0, 5, 5], "origin": "on_product", "confidence": 0.9}
+        report["facts"] = self.facts(
+            text_items=[mark], watermark_items=[{**mark, "origin": "unknown"}]
+        )
+        raw = json.dumps(report).encode()
+        file.write_bytes(raw)
+        self.samples[0]["report_sha256"] = hashlib.sha256(raw).hexdigest()
+        result = self.evaluate()
+        metrics = result["visual_presence"]["visible_text"]
+        self.assertEqual(metrics["confusion_matrix"]["present"]["present"], 1)
+        self.assertEqual(metrics["uncertain_count"], 5)
+        self.assertEqual(metrics["assessable_accuracy"], 1)
+        self.assertEqual(result["unavailable_or_mismatched_facts_count"], 5)
+        self.assertNotIn("dark_background", result["visual_presence"])
+        self.assertNotIn("category_exception", result["visual_presence"])
+
+    def test_multiple_platform_judgments_do_not_duplicate_visual_images_or_allow_conflicting_labels(
+        self,
+    ):
+        file = self.root / "0.json"
+        report = json.loads(file.read_bytes())
+        report["per_platform"].append({**report["per_platform"][0], "platform": "temu"})
+        raw = json.dumps(report).encode()
+        file.write_bytes(raw)
+        self.samples[0]["report_sha256"] = hashlib.sha256(raw).hexdigest()
+        extra = {
+            **copy.deepcopy(self.samples[0]),
+            "sample_id": "second-platform",
+            "platform": "temu",
+        }
+        self.samples.append(extra)
+        result = self.evaluate()
+        self.assertEqual(result["overall"]["count"], 7)
+        self.assertEqual(result["unique_visual_image_count"], 6)
+        self.assertEqual(result["visual_presence"]["visible_text"]["count"], 6)
+        extra["features"]["visible_text"] = False
+        with self.assertRaisesRegex(ValueError, "inconsistent_human_visual_labels"):
+            self.evaluate()
+        extra["features"]["visible_text"] = True
+        report["facts"] = self.facts()
+        alternate = json.dumps(report).encode()
+        (self.root / "alternate.json").write_bytes(alternate)
+        extra["report_file"] = "alternate.json"
+        extra["report_sha256"] = hashlib.sha256(alternate).hexdigest()
+        with self.assertRaisesRegex(ValueError, "conflicting_visual_observations"):
+            self.evaluate()
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

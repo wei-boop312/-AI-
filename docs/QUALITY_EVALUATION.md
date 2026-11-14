@@ -15,3 +15,10 @@ manifest的schema见`contracts/quality-dataset.schema.json`。样本必须列人
 下一步需要人工标注的真实产品集和对应真实模型最终报告，再运行同一入口。该工具不执行供应商请求、不修改业务报告、不写数据库/用户积分/供应商费用、不授予部署资格。
 
 0043进一步在PG新报告与规则重检写入边界按冻结快照验证完整目标范围及overall一致性，覆盖人工/违规结果；历史报告不改写。该写入约束候选仍须当次真实PG回归，统计工具也继续核对实际下载JSON与图片摘要。
+
+
+视觉事实存在性统计另列visual_presence，不和平台合规混淆矩阵混用。仅比较visible_text、on_product_logo、added_watermark三类人工存在标签与原报告Facts。模型明确给出的存在主张按present计；只有analysis_complete且无uncertainties、来源不含unknown时，未检出才可计absent，否则uncertain。无Facts、schema无效或尺寸错配也保留为未知，不算正确负例。置信度只是记录内的模型自评分，不用它代替人工对错；该指标不评价OCR文本逐字准确率或bbox定位精度。
+
+视觉混淆矩阵行是人工present/absent，列是模型present/absent/uncertain。误检率=false positive/人工absent总数，漏检率=false negative/人工present总数，不确定率=uncertain/总数；可评估覆盖率和准确率只在明确present/absent的子集计算，零分母null。多平台对同图的合规结论可分别统计，但视觉存在性按唯一图片SHA只计一次；同图物理标注冲突或不同报告存在性结论冲突会拒绝，模型对照请分开数据集，不自动挑选更好的结果。
+
+深色背景与类目例外继续只作为人工分层条件；Facts的non_white不等于深色，类目例外也不是视觉模型能直接输出的事实，不编造这两种识别准确率。当前仅合成夹具验证统计，真实产品集/实际供应商质量仍NOT_RUN。CLI输出额外记录开始/结束时间、Python版本、工具/计算模块SHA和脱敏命令；不记录输入文件路径或图片内容。

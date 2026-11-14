@@ -10,6 +10,7 @@ from typing import Annotated, Literal
 from PIL import Image
 from pydantic import Field, model_validator
 
+from visual_platform.domain.facts import Facts
 from visual_platform.domain.image_limits import MAX_CANONICAL_PIXELS, MAX_OUTPUT_EDGE
 from visual_platform.domain.platforms import Platform
 from visual_platform.domain.schemas import StrictModel
@@ -26,6 +27,7 @@ FEATURES = (
 )
 PREDICTIONS = ("compliant", "non_compliant", "manual_review")
 TRUTHS = ("compliant", "non_compliant")
+VISUAL_FEATURES = ("visible_text", "on_product_logo", "added_watermark")
 
 
 class SampleFeatures(StrictModel):
@@ -64,6 +66,7 @@ class QualityDataset(StrictModel):
         if not self.human_reviewed_attested or not self.usage_rights_attested:
             raise ValueError("quality_dataset_attestations_required")
         ids, scopes = set(), set()
+        image_labels: dict[str, tuple[bool, ...]] = {}
         for sample in self.samples:
             scope = (
                 sample.image_sha256,
@@ -77,6 +80,12 @@ class QualityDataset(StrictModel):
                 raise ValueError("duplicate_quality_sample_scope")
             ids.add(sample.sample_id)
             scopes.add(scope)
+            visual = tuple(
+                getattr(sample.features, name) for name in FEATURES if name != "category_exception"
+            )
+            if sample.image_sha256 in image_labels and image_labels[sample.image_sha256] != visual:
+                raise ValueError("inconsistent_human_visual_labels_for_same_image")
+            image_labels[sample.image_sha256] = visual
         return self
 
 
@@ -140,6 +149,61 @@ def summarize(rows):
     }
 
 
+def visual_predictions(raw, dimensions):
+    unknown = dict.fromkeys(VISUAL_FEATURES, "uncertain")
+    try:
+        facts = Facts.model_validate(raw)
+    except ValueError:
+        return unknown, False
+    if (facts.image_width, facts.image_height) != dimensions:
+        return unknown, False
+    complete = facts.analysis_complete and not facts.uncertainties
+
+    def prediction(items, origin=None):
+        if any(origin is None or mark.origin == origin for mark in items):
+            return "present"
+        if not complete or any(mark.origin == "unknown" for mark in items):
+            return "uncertain"
+        return "absent"
+
+    return {
+        "visible_text": prediction(facts.text_items),
+        "on_product_logo": prediction(facts.logo_items, "on_product"),
+        "added_watermark": prediction(facts.watermark_items, "added_overlay"),
+    }, True
+
+
+def summarize_visual(rows):
+    matrix = {
+        truth: {outcome: 0 for outcome in ("present", "absent", "uncertain")}
+        for truth in ("present", "absent")
+    }
+    for truth, prediction in rows:
+        matrix["present" if truth else "absent"][prediction] += 1
+    positives = sum(matrix["present"].values())
+    negatives = sum(matrix["absent"].values())
+    false_negative = matrix["present"]["absent"]
+    false_positive = matrix["absent"]["present"]
+    uncertain = matrix["present"]["uncertain"] + matrix["absent"]["uncertain"]
+    total = len(rows)
+    return {
+        "count": total,
+        "human_present_count": positives,
+        "human_absent_count": negatives,
+        "confusion_matrix": matrix,
+        "false_positive_count": false_positive,
+        "false_positive_rate": ratio(false_positive, negatives),
+        "false_negative_count": false_negative,
+        "false_negative_rate": ratio(false_negative, positives),
+        "uncertain_count": uncertain,
+        "uncertain_rate": ratio(uncertain, total),
+        "assessable_coverage": ratio(total - uncertain, total),
+        "assessable_accuracy": ratio(
+            total - uncertain - false_negative - false_positive, total - uncertain
+        ),
+    }
+
+
 def evaluate_dataset(manifest: Path):
     if (
         manifest.is_symlink()
@@ -153,6 +217,9 @@ def evaluate_dataset(manifest: Path):
     rows = []
     feature_rows: dict[str, list[tuple[str, str]]] = {name: [] for name in FEATURES}
     platform_rows: dict[str, list[tuple[str, str]]] = {}
+    visual_rows: dict[str, list[tuple[bool, str]]] = {name: [] for name in VISUAL_FEATURES}
+    unavailable_facts = 0
+    visual_seen: dict[str, tuple[dict[str, str], bool]] = {}
     profiles = set()
     for sample in data.samples:
         image = private_read(root, sample.image_file, 100 * 1024 * 1024)
@@ -170,6 +237,7 @@ def evaluate_dataset(manifest: Path):
                 or picture.width * picture.height > MAX_CANONICAL_PIXELS
             ):
                 raise ValueError("quality_final_png_required")
+            dimensions = picture.size
             picture.verify()
         report = strict_json(report_raw)
         if (
@@ -208,6 +276,16 @@ def evaluate_dataset(manifest: Path):
         ):
             raise ValueError("synthetic_quality_requires_offline_report")
         profiles.add(profile)
+        predictions, available = visual_predictions(report.get("facts"), dimensions)
+        observation = (predictions, available)
+        if sample.image_sha256 in visual_seen:
+            if visual_seen[sample.image_sha256] != observation:
+                raise ValueError("conflicting_visual_observations_for_same_image")
+        else:
+            visual_seen[sample.image_sha256] = observation
+            unavailable_facts += not available
+            for name in VISUAL_FEATURES:
+                visual_rows[name].append((getattr(sample.features, name), predictions[name]))
         row = (sample.human_label, matches[0]["status"])
         rows.append(row)
         platform_rows.setdefault(sample.platform, []).append(row)
@@ -228,6 +306,10 @@ def evaluate_dataset(manifest: Path):
         "overall": summarize(rows),
         "by_platform": {name: summarize(values) for name, values in sorted(platform_rows.items())},
         "by_feature_present": {name: summarize(values) for name, values in feature_rows.items()},
+        "visual_presence": {name: summarize_visual(values) for name, values in visual_rows.items()},
+        "unavailable_or_mismatched_facts_count": unavailable_facts,
+        "unique_visual_image_count": len(visual_seen),
+        "visual_presence_scope": "presence only; not OCR transcripts, bounding-box accuracy, dark-background recognition or policy exceptions",
         "missing_feature_coverage": [name for name, values in feature_rows.items() if not values],
         "sampling_representativeness_verified": False,
         "model_confidence_used_as_accuracy": False,
