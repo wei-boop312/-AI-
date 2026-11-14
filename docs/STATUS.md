@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-15 0055百炼尺寸前置候选：共享严格整数尺寸校验用于请求及Ops报价准备，PG在报价和任务INSERT前独立拒绝低于512²/超过项目4MP/过大宽高比及布尔/小数尺寸；不等到冻结后才由供应商拒绝。增加原生SQL绕过Python负例且核对积分/POST不变，Qwen登记夹具明确使用512尺寸。SQL语法辅助与双平台静态通过，实际PG待候选自身CI。
+
 2026-11-15 0054百炼演练候选：新报价明确冻结qwen-image-3.0-protocol-mock，供应商尝试记bailian_mock/qwen-image-3.0而非BFL。新schema4预算使用generation_model/detection_model及CNY生成、USD或Hubway单位检测，分别总额、不做汇率换算；旧schema2/3入口拒绝百炼、百炼意图缺schema4预算必拒绝。仅offline_protocol_mock、仍禁真实HTTP；本阶段不接受百炼价格绑定，提交/响应费用保持unknown，演练额度不构成真实供应商价格或可执行付费授权。新增5原生候选覆盖API报价/预算/Worker/S3/一次内部扣费、缺预算零POST全退、提交丢失冻结不重发、已知pending仅GET续跑、直接SQL模型/单位拒绝；实际PG待CI。20授权单元、SQL语法辅助/双平台静态通过。
 
 2026-11-15 f6c92eea/CI43621226847整轮成功：194单元/79契约/241原生/4普通+11受控浏览器，Compose/独立恢复/全部门槛通过。原文19位费用经真实PG保持且估算精确向上取整；旧63a1ca0失败的241项/1失败原始日志保留，不放宽原断言。实际交付包1543文件，sidecar匹配且独立复验OFFLINE_HANDOFF_VERIFIED，六原始JSON/三个专门前端证明/日志摘要已归档。后续0053/0054候选等待自身CI。

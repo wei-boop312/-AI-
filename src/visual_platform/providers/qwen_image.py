@@ -27,6 +27,19 @@ MAX_BODY = 1024 * 1024
 MAX_IMAGE = 10 * 1024 * 1024
 
 
+def checked_dimensions(width, height):
+    if (
+        type(width) is not int
+        or type(height) is not int
+        or not 256 <= width <= 6256
+        or not 256 <= height <= 6256
+        or not 512 * 512 <= width * height <= 4_000_000
+        or max(width, height) > 8 * min(width, height)
+    ):
+        raise ValueError("qwen_output_dimensions_out_of_range")
+    return width, height
+
+
 def workspace_origin(value):
     if type(value) is not str or not re.fullmatch(
         r"https://ws-[a-z0-9]{1,64}\.cn-beijing\.maas\.aliyuncs\.com", value
@@ -82,11 +95,8 @@ def image_url(value):
 class QwenImageRequest(BflRequest):
     @model_validator(mode="after")
     def qwen_limits(self):
-        if (
-            len(self.images) > 3
-            or not 512 * 512 <= self.width * self.height <= 4_000_000
-            or max(self.width, self.height) > 8 * min(self.width, self.height)
-        ):
+        checked_dimensions(self.width, self.height)
+        if len(self.images) > 3:
             raise ValueError("qwen_edit_dimensions_or_references_out_of_range")
         for reference in self.images:
             if len(base64.b64decode(reference, validate=True)) > MAX_IMAGE:

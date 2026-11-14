@@ -16,6 +16,8 @@ from visual_platform.services.runtime_quote import (
 
 
 class QwenRuntimeRegistryTests(RuntimeFixture):
+    runtime_output_edge = 512
+
     def qwen_runtime(self):
         document = self.runtime().model_dump()
         document["schema_version"] = 2

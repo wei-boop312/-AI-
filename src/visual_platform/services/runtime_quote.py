@@ -8,6 +8,7 @@ from uuid import UUID, uuid5
 import psycopg
 
 from visual_platform.db.result import required_row
+from visual_platform.providers.qwen_image import checked_dimensions
 from visual_platform.providers.runtime import ProviderRuntime
 from visual_platform.services.rule_operations import assert_operator
 
@@ -56,6 +57,9 @@ def revoke_runtime_configuration(dsn, digest, operation, reason):
 
 def runtime_snapshot(source, runtime):
     document = copy.deepcopy(source["input_snapshot"])
+    if runtime.schema_version == 2:
+        output = document["generation"]["output"]
+        checked_dimensions(output["width"], output["height"])
     document["_execution"].update(runtime.execution_binding())
     document["_execution"].update(
         provider_profile="offline_protocol_mock",

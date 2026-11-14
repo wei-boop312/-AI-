@@ -11,6 +11,34 @@ from bailian_fixture import BailianFixture
 
 
 class BailianRehearsalTests(BailianFixture):
+    def test_sql_supplier_dimensions_reject_before_quote_or_internal_freeze(self):
+        _, _, review = self.qwen_review()
+        before = self.client.get("/api/v1/credits/balance").json()
+        for width, height in ((256, 256), (2048, 2048), (4096, 256), (True, 512), (512.0, 512)):
+            snapshot = copy.deepcopy(review["input_snapshot"])
+            snapshot["generation"]["output"].update(width=width, height=height)
+            with (
+                self.subTest(width=width, height=height),
+                psycopg.connect(self.owner) as connection,
+            ):
+                connection.execute("SET LOCAL ROLE app_api")
+                connection.execute("SELECT set_config('app.user_id',%s,true)", (str(self.user),))
+                with self.assertRaisesRegex(
+                    psycopg.errors.RaiseException, "bailian_output_dimensions_out_of_range"
+                ):
+                    connection.execute(
+                        "SELECT app.create_quote(%s,%s,%s,%s::jsonb,%s::jsonb)",
+                        (
+                            uuid4(),
+                            "a" * 64,
+                            hashlib.sha256(json.dumps(snapshot).encode()).hexdigest(),
+                            json.dumps(snapshot),
+                            json.dumps(snapshot["_execution"]["rules"]),
+                        ),
+                    )
+        self.assertEqual(self.client.get("/api/v1/credits/balance").json(), before)
+        self.assertEqual(self.calls, [])
+
     def test_full_qwen_worker_uses_distinct_attempt_model_units_and_one_internal_charge(self):
         task = self.qwen_task()
         self.assertEqual(self.run_qwen(task), "succeeded")
