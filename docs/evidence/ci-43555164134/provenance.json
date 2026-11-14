@@ -1,0 +1,91 @@
+{
+  "run_id": 43555164134,
+  "commit": "cc4a2fe0a6429f67d31c9d49e64ed01e3727d7da",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43555164134",
+  "artifact_id": 14098252875,
+  "archive_sha256": "9fe2b234c2aa84a5d858aaf89e8e1b214a783fe0a1d25aebbffafd20f3a3ef97",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "e22405b8a9a8b0a39fb7347faaf777545a9d4308b7b1629a6d37f0dd692836b5"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "1594f03b6cf421e6e9ae912497d32427a2cfea751baa69fc9665b4c844623bfe"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "3026ec97f5ccb2e80f5c775cf42df4a0345e45b3ddb599a7d48d9d73f8a29279"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "28a01433ba70e034e262cbea4d46b7e3c86b1389f56a73dbc88a0ba7a2af03fd"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "67dd4610fc532e9c29d37d72305da3b4910650b3863200ef31e7e98aa29ae0f9"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "5dec778129411816b70f60c34261f5c05c1c971bd8d9fe9973af6116c400cd7a"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "812d4b599cb1bda77be81038a812eba69c454d3b8fa99e7014d6e723775fcea7"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "365b907e1435ed36090576af8f5dd8bf4dbadab19e356fa876f1516ec1c2ec14"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "44aaae7e95754e52dcc754c7016c181c0169e3d5624b64beb29a2b35bfe405e7"
+    }
+  },
+  "scope": "Private local annotation UI with independent label gates and complete native export acceptance",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "ca2a5807ee76f122f325889fc2d3b31488c8b4873befd4955593488878098b06",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "978e04eca0a057b3a6d447800d6e72001cafe54fa3f3679065afffc6e323ebd3",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "ec8293a0f47c84d6ac8ca151858032ca809215860814b96784b785b8eba626e7",
+      "passed_tests": [
+        56
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "5ca59dd95606559975495b11089b95316f6263d59db8e0f128ffe4fa78bee878",
+      "passed_tests": [
+        227
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "5b5cbfdf22ecbe3d055b3f8ca949bc4126972a89e96cbabf7ae38679fee759eb",
+      "passed_tests": [
+        189
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43555164134-offline-handoff.zip",
+    "sha256": "f45c7e1f3c0451a35c98746bed800234ac24a58a322526f0cc2f112d777bb427",
+    "size": 5399472,
+    "files": 1468,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}

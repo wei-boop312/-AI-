@@ -1,0 +1,50 @@
+{
+  "run_id": 43556624262,
+  "commit": "a4e562c45ad2e8ffe1fda0eb5d8e17001a46a66c",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43556624262",
+  "artifact_id": 14098098999,
+  "archive_sha256": "b797440117494f81c2f729a8098313d166654900fb6ec90b471bf487dd5249c1",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "be92c788f4c0fa1932d3169f1c3e1addbefe24efc6b04b2a5cfec972794975f3"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "b4cea60656b57d05d6d8ae6dddb03dc220abc9573b4b5399f1f91e4d4afbdcc5"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "5a0e4783936607756c5a8b6c0c170979736f150383033f4398b7594b2bcce35b"
+    }
+  },
+  "scope": "Runtime binding and operator quote preparation regression; retain full failure evidence",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "40d1486c86ea152b1aab3f5f3b25809f6cd23b27f05af475172eecf5f8688904",
+      "tests_run": [
+        62
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "be92c788f4c0fa1932d3169f1c3e1addbefe24efc6b04b2a5cfec972794975f3",
+      "tests_run": [
+        233
+      ],
+      "outcome": "failed",
+      "failure_summary": "failures=1"
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "0bffc62277039fa0ab3aa6bfc8ce9140ecd9b6826dbc34a946f02f984f1dd946",
+      "tests_run": [
+        189
+      ],
+      "outcome": "passed"
+    }
+  ]
+}

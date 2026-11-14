@@ -1,0 +1,16 @@
+{
+  "result": "PASS",
+  "commit": "cc4a2fe0a6429f67d31c9d49e64ed01e3727d7da",
+  "observed_at": "2026-11-14T04:25:28.624Z",
+  "paid_calls": 0,
+  "browser": "158.0.8127.18",
+  "scope": "synthetic local-file annotation UI only; native PG/S3 export separately tested",
+  "blank_labels_required": true,
+  "both_attestations_required": true,
+  "scope_and_hashes_preserved": true,
+  "no_external_requests": true,
+  "untrusted_scope_rendered_as_text": true,
+  "original_manifest_unchanged": true,
+  "test_sha256": "21cf8c2a526dacbbbaed62ab3412cc43a92285ade673db110d7ff615de476386",
+  "generator_sha256": "6afddbde0b9bc0d5eb4552f92467817bf00e8206f6b404a24d717f915cfa86c5"
+}

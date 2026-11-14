@@ -126,7 +126,15 @@ class ProviderRuntimeTests(ProviderBudgetFixture):
 
     def test_changed_configuration_rejects_before_any_intent_or_post(self):
         task = self.submit(self.bind, execution_updates=self.runtime().execution_binding())
-        self.assertEqual(self.run_configured(task, self.runtime("synthetic-v2")), "failed")
+        self.assertEqual(self.run_configured(task, self.runtime("synthetic-v2")), "stopped")
+        self.assertEqual(self.client.get("/api/v1/tasks/" + task).json()["status"], "failed")
+        with psycopg.connect(self.owner) as connection:
+            self.assertEqual(
+                connection.execute(
+                    "SELECT count(*) FROM app.provider_attempts WHERE task_id=%s", (task,)
+                ).fetchone()[0],
+                0,
+            )
         self.assertEqual((self.post_count("bfl"), self.post_count("gemini")), (0, 0))
         balance = self.client.get("/api/v1/credits/balance").json()
         self.assertEqual(

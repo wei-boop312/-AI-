@@ -61,6 +61,7 @@ def main():
         if k
         not in (
             "BFL_API_KEY",
+            "HUBWAY_API_KEY",
             "GEMINI_API_KEY",
             "GOOGLE_API_KEY",
             "API_DATABASE_URL",
