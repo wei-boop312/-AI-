@@ -135,6 +135,7 @@ class QwenImagePoll:
     sample_url: str | None = None
     usage: dict | None = None
     response_digest: str | None = None
+    response_body_base64: str | None = None
 
 
 @dataclass(frozen=True)
@@ -142,6 +143,8 @@ class QwenImageArtifact:
     data: bytes
     mime: str
     sha256: str
+    result_wire_body_base64: str | None = None
+    result_response_sha256: str | None = None
 
 
 class QwenImageProvider:
@@ -277,7 +280,12 @@ class QwenImageProvider:
                 raise ValueError("qwen_incomplete_output")
             url = image_url(content[0]["image"])
             return QwenImagePoll(
-                identity, "Ready", url, body.get("usage"), hashlib.sha256(raw).hexdigest()
+                identity,
+                "Ready",
+                url,
+                body.get("usage"),
+                hashlib.sha256(raw).hexdigest(),
+                base64.b64encode(raw).decode("ascii"),
             )
         except (ValueError, KeyError, TypeError, IndexError):
             raise ProviderUncertain("Qwen existing result requires reconciliation") from None
@@ -331,6 +339,12 @@ class QwenImageProvider:
             if not raw.startswith(b"\x89PNG\r\n\x1a\n"):
                 raise ValueError("qwen_png_required")
             # Existing isolated canonical decoder still validates actual image pixels.
-            return QwenImageArtifact(raw, "image/png", hashlib.sha256(raw).hexdigest())
+            return QwenImageArtifact(
+                raw,
+                "image/png",
+                hashlib.sha256(raw).hexdigest(),
+                poll.response_body_base64,
+                poll.response_digest,
+            )
         except (httpx.HTTPError, ValueError):
             raise ProviderUncertain("Qwen image download cannot be confirmed") from None

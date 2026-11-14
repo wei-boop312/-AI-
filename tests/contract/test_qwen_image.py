@@ -103,7 +103,11 @@ class QwenImageContracts(unittest.TestCase):
         self.assertEqual(base64.b64decode(image.split(",", 1)[1]), PNG)
         poll = provider.poll(receipt)
         self.assertEqual(poll.usage, self.result["usage"])
-        self.assertEqual(provider.fetch_result(poll).data, PNG)
+        artifact = provider.fetch_result(poll)
+        self.assertEqual(artifact.data, PNG)
+        result_raw = base64.b64decode(artifact.result_wire_body_base64)
+        self.assertEqual(json.loads(result_raw), self.result)
+        self.assertEqual(hashlib.sha256(result_raw).hexdigest(), artifact.result_response_sha256)
         self.assertEqual([r.method for r in self.calls], ["POST", "GET", "GET"])
 
     def test_live_transport_and_unreviewed_origins_rejected_before_file_creation(self):
