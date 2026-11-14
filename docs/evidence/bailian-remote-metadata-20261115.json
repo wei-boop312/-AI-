@@ -1,0 +1,22 @@
+{
+  "observed_on": "2026-11-15",
+  "kind": "read_only_remote_metadata_observation_not_inference_acceptance",
+  "catalogue_documentation": "https://help.aliyun.com/zh/model-studio/list-models",
+  "permission_documentation": "https://help.aliyun.com/zh/model-studio/list-model-permissions",
+  "model": "qwen-image-3.0",
+  "catalogue_http_status": 200,
+  "catalogue_authentication_observed": true,
+  "model_listed": true,
+  "image_generation_capability_listed": true,
+  "permission_http_status": 200,
+  "permission_check_result": "NOT_CONFIRMED_EMPTY_FILTER_RESULT",
+  "workspace_inference_permission_observed": false,
+  "generation_permission_verified": false,
+  "private_complete_responses_retained": true,
+  "metadata_get_requests": 2,
+  "model_inference_requests": 0,
+  "paid_model_calls": 0,
+  "provider_verified": false,
+  "execution_enabled": false,
+  "price_reviewed": false
+}

@@ -18,7 +18,7 @@
 .venv/Scripts/python.exe scripts/bailian_connection.py --prepare-local --endpoint-origin https://ws-EXAMPLE.cn-beijing.maas.aliyuncs.com --output-dir .local/bailian-connection
 ```
 
-该命令只读本机密钥、写连接身份与指纹，不保存密钥、不发 HTTP、不建立执行授权。`--config .local/bailian-connection/connection.json` 默认不读凭据，附加 `--check-credentials` 才比较本机密钥指纹。用户提供本机 CSV 路径后，密钥已保存本机用户环境，回读一致；`.local/bailian-csv-connection/connection.json` 本地预检 `credential_matches=true`。配置仅存身份与指纹，不存密钥。尚未请求远端，不能据此确认认证、余额、费率或模型可用。
+该命令只读本机密钥、写连接身份与指纹，不保存密钥、不发 HTTP、不建立执行授权。`--config .local/bailian-connection/connection.json` 默认不读凭据，附加 `--check-credentials` 才比较本机密钥指纹。用户提供本机 CSV 路径后，密钥已保存本机用户环境，回读一致；`.local/bailian-csv-connection/connection.json` 本地预检 `credential_matches=true`。配置仅存身份与指纹，不存密钥。随后显式只读目录GET已返回HTTP200并列出目标模型；这只证明目录认证观察。权限查询已授权筛选为空，调用权限仍未确认；没有发送推理请求，也不能据此确认余额、实际费率或出图成功。
 
 ## 协议与验收范围
 
@@ -39,3 +39,12 @@
 0062候选新增只读 `python scripts/provider_budget.py project-generation --user <用户UUID> --quote <报价UUID>`，需要本机Ops数据库身份。按冻结请求的单张输入/输出面积和已审阅价格计算CNY预测；不读模型密钥、不请求模型、不创建成本账本或费用授权。未知费率返回unknown，不当作免费。PG在生成预算hold前再次核验，已知超上限时拒绝整个意图事务；真实供应商计量仍须从成功查询独立归档与估算，预测不等于账单。
 
 0063候选增加真实原图前置检查：每边1–8000像素、宽高比最多10:1、项目保守大小上限10,000,000字节，不能用平台通用8192边长上传能力推断百炼能接收。PG依据所属不可变原图而非调用者JSON，在报价和任务写入前检查；请求适配器再次核规范PNG头与CRC。普通上传仍保留原能力，只有百炼路径应用此限制。
+
+## 显式远端只读检查
+
+```text
+python scripts/bailian_metadata.py --config .local/bailian-csv-connection/connection.json --probe --output-dir .local/new-catalogue-review
+python scripts/bailian_metadata.py --config .local/bailian-csv-connection/connection.json --kind permissions --probe --output-dir .local/new-permission-review
+```
+
+不加--probe时不读配置/密钥或请求远端。显式操作只请求官方GET /api/v1/models，或GET /api/v1/models/permissions的精确模型/AUTHORIZED/INFERENCE筛选；各一次，不跟随跳转、不改授权、不提交推理、不认为免费额度存在。响应有界2MiB；原文与审核摘要只写全新忽略目录，不要上传。401/403代表该元数据操作未获准，不自动扩大密钥范围；空筛选也不等同于断言实际推理无权。目录认证、工作空间授权、密钥自身范围、余额、真实出图及费用必须分别核验，任何成功都不会开启执行。
