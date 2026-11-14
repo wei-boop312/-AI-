@@ -17,6 +17,52 @@ from visual_platform.providers.authorization import load_authorization, verify_s
 
 
 class ProviderAuthorizationTests(unittest.IsolatedAsyncioTestCase):
+    def bailian_data(self):
+        data = copy.deepcopy(self.data)
+        for field in ("currency", "generate_ceiling", "detect_ceiling", "total_ceiling"):
+            data.pop(field, None)
+        data.update(
+            schema_version=4,
+            step_budgets={
+                "generate": {"currency": "CNY", "ceiling": "1"},
+                "detect": {"currency": "USD", "ceiling": "0.1"},
+            },
+            currency_totals=[
+                {"currency": "CNY", "ceiling": "1"},
+                {"currency": "USD", "ceiling": "0.1"},
+            ],
+        )
+        data["generation"].update(
+            protection_mode="none",
+            regions=[],
+            output={"width": 512, "height": 512, "format": "png"},
+        )
+        return data
+
+    async def test_bailian_scope_uses_new_model_fields_and_existing_isolated_source_decoder(self):
+        scope, digest = self.load(self.bailian_data())
+        self.assertEqual(scope.generation_model, "qwen-image-3.0")
+        self.assertNotIn("bfl_model", scope.model_dump())
+        self.assertNotIn("gemini_model", scope.model_dump())
+        self.assertEqual((await verify_sample(scope, self.path))["sha256"], scope.source_sha256)
+        self.assertEqual(len(digest), 64)
+
+    def test_bailian_scope_rejects_legacy_fields_cross_units_and_insufficient_totals(self):
+        for change in ("legacy", "model", "units", "total", "schema"):
+            data = self.bailian_data()
+            if change == "legacy":
+                data["bfl_model"] = "flux-3-image"
+            elif change == "model":
+                data["generation_model"] = "flux-3-image"
+            elif change == "units":
+                data["step_budgets"]["generate"]["currency"] = "USD"
+            elif change == "total":
+                data["currency_totals"][0]["ceiling"] = "0.9"
+            else:
+                data["schema_version"] = True
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                self.load(data)
+
     def setUp(self):
         self.folder = tempfile.TemporaryDirectory()
         self.addCleanup(self.folder.cleanup)

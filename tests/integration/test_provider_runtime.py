@@ -30,6 +30,8 @@ from visual_platform.worker.runner import Worker
 
 
 class RuntimeFixture(ProviderBudgetFixture):
+    runtime_output_edge = 256
+
     def setUp(self):
         super().setUp()
         self.runtime_version_prefix = uuid4().hex
@@ -49,7 +51,11 @@ class RuntimeFixture(ProviderBudgetFixture):
             "generation": {
                 "type": "scene",
                 "prompt": "offline runtime preparation",
-                "output": {"width": 256, "height": 256, "format": "png"},
+                "output": {
+                    "width": self.runtime_output_edge,
+                    "height": self.runtime_output_edge,
+                    "format": "png",
+                },
                 "protection_mode": "none",
                 "regions": [],
             },

@@ -27,7 +27,9 @@ class QwenRuntimeRegistryTests(RuntimeFixture):
         )
         return ProviderRuntime.model_validate(document, strict=True)
 
-    def test_registered_beijing_identity_replays_without_enabling_legacy_quote_or_wallet(self):
+    def test_registered_beijing_identity_replays_and_prepares_explicit_model_without_wallet_change(
+        self,
+    ):
         runtime = self.qwen_runtime()
         operation = uuid4()
         before = self.client.get("/api/v1/credits/balance").json()
@@ -48,8 +50,12 @@ class QwenRuntimeRegistryTests(RuntimeFixture):
         self.assertFalse(context["execution_enabled"])
         self.assertFalse(context["merchant_identity_verified"])
         source, _ = self.source_quote()
-        with self.assertRaisesRegex(psycopg.errors.RaiseException, "invalid_runtime_quote"):
-            self.prepare(source, runtime)
+        prepared = self.prepare(source, runtime)
+        with psycopg.connect(self.owner) as connection:
+            model = connection.execute(
+                "SELECT provider_model FROM app.quotes WHERE id=%s", (prepared["quote_id"],)
+            ).fetchone()[0]
+        self.assertEqual(model, "qwen-image-3.0-protocol-mock")
         self.assertEqual(self.client.get("/api/v1/credits/balance").json(), before)
         self.assertEqual(self.calls, [])
 

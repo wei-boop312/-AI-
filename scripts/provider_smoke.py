@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.providers.authorization import (
+    BailianSmokeAuthorization,
     UnitSmokeAuthorization,
     load_authorization,
     verify_sample,
@@ -54,7 +55,11 @@ async def main():
                 "configuration_sha256": digest,
                 "authorization_id": str(scope.authorization_id),
                 "sample": sample,
-                "models": {"generate": scope.bfl_model, "detect": scope.gemini_model},
+                "models": (
+                    {"generate": scope.generation_model, "detect": scope.detection_model}
+                    if isinstance(scope, BailianSmokeAuthorization)
+                    else {"generate": scope.bfl_model, "detect": scope.gemini_model}
+                ),
                 "call_limits": {
                     "generate": scope.max_generate_calls,
                     "detect": scope.max_detect_calls,
@@ -66,7 +71,7 @@ async def main():
                             row.model_dump(mode="json") for row in scope.currency_totals
                         ],
                     }
-                    if isinstance(scope, UnitSmokeAuthorization)
+                    if isinstance(scope, (UnitSmokeAuthorization, BailianSmokeAuthorization))
                     else {
                         "currency": scope.currency,
                         "generate": scope.generate_ceiling,

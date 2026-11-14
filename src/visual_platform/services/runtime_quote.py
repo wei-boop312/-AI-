@@ -59,7 +59,7 @@ def runtime_snapshot(source, runtime):
     document["_execution"].update(runtime.execution_binding())
     document["_execution"].update(
         provider_profile="offline_protocol_mock",
-        provider_model="flux-3-image-protocol-mock",
+        provider_model=runtime.generate.model + "-protocol-mock",
         price_version="trial-protocol-mock-v1",
     )
     return document

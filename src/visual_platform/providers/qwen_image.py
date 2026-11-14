@@ -129,7 +129,7 @@ class QwenImagePoll:
 
 @dataclass(frozen=True)
 class QwenImageArtifact:
-    body: bytes
+    data: bytes
     mime: str
     sha256: str
 

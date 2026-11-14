@@ -1,0 +1,91 @@
+{
+  "run_id": 43621226847,
+  "commit": "f6c92eeadc7dd9e60b39bad8de640b1cc75b3bb7",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43621226847",
+  "artifact_id": 14124432981,
+  "archive_sha256": "26bfe5e71275cd44bca640112dce604379034884b87cb8a9e78847dfe3d34583",
+  "files": {
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "eab643da7a2caa95e4d1f742e1803e6fdcce4afcad5856a88732bb71f4acf103"
+    },
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "1567d06fd84c8f856beadb8ace074a84887dfb7bd57ccffdc2be2996185ad1f7"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "f3723608a3e6a5e141ded6af70aa7af110cf663ec821e1e38d4b515b2cce0ec6"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "d74dd0eb9f6733e5b45fa908a0a710abd67a6346892b9c15a6ddf839d7efc609"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "941cb48ec9dd7693a0cf4074336d18226aedbcc8dd89e9f71659550847b1741d"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "0af3e20af992bda186b4176963c7c02b91bc5e0cb2e6033e78e48a5caad1f35b"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "efe4fcd8437a6b32ceb3abaee28e240678110fd92ad3a86b50702df36a1a342d"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "061dd20f5d986961fc1dd63df3090d6d75f004061f88558ad4ea21546ece0ef6"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "246ad7099e915f8c8791d00de00de4af35a26f6ab0b86d116b9ed9a51adff23a"
+    }
+  },
+  "scope": "Qwen offline HTTP adapter and PG exact wire decimal rounding",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "dfff13a333ec07299552da535406252b6d630a91ee3a5fba6f8306f9fff6f24e",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "c464ee91a878db0c9e57b10f18e6dda774cf4156dab7f822d4139e9ce9901788",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "23996ec36a1bc6b5eda419e66b4147cb1cabab6ac99ba6f8874bf6375382235a",
+      "passed_tests": [
+        79
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "80f86e28cff46be68a4b79960c5abfc882870e72b43ef07296a9880a94db69d3",
+      "passed_tests": [
+        241
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "4720b5fcae202b3ff69d737289509fd3e637fe991f176ad9e6966f696039b06f",
+      "passed_tests": [
+        194
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43621226847-offline-handoff.zip",
+    "sha256": "983feba2a1a7017a6393be8672beaf210bfafcd42568658f59f4cdee72cd0b8b",
+    "size": 5799168,
+    "files": 1543,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}

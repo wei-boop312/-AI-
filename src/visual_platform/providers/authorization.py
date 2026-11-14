@@ -23,7 +23,7 @@ def unique_object(pairs):
     return result
 
 
-class AuthorizationScope(BaseModel):
+class CommonAuthorizationScope(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     authorization_id: UUID
     user_id: UUID
@@ -37,8 +37,6 @@ class AuthorizationScope(BaseModel):
     quote_input_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
     generation: Generation
     targets: Targets
-    bfl_model: Literal["flux-3-image"] = "flux-3-image"
-    gemini_model: Literal["gemini-3.8-flash"] = "gemini-3.8-flash"
     max_generate_calls: Annotated[int, Field(ge=1, le=1)] = 1
     max_detect_calls: Annotated[int, Field(ge=1, le=1)] = 1
 
@@ -57,6 +55,11 @@ class AuthorizationScope(BaseModel):
         if not timedelta(0) < self.expires_at - self.authorized_at <= timedelta(hours=24):
             raise ValueError("authorization duration must be at most 24 hours")
         return self
+
+
+class AuthorizationScope(CommonAuthorizationScope):
+    bfl_model: Literal["flux-3-image"] = "flux-3-image"
+    gemini_model: Literal["gemini-3.8-flash"] = "gemini-3.8-flash"
 
 
 class SmokeAuthorization(AuthorizationScope):
@@ -125,7 +128,37 @@ class UnitSmokeAuthorization(AuthorizationScope):
         return self
 
 
-ProviderAuthorization = SmokeAuthorization | UnitSmokeAuthorization
+class BailianSmokeAuthorization(CommonAuthorizationScope):
+    """Schema 4 offline rehearsal, without legacy BFL model fields."""
+
+    schema_version: Annotated[int, Field(ge=4, le=4)] = 4
+    generation_model: Literal["qwen-image-3.0"] = "qwen-image-3.0"
+    detection_model: Literal["gemini-3.8-flash"] = "gemini-3.8-flash"
+    step_budgets: StepCeilings
+    currency_totals: Annotated[list[UnitCeiling], Field(min_length=1, max_length=2)]
+
+    @model_validator(mode="after")
+    def separate_bailian_units(self):
+        if (
+            self.step_budgets.generate.currency != "CNY"
+            or self.step_budgets.detect.currency not in ("USD", "HUBWAY_BALANCE_UNIT")
+        ):
+            raise ValueError("unreviewed_bailian_budget_units")
+        totals = {row.currency: Decimal(row.ceiling) for row in self.currency_totals}
+        required = {
+            row.currency: Decimal(row.ceiling)
+            for row in (self.step_budgets.generate, self.step_budgets.detect)
+        }
+        if (
+            len(totals) != len(self.currency_totals)
+            or set(totals) != set(required)
+            or any(totals[key] < ceiling for key, ceiling in required.items())
+        ):
+            raise ValueError("currency totals must cover exactly the authorized units")
+        return self
+
+
+ProviderAuthorization = SmokeAuthorization | UnitSmokeAuthorization | BailianSmokeAuthorization
 
 
 def load_authorization(path: Path, *, now: datetime | None = None):
@@ -139,7 +172,13 @@ def load_authorization(path: Path, *, now: datetime | None = None):
     if not isinstance(data, dict):
         raise ValueError("configuration object required")
     version = data.get("schema_version", 2)
-    model = UnitSmokeAuthorization if type(version) is int and version == 3 else SmokeAuthorization
+    model = (
+        BailianSmokeAuthorization
+        if type(version) is int and version == 4
+        else UnitSmokeAuthorization
+        if type(version) is int and version == 3
+        else SmokeAuthorization
+    )
     scope = model.model_validate_json(json.dumps(data))
     instant = now or datetime.now(timezone.utc)
     if instant.tzinfo is None or not scope.authorized_at <= instant < scope.expires_at:
@@ -185,5 +224,8 @@ async def verify_sample(scope: ProviderAuthorization, config_path: Path):
             for region in generation.regions
         ):
             raise ValueError("source rectangle exceeds reviewed sample")
-    BflRequest.from_canonical(generation.model_dump(mode="json"), canonical)
+    from visual_platform.providers.qwen_image import QwenImageRequest
+
+    request_type = QwenImageRequest if isinstance(scope, BailianSmokeAuthorization) else BflRequest
+    request_type.from_canonical(generation.model_dump(mode="json"), canonical)
     return {"sha256": scope.source_sha256, "width": decoded["width"], "height": decoded["height"]}
