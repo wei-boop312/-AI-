@@ -3,7 +3,6 @@
 import hashlib
 import hmac
 import json
-import os
 import re
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -12,6 +11,7 @@ from typing import Annotated, Literal
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from visual_platform.core.credentials import private_credential
 from visual_platform.providers.bfl import BflProvider
 from visual_platform.providers.gemini import HUBWAY_ORIGINS, MODEL, OFFICIAL_ORIGIN, GeminiProvider
 from visual_platform.providers.gemini_usage import unique_object
@@ -130,10 +130,9 @@ def credential_fingerprint(key):
 
 
 def credential_status(runtime: ProviderRuntime, environment=None):
-    environment = os.environ if environment is None else environment
     result = {}
     for name, step in (("generate", runtime.generate), ("detect", runtime.detect)):
-        key = environment.get(step.key_environment)
+        key = private_credential(step.key_environment, environment)
         try:
             result[name] = hmac.compare_digest(
                 credential_fingerprint(key), step.credential_fingerprint

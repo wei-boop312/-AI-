@@ -2,6 +2,7 @@
 
 import os
 
+from visual_platform.core.credentials import private_credential
 from visual_platform.providers.gemini import HUBWAY_ORIGINS, MODEL, GeminiProvider
 
 
@@ -13,7 +14,7 @@ class HubwayGeminiProvider(GeminiProvider):
 
     @classmethod
     def from_environment(cls, private_directory, *, transport=None):
-        key = os.environ.get("HUBWAY_API_KEY")
+        key = private_credential("HUBWAY_API_KEY")
         if not key:
             raise ValueError("HUBWAY_API_KEY required in private server environment")
         if os.environ.get("HUBWAY_VISION_MODEL", MODEL) != MODEL:
