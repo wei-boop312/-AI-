@@ -13,6 +13,7 @@ from PIL import Image
 
 from visual_platform.db.result import required_row
 from visual_platform.domain.image_limits import MAX_CANONICAL_PIXELS, MAX_OUTPUT_EDGE
+from visual_platform.services.quality_annotation import annotation_document
 from visual_platform.services.quality_evaluation import (
     FEATURES,
     PREDICTIONS,
@@ -166,6 +167,7 @@ def export_quality_pack(dsn, storage, user, task, check, output, private_root, d
 
     write("final.png", image)
     write("report.json", report)
+    write("annotate.html", annotation_document(manifest).encode())
     write("provenance.json", (json.dumps(provenance, indent=2) + "\n").encode())
     write(
         "README.txt",

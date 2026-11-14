@@ -8,6 +8,10 @@
 
 包内`final.png`、`report.json`是原始字节；`provenance.json`保留私有任务/检查关联和来源模式，不包含S3地址或凭据。`manifest.json`与评测工具字段兼容，但human_label、annotator_fingerprint和所有人工特征为空，两个声明为false，不能直接通过质量评测。不要把自动结果复制为人工标签，也不自动声明素材权属。
 
+可直接用浏览器打开包内`annotate.html`，中文界面展示最终图及各目标范围，不展示自动结论。四项同图物理特征共用，类目例外和人工合规结论分别按目标填写；标注者使用64位小写SHA256指纹。所有标签及两个声明完整后才允许下载`manifest.reviewed.json`。把下载文件移回同一包目录，再运行`python scripts/evaluate_quality.py --manifest work/private-quality/review-001/manifest.reviewed.json`。原始空白manifest不覆盖；页面不上传图片，不请求外部服务，不自动保存到云端。
+
+页面使用静态内嵌资源和基于摘要的CSP，禁止连接与表单提交；范围文本以纯文本显示、内嵌JSON转义HTML边界。本地Chrome受控回归检查空白/声明门槛、来源字段不变、恶意范围文本不执行、无外网请求和原始清单不变；CI额外绑定生成器及测试源码SHA，不能用其他提交的证明替代。
+
 人工逐项查看图片及站点/类目/图片用途/规则版本，填写合规或违规标签、标注者SHA和全部特征，确认审核与权属后才设置声明，再运行`python scripts/evaluate_quality.py --manifest work/private-quality/review-001/manifest.json`。无法判定的样本先人工复核，不强填。PNG和报告不可修改，重新导出使用新目录。
 
 Fake/mock来源只能导出为synthetic_fixture；real_product_set不能据此宣称真实模型质量。原报告来源不明的重检拒绝导出，不能从工作流名推断供应商。导出和评测均不调用模型、不结算费用、不更改业务报告，也不授予发布资格。Windows文件隐私依赖所在目录ACL，POSIX目录0700/文件0600。

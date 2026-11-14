@@ -329,12 +329,34 @@ def verify_run(evidence):
             re.search(r"^OK\s*$", text, re.M) is not None and "skipped=" not in text,
             "unittest failure or skipped coverage",
         )
-    for name, count in (("browser-production", 4), ("browser-controlled-faults", 10)):
+    for name, count in (("browser-production", 4), ("browser-controlled-faults", 11)):
         text = (evidence / (name + ".log")).read_text(encoding="utf-8-sig")
         require(
             re.search(r"\b" + str(count) + r" passed\b", text) is not None,
             "browser suite incomplete",
         )
+    annotation = load(evidence / "frontend-quality-annotation.json")
+    require(
+        annotation.get("result") == "PASS"
+        and annotation.get("commit") == commit
+        and annotation.get("paid_calls") == 0
+        and annotation.get("test_sha256")
+        == sha(ROOT / "apps/web/e2e-controlled/quality-annotation.spec.ts")
+        and annotation.get("generator_sha256")
+        == sha(ROOT / "src/visual_platform/services/quality_annotation.py")
+        and all(
+            annotation.get(key) is True
+            for key in (
+                "blank_labels_required",
+                "both_attestations_required",
+                "scope_and_hashes_preserved",
+                "no_external_requests",
+                "untrusted_scope_rendered_as_text",
+                "original_manifest_unchanged",
+            )
+        ),
+        "private annotation browser proof missing or stale",
+    )
     for filename in ("performance-production.json", "browser-controlled-faults.json"):
         item = load(ROOT / "docs/evidence" / filename)
         require(
