@@ -613,6 +613,18 @@ if args.command == "prepare":
             and state["detection_archive"]["representation_version"] == 2,
             "source archive invalid",
         )
+        state["generation_archive"] = admin(
+            "SELECT jsonb_build_object('attempt_id',g.attempt_id,'receipt_id',g.receipt_id,'document_sha256',g.document_sha256,'document',g.document,'request_sha256',g.request_sha256,'intent_bound',g.request_sha256=a.request_hash,'wire_hash_valid',encode(sha256(decode(g.document->>'response_body_base64','base64')),'hex')=g.response_digest,'canonical_hash_valid',encode(sha256(convert_to(g.canonical_document,'UTF8')),'hex')=g.document_sha256) FROM ops.generation_archives g JOIN app.provider_attempts a ON a.id=g.attempt_id AND a.task_id=g.task_id AND a.user_id=g.user_id WHERE g.task_id=%s",
+            (state["tasks"]["protocol_completed"],),
+        )
+        require(
+            state["generation_archive"] is not None
+            and all(
+                state["generation_archive"][key]
+                for key in ("intent_bound", "wire_hash_valid", "canonical_hash_valid")
+            ),
+            "source generation wire archive invalid",
+        )
         billing_context = supplier_billing_context(
             profile["ADMIN_DATABASE_URL"],
             UUID(state["tasks"]["protocol_completed"]),
@@ -1095,6 +1107,18 @@ elif args.command == "verify":
             and restored_archive["representation_version"] == 2,
             "restored synchronous detection archive changed",
         )
+        restored_generation_archive = admin(
+            "SELECT jsonb_build_object('attempt_id',g.attempt_id,'receipt_id',g.receipt_id,'document_sha256',g.document_sha256,'document',g.document,'request_sha256',g.request_sha256,'intent_bound',g.request_sha256=a.request_hash,'wire_hash_valid',encode(sha256(decode(g.document->>'response_body_base64','base64')),'hex')=g.response_digest,'canonical_hash_valid',encode(sha256(convert_to(g.canonical_document,'UTF8')),'hex')=g.document_sha256) FROM ops.generation_archives g JOIN app.provider_attempts a ON a.id=g.attempt_id AND a.task_id=g.task_id AND a.user_id=g.user_id WHERE g.task_id=%s",
+            (state["tasks"]["protocol_completed"],),
+        )
+        require(
+            restored_generation_archive == state["generation_archive"]
+            and all(
+                restored_generation_archive[key]
+                for key in ("intent_bound", "wire_hash_valid", "canonical_hash_valid")
+            ),
+            "restored generation wire archive changed",
+        )
         require(
             not (
                 Path(profile["FAKE_PROVIDER_DIR"])
@@ -1280,6 +1304,7 @@ elif args.command == "verify":
         "provider_budget_revoked_before_new_intent": True,
         "unit_limits_preserved_without_cross_unit_total": True,
         "detection_archive_preserved_without_local_files": True,
+        "generation_wire_archive_preserved_without_local_files": True,
         "detection_wire_and_sdk_response_preserved": True,
         "bill_fixture_evidence_preserved_not_settled": True,
         "recheck_receipt_replayed_after_independent_restore": True,

@@ -10,6 +10,10 @@ from uuid import UUID
 from visual_platform.providers.bfl import BflProvider, BflRequest
 from visual_platform.providers.contract import ProviderPending, ProviderUncertain, Receipt
 from visual_platform.providers.gemini import MODEL, OFFICIAL_ORIGIN, validate_archive_record
+from visual_platform.providers.generation_archive import (
+    generation_observation,
+    validate_generation_archive,
+)
 
 BASELINE_ENDPOINTS = {
     "generate": BflProvider.endpoint,
@@ -23,6 +27,7 @@ class ProtocolProvider:
     execution_profile = "offline_protocol_mock"
     report_profile = "offline_protocol_mock"
     durable_detection_archive = True
+    durable_generation_archive = True
 
     def __init__(self, bfl, gemini, *, merchant_accounts=None, runtime_sha256=None):
         if not bfl.offline_transport or not gemini.offline_transport:
@@ -111,6 +116,27 @@ class ProtocolProvider:
 
     def fetch_facts(self, identity):
         return self.gemini.fetch_facts(identity)
+
+    def fetch_generation_record(self, intent):
+        receipt = self.bfl.receipt_record(intent)
+        if receipt.get("archive_version") != 2:
+            return None
+        return validate_generation_archive(
+            {
+                "archive_version": 1,
+                "provider": "bfl",
+                "model": self.generation_model,
+                "endpoint_origin": "https://api.bfl.ai",
+                "provider_id": receipt["provider_id"],
+                "polling_url": receipt["polling_url"],
+                "response_digest": receipt["response_digest"],
+                "wire_response_sha256": receipt["wire_response_sha256"],
+                "response_body_base64": receipt["response_body_base64"],
+            }
+        )
+
+    validate_generation_record = staticmethod(validate_generation_archive)
+    observation_from_generation = staticmethod(generation_observation)
 
     def observation(self, step, attempt):
         if step == "generate":

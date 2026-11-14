@@ -1,5 +1,9 @@
 # 实施状态
 
+2026-11-15 0056生成原文归档候选：BFL v2及百炼异步提交原始字节与回执/原意图request hash同事务保存为不可变、FORCE RLS的PG记录，新增/重放与唯一审计原子化；严格复验原文SHA/base64规范/JSON唯一键/任务ID/模型/冻结端点，API/Worker无原始表读权。Worker优先从受租约保护的PG正文派生费用观察；旧无wire回执不伪造证据。百炼PENDING提交仍无真实计量，不借用BFL费用。新增4契约通过、全85契约通过、双平台静态及SQL语法辅助通过；2原生候选覆盖私有文件丢失后GET续跑、8并发重放、错误wire/身份/私有权限/不可变及过期租约拒绝，等待CI。独立PG/S3恢复夹具纳入非空生成归档/原意图/双SHA复验，新mandatory flag待真正冷恢复。
+
+2026-11-15 本机百炼连接准备实际返回WAITING_PRIVATE_CREDENTIAL，尚未读取到DASHSCOPE_API_KEY；未创建连接文件或调用供应商。用户已回答未下载密钥，已给本机遮蔽输入命令，等待用户自行保存。当前本周used69%/剩余31%，继续守剩余20%线。
+
 2026-11-15 0055百炼尺寸前置候选：共享严格整数尺寸校验用于请求及Ops报价准备，PG在报价和任务INSERT前独立拒绝低于512²/超过项目4MP/过大宽高比及布尔/小数尺寸；不等到冻结后才由供应商拒绝。增加原生SQL绕过Python负例且核对积分/POST不变，Qwen登记夹具明确使用512尺寸。SQL语法辅助与双平台静态通过，实际PG待候选自身CI。
 
 2026-11-15 0054百炼演练候选：新报价明确冻结qwen-image-3.0-protocol-mock，供应商尝试记bailian_mock/qwen-image-3.0而非BFL。新schema4预算使用generation_model/detection_model及CNY生成、USD或Hubway单位检测，分别总额、不做汇率换算；旧schema2/3入口拒绝百炼、百炼意图缺schema4预算必拒绝。仅offline_protocol_mock、仍禁真实HTTP；本阶段不接受百炼价格绑定，提交/响应费用保持unknown，演练额度不构成真实供应商价格或可执行付费授权。新增5原生候选覆盖API报价/预算/Worker/S3/一次内部扣费、缺预算零POST全退、提交丢失冻结不重发、已知pending仅GET续跑、直接SQL模型/单位拒绝；实际PG待CI。20授权单元、SQL语法辅助/双平台静态通过。

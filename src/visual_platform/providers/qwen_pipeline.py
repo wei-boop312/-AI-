@@ -3,6 +3,7 @@
 from uuid import UUID
 
 from visual_platform.providers.contract import ProviderUncertain
+from visual_platform.providers.generation_archive import validate_generation_archive
 from visual_platform.providers.pipeline import ProtocolProvider
 from visual_platform.providers.qwen_image import MODEL, QwenImageProvider, QwenImageRequest
 
@@ -10,6 +11,22 @@ from visual_platform.providers.qwen_image import MODEL, QwenImageProvider, QwenI
 class QwenProtocolProvider(ProtocolProvider):
     generation_model = MODEL
     request_type = QwenImageRequest
+
+    def fetch_generation_record(self, intent):
+        receipt = self.bfl.receipt_record(intent)
+        return validate_generation_archive(
+            {
+                "archive_version": 1,
+                "provider": "aliyun_bailian",
+                "model": self.generation_model,
+                "endpoint_origin": self.bfl.endpoint_origin,
+                "provider_id": receipt["provider_id"],
+                "polling_url": receipt["polling_url"],
+                "response_digest": receipt["response_digest"],
+                "wire_response_sha256": receipt["response_digest"],
+                "response_body_base64": receipt["response_body_base64"],
+            }
+        )
 
     def __init__(self, qwen, gemini, *, merchant_accounts, runtime_sha256):
         if not isinstance(qwen, QwenImageProvider) or runtime_sha256 is None:

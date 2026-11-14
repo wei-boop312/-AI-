@@ -65,6 +65,15 @@ class Worker:
             ):
                 record = await self.detection_payload(task, fence, attempt)
                 usage = self.provider.observation_from_facts(record)
+            elif attempt["step"] == "generate" and getattr(
+                self.provider, "durable_generation_archive", False
+            ):
+                record = await self.generation_payload(task, fence, attempt)
+                usage = (
+                    self.provider.observation_from_generation(record)
+                    if record is not None
+                    else await self.call_provider(self.provider.observation, "generate", attempt)
+                )
             else:
                 usage = await self.call_provider(
                     self.provider.observation, attempt["step"], attempt
@@ -119,6 +128,41 @@ class Worker:
         )
         return identity, payload
 
+    async def preserve_generation(self, task, attempt, provider_id, digest):
+        payload = await self.call_provider(self.provider.fetch_generation_record, attempt)
+        if payload is None:
+            return None, None
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        identity = await self.db(
+            "SELECT app.append_generation_receipt($1,$2,$3,$4,$5,$6)",
+            task,
+            attempt,
+            provider_id,
+            digest,
+            canonical,
+            hashlib.sha256(canonical.encode()).hexdigest(),
+        )
+        return identity, payload
+
+    async def generation_payload(self, task, fence, attempt):
+        saved = await self.db(
+            "SELECT app.generation_archive($1,$2,$3,$4)",
+            task,
+            self.owner,
+            fence,
+            UUID(attempt["id"]),
+        )
+        if saved is not None:
+            return self.provider.validate_generation_record(json.loads(saved))
+        # Only existing local evidence may fill a pre-migration gap; never submit again.
+        try:
+            _, payload = await self.preserve_generation(
+                task, UUID(attempt["id"]), attempt["provider_id"], attempt["response_digest"]
+            )
+            return payload
+        except ProviderUncertain:
+            return None
+
     async def detection_payload(self, task, fence, attempt):
         if not getattr(self.provider, "durable_detection_archive", False):
             return await self.call_provider(self.provider.fetch_facts, attempt["provider_id"])
@@ -142,6 +186,19 @@ class Worker:
             identity, _ = await self.preserve_detection(
                 task, attempt, receipt.provider_id, receipt.response_digest
             )
+        elif step == "generate" and getattr(self.provider, "durable_generation_archive", False):
+            identity, _ = await self.preserve_generation(
+                task, attempt, receipt.provider_id, receipt.response_digest
+            )
+            if identity is None:
+                identity = await self.db(
+                    "SELECT app.append_receipt($1,$2,$3,$4,$5)",
+                    task,
+                    attempt,
+                    receipt.provider_id,
+                    receipt.response_digest,
+                    receipt.polling_url,
+                )
         else:
             identity = await self.db(
                 "SELECT app.append_receipt($1,$2,$3,$4,$5)",
