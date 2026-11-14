@@ -1,0 +1,91 @@
+{
+  "run_id": 43627774746,
+  "commit": "ed6b11be7a9d82b6327481cf840b7bf294d8ee16",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43627774746",
+  "artifact_id": 14127696754,
+  "archive_sha256": "5c0f4d932fc78c7eb12ab4eef06b053de3323d5f7b4c1309126d5dac2f0af04d",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "28ef6aaa8fe3e8b65066542ce568d51dd55061dc6d2dd3d564af85f56d7865e9"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "72093e24e470461500b23617d3a00ff3f8b4332198547dbfe8ac57f759b53910"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "0e54db98b09e41aef8f6bd0e2236e1ab94b3883745d77fc2352a5846c71fd3d4"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "c68effcf684729c9434d861f7f5f7553a33f704e8f7115fa71b84e3168abbf8b"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "a90f4b63b8dfcb20e44baacc4ae6310052c96215e3640fcb2b8c8d8fd81e3846"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "feae85283533d198cf6e5e2dc945d5e3274d559117665691425b8e1483c92fdf"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "9bac4a7aef0626768e1f5333449d43e55885c1d61847a89c6eda0077faf90a0f"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "1c524ee5bc7aa20b4985b787807e985d8316505659a2318688c02a7be6c7a36a"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "1c3d64d0a45d97b014943a576d97024c63b49e8e4818e3073824d1eb6dd27029"
+    }
+  },
+  "scope": "Deferred terminal Qwen estimates, explicit price binding and independent currency ceilings; mock suppliers only",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "7ea4e8578566dfd39446fa10d838e9f29d129c09e355f7e7be171b145a519b6d",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "8c9de51c31e5b43731a6a1de63b4fcaf39263425272830b1144aa7b08247ab4a",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "e64f8f95e00b31d10ebcd7cf0eeb46bed6350d9f2475d422a8660c1eea080616",
+      "passed_tests": [
+        91
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "db7a36f7338a9c73c525505c62fed0e2ba07f34b673ede9c3eb2062183eda68b",
+      "passed_tests": [
+        261
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "466f1e352e6a01ae9d3992d2a5ba4a3c2df183311d65148d7fcf5cf2d41ffa8a",
+      "passed_tests": [
+        209
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43627774746-offline-handoff.zip",
+    "sha256": "f7b0b42c5175fdb33ec2abfdddf3ea48a26fd9a7e26a5bb0cd17807a1b324cc6",
+    "size": 6247535,
+    "files": 1621,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}
