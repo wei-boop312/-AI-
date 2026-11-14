@@ -1,0 +1,16 @@
+{
+  "observed_on": "2026-11-15",
+  "kind": "independently_written_protocol_review_not_vendor_response",
+  "model_url": "https://help.aliyun.com/zh/model-studio/qwen3-8-flash",
+  "vision_url": "https://help.aliyun.com/zh/model-studio/vision/",
+  "structured_output_url": "https://help.aliyun.com/zh/model-studio/qwen-structured-output",
+  "model": "qwen3.8-flash",
+  "path": "/compatible-mode/v1/chat/completions",
+  "multimodal_json_schema_enforcement_claimed": false,
+  "request_response_format": "json_object",
+  "local_facts_schema_validation_required": true,
+  "thinking_enabled": false,
+  "live_execution_enabled": false,
+  "provider_verified": false,
+  "paid_model_calls": 0
+}

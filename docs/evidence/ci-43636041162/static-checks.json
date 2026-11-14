@@ -1,0 +1,42 @@
+{
+  "commit": "e9b8943e0085e0be9617ccc747af95438284e57f",
+  "observed_at": "2026-11-14T20:16:45.422381+00:00",
+  "paid_calls": 0,
+  "implementation_dirty": false,
+  "result": "PASS",
+  "format_lint_scope": [
+    "src",
+    "scripts",
+    "tests",
+    "migrations"
+  ],
+  "type_scope": [
+    "src/visual_platform",
+    "scripts"
+  ],
+  "type_mode": "check_untyped_defs; not strict annotation completeness; only listed untyped third-party imports exempt",
+  "versions": {
+    "ruff": "0.17.5",
+    "mypy": "2.4.1"
+  },
+  "steps": [
+    {
+      "name": "ruff-format",
+      "exit_code": 0
+    },
+    {
+      "name": "ruff-lint",
+      "exit_code": 0
+    },
+    {
+      "name": "mypy-linux",
+      "exit_code": 0,
+      "checked_files": 130
+    },
+    {
+      "name": "mypy-win32",
+      "exit_code": 0,
+      "checked_files": 130
+    }
+  ]
+}
