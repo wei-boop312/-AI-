@@ -284,9 +284,11 @@ def prepare_qwen_restore(profile, settings):
         balance = client.get("/api/v1/credits/balance").json()
         state["balance"] = [balance[key] for key in ("available", "reserved", "spent_total")]
         require(state["balance"] == [16, 0, 16], "Qwen source wallet mismatch")
-        state["step_limits"] = provider_budget_snapshot(
+        completed_budget = provider_budget_snapshot(
             profile["ADMIN_DATABASE_URL"], UUID(state["budget_id"])
-        )["step_limits"]
+        )
+        require(completed_budget["state"] == "closed", "completed Qwen budget was not closed")
+        state["step_limits"] = completed_budget["step_limits"]
     return state
 
 
@@ -326,7 +328,7 @@ def verify_qwen_restore(profile, settings, state):
     )
     budget = provider_budget_snapshot(profile["ADMIN_DATABASE_URL"], UUID(state["budget_id"]))
     require(
-        budget["state"] == "revoked" and budget["step_limits"] == state["step_limits"],
+        budget["state"] == "closed" and budget["step_limits"] == state["step_limits"],
         "restored Qwen budget was reauthorized or units changed",
     )
     with TestClient(create_app(settings)) as client:
