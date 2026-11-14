@@ -1,0 +1,49 @@
+
+Running 9 tests using 1 worker
+
+  ✓  1 e2e-controlled/faults.spec.ts:32:1 › 排队取消和重复点击只释放一次积分 (3.6s)
+  ✓  2 e2e-controlled/faults.spec.ts:41:1 › 明确供应商失败释放积分，刷新不自动重试 (4.4s)
+  ✓  3 e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 (5.9s)
+{"event":"storage_archive_observed","observation_id":"0168f33c-d4a5-4d27-8ca7-b12fd44786b7","observed_at":"2026-11-14T00:21:57.523667+00:00","duration_ms":9.802,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"40373d3d-a343-49e7-a523-de7ace5ea6ed","observed_at":"2026-11-14T00:21:57.626742+00:00","duration_ms":5.28,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"90326d50-d825-4e93-b83f-3a9744e11d2f","observed_at":"2026-11-14T00:21:57.718552+00:00","duration_ms":5.214,"outcome":"success"}
+  ✓  4 e2e-controlled/faults.spec.ts:65:1 › 晚到回执恢复查询和归档，原生成意图不重发 (6.2s)
+{"event":"storage_archive_observed","observation_id":"e9a83a11-4d59-43f7-ba93-e8d63cfa6806","observed_at":"2026-11-14T00:22:02.519040+00:00","duration_ms":7.561,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"e928aa81-db50-403f-82bd-f4194fce80dd","observed_at":"2026-11-14T00:22:02.623001+00:00","duration_ms":5.769,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"55c22467-fe78-4870-b521-6a7b3ba8691f","observed_at":"2026-11-14T00:22:02.712576+00:00","duration_ms":6.088,"outcome":"success"}
+  ✓  5 e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (4.0s)
+{"event":"storage_archive_observed","observation_id":"0456b094-9d6b-4134-9569-7e1abae17645","observed_at":"2026-11-14T00:22:06.384283+00:00","duration_ms":7.321,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"41faacd9-3210-48de-a70a-860c4cacbc4c","observed_at":"2026-11-14T00:22:06.487176+00:00","duration_ms":5.239,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"6432c5b9-4d5b-4ee7-a3bd-98811c1296d5","observed_at":"2026-11-14T00:22:08.877510+00:00","duration_ms":14.027,"outcome":"success"}
+  ✓  6 e2e-controlled/faults.spec.ts:97:1 › 检测结果未知经运营审批交付，保留未知状态且只结算一次 (6.6s)
+  ✓  7 e2e-controlled/sse.spec.ts:42:1 › 真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离 (23.3s)
+  ✘  8 e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 (6.9s)
+  ✓  9 e2e-controlled/uploads.spec.ts:62:1 › 切换产品取消旧上传流程，延迟的校验和意图响应不覆盖当前原图 (3.7s)
+
+
+  1) e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 ──────────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      53 |  await page.locator('input[type=file]').first().setInputFiles(fixture);
+      54 |  await expect(page.getByRole('status',{name:'原图上传状态'})).toContainText('正在上传原图');await expect.poll(()=>puts).toBe(1);put.release();
+    > 55 |  await expect.poll(()=>completions).toBe(1);await expect(page.getByRole('status',{name:'原图上传状态'})).toContainText('上传完成，正在校验图片');
+         |                                     ^
+      56 |  completion.release();await expect(page.getByRole('button',{name:'重新校验',exact:true})).toBeVisible();
+      57 |  await page.getByRole('button',{name:'重新校验',exact:true}).click();await expect(page.getByText('已归档原图',{exact:true})).toBeVisible();
+      58 |  expect([intents,puts,completions]).toEqual([1,1,2]);await expect(page.locator('.upload-progress')).toHaveCount(0);await unchanged(page);
+        at /home/runner/work/-AI-/-AI-/apps/web/e2e-controlled/uploads.spec.ts:55:37
+
+    Error Context: ../../work/browser-test-results/uploads-上传显示传输与校验阶段，暂时失败只重试原校验而不重传/error-context.md
+
+    Error Context: ../../work/browser-test-results/uploads-上传显示传输与校验阶段，暂时失败只重试原校验而不重传/error-context.md
+
+  1 failed
+    e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 ───────────────────────────────
+  8 passed (1.1m)

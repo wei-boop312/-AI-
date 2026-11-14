@@ -1,0 +1,35 @@
+{
+  "run_id": 43532001316,
+  "commit": "d008345e6a9c48919de2a0acbac191d4aec87c47",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43532001316",
+  "artifact_id": 14088926229,
+  "archive_sha256": "fab5cb08289520d59a2f5f54fed442323e197833fff063a511b6878431fc4d0b",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "f036f0302d685450afc6ae078bba6cd090be202c31b5673293812dee4bd348e8"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "a4cd72d9a9622ab8c041cbeaee63728bcc9ada19bfb57247992d2d821c0d7a6f"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "6c25dd6f5a3973a36a72a85992e8332cec1d42e1edfd57fcabfc4e537a8a2416"
+    },
+    "browser-controlled-faults.log": {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "0278f4df40a91d6bf90a1a03ac44ebf27b0671191239a2b88f7b58fd4df9752c"
+    },
+    "browser-production.log": {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "798f301fc61e261579b859a92eefc6de7ec2a05e58392d03556c012a3430c694"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "2a3492f6b38cecac54ab685f97b2fec8b4a99052ead2129dd9e788ca11f0d1d6"
+    }
+  },
+  "scope": "Active SSE prune watermark acknowledgment and upload browser lifecycle"
+}

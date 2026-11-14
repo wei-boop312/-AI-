@@ -46,7 +46,7 @@ test.afterAll(()=>{
 test('上传显示传输与校验阶段，暂时失败只重试原校验而不重传',async({page})=>{
  await setup(page);let puts=0,intents=0,completions=0;const put=hold(),completion=hold();
  page.on('request',request=>{if(request.method()==='POST'&&request.url().endsWith('/api/v1/assets/upload-intents'))intents++});
- await page.route('**/temp/**',async route=>{if(route.request().method()!=='PUT'){await route.continue();return}puts++;await put.promise;await fulfill(route,await route.fetch())});
+ await page.route('**/temp/**',async route=>{if(route.request().method()!=='PUT'){await route.continue();return}puts++;await put.promise;await route.continue()});
  await page.route('**/api/v1/assets/upload-intents/*/complete',async route=>{
   completions++;if(completions===1){await completion.promise;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:{code:'validation_temporarily_unavailable'}})})}else await route.continue();
  });

@@ -1,0 +1,32 @@
+{
+  "commit": "d008345e6a9c48919de2a0acbac191d4aec87c47",
+  "steps": [
+    {
+      "name": "migrate-test",
+      "exit_code": 0,
+      "seconds": 0.574
+    },
+    {
+      "name": "bootstrap-dev",
+      "exit_code": 0,
+      "seconds": 1.071
+    },
+    {
+      "name": "native-integration",
+      "exit_code": 0,
+      "seconds": 187.783
+    },
+    {
+      "name": "browser-production",
+      "exit_code": 0,
+      "seconds": 100.98
+    },
+    {
+      "name": "browser-controlled-faults",
+      "exit_code": 1,
+      "seconds": 67.165
+    }
+  ],
+  "result": "FAIL",
+  "paid_calls": 0
+}
