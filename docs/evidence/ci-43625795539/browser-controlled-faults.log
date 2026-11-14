@@ -1,0 +1,26 @@
+
+Running 11 tests using 1 worker
+
+  ✓   1 e2e-controlled/faults.spec.ts:32:1 › 排队取消和重复点击只释放一次积分 (3.1s)
+  ✓   2 e2e-controlled/faults.spec.ts:41:1 › 明确供应商失败释放积分，刷新不自动重试 (4.5s)
+  ✓   3 e2e-controlled/faults.spec.ts:50:1 › 已创建意图的取消竞争返回409，未知保持冻结并接收运营结案 (5.8s)
+{"event":"storage_archive_observed","observation_id":"0623da34-6377-4578-828c-37a3c18aeb0c","observed_at":"2026-11-14T18:25:12.701656+00:00","duration_ms":9.076,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"f93e78b4-19e4-4f47-8e6e-2576b4735c29","observed_at":"2026-11-14T18:25:12.806072+00:00","duration_ms":5.672,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"61dbe32d-0fbb-4a30-af65-d3846f7c4876","observed_at":"2026-11-14T18:25:12.897955+00:00","duration_ms":5.698,"outcome":"success"}
+  ✓   4 e2e-controlled/faults.spec.ts:65:1 › 晚到回执恢复查询和归档，原生成意图不重发 (5.8s)
+{"event":"storage_archive_observed","observation_id":"299447e0-9f8b-48a9-a1dc-ccc0873f8b44","observed_at":"2026-11-14T18:25:17.270868+00:00","duration_ms":7.082,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"88988910-6606-4267-987c-1652b950a96e","observed_at":"2026-11-14T18:25:17.372647+00:00","duration_ms":5.469,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"1f0a6513-5c10-4865-9182-01e3f725a392","observed_at":"2026-11-14T18:25:17.455377+00:00","duration_ms":5.934,"outcome":"success"}
+  ✓   5 e2e-controlled/faults.spec.ts:74:1 › 提交响应丢失后再次确认沿用同一幂等键 (3.6s)
+{"event":"storage_archive_observed","observation_id":"3e8cec77-347d-4927-965d-e95a19008bc8","observed_at":"2026-11-14T18:25:20.534329+00:00","duration_ms":6.808,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"ccac83a7-a94e-476c-a883-f88f56b648db","observed_at":"2026-11-14T18:25:20.633797+00:00","duration_ms":6.049,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"aeb086cb-599a-4cf4-8886-f9713c030f47","observed_at":"2026-11-14T18:25:22.824230+00:00","duration_ms":6.023,"outcome":"success"}
+  ✓   6 e2e-controlled/faults.spec.ts:97:1 › 检测结果未知经运营审批交付，保留未知状态且只结算一次 (5.9s)
+
+  ✓   7 e2e-controlled/quality-annotation.spec.ts:11:1 › private local annotation requires independent labels and exports an unchanged scope (464ms)
+  ✓   8 e2e-controlled/quotes.spec.ts:11:1 › 迟到的报价不能跨产品或配置弹出，只有当前确认的输入能冻结一次积分 (4.0s)
+  ✓   9 e2e-controlled/sse.spec.ts:42:1 › 真实 SSE 刷新游标、自动重连、重复和旧版本事件以及账号任务隔离 (22.7s)
+  ✓  10 e2e-controlled/uploads.spec.ts:46:1 › 上传显示传输与校验阶段，暂时失败只重试原校验而不重传 (3.1s)
+  ✓  11 e2e-controlled/uploads.spec.ts:62:1 › 切换产品取消旧上传流程，延迟的校验和意图响应不覆盖当前原图 (3.3s)
+
+  11 passed (1.1m)

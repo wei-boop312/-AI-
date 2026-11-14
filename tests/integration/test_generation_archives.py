@@ -6,6 +6,7 @@ import hashlib
 import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from uuid import uuid4
 
 import psycopg
 from bailian_fixture import BailianFixture
@@ -14,6 +15,36 @@ from visual_platform.providers.generation_archive import validate_generation_arc
 
 
 class GenerationArchiveTests(BailianFixture):
+    def test_ops_integrity_summary_is_user_scoped_without_raw_body_or_worker_access(self):
+        task = self.qwen_task()
+        self.assertEqual(self.run_qwen(task), "succeeded")
+        row = self.archived(task)
+        with psycopg.connect(self.operator_dsn) as connection:
+            summary = connection.execute(
+                "SELECT ops.generation_archive_integrity(%s,%s)", (self.user, task)
+            ).fetchone()[0]
+            self.assertIsNone(
+                connection.execute(
+                    "SELECT ops.generation_archive_integrity(%s,%s)", (uuid4(), task)
+                ).fetchone()[0]
+            )
+        self.assertEqual(summary["document_sha256"], row[4])
+        self.assertEqual(summary["wire_response_sha256"], row[2])
+        self.assertTrue(
+            all(
+                summary[field]
+                for field in ("intent_bound", "wire_hash_valid", "canonical_hash_valid")
+            )
+        )
+        self.assertNotIn("document", summary)
+        self.assertNotIn("polling_url", summary)
+        self.assertNotIn("response_body_base64", summary)
+        with psycopg.connect(self.worker_dsn) as connection:
+            with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                connection.execute(
+                    "SELECT ops.generation_archive_integrity(%s,%s)", (self.user, task)
+                )
+
     def archived(self, task):
         with psycopg.connect(self.owner) as connection:
             return connection.execute(

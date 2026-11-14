@@ -1,0 +1,91 @@
+{
+  "run_id": 43625795539,
+  "commit": "20eaa9961e0497486655b1a97b76c02b6d25f4c5",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43625795539",
+  "artifact_id": 14126955208,
+  "archive_sha256": "e0b5f0c64f478bc641270d46bff2ba4b6eb922686bea84b43c26e5d44e9b82dd",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "7423a7b39ccdc00ce641154567aa82c61643c4aef6a2ab7b066ea66f90a22280"
+    },
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "0d97dc7016d91678bb18c0c460cf29e92dbc372b3584d7f50b4f5ccecee6ffce"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "9f54f31f543588e3ed616da97cb8b72584bfab330bbf13a844494b87ce0daec6"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "f2f06ea544c13c6cb9b636fc4679a1b27d6deeb69d63a9ef1219d8021651f687"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "06067cf42b7da10439ba7c18f69f63249321c3fe8a5050498d64257522e597a3"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "3ba705b2904b33bf2d60b6d62a266b4fcb95cc6562420389b753646f763d0d12"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "04652f7257c169e633de600a253f09de5245c457ae9c6bfb456830432c357990"
+    }
+  },
+  "scope": "Generation wire and terminal Qwen PG archives after SQLAlchemy parameter correction",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "51dce3ac42e1c9d8e3ef9b3136c169772617a1a992c1f5364fec5a31a43d6fcd",
+      "tests_run": [
+        11
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "fd9ae321d031539f0aabc4994197b10e1db396a6a177705539a9ba7e185e7970",
+      "tests_run": [
+        4
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "34e52eb738159cbcd02424742bfe7630e64d9885f3d200350692e59b795fc844",
+      "tests_run": [
+        89
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "7423a7b39ccdc00ce641154567aa82c61643c4aef6a2ab7b066ea66f90a22280",
+      "tests_run": [
+        254
+      ],
+      "outcome": "passed"
+    },
+    {
+      "artifact_path": "work/ci-public/native-restore-v2-diagnostics.log",
+      "sha256": "d16972a03d6ee3574d9552413f7749c71abbbb674417497cd2bbbbe9af317d47",
+      "tests_run": [],
+      "outcome": "failed"
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "9006a2e65a90215d9caab1cb722386e68bebd61cf057f541b2113484620fb4e4",
+      "tests_run": [
+        206
+      ],
+      "outcome": "passed"
+    }
+  ],
+  "not_verified": [
+    "native-restore-v2 failed before backup",
+    "Compose and final handoff gates"
+  ]
+}

@@ -1,0 +1,32 @@
+prepare.log
+atus":201,"outcome":"completed","request_id":"d0278ee4-3e6f-4a2e-a382-be3ba23cfb93"}
+{"event":"api_request_observed","observation_id":"532e7d97-ca40-41a4-8d31-baeae176147a","observed_at":"2026-11-14T18:25:59.514309+00:00","duration_ms":4.186,"status":201,"outcome":"completed","request_id":"c815f994-8536-49ce-80b9-c6d35c7189a9"}
+{"event":"api_request_observed","observation_id":"bdb70777-6259-41a7-8825-bd810014de9a","observed_at":"2026-11-14T18:25:59.519614+00:00","duration_ms":4.298,"status":201,"outcome":"completed","request_id":"9806b24c-1666-49db-8cc1-c629e5f26e5d"}
+{"event":"storage_archive_observed","observation_id":"b20cb77e-deb8-4eda-bec3-dbef06ffacf6","observed_at":"2026-11-14T18:25:59.601587+00:00","duration_ms":5.422,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"4f425e26-a367-4048-9baa-8fd0c432500b","observed_at":"2026-11-14T18:25:59.664632+00:00","duration_ms":4.08,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"ada8ad66-3162-431b-aa36-952b0adf37f0","observed_at":"2026-11-14T18:25:59.702939+00:00","duration_ms":5.405,"status":201,"outcome":"completed","request_id":"4cd5f222-3d35-4f7b-b1ac-4c72e7ea0bec"}
+{"event":"api_request_observed","observation_id":"d1b3ba1d-4db7-4f91-b503-3d62e081b765","observed_at":"2026-11-14T18:25:59.708877+00:00","duration_ms":4.817,"status":201,"outcome":"completed","request_id":"d8e91600-b136-43f7-ac1d-7a460b6dc185"}
+{"event":"api_request_observed","observation_id":"8dc02a70-807a-4e4b-8994-b9fda149d8d6","observed_at":"2026-11-14T18:25:59.714034+00:00","duration_ms":4.087,"status":201,"outcome":"completed","request_id":"2efd5052-47fb-43a2-9f2a-7b69c08b610a"}
+{"event":"api_request_observed","observation_id":"ab4d3079-e05e-495f-95c3-ae6b9bfbb57f","observed_at":"2026-11-14T18:25:59.741983+00:00","duration_ms":5.257,"status":201,"outcome":"completed","request_id":"13bf104d-1baa-4eee-ae1b-360d08e62f57"}
+{"event":"storage_archive_observed","observation_id":"2769f5f0-498d-4897-a4a2-48a8d7732b15","observed_at":"2026-11-14T18:25:59.866269+00:00","duration_ms":5.493,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"9a0f66a7-4b4a-43f5-bccf-78e529d00b24","observed_at":"2026-11-14T18:25:59.930082+00:00","duration_ms":4.393,"outcome":"success"}
+{"event":"api_request_observed","observation_id":"f4e23acf-c505-4d07-98a1-c3d08de1a907","observed_at":"2026-11-14T18:25:59.978109+00:00","duration_ms":4.504,"status":201,"outcome":"completed","request_id":"894d80d4-f936-43bc-9e27-e70c01648fd6"}
+{"event":"storage_archive_observed","observation_id":"aba7ef09-6fea-4c11-9ba6-2fe2def1a155","observed_at":"2026-11-14T18:26:00.093908+00:00","duration_ms":5.532,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"4350bca0-f0c4-48d8-80f8-d642092ccf6a","observed_at":"2026-11-14T18:26:00.159191+00:00","duration_ms":4.32,"outcome":"success"}
+{"event":"storage_archive_observed","observation_id":"02603407-b6d9-4025-b161-e1f4314572c3","observed_at":"2026-11-14T18:26:00.307307+00:00","duration_ms":4.664,"outcome":"success"}
+Traceback (most recent call last):
+  File "/home/runner/work/-AI-/-AI-/scripts/verify_restore_drill.py", line 616, in <module>
+    state["generation_archive"] = admin(
+                                  ~~~~~^
+        "SELECT jsonb_build_object('attempt_id',g.attempt_id,'receipt_id',g.receipt_id,'document_sha256',g.document_sha256,'document',g.document,'request_sha256',g.request_sha256,'intent_bound',g.request_sha256=a.request_hash,'wire_hash_valid',encode(sha256(decode(g.document->>'response_body_base64','base64')),'hex')=g.response_digest,'canonical_hash_valid',encode(sha256(convert_to(g.canonical_document,'UTF8')),'hex')=g.document_sha256) FROM ops.generation_archives g JOIN app.provider_attempts a ON a.id=g.attempt_id AND a.task_id=g.task_id AND a.user_id=g.user_id WHERE g.task_id=%s",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        (state["tasks"]["protocol_completed"],),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/runner/work/-AI-/-AI-/scripts/verify_restore_drill.py", line 165, in admin
+    return required_row(c.execute(query, values))[0]
+                        ~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/runner/work/-AI-/-AI-/.venv/lib/python3.13/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.InsufficientPrivilege: permission denied for table generation_archives

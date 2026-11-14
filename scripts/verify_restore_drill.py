@@ -614,8 +614,8 @@ if args.command == "prepare":
             "source archive invalid",
         )
         state["generation_archive"] = admin(
-            "SELECT jsonb_build_object('attempt_id',g.attempt_id,'receipt_id',g.receipt_id,'document_sha256',g.document_sha256,'document',g.document,'request_sha256',g.request_sha256,'intent_bound',g.request_sha256=a.request_hash,'wire_hash_valid',encode(sha256(decode(g.document->>'response_body_base64','base64')),'hex')=g.response_digest,'canonical_hash_valid',encode(sha256(convert_to(g.canonical_document,'UTF8')),'hex')=g.document_sha256) FROM ops.generation_archives g JOIN app.provider_attempts a ON a.id=g.attempt_id AND a.task_id=g.task_id AND a.user_id=g.user_id WHERE g.task_id=%s",
-            (state["tasks"]["protocol_completed"],),
+            "SELECT ops.generation_archive_integrity(%s,%s)",
+            (uid, state["tasks"]["protocol_completed"]),
         )
         require(
             state["generation_archive"] is not None
@@ -1108,8 +1108,8 @@ elif args.command == "verify":
             "restored synchronous detection archive changed",
         )
         restored_generation_archive = admin(
-            "SELECT jsonb_build_object('attempt_id',g.attempt_id,'receipt_id',g.receipt_id,'document_sha256',g.document_sha256,'document',g.document,'request_sha256',g.request_sha256,'intent_bound',g.request_sha256=a.request_hash,'wire_hash_valid',encode(sha256(decode(g.document->>'response_body_base64','base64')),'hex')=g.response_digest,'canonical_hash_valid',encode(sha256(convert_to(g.canonical_document,'UTF8')),'hex')=g.document_sha256) FROM ops.generation_archives g JOIN app.provider_attempts a ON a.id=g.attempt_id AND a.task_id=g.task_id AND a.user_id=g.user_id WHERE g.task_id=%s",
-            (state["tasks"]["protocol_completed"],),
+            "SELECT ops.generation_archive_integrity(%s,%s)",
+            (UUID(state["user_id"]), state["tasks"]["protocol_completed"]),
         )
         require(
             restored_generation_archive == state["generation_archive"]

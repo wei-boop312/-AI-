@@ -1,0 +1,12 @@
+
+Running 4 tests using 1 worker
+
+{"canvas_frame_p95_ms":16.700000000004366,"canvas_duration_ms":60705.79999999993,"api_p95_ms":87.39178400000037,"status_counts":{"200":500},"passed":true}
+  ✓  1 e2e/performance.spec.ts:14:1 › 生产构建：4MP、50绘制对象、60秒真实指针及20并发500次非模型API (1.1m)
+{"event":"storage_archive_observed","observation_id":"3c001875-b209-49fa-a3a0-884a406ae3f4","observed_at":"2026-11-14T18:24:38.074489+00:00","duration_ms":5.006,"outcome":"success"}
+  ✓  2 e2e/recovery.spec.ts:8:1 › 断线恢复、规则报告版本、Cookie刷新和账号隔离 (12.9s)
+  ✓  3 e2e/recovery.spec.ts:47:1 › 不同产品草稿隔离，刷新恢复当前产品且编辑不创建模型任务 (4.5s)
+
+  ✓  4 e2e/smoke.spec.ts:7:1 › 真实服务：登录、产品、上传、Konva选区、生成、报告及移动端 (7.8s)
+
+  4 passed (1.5m)
