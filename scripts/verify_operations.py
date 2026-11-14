@@ -89,6 +89,7 @@ def main():
             "bill_fixture_evidence_preserved_not_settled",
             "recheck_receipt_replayed_after_independent_restore",
             "runtime_configuration_and_quote_preserved_without_local_files",
+            "runtime_revocation_preserved_and_new_quote_blocked",
         ):
             require(verification[field] is True, "recovery guard failed: " + field)
         require(

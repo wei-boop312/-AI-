@@ -64,6 +64,7 @@ from visual_platform.services.runtime_quote import (
     prepare_runtime_quote,
     register_runtime_configuration,
     registered_runtime_context,
+    revoke_runtime_configuration,
 )
 from visual_platform.storage.s3 import S3Storage, StorageError
 from visual_platform.worker.runner import Worker
@@ -249,6 +250,25 @@ if args.command == "prepare":
         runtime.digest(),
         UUID(state["runtime_registration_operation"]),
         state["runtime_registration_reason"],
+    )
+    revoked_data = runtime.model_dump(mode="json")
+    revoked_data["version"] += "-revoked"
+    revoked_runtime = ProviderRuntime.model_validate(revoked_data, strict=True)
+    state["revoked_runtime_sha256"] = revoked_runtime.digest()
+    state["revoked_runtime_id"] = register_runtime_configuration(
+        profile["ADMIN_DATABASE_URL"],
+        revoked_runtime,
+        revoked_runtime.digest(),
+        uuid4(),
+        "synthetic configuration to remain stopped after restore",
+    )
+    state["runtime_revocation_operation"] = str(uuid4())
+    state["runtime_revocation_reason"] = "synthetic durable stop, not supplier cancellation"
+    revoke_runtime_configuration(
+        profile["ADMIN_DATABASE_URL"],
+        revoked_runtime.digest(),
+        UUID(state["runtime_revocation_operation"]),
+        state["runtime_revocation_reason"],
     )
     storage = S3Storage(settings)
     evidence = (
@@ -914,6 +934,76 @@ elif args.command == "verify":
             client.get("/api/v1/credits/balance").json() == state["balance"],
             "runtime restore replay changed money",
         )
+        revoked_context = registered_runtime_context(
+            profile["ADMIN_DATABASE_URL"], state["revoked_runtime_sha256"]
+        )
+        require(
+            revoked_context.get("revoked") is True
+            and revoked_context["id"] == state["revoked_runtime_id"],
+            "runtime stop lost after restore",
+        )
+        revoked_runtime = ProviderRuntime.model_validate(revoked_context["document"], strict=True)
+        require(
+            revoke_runtime_configuration(
+                profile["ADMIN_DATABASE_URL"],
+                revoked_runtime.digest(),
+                UUID(state["runtime_revocation_operation"]),
+                state["runtime_revocation_reason"],
+            )
+            == state["revoked_runtime_id"],
+            "restored revocation replay changed identity",
+        )
+        register_runtime_configuration(
+            profile["ADMIN_DATABASE_URL"],
+            revoked_runtime,
+            revoked_runtime.digest(),
+            uuid4(),
+            "synthetic repeat review must not reenable",
+        )
+        require(
+            registered_runtime_context(profile["ADMIN_DATABASE_URL"], revoked_runtime.digest()).get(
+                "revoked"
+            )
+            is True,
+            "registration reenabled a stopped runtime",
+        )
+        preserved_quote = provider_quote_review(
+            profile["ADMIN_DATABASE_URL"],
+            UUID(state["user_id"]),
+            UUID(state["runtime_quote_receipt"]["quote_id"]),
+        )
+        new_source = client.post(
+            "/api/v1/quotes",
+            json={
+                key: value
+                for key, value in preserved_quote["input_snapshot"].items()
+                if key != "_execution"
+            },
+            headers=headers,
+        )
+        require(new_source.status_code == 201, "fresh restored source quote unavailable")
+        blocked_runtime = False
+        try:
+            prepare_runtime_quote(
+                profile["ADMIN_DATABASE_URL"],
+                UUID(state["user_id"]),
+                UUID(new_source.json()["quote_id"]),
+                revoked_runtime,
+                revoked_runtime.digest(),
+                uuid4(),
+                "synthetic restored stop probe",
+            )
+        except psycopg.Error as error:
+            require(
+                str(error).splitlines()[0] == "provider_runtime_revoked",
+                "restored runtime rejected for an unexpected reason",
+            )
+            blocked_runtime = True
+        require(blocked_runtime, "restored stopped runtime accepted a new quote")
+        require(
+            client.get("/api/v1/credits/balance").json() == state["balance"],
+            "runtime stop probe changed money",
+        )
         require(
             restored_price["document_sha256"] == state["supplier_price_sha256"],
             "supplier price version changed on restore",
@@ -1194,6 +1284,7 @@ elif args.command == "verify":
         "bill_fixture_evidence_preserved_not_settled": True,
         "recheck_receipt_replayed_after_independent_restore": True,
         "runtime_configuration_and_quote_preserved_without_local_files": True,
+        "runtime_revocation_preserved_and_new_quote_blocked": True,
         "five_fixture_tasks_quarantined": True,
         "cost_estimate_history_and_review_block_preserved": True,
         "detection_delivery_requires_new_review_after_restore": True,
