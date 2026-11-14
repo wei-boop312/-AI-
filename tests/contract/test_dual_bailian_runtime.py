@@ -3,9 +3,12 @@
 import copy
 import hashlib
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
 
 import httpx
@@ -13,7 +16,7 @@ from qwen_fixture import canonical_png
 from test_qwen_runtime import qwen_runtime_document
 
 from visual_platform.providers.runtime import ProviderRuntime, credential_status, offline_runtime
-from visual_platform.services.runtime_quote import runtime_snapshot
+from visual_platform.services.runtime_quote import prepare_runtime_quote, runtime_snapshot
 
 
 def dual_document():
@@ -28,6 +31,47 @@ def dual_document():
 
 
 class DualBailianRuntimeContracts(unittest.IsolatedAsyncioTestCase):
+    async def test_unsupported_quote_is_rejected_before_database_connection(self):
+        runtime = ProviderRuntime.model_validate(dual_document(), strict=True)
+        with patch("visual_platform.services.runtime_quote.psycopg.connect") as connect:
+            with self.assertRaisesRegex(ValueError, "qwen_vision_quote_budget_path_not_enabled"):
+                prepare_runtime_quote(
+                    "unused-dsn", uuid4(), uuid4(), runtime, runtime.digest(), uuid4(), "synthetic"
+                )
+            connect.assert_not_called()
+
+    async def test_shipped_operator_examples_preserve_hubway_and_report_dual_path_blockers(self):
+        root = Path(__file__).resolve().parents[2]
+        for name, version, detector in (
+            ("provider-runtime-bailian-hubway.example.json", 2, "gemini-3.8-flash"),
+            ("provider-runtime-dual-bailian.example.json", 3, "qwen3.8-flash"),
+        ):
+            with self.subTest(example=name):
+                path = root / "ops" / name
+                runtime = ProviderRuntime.model_validate_json(path.read_text())
+                self.assertEqual(runtime.schema_version, version)
+                process = subprocess.run(
+                    [
+                        sys.executable,
+                        str(root / "scripts/provider_runtime.py"),
+                        "--config",
+                        str(path),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                )
+                self.assertEqual(process.returncode, 0, process.stdout)
+                result = json.loads(process.stdout)
+                self.assertEqual(result["models"]["detect"], detector)
+                self.assertIsNone(result["reviewed_credential_present"])
+                self.assertFalse(result["execution_enabled"])
+                self.assertEqual(result["paid_calls"], 0)
+                self.assertEqual(result["protocol_quote_preparation_supported"], version == 2)
+                self.assertEqual(
+                    len(result["additional_implementation_required"]), 2 if version == 3 else 0
+                )
+
     def test_schema_three_requires_same_workspace_account_key_and_explicit_detector(self):
         runtime = ProviderRuntime.model_validate(dual_document(), strict=True)
         self.assertEqual(

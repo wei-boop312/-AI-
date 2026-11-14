@@ -4,6 +4,8 @@
 
 schema 3显式配对qwen-image-3.0与qwen3.8-flash，并要求同北京业务空间、密钥指纹、商户指纹及计费分组。schema 1/2的Hubway检测路径保留。两端事实、请求端点及用量分别绑定；旧Gemini执行范围不能替代新检测范围。登记仅保存身份元数据，准备报价明确返回`qwen_vision_quote_budget_path_not_enabled`，不会借用旧报价和预算开启支出。数据库登记与拒绝报价的真实验收等待该提交的Linux CI。
 
+两种运行示例分别位于`ops/provider-runtime-bailian-hubway.example.json`和`ops/provider-runtime-dual-bailian.example.json`，均仅占位、没有密钥或已审阅身份。复制到私有.local后才能填写实际业务空间和指纹；不要修改示例当作生产授权。`provider_runtime.py --config <配置>`仅验证身份结构且默认不读密钥；显式--check-credentials才比较本机指纹。双百炼输出额外列出报价预算、PG检测归档两个缺口，准备报价在连接数据库前拒绝，返回RUNTIME_QUOTE_NOT_IMPLEMENTED；有效配置不代表可执行。
+
 官方[模型页](https://help.aliyun.com/zh/model-studio/qwen3-8-flash)和[视觉接口](https://help.aliyun.com/zh/model-studio/vision/)确认模型支持图像理解，使用北京业务空间 `/compatible-mode/v1/chat/completions`。仅提交已隔离规范化的最终PNG内联字节，绑定SHA和实际尺寸；项目限制4MP/10,000,000字节。不开流式、工具或自动续轮，显式关闭思考并限制输出8192 token。
 
 本机绑定连接的目录只读核验已得到HTTP200和精确qwen3.8-flash行。可用`bailian_metadata.py --probe --model qwen3.8-flash --config <私有连接> --output-dir <新的.local目录>`重新核验；不加--probe不读密钥或请求。目录存在不等于推理权限、质量或计费已验收；完整响应只留私有目录，不能提交供应商账户数据。

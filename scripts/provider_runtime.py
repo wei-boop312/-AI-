@@ -88,6 +88,18 @@ def main():
         if args.prepare_protocol_quote:
             if any(value is None for value in write_args):
                 raise ValueError("explicit_runtime_quote_scope_required")
+            if runtime.schema_version == 3:
+                print(
+                    json.dumps(
+                        {
+                            "result": "RUNTIME_QUOTE_NOT_IMPLEMENTED",
+                            "reason": "qwen_vision_quote_budget_path_not_enabled",
+                            "execution_enabled": False,
+                            "paid_calls": 0,
+                        }
+                    )
+                )
+                return 3
             price_versions = (
                 load_price_bindings(args.price_bindings)
                 if args.price_bindings is not None
@@ -130,6 +142,12 @@ def main():
                     "credential_identity_verified": False,
                     "merchant_identity_verified": False,
                     "supplier_compatibility_verified": False,
+                    "protocol_quote_preparation_supported": runtime.schema_version != 3,
+                    "additional_implementation_required": (
+                        ["dual_model_quote_budget_admission", "qwen_vision_pg_detection_archive"]
+                        if runtime.schema_version == 3
+                        else []
+                    ),
                     "execution_enabled": False,
                     "paid_calls": 0,
                 }

@@ -115,6 +115,8 @@ def prepare_runtime_quote(
     runtime = ProviderRuntime.model_validate(runtime.model_dump(mode="json"), strict=True)
     if reviewed_sha256 != runtime.digest():
         raise ValueError("runtime_configuration_not_reviewed")
+    if runtime.schema_version == 3:
+        raise ValueError("qwen_vision_quote_budget_path_not_enabled")
     with psycopg.connect(dsn) as connection:
         assert_operator(connection)
         source = required_row(
