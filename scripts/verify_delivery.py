@@ -329,7 +329,7 @@ def verify_run(evidence):
             re.search(r"^OK\s*$", text, re.M) is not None and "skipped=" not in text,
             "unittest failure or skipped coverage",
         )
-    for name, count in (("browser-production", 4), ("browser-controlled-faults", 9)):
+    for name, count in (("browser-production", 4), ("browser-controlled-faults", 10)):
         text = (evidence / (name + ".log")).read_text(encoding="utf-8-sig")
         require(
             re.search(r"\b" + str(count) + r" passed\b", text) is not None,
@@ -379,6 +379,19 @@ def verify_run(evidence):
             for item in upload_cases.values()
         ),
         "upload scope isolation or financial proof missing",
+    )
+    quotes = load(evidence / "frontend-quotes.json")
+    require(
+        quotes.get("result") == "PASS"
+        and quotes.get("commit") == commit
+        and quotes.get("paid_calls") == 0
+        and quotes.get("test_sha256") == sha(ROOT / "apps/web/e2e-controlled/quotes.spec.ts")
+        and quotes.get("stale_product_quote_discarded") is True
+        and quotes.get("stale_config_quote_discarded") is True
+        and quotes.get("confirmed_input_matches_current_quote") is True
+        and quotes.get("one_freeze_one_refund") is True
+        and (quotes.get("quotes"), quotes.get("task_posts")) == (3, 1),
+        "quote scope browser proof missing or stale",
     )
     audit = load(evidence / "dependency-audit.json")
     require(
