@@ -1,0 +1,91 @@
+{
+  "run_id": 43629643953,
+  "commit": "c8c0b61b02207c75c5e96fe205eaf9db9cea05ae",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43629643953",
+  "artifact_id": 14127937516,
+  "archive_sha256": "8883a1e550b8417c26869b7d84e1906680d7f8177c37b1996039f2b99da024a8",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "9b6eb380007fff54e6274e818bca2605cca0b62d90f52e4b9d30dfdd9c839013"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "b8e78b7e0e9b7d10930a760696861dbdcb7a238e642f55a8a88d80f84c398980"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "9bbacf2d1bf4df796208857181ddc33f955f786d108f37970b3d58788e9e9e2c"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "b6661a84eb94f4356cc34bbcc981169d342a175e88335891de0bf19745498df0"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "00fae9e9b1c65bd730629dd01e400a36552f5063a07302c3d875760c801f5aee"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "f2d9544d5884e588809aaf073e14832bc5298e2a5a9a7c70f79ec91b8b3306e7"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "47e7a0986393369cfd2def9471cfaf1a32de932e4e639f2a1a4ece589423f1c2"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "e720e58ab77aab43e2c1656761f4fb5f7d42f562dc40e5f676df71de94123627"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "5f86cdb69734e5fa1d6a5eb6284de5232c168a758ebbfb6d169fa6a452ef3025"
+    }
+  },
+  "scope": "Nonempty Qwen submission/query archives, image meters and protected final independently restored; mock suppliers only",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "bdcd7c8f61cd5062c9e64b9b4395d5e5665955bfd03a2db75b75292fe653cebb",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "2b723b203db4f2d3fe03a527360bcbe45e8edcae9c4260b09ed0c5eae2a8ce75",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "e603fd300e58b66c0aaa114d840e02423339665b91081f19fcc3d72776ce0a8c",
+      "passed_tests": [
+        91
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "0dc79298273f552cb457ba7763a39d2449463fe18dee1233812c3056552d24bb",
+      "passed_tests": [
+        262
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "12c71a954dd59d98d0cecde378f8bf754687238f03f6ea58ad1a5634e9147043",
+      "passed_tests": [
+        209
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43629643953-offline-handoff.zip",
+    "sha256": "17c47a21dc734141fcae7d967f15a125faa4c66223cd60c214100ff6d62921b7",
+    "size": 6434405,
+    "files": 1642,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}

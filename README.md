@@ -2,7 +2,7 @@
 
 基于V4计划的私有图片工作台：FastAPI/Worker、PostgreSQL、RabbitMQ、私有S3、React/Konva。已验证的离线MVP包含私有登录、产品与外观配置、真实原图上传、保护区域平移、报价/任务、进度与历史、PNG/报告下载、积分账本，以及独立备份恢复和故障演练。规则证据不足时保持人工复核，不保证商城上架。
 
-最新完整已验基线为[ed6b11be / CI43627774746](https://github.com/wei-boop312/-AI-/actions/runs/43627774746)：209单元、91离线协议契约、261原生PG/MQ/S3测试、4普通+11受控浏览器、完整8服务Compose、独立冷恢复与离线门槛通过。1621文件交付包sidecar及本机独立复验通过。包括私有回执归档、受限恢复摘要、显式百炼运行身份/分币种预算、价格证据与异步查询后费用估算；真实供应商仍仅由MockTransport替代。后续百炼非空查询与保护图冷恢复候选须看自身CI，不能外推。详见[状态](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)和[原始证据](docs/evidence)。
+最新完整已验基线为[c8c0b61b / CI43629643953](https://github.com/wei-boop312/-AI-/actions/runs/43629643953)：209单元、91离线协议契约、262原生PG/MQ/S3测试、4普通+11受控浏览器、完整8服务Compose、独立冷恢复与离线门槛通过。1642文件交付包sidecar及本机独立复验通过。包括私有回执归档、受限恢复摘要、显式百炼运行身份/分币种预算、价格证据与异步查询后费用估算；真实供应商仍仅由MockTransport替代。百炼非空查询/计量与保护图的独立冷恢复也已通过，后续源码仍须自身CI。详见[状态](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)和[原始证据](docs/evidence)。
 
 **当前运行模式仍是offline Fake。百炼图片编辑和Hubway/Gemini检测已有离线适配与Worker演练，尚未真实接通；完整V4、真实供应商验收和生产发布均未完成。** 本机百炼密钥配置见[BAILIAN_SETUP](docs/BAILIAN_SETUP.md)，剩余条件见[REMAINING_WORK](docs/REMAINING_WORK.md)。
 
