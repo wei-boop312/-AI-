@@ -1,0 +1,17 @@
+{
+  "result": "OFFLINE_FINAL_SAMPLE_PROTOCOL_VERIFIED",
+  "sample_kind": "Synthetic canvas with pixel-protected regions from the user-authorized resized product copy",
+  "width": 2000,
+  "height": 2000,
+  "exact_inline_png_bytes_verified": true,
+  "source_unchanged": true,
+  "explicit_mock_posts": 1,
+  "remote_requests": 0,
+  "paid_calls": 0,
+  "real_model_analysis": false,
+  "manual_review_required": true,
+  "billing_usage_integrity": "missing",
+  "execution_enabled": false,
+  "images_and_complete_hash_proof": "private_local_only",
+  "scope": "Local 4MP protocol and immutable archive boundary only; not actual model output, detection accuracy or supplier billing"
+}
