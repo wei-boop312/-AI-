@@ -1,0 +1,12 @@
+{
+  "kind": "model_plaza_ui_observation_not_price_version",
+  "observed_on": "2026-11-15",
+  "source_url": "https://hubway.cc/model-plaza?embedded=1",
+  "searched_model": "gemini-3.8-flash",
+  "matching_price_rows": 0,
+  "group_claims_3_8_support": true,
+  "other_model_price_not_substituted": true,
+  "balance_unit_conversion_verified": false,
+  "detector_price_review_complete": false,
+  "paid_model_calls": 0
+}

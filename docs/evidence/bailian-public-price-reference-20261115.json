@@ -1,0 +1,37 @@
+{
+  "kind": "public_reference_not_publishable_price_version",
+  "observed_on": "2026-11-15",
+  "source_url": "https://help.aliyun.com/zh/model-studio/model-pricing",
+  "provider": "aliyun_bailian",
+  "model": "qwen-image-3.0",
+  "region": "cn-beijing",
+  "currency": "CNY",
+  "rates": [
+    {
+      "measure": "qima_input_1k",
+      "amount": "0.02",
+      "per": 1
+    },
+    {
+      "measure": "qima_input_2k",
+      "amount": "0.02",
+      "per": 1
+    },
+    {
+      "measure": "qima_output_1k",
+      "amount": "0.18",
+      "per": 1
+    },
+    {
+      "measure": "qima_output_2k",
+      "amount": "0.18",
+      "per": 1
+    }
+  ],
+  "reference_one_input_one_output": "0.20",
+  "account_discounts_and_free_quota_verified": false,
+  "merchant_binding_reviewed": false,
+  "published_to_database": false,
+  "actual_spending_verified": false,
+  "paid_model_calls": 0
+}
