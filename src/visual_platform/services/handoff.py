@@ -22,6 +22,23 @@ MAX_FILE = 100 * 1024 * 1024
 MAX_TOTAL = 512 * 1024 * 1024
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("handoff_duplicate_json_key")
+        result[key] = value
+    return result
+
+
+def _invalid_constant(value):
+    raise ValueError("handoff_nonstandard_json_number")
+
+
+def read_json(raw):
+    return json.loads(raw, object_pairs_hook=_unique_object, parse_constant=_invalid_constant)
+
+
 def safe_member(name):
     if (
         not isinstance(name, str)
@@ -57,7 +74,7 @@ def gates_for_commit(folder, commit):
         if path.is_symlink() or not path.is_file() or path.stat().st_size > 2 * 1024 * 1024:
             raise ValueError("missing_or_oversized_handoff_gate")
         raw = path.read_bytes()
-        value = json.loads(raw)
+        value = read_json(raw)
         if (
             value.get("commit") != commit
             or value.get("result") != status
@@ -211,7 +228,7 @@ def verify_handoff_data(data: bytes):
             or sum(item.file_size for item in items) > MAX_TOTAL
         ):
             raise ValueError("handoff_unsafe_type_or_size")
-        manifest = json.loads(archive.read("HANDOFF.json"))
+        manifest = read_json(archive.read("HANDOFF.json"))
         if (
             manifest.get("schema_version") != 1
             or type(manifest.get("schema_version")) is not int
@@ -247,7 +264,7 @@ def verify_handoff_data(data: bytes):
         if listed != set(names) - {"HANDOFF.json"}:
             raise ValueError("handoff_inventory_mismatch")
         for name, status in GATES.items():
-            gate = json.loads(archive.read("evidence/" + name))
+            gate = read_json(archive.read("evidence/" + name))
             if (
                 gate.get("commit") != manifest["commit"]
                 or gate.get("result") != status
@@ -255,15 +272,15 @@ def verify_handoff_data(data: bytes):
                 or gate["paid_calls"] != 0
             ):
                 raise ValueError("handoff_gate_mismatch")
-        static = json.loads(archive.read("evidence/static-checks.json"))
-        offline = json.loads(archive.read("evidence/offline-gate.json"))
+        static = read_json(archive.read("evidence/static-checks.json"))
+        offline = read_json(archive.read("evidence/offline-gate.json"))
         if (
             static.get("implementation_dirty") is not False
             or offline.get("deployed") is not False
             or offline.get("profile") != "offline"
         ):
             raise ValueError("handoff_dirty_or_nonoffline_evidence")
-        native = json.loads(archive.read("evidence/native-result.json"))
+        native = read_json(archive.read("evidence/native-result.json"))
         assets = native.get("files")
         if not isinstance(assets, dict) or not assets:
             raise ValueError("handoff_missing_browser_asset_inventory")
@@ -293,7 +310,7 @@ def verify_handoff_data(data: bytes):
         inventory_name = "supply-chain/third_party/inventory.json"
         if inventory_name not in listed:
             raise ValueError("handoff_missing_legal_inventory")
-        inventory = json.loads(archive.read(inventory_name))
+        inventory = read_json(archive.read(inventory_name))
         if inventory.get("missing_packaged_texts") != [] or not inventory.get("components"):
             raise ValueError("handoff_incomplete_legal_inventory")
         texts = 0

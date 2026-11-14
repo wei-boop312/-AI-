@@ -186,6 +186,31 @@ class HandoffTests(unittest.TestCase):
             verify_handoff_data(self.bundle(files))["result"], "OFFLINE_HANDOFF_VERIFIED"
         )
 
+    def test_duplicate_json_and_nonstandard_numbers_cannot_be_resealed(self):
+        for prefix in (b'{"paid_calls":1,', b'{"unused":NaN,'):
+            with self.subTest(location="manifest", prefix=prefix):
+                original = self.bundle(self.fixture())
+                output = io.BytesIO()
+                with (
+                    zipfile.ZipFile(io.BytesIO(original)) as source,
+                    zipfile.ZipFile(output, "w") as target,
+                ):
+                    for name in source.namelist():
+                        raw = source.read(name)
+                        target.writestr(name, prefix + raw[1:] if name == "HANDOFF.json" else raw)
+                with self.assertRaisesRegex(
+                    ValueError, "handoff_(duplicate_json|nonstandard_json)"
+                ):
+                    verify_handoff_data(output.getvalue())
+            with self.subTest(location="resealed_gate", prefix=prefix):
+                files = self.fixture()
+                name = "evidence/native-result.json"
+                files[name] = prefix + files[name][1:]
+                with self.assertRaisesRegex(
+                    ValueError, "handoff_(duplicate_json|nonstandard_json)"
+                ):
+                    verify_handoff_data(self.bundle(files))
+
     def test_symlink_and_case_insensitive_duplicate_are_rejected(self):
         files = self.fixture()
         with self.assertRaisesRegex(ValueError, "unsafe_type"):
