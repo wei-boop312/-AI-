@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-15 0062请求前费用预测候选：按冻结的单源图请求/输出面积与审阅价格，在PG以整数有理数向上取整预测生成CNY费用；独立Ops只读入口project-generation不创建成本观察/意图/授权。生成预算hold插入前独立检查，已知预测超过上限时整个意图事务回滚，Worker无POST/无hold/无估算并退内部冻结；等于上限允许。未定价Mock演练保留unknown而非零。新增4原生候选覆盖1/7精度、1500²档位边界、作用域/Worker权限、等额边界；原超额用例强化为请求前阻断。全209单元、迁移SQL参数/语法辅助、双平台静态通过，实际PG须本次CI。用户停止线已更新至本周剩余0%或项目完成，仍禁止真实付费模型。
+
 2026-11-15 用户提供本机CSV路径后，已在本机内存解析专用apiKey字段并保存Windows用户环境DASHSCOPE_API_KEY，回读一致；识别CSV北京业务空间地址，在被忽略.local/bailian-csv-connection生成仅含身份/密钥指纹的私有配置，LOCAL_CONNECTION_REVIEW且credential_matches=true。未展示密钥、未复制CSV到仓库、未请求供应商。此为本地一致性校验，不证明远端认证/商户/费率/模型可用；execution_enabled/provider_verified/price_reviewed仍false，真实调用0。
 
 2026-11-15 c8c0b61b/CI43629643953整轮成功：209单元/91契约/262真实基础设施/4普通+11受控浏览器，完整Compose、独立PG/S3冷恢复及所有离线门槛通过。0061新增非空百炼提交/成功查询、四档计量、原下载/规范图绑定、保护区域最终像素、余额/closed预算及零重复POST在真正独立恢复中通过，mandatory flag为true。1642文件实际交付包sidecar与本机独立OFFLINE_HANDOFF_VERIFIED通过，原始报告和日志SHA/数量已归档。真实付费调用0；本机DASHSCOPE_API_KEY仍缺，真实连接/样本质量/价格账单/部署未验。当前周剩余22%，未触及20%线；真实接入等待用户本机遮蔽输入，不消耗额度伪造完成或调用模型。

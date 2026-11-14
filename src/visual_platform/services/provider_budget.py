@@ -52,6 +52,15 @@ def provider_quote_review(dsn: str, user: UUID, quote: UUID):
         )[0]
 
 
+def qwen_generation_projection(dsn: str, user: UUID, quote: UUID):
+    """Read a scoped pre-submission prediction; never create observations or spending authority."""
+    with psycopg.connect(dsn) as connection:
+        assert_operator(connection)
+        return required_row(
+            connection.execute("SELECT ops.qwen_generation_projection(%s,%s)", (user, quote))
+        )[0]
+
+
 def review_blocked_provider_budget(
     dsn: str,
     identity: UUID,

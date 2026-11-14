@@ -55,6 +55,9 @@ class BailianPricingFixture(BailianFixture):
                 {"measure": "thinking_tokens", "amount": "1", "per": 1000000},
             ],
         }
+        if generation:
+            for rate in document["rates"]:
+                rate["per"] = getattr(self, "qwen_rate_per", 1)
         price = SupplierPriceVersion.model_validate_json(json.dumps(document))
         storage = S3Storage(self.settings)
         try:

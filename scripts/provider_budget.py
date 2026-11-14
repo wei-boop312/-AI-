@@ -14,6 +14,7 @@ from visual_platform.providers.authorization import load_authorization, verify_s
 from visual_platform.services.provider_budget import (
     provider_budget_snapshot,
     provider_quote_review,
+    qwen_generation_projection,
     register_provider_budget,
     review_blocked_provider_budget,
 )
@@ -40,6 +41,9 @@ async def main():
     review = modes.add_parser("review-quote")
     review.add_argument("--user", type=UUID, required=True)
     review.add_argument("--quote", type=UUID, required=True)
+    projection = modes.add_parser("project-generation")
+    projection.add_argument("--user", type=UUID, required=True)
+    projection.add_argument("--quote", type=UUID, required=True)
     args = parser.parse_args()
     try:
         dsn = os.environ.get("ADMIN_DATABASE_URL")
@@ -49,6 +53,14 @@ async def main():
         if args.mode == "review-quote":
             data = provider_quote_review(dsn, args.user, args.quote)
             print(json.dumps({"result": "OFFLINE_QUOTE_REVIEW", "paid_calls": 0, "quote": data}))
+            return 0
+        if args.mode == "project-generation":
+            data = qwen_generation_projection(dsn, args.user, args.quote)
+            print(
+                json.dumps(
+                    {"result": "REQUEST_PROJECTION_REVIEW", "paid_calls": 0, "projection": data}
+                )
+            )
             return 0
         if args.mode == "register":
             scope, digest = load_authorization(args.config)

@@ -65,23 +65,28 @@ class QwenScopedEstimateTests(BailianPricingFixture):
             ("unknown", None, None),
         )
 
-    def test_over_cny_ceiling_stops_next_supplier_and_preserves_known_generated_image(self):
+    def test_known_over_cny_request_stops_before_any_supplier_or_cost_observation(self):
         self.qwen_output_rate = "2.00"
         task = self.qwen_task()
         self.assertEqual(self.run_qwen(task), "stopped")
-        self.assertEqual((self.post_count("bailian"), self.post_count("gemini")), (1, 0))
-        estimate = self.costs(task)["estimates"][0]
-        self.assertEqual(
-            (estimate["amount"], estimate["currency"], estimate["ceiling_state"]),
-            ("2.10000000", "CNY", "over_ceiling"),
-        )
+        self.assertEqual((self.post_count("bailian"), self.post_count("gemini")), (0, 0))
+        self.assertEqual(self.costs(task)["estimates"], [])
+        self.assertEqual(self.snapshot()["holds"], [])
         balance = self.client.get("/api/v1/credits/balance").json()
-        self.assertEqual((balance["reserved"], balance["spent_total"]), (16, 0))
+        self.assertEqual(
+            (balance["available"], balance["reserved"], balance["spent_total"]), (100, 0, 0)
+        )
         with psycopg.connect(self.owner) as connection:
-            self.assertIsNotNone(
+            self.assertIsNone(
                 connection.execute(
                     "SELECT generated_version_id FROM app.generation_tasks WHERE id=%s", (task,)
                 ).fetchone()[0]
+            )
+            self.assertEqual(
+                connection.execute(
+                    "SELECT count(*) FROM app.provider_attempts WHERE task_id=%s", (task,)
+                ).fetchone()[0],
+                0,
             )
 
     def test_wrong_price_merchant_cannot_prepare_quote_or_freeze_internal_credits(self):
