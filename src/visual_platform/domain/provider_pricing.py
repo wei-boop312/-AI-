@@ -43,8 +43,8 @@ class UnitRate(BaseModel):
 
 class SupplierPriceVersion(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    schema_version: Literal[1, 2] = 1
-    provider: Literal["bfl", "gemini", "aliyun_bailian"]
+    schema_version: Literal[1, 2, 3] = 1
+    provider: Literal["bfl", "gemini", "aliyun_bailian", "aliyun_bailian_vision"]
     model: str
     endpoint_origin: str
     merchant_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
@@ -81,9 +81,12 @@ class SupplierPriceVersion(BaseModel):
 
     @model_validator(mode="after")
     def scoped(self):
-        if self.provider == "aliyun_bailian":
+        if self.provider in ("aliyun_bailian", "aliyun_bailian_vision"):
             workspace_origin(self.endpoint_origin)
-            if self.schema_version != 2 or self.model != "qwen-image-3.0" or self.currency != "CNY":
+            expected = (
+                (2, "qwen-image-3.0") if self.provider == "aliyun_bailian" else (3, "qwen3.8-flash")
+            )
+            if (self.schema_version, self.model) != expected or self.currency != "CNY":
                 raise ValueError("unreviewed supplier identity")
         else:
             model, origins = IDENTITIES[self.provider]
@@ -113,6 +116,10 @@ class SupplierPriceVersion(BaseModel):
                     "cache_write_tokens",
                     "thinking_tokens",
                 }
+            )
+            or (
+                self.provider == "aliyun_bailian_vision"
+                and set(measures) != {"input_tokens", "cached_input_tokens", "output_tokens"}
             )
             or (
                 self.provider == "aliyun_bailian"

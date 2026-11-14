@@ -16,6 +16,33 @@ from visual_platform.domain.provider_pricing import (
 
 
 class SupplierPricingTests(unittest.TestCase):
+    def test_visual_token_price_is_exact_cny_without_separate_thinking_charge(self):
+        price = self.price(
+            schema_version=3,
+            provider="aliyun_bailian_vision",
+            model="qwen3.8-flash",
+            endpoint_origin="https://ws-synthetic.cn-beijing.maas.aliyuncs.com",
+            currency="CNY",
+            rates=[
+                {"measure": "input_tokens", "amount": "0.8", "per": 1000000},
+                {"measure": "cached_input_tokens", "amount": "0.1", "per": 1000000},
+                {"measure": "output_tokens", "amount": "2.7", "per": 1000000},
+            ],
+        )
+        counts = {"input_tokens": 9, "cached_input_tokens": 3, "output_tokens": 8}
+        self.assertEqual(self.estimate(counts, price=price)["amount"], "0.00002910")
+        self.assertEqual(
+            self.estimate({**counts, "thinking_tokens": 0}, price=price)["cost_status"], "unknown"
+        )
+        for change in (
+            {"schema_version": 2},
+            {"currency": "USD"},
+            {"provider": "gemini"},
+            {"rates": price.model_dump()["rates"][:-1]},
+        ):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                SupplierPriceVersion.model_validate({**price.model_dump(), **change})
+
     def qwen_price(self, **changes):
         return self.price(
             schema_version=2,

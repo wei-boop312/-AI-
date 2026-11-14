@@ -1,0 +1,15 @@
+{
+  "kind": "public_reference_not_publishable_supplier_price",
+  "source": "https://help.aliyun.com/zh/model-studio/qwen3-8-flash",
+  "observed_date": "2026-11-15",
+  "model": "qwen3.8-flash",
+  "region": "cn-beijing",
+  "currency": "CNY",
+  "per_tokens": 1000000,
+  "reference_rates": {"input_tokens": "0.8", "cached_input_tokens": "0.1", "output_tokens": "2.7"},
+  "scope": "Standard public list rates; no merchant discount, promotion, free quota or invoice attested. Explicit cache creation and batch use are outside this adapter.",
+  "merchant_price_published": false,
+  "paid_calls": 0,
+  "actual_spending_verified": false,
+  "execution_enabled": false
+}

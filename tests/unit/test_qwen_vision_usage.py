@@ -19,7 +19,7 @@ class QwenVisionUsageTests(unittest.TestCase):
         self.assertEqual(result["billing_usage_integrity"], "complete")
         self.assertEqual(
             result["quantities"],
-            {"input_tokens": 9, "cached_input_tokens": 3, "output_tokens": 8, "thinking_tokens": 0},
+            {"input_tokens": 9, "cached_input_tokens": 3, "output_tokens": 8},
         )
 
     def test_missing_nested_counts_do_not_become_zero_or_free(self):

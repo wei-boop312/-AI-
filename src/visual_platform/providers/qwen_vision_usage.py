@@ -49,6 +49,5 @@ def vision_usage(document):
             "input_tokens": prompt - cached,
             "cached_input_tokens": cached,
             "output_tokens": completion,
-            "thinking_tokens": 0,
         },
     }

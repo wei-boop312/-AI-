@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-15 百炼检测独立费率审阅候选：Python/schema 3与0065 PG函数增加aliyun_bailian_vision/qwen3.8-flash/北京/CNY身份及完整三个互斥token计量，保留原生成/Hubway费率。completion已包含reasoning，检测输出数量不再增加独立thinking项，原始思考明细保留且非零仍unknown。新增精确估算和2项真实PG/S3登记/负例候选；PG验收待CI。官方公开三费率仅人工参考，未发布商户价/假定免费额度；报价、预算、付费调用仍关闭。
+
 2026-11-15 可选检测模型只读目录已实测：metadata CLI增加显式--model白名单，仅qwen-image-3.0/qwen3.8-flash；11项元数据契约及静态通过。当前北京连接实际GET qwen3.8-flash返回HTTP200和精确模型行，1次目录GET、0推理/付费请求；原文留私有.local，不把模型存在解释为推理授权、质量或账单验收。
 
 2026-11-15 2ffe6ca0/CI43637143953整轮成功：217单元/102契约/270真实基础设施/4普通+11受控浏览器，完整Compose/独立冷恢复/离线门槛通过；1694文件交付包sidecar及本机独立OFFLINE_HANDOFF_VERIFIED通过。报告与原始日志计数/SHA归档。该轮覆盖只读元数据工具，不覆盖其后的新检测协议与schema 3登记。
