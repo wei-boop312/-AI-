@@ -18,7 +18,7 @@
 .venv/Scripts/python.exe scripts/bailian_connection.py --prepare-local --endpoint-origin https://ws-EXAMPLE.cn-beijing.maas.aliyuncs.com --output-dir .local/bailian-connection
 ```
 
-该命令只读本机密钥、写连接身份与指纹，不保存密钥、不发 HTTP、不建立执行授权。`--config .local/bailian-connection/connection.json` 默认不读凭据，附加 `--check-credentials` 才比较本机密钥指纹。目前本机预检为 `WAITING_PRIVATE_CREDENTIAL`，未生成真实连接文件。
+该命令只读本机密钥、写连接身份与指纹，不保存密钥、不发 HTTP、不建立执行授权。`--config .local/bailian-connection/connection.json` 默认不读凭据，附加 `--check-credentials` 才比较本机密钥指纹。用户提供本机 CSV 路径后，密钥已保存本机用户环境，回读一致；`.local/bailian-csv-connection/connection.json` 本地预检 `credential_matches=true`。配置仅存身份与指纹，不存密钥。尚未请求远端，不能据此确认认证、余额、费率或模型可用。
 
 ## 协议与验收范围
 

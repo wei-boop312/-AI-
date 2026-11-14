@@ -1,5 +1,7 @@
 # 实施状态
 
+2026-11-15 用户提供本机CSV路径后，已在本机内存解析专用apiKey字段并保存Windows用户环境DASHSCOPE_API_KEY，回读一致；识别CSV北京业务空间地址，在被忽略.local/bailian-csv-connection生成仅含身份/密钥指纹的私有配置，LOCAL_CONNECTION_REVIEW且credential_matches=true。未展示密钥、未复制CSV到仓库、未请求供应商。此为本地一致性校验，不证明远端认证/商户/费率/模型可用；execution_enabled/provider_verified/price_reviewed仍false，真实调用0。
+
 2026-11-15 c8c0b61b/CI43629643953整轮成功：209单元/91契约/262真实基础设施/4普通+11受控浏览器，完整Compose、独立PG/S3冷恢复及所有离线门槛通过。0061新增非空百炼提交/成功查询、四档计量、原下载/规范图绑定、保护区域最终像素、余额/closed预算及零重复POST在真正独立恢复中通过，mandatory flag为true。1642文件实际交付包sidecar与本机独立OFFLINE_HANDOFF_VERIFIED通过，原始报告和日志SHA/数量已归档。真实付费调用0；本机DASHSCOPE_API_KEY仍缺，真实连接/样本质量/价格账单/部署未验。当前周剩余22%，未触及20%线；真实接入等待用户本机遮蔽输入，不消耗额度伪造完成或调用模型。
 
 2026-11-15 ed6b11be/CI43627774746整轮成功：209单元/91契约/261真实基础设施/4普通+11受控浏览器，Compose/独立恢复/离线门槛全部通过。0060显式双价格绑定、查询后估算、缺计量/超CNY阻断已由原生测试证明；原金额观察仍unknown，估算不是账单。实际包1621文件，sidecar与本机独立OFFLINE_HANDOFF_VERIFIED通过，原始报告和计数SHA归档。0061百炼非空冷恢复尚在自身CI，不借用该绿灯。真实调用0，真实密钥/质量/账单/生产部署未验。
