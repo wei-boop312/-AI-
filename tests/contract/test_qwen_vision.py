@@ -7,6 +7,7 @@ import hashlib
 import json
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
@@ -27,6 +28,86 @@ ORIGIN = "https://ws-synthetic.cn-beijing.maas.aliyuncs.com"
 
 
 class QwenVisionContracts(unittest.IsolatedAsyncioTestCase):
+    async def test_advisory_price_rederives_wire_counts_and_binds_all_three_provenance_hashes(self):
+        from visual_platform.domain.provider_pricing import SupplierPriceVersion
+        from visual_platform.domain.visual_price_review import (
+            VisualPriceReviewScope,
+            estimate_visual_archive,
+        )
+
+        provider = self.provider()
+        receipt = await provider.submit(
+            uuid4(), self.png, expected_sha256=self.sha, width=256, height=256
+        )
+        record = provider.fetch_facts(receipt.provider_id)
+        now = datetime.now(timezone.utc)
+        price = SupplierPriceVersion(
+            schema_version=3,
+            provider="aliyun_bailian_vision",
+            model=MODEL,
+            endpoint_origin=ORIGIN,
+            merchant_fingerprint="a" * 64,
+            billing_group="synthetic-only",
+            version="offline-visual-wire",
+            currency="CNY",
+            valid_from=now - timedelta(minutes=1),
+            valid_until=now + timedelta(hours=1),
+            evidence_kind="offline_fixture",
+            evidence_sha256="b" * 64,
+            complete_meter_coverage=True,
+            rates=[
+                {"measure": name, "amount": amount, "per": 1000000}
+                for name, amount in (
+                    ("input_tokens", "0.8"),
+                    ("cached_input_tokens", "0.1"),
+                    ("output_tokens", "2.7"),
+                )
+            ],
+        )
+        scope = VisualPriceReviewScope(
+            final_sha256=self.sha,
+            request_sha256=record["request_sha256"],
+            response_digest=receipt.response_digest,
+            merchant_fingerprint="a" * 64,
+            billing_group="synthetic-only",
+            observed_at=now,
+        )
+        result = estimate_visual_archive(price, record, scope)
+        self.assertEqual((result["amount"], result["currency"]), ("0.00002910", "CNY"))
+        self.assertFalse(result["actual_spending_verified"])
+        self.assertFalse(result["spending_authorized"])
+        self.assertFalse(result["task_cost_record_created"])
+        for field in ("final_sha256", "request_sha256", "response_digest"):
+            with (
+                self.subTest(field=field),
+                self.assertRaisesRegex(ValueError, "provenance_mismatch"),
+            ):
+                estimate_visual_archive(price, record, scope.model_copy(update={field: "f" * 64}))
+        modified = copy.deepcopy(record)
+        modified["quantities"]["output_tokens"] = 0
+        with self.assertRaises(ValueError):
+            estimate_visual_archive(price, modified, scope)
+        foreign = price.model_copy(
+            update={"endpoint_origin": "https://ws-other.cn-beijing.maas.aliyuncs.com"}
+        )
+        self.assertEqual(
+            estimate_visual_archive(foreign, record, scope)["reason"], "price_identity_mismatch"
+        )
+        self.body["usage"].pop("prompt_tokens_details")
+        second = await provider.submit(
+            uuid4(), self.png, expected_sha256=self.sha, width=256, height=256
+        )
+        unknown = provider.fetch_facts(second.provider_id)
+        unknown_scope = scope.model_copy(
+            update={
+                "response_digest": second.response_digest,
+                "request_sha256": unknown["request_sha256"],
+            }
+        )
+        self.assertEqual(
+            estimate_visual_archive(price, unknown, unknown_scope)["cost_status"], "unknown"
+        )
+
     async def asyncSetUp(self):
         self.folder = tempfile.TemporaryDirectory()
         self.providers = []

@@ -81,7 +81,10 @@ class DualBailianProtocolProvider(QwenProtocolProvider):
         )
 
     def validate_facts_record(self, record):
-        return validate_vision_archive(record)
+        record = validate_vision_archive(record)
+        if record["endpoint_origin"] != self.gemini.endpoint_origin:
+            raise ProviderUncertain("Qwen detector archive belongs to another workspace")
+        return record
 
     @staticmethod
     def observation_from_facts(record):

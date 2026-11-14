@@ -70,6 +70,16 @@ def estimate_reviewed_price(dsn: str, identity: UUID, quantities: dict, **scope)
     return estimate_supplier_cost(price, quantities, **scope)
 
 
+def estimate_reviewed_visual_archive(dsn, identity, record, scope):
+    from visual_platform.domain.visual_price_review import estimate_visual_archive
+
+    reviewed = supplier_price_context(dsn, identity)
+    price = SupplierPriceVersion.model_validate_json(json.dumps(reviewed["document"]))
+    if hashlib.sha256(canonical_price(price)).hexdigest() != reviewed["document_sha256"]:
+        raise ValueError("supplier_price_document_mismatch")
+    return estimate_visual_archive(price, record, scope)
+
+
 def supplier_task_costs(dsn: str, task: UUID):
     with psycopg.connect(dsn) as connection:
         assert_operator(connection)

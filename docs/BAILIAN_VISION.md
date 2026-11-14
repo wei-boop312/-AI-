@@ -17,3 +17,5 @@ OpenAI兼容用量与Gemini六计量规则分开：prompt包含缓存、completi
 费率审阅候选使用独立schema 3/provider `aliyun_bailian_vision`，仅CNY及非缓存输入/缓存输入/输出三个互斥计量。completion已包含思考，不能再添加thinking收费计量；原始reasoning计数仍保留并要求为0。0065允许Ops显式证据审阅、私有S3归档和幂等登记，不自动发布公开参考价，也不开放schema 3任务报价、预算或付费HTTP。独立算术估算永远不代表实际账单，协议归档本身的金额仍unknown。
 
 官方模型页的北京公开参考为每百万token输入0.8元、缓存命中0.1元、输出2.7元；不适用于显式缓存创建、批量或其他地域，不代表本商户折扣或免费额度。公开摘记只用于人工审阅准备，不具备发布费率所需的商户、业务空间和有效期证据。
+
+只读原回执审阅入口：`supplier_pricing.py estimate-vision-archive --price <已审阅价格UUID> --archive <私有facts.json> --scope <私有审阅范围.json>`，需要Ops数据库身份。范围明确列出final_sha256/request_sha256/response_digest、merchant_fingerprint/billing_group和UTC observed_at；不能输入替代用量。系统从原响应重新验证Facts/计量及归档派生值，再使用精确商户价格估算。缺计量或身份/有效期不符保持unknown，篡改派生数量或三个摘要不匹配直接拒绝。它不认证人工范围来源，不写任务成本、预算或账单，不提供执行授权；PG任务检测归档路径仍未开放。组合读取还拒绝来自其他业务空间的完整有效回执。

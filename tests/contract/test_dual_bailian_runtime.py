@@ -133,6 +133,12 @@ class DualBailianRuntimeContracts(unittest.IsolatedAsyncioTestCase):
                     provider.validate_facts_record(record)["final_sha256"],
                     hashlib.sha256(png).hexdigest(),
                 )
+                foreign = copy.deepcopy(record)
+                foreign["endpoint_origin"] = "https://ws-other.cn-beijing.maas.aliyuncs.com"
+                from visual_platform.providers.contract import ProviderUncertain
+
+                with self.assertRaises(ProviderUncertain):
+                    provider.validate_facts_record(foreign)
                 observed = provider.observation(
                     "detect",
                     {

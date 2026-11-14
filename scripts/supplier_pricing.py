@@ -13,9 +13,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.domain.provider_pricing import SupplierMeteringContext, SupplierPriceVersion
 from visual_platform.domain.supplier_billing import load_bill_review, review_supplier_bill
+from visual_platform.domain.visual_price_review import VisualPriceReviewScope
+from visual_platform.providers.qwen_image import strict_document
 from visual_platform.services.provider_pricing import (
     archive_supplier_bill,
     estimate_reviewed_price,
+    estimate_reviewed_visual_archive,
     publish_supplier_price,
     supplier_bill_review,
     supplier_billing_context,
@@ -39,6 +42,10 @@ def main():
     estimate = modes.add_parser("estimate")
     estimate.add_argument("--price", type=UUID, required=True)
     estimate.add_argument("--metering-context", type=Path, required=True)
+    visual = modes.add_parser("estimate-vision-archive")
+    visual.add_argument("--price", type=UUID, required=True)
+    visual.add_argument("--archive", type=Path, required=True)
+    visual.add_argument("--scope", type=Path, required=True)
     task = modes.add_parser("task-costs")
     task.add_argument("--task", type=UUID, required=True)
     billing = modes.add_parser("billing-context")
@@ -145,6 +152,18 @@ def main():
             )
         elif args.mode == "task-costs":
             output = supplier_task_costs(dsn, args.task)
+        elif args.mode == "estimate-vision-archive":
+            documents = []
+            for path, limit in ((args.archive, 4 * 1024 * 1024), (args.scope, 16384)):
+                if path.is_symlink() or not path.is_file() or path.stat().st_size > limit:
+                    raise ValueError("bounded_regular_visual_review_file_required")
+                with path.open("rb") as stream:
+                    raw = stream.read(limit + 1)
+                if len(raw) > limit:
+                    raise ValueError("visual_review_file_grew_beyond_limit")
+                documents.append(strict_document(raw))
+            scope = VisualPriceReviewScope.model_validate_json(json.dumps(documents[1]))
+            output = estimate_reviewed_visual_archive(dsn, args.price, documents[0], scope)
         else:
             if args.metering_context.stat().st_size > 65536:
                 raise ValueError("bounded usage context required")
