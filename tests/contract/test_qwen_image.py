@@ -10,10 +10,12 @@ from pathlib import Path
 from uuid import uuid4
 
 import httpx
+from qwen_fixture import canonical_png
 
 from visual_platform.providers.contract import ProviderFailure, ProviderUncertain, Receipt
 from visual_platform.providers.qwen_image import (
     ASYNC_PATH,
+    MAX_IMAGE,
     QwenImageProvider,
     QwenImageRequest,
     image_url,
@@ -21,11 +23,38 @@ from visual_platform.providers.qwen_image import (
 )
 
 ORIGIN = "https://ws-synthetic.cn-beijing.maas.aliyuncs.com"
-PNG = b"\x89PNG\r\n\x1a\nsynthetic-decoder-fixture"
+PNG = canonical_png()
 URL = "https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/output.png?Expires=1"
 
 
 class QwenImageContracts(unittest.TestCase):
+    def test_source_limits_reject_before_journal_or_network_even_after_model_copy(self):
+        provider = self.provider()
+        damaged = bytearray(PNG)
+        damaged[29] ^= 1
+        invalid = (
+            canonical_png(8001, 801),
+            canonical_png(1024, 64),
+            PNG[:24],
+            bytes(damaged),
+            PNG + b"0" * (MAX_IMAGE + 1 - len(PNG)),
+        )
+        for data in invalid:
+            with self.subTest(size=len(data)), self.assertRaises(ValueError):
+                provider.submit(
+                    uuid4(),
+                    self.request().model_copy(update={"images": [base64.b64encode(data).decode()]}),
+                )
+        self.assertEqual(self.calls, [])
+        self.assertEqual(list(Path(self.temp.name).iterdir()), [])
+        admitted = QwenImageRequest(
+            prompt="synthetic boundary",
+            width=512,
+            height=512,
+            images=[base64.b64encode(canonical_png(8000, 800)).decode()],
+        )
+        self.assertEqual(len(admitted.payload()["input"]["messages"][0]["content"]), 2)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

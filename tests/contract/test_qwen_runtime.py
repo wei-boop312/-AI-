@@ -8,6 +8,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import httpx
+from qwen_fixture import canonical_png
 from test_runtime import runtime_document
 
 from visual_platform.providers.contract import ProviderUncertain
@@ -108,7 +109,7 @@ class QwenRuntimeContracts(unittest.IsolatedAsyncioTestCase):
                     prompt="synthetic edit",
                     width=512,
                     height=512,
-                    images=[base64.b64encode(b"\x89PNG\r\n\x1a\nsynthetic").decode()],
+                    images=[base64.b64encode(canonical_png()).decode()],
                 ).model_dump()
                 receipt = await provider.submit_generate(intent, payload)
                 attempt = {

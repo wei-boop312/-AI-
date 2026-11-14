@@ -1,0 +1,31 @@
+{
+  "reviewed_on": "2026-11-15",
+  "source_url": "https://help.aliyun.com/zh/model-studio/qwen-image-generation-and-editing-api-reference",
+  "kind": "independently_written_protocol_facts_not_full_page_archive",
+  "model": "qwen-image-3.0",
+  "region": "cn-beijing",
+  "async_path": "/api/v1/services/aigc/image-generation/generation",
+  "input_constraints": {
+    "maximum_count": 3,
+    "maximum_edge_pixels": 8000,
+    "maximum_aspect_ratio": "10:1",
+    "documented_size_label": "10 MB",
+    "project_conservative_maximum_bytes": 10000000
+  },
+  "output_constraints": {
+    "minimum_area_pixels": 262144,
+    "documented_maximum_area_pixels": 4194304,
+    "project_maximum_area_pixels": 4000000,
+    "maximum_aspect_ratio": "8:1",
+    "project_image_count": 1
+  },
+  "usage": {
+    "input_count": "actual_number_of_references",
+    "meter_tier_basis": "output_area_pixels",
+    "one_k_maximum_area_pixels": 2250000,
+    "no_token_or_invoice_inference": true
+  },
+  "provider_verified": false,
+  "actual_spending_verified": false,
+  "paid_model_calls": 0
+}

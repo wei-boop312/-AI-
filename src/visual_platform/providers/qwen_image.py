@@ -9,6 +9,8 @@ import hashlib
 import json
 import os
 import re
+import struct
+import zlib
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -24,7 +26,26 @@ from visual_platform.providers.gemini_usage import unique_object
 MODEL = "qwen-image-3.0"
 ASYNC_PATH = "/api/v1/services/aigc/image-generation/generation"
 MAX_BODY = 1024 * 1024
-MAX_IMAGE = 10 * 1024 * 1024
+# Conservative decimal byte ceiling for the documented 10 MB input limit.
+MAX_IMAGE = 10_000_000
+
+
+def reference_metadata(data):
+    """Check the header of already isolated/canonical PNGs; not a general PNG decoder."""
+    if (
+        not 33 <= len(data) <= MAX_IMAGE
+        or data[:16] != b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
+        or zlib.crc32(data[12:29]) != struct.unpack(">I", data[29:33])[0]
+    ):
+        raise ValueError("qwen_reference_header_or_size_invalid")
+    width, height = struct.unpack(">II", data[16:24])
+    if (
+        not 1 <= width <= 8000
+        or not 1 <= height <= 8000
+        or max(width, height) > 10 * min(width, height)
+    ):
+        raise ValueError("qwen_reference_dimensions_out_of_range")
+    return {"width": width, "height": height, "byte_size": len(data)}
 
 
 def checked_dimensions(width, height):
@@ -99,8 +120,7 @@ class QwenImageRequest(BflRequest):
         if len(self.images) > 3:
             raise ValueError("qwen_edit_dimensions_or_references_out_of_range")
         for reference in self.images:
-            if len(base64.b64decode(reference, validate=True)) > MAX_IMAGE:
-                raise ValueError("qwen_reference_exceeds_10MiB")
+            reference_metadata(base64.b64decode(reference, validate=True))
         return self
 
     def payload(self):
