@@ -217,6 +217,8 @@ def verify_handoff_data(data: bytes):
         raise ValueError("invalid_handoff_archive")
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         items = archive.infolist()
+        if any(item.orig_filename != item.filename for item in items):
+            raise ValueError("handoff_ambiguous_member_name")
         names = [safe_member(item.filename) for item in items]
         if len({name.casefold() for name in names}) != len(names) or "HANDOFF.json" not in names:
             raise ValueError("handoff_duplicate_or_missing_manifest")

@@ -218,6 +218,25 @@ class HandoffTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             verify_handoff_data(self.bundle(files, duplicate=True))
 
+    def test_nul_truncated_zip_name_cannot_match_a_safe_manifest_name(self):
+        files = self.fixture()
+        files["source/extra"] = b"ambiguous member fixture"
+        original = self.bundle(files)
+        output = io.BytesIO()
+        with (
+            zipfile.ZipFile(io.BytesIO(original)) as source,
+            zipfile.ZipFile(output, "w") as target,
+        ):
+            for name in source.namelist():
+                target.writestr(
+                    "source/extraABCDE" if name == "source/extra" else name, source.read(name)
+                )
+        malicious = output.getvalue().replace(b"source/extraABCDE", b"source/extra\x00BCDE")
+        with zipfile.ZipFile(io.BytesIO(malicious)) as parsed:
+            self.assertIn("source/extra", parsed.namelist())
+        with self.assertRaisesRegex(ValueError, "ambiguous_member_name"):
+            verify_handoff_data(malicious)
+
     def test_special_unix_member_types_are_rejected_before_content_verification(self):
         original = self.bundle(self.fixture())
         for mode in (stat.S_IFIFO, stat.S_IFCHR, stat.S_IFBLK, stat.S_IFSOCK, stat.S_IFDIR):
