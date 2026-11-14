@@ -1,5 +1,7 @@
 # 最小真实供应商验收的离线预检
 
+当前状态（2026-11-14）：0027原子预算绑定已在后续完整原生CI验证；0034多计价单位授权/独立恢复撤销、0038 mock领取隔离及0037离线账单证据恢复也已通过，见[当前任务状态](TASK_STATUS.md)。下文早期“原生待CI”记录仅为当时状态。真实执行入口依旧缺失，不能通过省略preflight开启调用；费用授权配置通过不构成真实供应商验收。
+
 `python scripts/provider_smoke.py --config work/private-smoke/review.json --preflight` 只检查授权范围和样本，不读取模型密钥、不请求供应商、不创建业务任务。返回 `SCOPE_REVIEW_READY` 仅表示配置可供审阅，不是费用授权，也不是 `PROVIDER_VERIFIED`。省略 `--preflight` 固定返回 `WAITING_EXTERNAL`/exit3；当前没有启用付费执行入口。
 
 将 `ops/provider-smoke.example.json` 复制到忽略的私有目录后编辑。示例故意过期、摘要为占位值、样本不存在；金额只是格式示例，不是供应商价格。配置不允许 API key 或其他额外字段。实际密钥不应进入配置、命令行、Git 或公开报告。
