@@ -151,6 +151,38 @@ class HandoffTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 verify_handoff_data(self.bundle(files))
 
+    def test_windows_device_names_aliases_and_illegal_characters_are_rejected(self):
+        for name in (
+            "CON",
+            "nul.txt",
+            "Aux.tar.gz",
+            "COM9/data",
+            "lpt¹.txt",
+            ".git./config",
+            ".env /secret",
+            "trailing.",
+            "trailing /file",
+            'bad"name',
+            "bad<name",
+            "bad>name",
+            "bad|name",
+            "bad?name",
+            "bad*name",
+        ):
+            files = self.fixture()
+            files["source/" + name] = b"unsafe Windows path fixture"
+            with (
+                self.subTest(name=name),
+                self.assertRaisesRegex(ValueError, "unsafe_bundle_member"),
+            ):
+                verify_handoff_data(self.bundle(files))
+        files = self.fixture()
+        for name in ("console.txt", "COM10.txt", "auxiliary", ".temporary"):
+            files["source/" + name] = b"ordinary path fixture"
+        self.assertEqual(
+            verify_handoff_data(self.bundle(files))["result"], "OFFLINE_HANDOFF_VERIFIED"
+        )
+
     def test_symlink_and_case_insensitive_duplicate_are_rejected(self):
         files = self.fixture()
         with self.assertRaisesRegex(ValueError, "unsafe_type"):

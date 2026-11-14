@@ -1,5 +1,7 @@
 # 离线交付包
 
+路径校验拒绝Windows设备保留名（含扩展名及COM/LPT上标数字）、末尾空格或句点和非法字符，规则依据[Microsoft文件命名说明](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file)。恶意名称在读取ZIP清单时拒绝，不尝试解包或创建设备文件；正常近似名称保留。新增本地边界测试与原3ef9eea实际包复验通过，不代表后续提交已经完成整轮CI。
+
 CI完成当前提交的静态、单元/契约、原生PG/MQ/S3、生产浏览器、完整Compose、冷恢复/重启和全部offline gate后，执行`python scripts/handoff.py`，生成`work/ci-public/offline-handoff.zip`和摘要报告`offline-handoff.json`。两者随该提交的GitHub Actions artifact上传；artifact按仓库现有设置保留3天。先核对报告commit，再下载对应包。
 
 包内目录：
