@@ -41,3 +41,5 @@ ProtocolProvider在Worker的每个阶段先核对_execution.provider_endpoints�
 
 
 2026-11-14公开资料补充：[Sub2API上游README](https://github.com/Wei-Shaw/sub2api)与[路由定义](https://github.com/Wei-Shaw/sub2api/blob/main/backend/internal/handler/endpoint.go)说明上游软件有图片生成/编辑路由；这只说明该软件具备相关接口，不证明Hubway部署版本、账号分组或FLUX 3 Image模型可用。未复制上游源码、未新增依赖、未调用付费接口；仍等待用户确认生成模型/供应商方向，固定模型未替换。
+
+2026-11-14 用户已明确允许改用Hubway实际支持的图片编辑模型，前提是先核实准确模型和编辑协议；此前保留FLUX等待选择的记录为历史决策。再次只读查看登录渠道及当前项目密钥选择器：可见gemini-3.8-flash及high、4-argon/4-carbon及推理后缀，未核实图片编辑模型。未把聊天回答当成官方接口文档，未更改密钥/分组、未由代理发送聊天或图片。代码暂不猜测gpt-image或其他模型ID。
