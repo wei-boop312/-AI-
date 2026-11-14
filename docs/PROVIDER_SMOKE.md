@@ -13,3 +13,17 @@ schema_version=2配置固定授权ID、用户/产品/标准化版本及完整报
 0027已新增费用上限与持久意图同事务绑定候选（见PROVIDER_BUDGET，原生待CI）。尚未完成：实时Worker路由、已知ID只查询恢复、一次性费用执行及完整归档/回贴/最终检测/费用交叉验收。配置中的金额不能证明供应商收费封顶；还需可核验价表与成本来源，BFL credits不能直接当USD，Gemini未知费用不能当0。超时/未知必须停止新submit并保留预算占用，不能因预检成功就绕过这些条件。当前工程AGENTS禁止实际付费调用，保持这一限制。
 
 当前授权配置单元行为/负例，包含真实独立解码和CLI拒绝/脱敏；这些是离线配置证明，不能替代实际模型样本或PG原子预算竞争测试。真实样本、模型次数/费用范围、安全配置及外部验收仍按P4-03记录。
+
+## 百炼完整绑定的只读审阅
+
+仅本机文件预检不足以证明数据库报价、预算和价格属于同一任务。新增显式模式：
+
+```text
+python scripts/provider_smoke.py --config .local/private-scope/authorization.json --preflight --bound-review --runtime .local/private-scope/runtime.json --bailian-connection .local/bailian-csv-connection/connection.json --quote <报价UUID>
+```
+
+需要专属Ops身份ADMIN_DATABASE_URL。命令先以现有隔离解码器核样本原文与规范SHA，再在一个只读REPEATABLE READ数据库事务里读取各受限上下文。交叉核对完整报价/授权SHA、运行配置/停用、本机百炼连接指纹、未使用预算及逐币种上限、两份不可变费率/商户/端点/有效期/完整计量和请求前预测。报价未绑定完整费率时拒绝，不从网页猜测费率。
+
+默认要求两份reviewed_price；合成CI演练才显式使用--offline-fixtures，报告review_mode明确不同。默认不读凭据；--check-credentials额外读取两个所选本机密钥并只报告布尔匹配，不能据此证明远端认证。
+
+BOUND_PROTOCOL_SCOPE_REVIEW只代表当次元数据快照与样本审阅通过，不是执行授权或付费开关。不会登记预算、创建任务/意图、写成本或请求供应商。事务结束后停用/到期/使用状态仍可能变化，真正调用意图必须重新通过既有PG原子检查。原价格证据的当前S3可读性、真实商户/兼容性、质量和账单仍独立待验。
