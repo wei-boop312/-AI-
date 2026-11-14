@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-11-14T01:43:42.956558+00:00",
+  "commit": "d5e3440a915ddf8f3f832679e4d5b78fc1d3160a",
+  "scope": "P5-02 native recovery/restart/performance and runtime metrics; no production SLA",
+  "paid_calls": 0,
+  "recovery_objectives": {
+    "scope": "initial_rehearsal",
+    "target_document_sha256": "37c82a14debb5e7f9d8e5c4cdaad0ed004b5b496bd4e10adbcca40e2063d12f9",
+    "target_source": "docs/specification/PROJECT_PLAN.md#13",
+    "target_source_sha256": "d74c99ebc7bae74fc7187d10e2f194967d985fe18b11fdf94e8c8910d602fabb",
+    "rpo_target_seconds": 86400,
+    "rto_target_seconds": 14400,
+    "rehearsal_rpo_met": true,
+    "rehearsal_rto_met": true,
+    "rpo_measurement": "snapshot age at recovery start; single rehearsal only",
+    "production_backup_cadence_verified": false,
+    "production_sla_verified": false
+  },
+  "drill_verification": "PASS",
+  "rto_seconds": 15.338146931999972,
+  "snapshot_age_seconds": 1.910389,
+  "result": "PASS",
+  "runtime_metrics": "PASS"
+}

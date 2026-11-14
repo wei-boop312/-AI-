@@ -34,3 +34,5 @@ python scripts/handoff.py --verify <offline-handoff.zip的路径>
 [3ef9eea / CI43537600900](https://github.com/wei-boop312/-AI-/actions/runs/43537600900)已进一步通过0046独立存储恢复后的原重检回执重放，181单元/56契约/224原生/4+10浏览器与全部门槛全绿。实际包1406文件、5,183,182字节，SHA为8bf76e10224199928dfb3a32bbe4a1df0b3958bf11d4830d3098c327535ae20a，下载后独立验证通过；原始sidecar及来源见ci-43537600900。
 
 [339cebb / CI43539701837](https://github.com/wei-boop312/-AI-/actions/runs/43539701837)进一步包含offline启动参数兼容并整轮通过，测试数量181/56/224及4+10浏览器。实际包1423文件、5,340,362字节，SHA为48ee3fcb87fc0f68ef20fcaf9e73a2f449c5461c38a2e470d94cc306bd468bd9；原始sidecar和来源见ci-43539701837，新Windows路径校验独立复验通过。后续身份请求清理与路径加固仍分别等待自身CI。
+
+[d5e3440 / CI43540917648](https://github.com/wei-boop312/-AI-/actions/runs/43540917648)已验证初始身份请求清理，181/56/224及4+10浏览器和全部门槛通过。实际包1432文件、5,349,687字节，SHA为d2b26c45613c6c1e3f79ade14e05b5dd37b9892386e9869e966c058634059cca；原始sidecar和来源见ci-43540917648，下载后经最新Windows路径规则独立复验通过。该包不包含后续路径加固及迟到视图错误处理源码。
