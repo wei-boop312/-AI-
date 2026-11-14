@@ -7,13 +7,13 @@ The script prints only the variable name and result, and never calls a provider 
 #>
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet('bfl','hubway','gemini')]
+    [ValidateSet('bfl','hubway','gemini','bailian')]
     [string]$Provider,
     [switch]$Replace,
     [switch]$ExplainOnly
 )
 $ErrorActionPreference = 'Stop'
-$providerVariables = @{bfl='BFL_API_KEY';hubway='HUBWAY_API_KEY';gemini='GEMINI_API_KEY'}
+$providerVariables = @{bfl='BFL_API_KEY';hubway='HUBWAY_API_KEY';gemini='GEMINI_API_KEY';bailian='DASHSCOPE_API_KEY'}
 $providerVariable = $providerVariables[$Provider]
 if ($ExplainOnly) {
     @{result='INSTRUCTIONS_ONLY';variable=$providerVariable;storage='Windows user and current PowerShell environment';masked_input=$true;paid_calls=0} | ConvertTo-Json -Compress

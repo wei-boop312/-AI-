@@ -1,0 +1,300 @@
+"""Beijing Qwen Image async editing protocol; explicit offline transports only.
+
+No live model path is exposed. POST is attempted once per private intent journal.
+The same reviewed workspace origin supplies task GETs; downloads never receive keys.
+"""
+
+import base64
+import hashlib
+import json
+import os
+import re
+from dataclasses import dataclass
+from pathlib import Path
+from urllib.parse import urlsplit
+from uuid import UUID
+
+import httpx
+from pydantic import model_validator
+
+from visual_platform.providers.bfl import BflRequest
+from visual_platform.providers.contract import ProviderFailure, ProviderUncertain, Receipt
+from visual_platform.providers.gemini_usage import unique_object
+
+MODEL = "qwen-image-3.0"
+ASYNC_PATH = "/api/v1/services/aigc/image-generation/generation"
+MAX_BODY = 1024 * 1024
+MAX_IMAGE = 10 * 1024 * 1024
+
+
+def workspace_origin(value):
+    if type(value) is not str or not re.fullmatch(
+        r"https://ws-[a-z0-9]{1,64}\.cn-beijing\.maas\.aliyuncs\.com", value
+    ):
+        raise ValueError("unreviewed_bailian_workspace_origin")
+    return value
+
+
+def strict_document(raw):
+    def invalid(value):
+        raise ValueError("nonstandard_json")
+
+    try:
+        result = json.loads(raw, object_pairs_hook=unique_object, parse_constant=invalid)
+        if type(result) is not dict:
+            raise ValueError("object_required")
+        return result
+    except (ValueError, TypeError, RecursionError):
+        raise ValueError("invalid_qwen_response") from None
+
+
+def task_id(value):
+    if type(value) is not str or not re.fullmatch(r"[A-Za-z0-9_-]{1,200}", value):
+        raise ValueError("invalid_qwen_task_id")
+    return value
+
+
+def image_url(value):
+    if (
+        type(value) is not str
+        or len(value) > 8192
+        or any(c.isspace() or ord(c) < 32 for c in value)
+        or "\\" in value
+    ):
+        raise ValueError("untrusted_qwen_image_url")
+    parsed = urlsplit(value)
+    if (
+        parsed.scheme != "https"
+        or parsed.username
+        or parsed.password
+        or parsed.port not in (None, 443)
+        or parsed.fragment
+        or not re.fullmatch(
+            r"dashscope-result-[a-z0-9-]+\.oss-cn-[a-z0-9-]+\.aliyuncs\.com",
+            parsed.hostname or "",
+        )
+        or not parsed.path.endswith(".png")
+    ):
+        raise ValueError("untrusted_qwen_image_url")
+    return value
+
+
+class QwenImageRequest(BflRequest):
+    @model_validator(mode="after")
+    def qwen_limits(self):
+        if (
+            len(self.images) > 3
+            or not 512 * 512 <= self.width * self.height <= 4_000_000
+            or max(self.width, self.height) > 8 * min(self.width, self.height)
+        ):
+            raise ValueError("qwen_edit_dimensions_or_references_out_of_range")
+        for reference in self.images:
+            if len(base64.b64decode(reference, validate=True)) > MAX_IMAGE:
+                raise ValueError("qwen_reference_exceeds_10MiB")
+        return self
+
+    def payload(self):
+        # Revalidate even model_copy/model_construct values before making an intent.
+        request = QwenImageRequest.model_validate(self.model_dump())
+        return {
+            "model": MODEL,
+            "input": {
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"image": "data:image/png;base64," + image} for image in request.images
+                        ]
+                        + [{"text": request.prompt}],
+                    }
+                ]
+            },
+            "parameters": {
+                "n": 1,
+                "size": f"{request.width}*{request.height}",
+                "prompt_extend": False,
+                "watermark": False,
+            },
+        }
+
+
+@dataclass(frozen=True)
+class QwenImagePoll:
+    provider_id: str
+    status: str
+    sample_url: str | None = None
+    usage: dict | None = None
+    response_digest: str | None = None
+
+
+@dataclass(frozen=True)
+class QwenImageArtifact:
+    body: bytes
+    mime: str
+    sha256: str
+
+
+class QwenImageProvider:
+    model = MODEL
+    offline_transport = True
+
+    def __init__(self, key, directory: Path, *, endpoint_origin, transport=None):
+        if not isinstance(transport, httpx.MockTransport):
+            raise ValueError("qwen_image_requires_explicit_offline_mock_transport")
+        self.endpoint_origin = workspace_origin(endpoint_origin)
+        self.endpoint = self.endpoint_origin + ASYNC_PATH
+        if type(key) is not str or not re.fullmatch(r"[\x21-\x7e]{1,4096}", key):
+            raise ValueError("invalid_qwen_credential")
+        if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
+            raise ValueError("invalid_qwen_private_directory")
+        directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+        self.directory = directory
+        self._key = key
+        self.client = httpx.Client(
+            transport=transport,
+            trust_env=False,
+            follow_redirects=False,
+            timeout=httpx.Timeout(30, connect=5),
+        )
+        self.download_client = httpx.Client(
+            transport=transport,
+            trust_env=False,
+            follow_redirects=False,
+            timeout=httpx.Timeout(30, connect=5),
+        )
+
+    def close(self):
+        self.client.close()
+        self.download_client.close()
+
+    def _path(self, intent, suffix):
+        return self.directory / (str(UUID(str(intent))) + suffix)
+
+    @staticmethod
+    def _write(path, raw):
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+
+    def _json_body(self, method, url, payload=None):
+        headers = {
+            "authorization": "Bearer " + self._key,
+            "accept": "application/json",
+            "accept-encoding": "identity",
+        }
+        if method == "POST":
+            headers["X-DashScope-Async"] = "enable"
+        try:
+            with self.client.stream(method, url, json=payload, headers=headers) as response:
+                if method == "POST" and response.status_code in (400, 401, 403, 422, 429):
+                    raise ProviderFailure("Qwen submission explicitly rejected")
+                if (
+                    response.status_code != 200
+                    or response.headers.get("content-encoding", "identity").lower() != "identity"
+                    or response.headers.get("content-type", "").split(";", 1)[0].lower()
+                    != "application/json"
+                ):
+                    raise ProviderUncertain("Qwen response unavailable")
+                raw = bytearray()
+                for chunk in response.iter_bytes(chunk_size=16384):
+                    raw.extend(chunk)
+                    if len(raw) > MAX_BODY:
+                        raise ProviderUncertain("Qwen response exceeds limit")
+                return bytes(raw)
+        except httpx.HTTPError:
+            raise ProviderUncertain("Qwen response cannot be confirmed") from None
+
+    def submit(self, intent_id, request):
+        if not isinstance(request, QwenImageRequest):
+            raise TypeError("validated QwenImageRequest required")
+        payload = request.payload()
+        intent = UUID(str(intent_id))
+        paths = [self._path(intent, suffix) for suffix in (".intent", ".response.body")]
+        if any(path.exists() or path.is_symlink() for path in paths):
+            raise ProviderUncertain("Qwen intent already attempted; do not resubmit")
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+        try:
+            self._write(paths[0], hashlib.sha256(encoded).hexdigest().encode())
+        except FileExistsError:
+            raise ProviderUncertain("Qwen intent already attempted; do not resubmit") from None
+        raw = self._json_body("POST", self.endpoint, payload)
+        try:
+            self._write(paths[1], raw)
+            body = strict_document(raw)
+            output = body["output"]
+            identity = task_id(output["task_id"])
+            if body.get("code") or output["task_status"] not in ("PENDING", "RUNNING", "SUCCEEDED"):
+                raise ValueError("unconfirmed_qwen_submit_state")
+            return Receipt(
+                identity,
+                hashlib.sha256(raw).hexdigest(),
+                self.endpoint_origin + "/api/v1/tasks/" + identity,
+            )
+        except (KeyError, ValueError, TypeError, OSError):
+            raise ProviderUncertain("Qwen receipt requires reconciliation") from None
+
+    def poll(self, receipt):
+        identity = task_id(receipt.provider_id)
+        expected = self.endpoint_origin + "/api/v1/tasks/" + identity
+        if receipt.polling_url != expected:
+            raise ProviderUncertain("Qwen receipt workspace mismatch")
+        raw = self._json_body("GET", expected)
+        try:
+            body = strict_document(raw)
+            output = body["output"]
+            if output["task_id"] != identity or body.get("code"):
+                raise ValueError("qwen_result_identity_mismatch")
+            status = output["task_status"]
+            if status in ("PENDING", "RUNNING"):
+                return QwenImagePoll(identity, "Pending")
+            if status in ("FAILED", "CANCELED"):
+                raise ProviderFailure("Qwen existing task failed")
+            if status != "SUCCEEDED":
+                raise ValueError("unconfirmed_qwen_task_state")
+            choices = output["choices"]
+            if type(choices) is not list or len(choices) != 1:
+                raise ValueError("qwen_one_output_required")
+            choice = choices[0]
+            content = choice["message"]["content"]
+            if (
+                choice["finish_reason"] != "stop"
+                or choice["message"]["role"] != "assistant"
+                or type(content) is not list
+                or len(content) != 1
+            ):
+                raise ValueError("qwen_incomplete_output")
+            url = image_url(content[0]["image"])
+            return QwenImagePoll(
+                identity, "Ready", url, body.get("usage"), hashlib.sha256(raw).hexdigest()
+            )
+        except (ValueError, KeyError, TypeError, IndexError):
+            raise ProviderUncertain("Qwen existing result requires reconciliation") from None
+
+    def fetch_result(self, poll):
+        if not isinstance(poll, QwenImagePoll) or poll.status != "Ready":
+            raise ValueError("Ready Qwen result required")
+        try:
+            url = image_url(poll.sample_url)
+            with self.download_client.stream(
+                "GET", url, headers={"accept": "image/png", "accept-encoding": "identity"}
+            ) as response:
+                if (
+                    response.status_code != 200
+                    or response.headers.get("content-type", "").split(";", 1)[0] != "image/png"
+                    or response.headers.get("content-encoding", "identity").lower() != "identity"
+                ):
+                    raise ValueError("qwen_image_unavailable")
+                data = bytearray()
+                for chunk in response.iter_bytes(chunk_size=65536):
+                    data.extend(chunk)
+                    if len(data) > 20 * 1024 * 1024:
+                        raise ValueError("qwen_image_oversized")
+            raw = bytes(data)
+            if not raw.startswith(b"\x89PNG\r\n\x1a\n"):
+                raise ValueError("qwen_png_required")
+            # Existing isolated canonical decoder still validates actual image pixels.
+            return QwenImageArtifact(raw, "image/png", hashlib.sha256(raw).hexdigest())
+        except (httpx.HTTPError, ValueError):
+            raise ProviderUncertain("Qwen image download cannot be confirmed") from None

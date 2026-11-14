@@ -1,0 +1,25 @@
+# 百炼国内图片编辑接入
+
+2026-11-15 用户已完成实名认证并确认创建北京默认业务空间项目专用API Key，控制台访问范围限定Qwen-Image-3.0。账号当时提示余额不足，未充值或调用模型。真实密钥、业务空间域名与账户标识不进入仓库。
+
+## 当前交付边界
+
+新增`providers/qwen_image.py`：固定qwen-image-3.0、北京业务空间域名，按官方异步编辑协议提交原图与编辑指令，再按同一业务空间查询已知任务。仅接受显式MockTransport；没有开放真实模型执行入口。原BFL/Gemini协议、默认Fake和既有报价/预算不自动切换。尚未接通百炼的PG报价/预算、计费版本和Worker组合，不能把创建密钥或离线契约通过称为真实出图成功。
+
+官方[模型API文档](https://help.aliyun.com/zh/model-studio/qwen-image-generation-and-editing-api-reference)包含同步和异步两种不同地址。本适配选用异步：POST `/api/v1/services/aigc/image-generation/generation`，设置`X-DashScope-Async: enable`，收到task_id后GET `/api/v1/tasks/{task_id}`。同步multimodal地址、OpenAI兼容地址不可混用。输出usage是图片数量/分辨率档位，不是token、BFL积分或账户余额；费用仍未知，不推断免费额度或自动采用网页单价。
+
+## 本机保存密钥
+
+在自己的PowerShell运行：
+
+```powershell
+& ./scripts/configure_provider_key.ps1 -Provider bailian
+```
+
+输入遮蔽，变量名DASHSCOPE_API_KEY；仅写本机Windows用户/当前进程环境，不上传或调用接口。环境变量不是加密保险库。服务进程使用专有环境配置，浏览器端不放密钥。已有本机值不会无提示替换；显式空进程值不会回退旧用户值。`-ExplainOnly`仅说明、不读写密钥。下载的原始密钥文件不要放入工程目录，也不要发送到聊天。
+
+## 传输与恢复边界
+
+单次意图以排他本地文件先落盘，超时、429/5xx及未知结果均不自动重发。原始提交响应私有保存并用原始字节SHA关联回执；任务查询只读且验证任务ID/业务空间。下载仅允许明确的阿里云结果OSS主机，禁重定向、代理继承和认证头转发，限PNG/大小，后续仍须通过已有隔离解码及实际尺寸/保护像素校验。
+
+图片输入最多3张、单图最多10MiB、输出限定项目4MP上限及供应商最小面积/宽高比；固定单张输出、不自动改写提示词。原任务必须保持原模型/商户/端点，百炼需要新的明确配置与审阅。持久化PG原文恢复、真实质量与账单验收仍待完成，现有BFL预算及费用不能套用于百炼。

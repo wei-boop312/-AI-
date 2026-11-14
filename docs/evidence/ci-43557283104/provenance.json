@@ -1,0 +1,23 @@
+{
+  "run_id": 43557283104,
+  "commit": "1c20eb28d5ad1a02a36b87077e173a63f14f976c",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43557283104",
+  "artifact_id": 14099205295,
+  "archive_sha256": "24ecd85b0a6095c5066e50a46a5061f032a5ee2a406c6498f5854b4e3a5bf57f",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "63e3ba99060b951160cf13d8b086d969c6f6ca5ffb272d037d7ae6af5d3b143b"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "6c2f50b2cc0516acd86aa9a000dddbb30a375bef517276e9aeb047e420e2c68b"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "cfb632fbd811dac2c7b48bce6b8de8280d2dcd757263b5738444f0addfdea3f6"
+    }
+  },
+  "scope": "Immutable runtime registration and SQL write guards; preserve all native failures"
+}

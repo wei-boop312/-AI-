@@ -62,6 +62,7 @@ def main():
         not in (
             "BFL_API_KEY",
             "HUBWAY_API_KEY",
+            "DASHSCOPE_API_KEY",
             "GEMINI_API_KEY",
             "GOOGLE_API_KEY",
             "API_DATABASE_URL",

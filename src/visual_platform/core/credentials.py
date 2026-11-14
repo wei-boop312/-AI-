@@ -3,7 +3,9 @@
 import os
 import sys
 
-PROVIDER_KEY_NAMES = frozenset({"BFL_API_KEY", "HUBWAY_API_KEY", "GEMINI_API_KEY"})
+PROVIDER_KEY_NAMES = frozenset(
+    {"BFL_API_KEY", "HUBWAY_API_KEY", "GEMINI_API_KEY", "DASHSCOPE_API_KEY"}
+)
 
 
 def _windows_user_credential(name):

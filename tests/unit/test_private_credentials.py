@@ -7,6 +7,18 @@ from visual_platform.core.credentials import private_credential
 
 
 class PrivateCredentialTests(unittest.TestCase):
+    def test_bailian_key_uses_the_same_explicit_override_boundary(self):
+        with patch(
+            "visual_platform.core.credentials._windows_user_credential",
+            side_effect=AssertionError("must not inspect a real user credential"),
+        ):
+            self.assertEqual(private_credential("DASHSCOPE_API_KEY", {"DASHSCOPE_API_KEY": ""}), "")
+            self.assertEqual(
+                private_credential("DASHSCOPE_API_KEY", {"DASHSCOPE_API_KEY": "synthetic"}),
+                "synthetic",
+            )
+            self.assertIsNone(private_credential("DASHSCOPE_API_KEY", {}))
+
     def test_explicit_environment_and_blank_override_never_fall_back_to_an_old_key(self):
         with patch(
             "visual_platform.core.credentials._windows_user_credential",
