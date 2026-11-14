@@ -1,0 +1,88 @@
+{
+  "commit": "339cebb0f9f2c2b04727d4c7fc3956f70a9647b7",
+  "files": {
+    "apps/web/dist/assets/index-BC6YZeKb.js": "04e37164915fedd34fa4c368cbd34729e1ff49ce0d8cd1c2d81e7a382518430c",
+    "apps/web/dist/assets/index-BLahs-Ie.css": "a125d8e3a62683a17755048ff97bac779a1177f45a436fc8f3ffa5e06c5d1922",
+    "apps/web/dist/index.html": "4937ceebfa20be207bbf76f0cb7fa9e72b81655628c0d215855d86c8b5acd21c"
+  },
+  "images": {
+    "python": {
+      "image": "python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72",
+      "digest": "sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72"
+    },
+    "node": {
+      "image": "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c",
+      "digest": "sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c"
+    },
+    "postgres": {
+      "image": "postgres:17.11-bookworm@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994",
+      "digest": "sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994"
+    },
+    "rabbitmq": {
+      "image": "rabbitmq:4.4.0-alpine@sha256:7b77c3d3a996c7fcca1ca8bf53ce1557ff43c13b8ca2c132df6031781b209ef2",
+      "digest": "sha256:7b77c3d3a996c7fcca1ca8bf53ce1557ff43c13b8ca2c132df6031781b209ef2"
+    },
+    "seaweedfs": {
+      "image": "chrislusf/seaweedfs:4.53@sha256:ccad23e18639c8b98cee17e7100b95830a06077b56d8e5b006d6dcf8ec5e94a0",
+      "digest": "sha256:ccad23e18639c8b98cee17e7100b95830a06077b56d8e5b006d6dcf8ec5e94a0"
+    },
+    "nginx": {
+      "image": "nginx:stable-alpine@sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311",
+      "digest": "sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311"
+    }
+  },
+  "steps": [
+    {
+      "name": "migrate-test",
+      "exit_code": 0,
+      "seconds": 0.659
+    },
+    {
+      "name": "bootstrap-dev",
+      "exit_code": 0,
+      "seconds": 1.119
+    },
+    {
+      "name": "native-integration",
+      "exit_code": 0,
+      "seconds": 210.974
+    },
+    {
+      "name": "browser-production",
+      "exit_code": 0,
+      "seconds": 100.14
+    },
+    {
+      "name": "browser-controlled-faults",
+      "exit_code": 0,
+      "seconds": 71.447
+    },
+    {
+      "name": "native-restore-v2",
+      "exit_code": 0,
+      "seconds": 24.231
+    },
+    {
+      "name": "monitor-after-recovery",
+      "exit_code": 0,
+      "seconds": 0.398
+    },
+    {
+      "name": "native-restart",
+      "exit_code": 0,
+      "seconds": 51.572
+    },
+    {
+      "name": "runtime-metrics",
+      "exit_code": 0,
+      "seconds": 0.329
+    },
+    {
+      "name": "operations-gate",
+      "exit_code": 0,
+      "seconds": 0.423
+    }
+  ],
+  "paid_calls": 0,
+  "result": "PASS"
+}
