@@ -6,7 +6,11 @@ from uuid import UUID
 import psycopg
 
 from visual_platform.db.result import required_row
-from visual_platform.providers.authorization import ProviderAuthorization, canonical_authorization
+from visual_platform.providers.authorization import (
+    DualBailianSmokeAuthorization,
+    ProviderAuthorization,
+    canonical_authorization,
+)
 from visual_platform.services.rule_operations import assert_operator
 
 
@@ -18,6 +22,8 @@ def register_provider_budget(
     operation: UUID,
     reason: str,
 ) -> str:
+    if isinstance(scope, DualBailianSmokeAuthorization):
+        raise ValueError("dual_bailian_budget_registration_not_enabled")
     canonical = canonical_authorization(scope)
     digest = hashlib.sha256(canonical).hexdigest()
     if digest != reviewed_sha256:

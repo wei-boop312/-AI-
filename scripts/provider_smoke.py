@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.providers.authorization import (
     BailianSmokeAuthorization,
+    DualBailianSmokeAuthorization,
     UnitSmokeAuthorization,
     load_authorization,
     verify_sample,
@@ -69,6 +70,18 @@ async def main():
         scope, digest = load_authorization(args.config)
         sample = await verify_sample(scope, args.config)
         if args.bound_review:
+            if isinstance(scope, DualBailianSmokeAuthorization):
+                print(
+                    json.dumps(
+                        {
+                            "result": "DUAL_BAILIAN_BOUND_REVIEW_NOT_IMPLEMENTED",
+                            "reason": "dual_model_quote_and_atomic_budget_not_enabled",
+                            "execution_enabled": False,
+                            "paid_calls": 0,
+                        }
+                    )
+                )
+                return 3
             if not isinstance(scope, BailianSmokeAuthorization):
                 raise ValueError("bailian_scope_required")
             dsn = os.environ.get("ADMIN_DATABASE_URL")
@@ -130,14 +143,16 @@ async def main():
     print(
         json.dumps(
             {
-                "result": "SCOPE_REVIEW_READY",
+                "result": "DRAFT_SCOPE_REVIEW_READY"
+                if isinstance(scope, DualBailianSmokeAuthorization)
+                else "SCOPE_REVIEW_READY",
                 "paid_calls": 0,
                 "configuration_sha256": digest,
                 "authorization_id": str(scope.authorization_id),
                 "sample": sample,
                 "models": (
                     {"generate": scope.generation_model, "detect": scope.detection_model}
-                    if isinstance(scope, BailianSmokeAuthorization)
+                    if isinstance(scope, (BailianSmokeAuthorization, DualBailianSmokeAuthorization))
                     else {"generate": scope.bfl_model, "detect": scope.gemini_model}
                 ),
                 "call_limits": {
@@ -151,7 +166,14 @@ async def main():
                             row.model_dump(mode="json") for row in scope.currency_totals
                         ],
                     }
-                    if isinstance(scope, (UnitSmokeAuthorization, BailianSmokeAuthorization))
+                    if isinstance(
+                        scope,
+                        (
+                            UnitSmokeAuthorization,
+                            BailianSmokeAuthorization,
+                            DualBailianSmokeAuthorization,
+                        ),
+                    )
                     else {
                         "currency": scope.currency,
                         "generate": scope.generate_ceiling,
@@ -160,6 +182,9 @@ async def main():
                     }
                 ),
                 "expires_at": scope.expires_at.isoformat(),
+                "budget_registration_implemented": not isinstance(
+                    scope, DualBailianSmokeAuthorization
+                ),
                 "execution_enabled": False,
                 "not_verified": [
                     "operator spending authorization",

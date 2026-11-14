@@ -8,6 +8,7 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
 
 from PIL import Image
@@ -17,6 +18,93 @@ from visual_platform.providers.authorization import load_authorization, verify_s
 
 
 class ProviderAuthorizationTests(unittest.IsolatedAsyncioTestCase):
+    def dual_data(self):
+        data = self.bailian_data()
+        data.update(
+            schema_version=5,
+            detection_model="qwen3.8-flash",
+            currency_totals=[{"currency": "CNY", "ceiling": "1.1"}],
+        )
+        data["step_budgets"]["detect"]["currency"] = "CNY"
+        return data
+
+    async def test_dual_scope_binds_new_model_and_requires_shared_sum_without_legacy_authority(
+        self,
+    ):
+        scope, digest = self.load(self.dual_data())
+        self.assertEqual(scope.schema_version, 5)
+        self.assertEqual(scope.detection_model, "qwen3.8-flash")
+        self.assertEqual((await verify_sample(scope, self.path))["sha256"], scope.source_sha256)
+        self.assertNotEqual(self.load(self.bailian_data())[1], digest)
+        for field, value in (
+            ("total", "1"),
+            ("currency", "USD"),
+            ("model", "gemini-3.8-flash"),
+            ("legacy", "flux-3-image"),
+            ("calls", 2),
+            ("schema", True),
+        ):
+            data = self.dual_data()
+            if field == "total":
+                data["currency_totals"][0]["ceiling"] = value
+            elif field == "currency":
+                data["step_budgets"]["detect"]["currency"] = value
+            elif field == "model":
+                data["detection_model"] = value
+            elif field == "legacy":
+                data["bfl_model"] = value
+            elif field == "calls":
+                data["max_detect_calls"] = value
+            else:
+                data["schema_version"] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                self.load(data)
+
+    def test_dual_budget_registration_stops_before_database_or_wallet_access(self):
+        from visual_platform.services.provider_budget import register_provider_budget
+
+        scope, digest = self.load(self.dual_data())
+        with patch("visual_platform.services.provider_budget.psycopg.connect") as connect:
+            with self.assertRaisesRegex(ValueError, "dual_bailian_budget_registration_not_enabled"):
+                register_provider_budget("unused-dsn", uuid4(), scope, digest, uuid4(), "synthetic")
+            connect.assert_not_called()
+
+    def test_dual_cli_reviews_draft_but_bound_review_cannot_reuse_schema_four_budget(self):
+        data = self.dual_data()
+        now = datetime.now(timezone.utc)
+        data.update(
+            authorized_at=(now - timedelta(minutes=1)).isoformat(),
+            expires_at=(now + timedelta(hours=1)).isoformat(),
+        )
+        self.path.write_text(json.dumps(data))
+        script = Path(__file__).resolve().parents[2] / "scripts/provider_smoke.py"
+        command = [sys.executable, str(script), "--config", str(self.path), "--preflight"]
+        process = subprocess.run(command, capture_output=True, text=True, timeout=20)
+        self.assertEqual(process.returncode, 0, process.stdout)
+        report = json.loads(process.stdout)
+        self.assertEqual(report["result"], "DRAFT_SCOPE_REVIEW_READY")
+        self.assertFalse(report["execution_enabled"])
+        self.assertEqual(report["models"]["detect"], "qwen3.8-flash")
+        blocked = subprocess.run(
+            command
+            + [
+                "--bound-review",
+                "--runtime",
+                "not-read.json",
+                "--bailian-connection",
+                "not-read.json",
+                "--quote",
+                str(uuid4()),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        self.assertEqual(blocked.returncode, 3, blocked.stdout)
+        self.assertEqual(
+            json.loads(blocked.stdout)["result"], "DUAL_BAILIAN_BOUND_REVIEW_NOT_IMPLEMENTED"
+        )
+
     def bailian_data(self):
         data = copy.deepcopy(self.data)
         for field in ("currency", "generate_ceiling", "detect_ceiling", "total_ceiling"):

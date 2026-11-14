@@ -158,7 +158,31 @@ class BailianSmokeAuthorization(CommonAuthorizationScope):
         return self
 
 
-ProviderAuthorization = SmokeAuthorization | UnitSmokeAuthorization | BailianSmokeAuthorization
+class DualBailianSmokeAuthorization(CommonAuthorizationScope):
+    """Schema 5 review only; no PG budget registration or model execution is enabled."""
+
+    schema_version: Annotated[int, Field(ge=5, le=5)] = 5
+    generation_model: Literal["qwen-image-3.0"] = "qwen-image-3.0"
+    detection_model: Literal["qwen3.8-flash"] = "qwen3.8-flash"
+    step_budgets: StepCeilings
+    currency_totals: Annotated[list[UnitCeiling], Field(min_length=1, max_length=1)]
+
+    @model_validator(mode="after")
+    def shared_cny_total(self):
+        rows = (self.step_budgets.generate, self.step_budgets.detect, self.currency_totals[0])
+        if any(row.currency != "CNY" for row in rows):
+            raise ValueError("dual_bailian_requires_cny_only")
+        if Decimal(rows[2].ceiling) < Decimal(rows[0].ceiling) + Decimal(rows[1].ceiling):
+            raise ValueError("shared_cny_total_must_cover_both_steps")
+        return self
+
+
+ProviderAuthorization = (
+    SmokeAuthorization
+    | UnitSmokeAuthorization
+    | BailianSmokeAuthorization
+    | DualBailianSmokeAuthorization
+)
 
 
 def load_authorization(path: Path, *, now: datetime | None = None):
@@ -173,7 +197,9 @@ def load_authorization(path: Path, *, now: datetime | None = None):
         raise ValueError("configuration object required")
     version = data.get("schema_version", 2)
     model = (
-        BailianSmokeAuthorization
+        DualBailianSmokeAuthorization
+        if type(version) is int and version == 5
+        else BailianSmokeAuthorization
         if type(version) is int and version == 4
         else UnitSmokeAuthorization
         if type(version) is int and version == 3
@@ -226,6 +252,10 @@ async def verify_sample(scope: ProviderAuthorization, config_path: Path):
             raise ValueError("source rectangle exceeds reviewed sample")
     from visual_platform.providers.qwen_image import QwenImageRequest
 
-    request_type = QwenImageRequest if isinstance(scope, BailianSmokeAuthorization) else BflRequest
+    request_type = (
+        QwenImageRequest
+        if isinstance(scope, (BailianSmokeAuthorization, DualBailianSmokeAuthorization))
+        else BflRequest
+    )
     request_type.from_canonical(generation.model_dump(mode="json"), canonical)
     return {"sha256": scope.source_sha256, "width": decoded["width"], "height": decoded["height"]}

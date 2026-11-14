@@ -3,11 +3,16 @@
 import copy
 import hashlib
 import json
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import psycopg
 from bailian_fixture import BailianFixture
 
+from visual_platform.providers.authorization import (
+    DualBailianSmokeAuthorization,
+    canonical_authorization,
+)
 from visual_platform.providers.runtime import ProviderRuntime
 from visual_platform.services.runtime_quote import (
     register_runtime_configuration,
@@ -16,6 +21,58 @@ from visual_platform.services.runtime_quote import (
 
 
 class DualBailianRegistryTests(BailianFixture):
+    def test_schema_five_draft_cannot_be_registered_against_existing_gemini_quote(self):
+        quote, _, review = self.qwen_review()
+        snapshot = review["input_snapshot"]
+        now = datetime.now(timezone.utc)
+        scope = DualBailianSmokeAuthorization.model_validate_json(
+            json.dumps(
+                {
+                    "authorization_id": str(uuid4()),
+                    "user_id": str(self.user),
+                    "product_id": self.product,
+                    "source_asset_version_id": self.version,
+                    "authorized_by": "synthetic draft only",
+                    "authorized_at": (now - timedelta(seconds=1)).isoformat(),
+                    "expires_at": (now + timedelta(hours=1)).isoformat(),
+                    "source_path": "synthetic.png",
+                    "source_sha256": snapshot["_execution"]["source_sha256"],
+                    "quote_input_sha256": review["input_sha256"],
+                    "generation": snapshot["generation"],
+                    "targets": snapshot["targets"],
+                    "step_budgets": {
+                        "generate": {"currency": "CNY", "ceiling": "1"},
+                        "detect": {"currency": "CNY", "ceiling": "0.1"},
+                    },
+                    "currency_totals": [{"currency": "CNY", "ceiling": "1.1"}],
+                }
+            )
+        )
+        canonical = canonical_authorization(scope)
+        wallet = self.client.get("/api/v1/credits/balance").json()
+        with psycopg.connect(self.operator_dsn) as connection:
+            with self.assertRaises(psycopg.errors.RaiseException):
+                connection.execute(
+                    "SELECT ops.register_provider_budget(%s,%s,%s,%s,%s,%s)",
+                    (
+                        scope.authorization_id,
+                        quote,
+                        canonical.decode(),
+                        hashlib.sha256(canonical).hexdigest(),
+                        uuid4(),
+                        "synthetic rejected draft",
+                    ),
+                )
+        with psycopg.connect(self.owner) as connection:
+            self.assertEqual(
+                connection.execute(
+                    "SELECT count(*) FROM ops.provider_budgets WHERE quote_id=%s", (quote,)
+                ).fetchone()[0],
+                0,
+            )
+        self.assertEqual(self.client.get("/api/v1/credits/balance").json(), wallet)
+        self.assertEqual(self.calls, [])
+
     def dual_runtime(self):
         document = self.qwen_runtime.model_dump()
         document["schema_version"] = 3
