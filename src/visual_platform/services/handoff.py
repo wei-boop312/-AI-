@@ -222,7 +222,8 @@ def verify_handoff_data(data: bytes):
             raise ValueError("handoff_duplicate_or_missing_manifest")
         if (
             any(
-                stat.S_IFMT(item.external_attr >> 16) not in (0, stat.S_IFREG, stat.S_IFDIR)
+                item.is_dir()
+                or stat.S_IFMT(item.external_attr >> 16) not in (0, stat.S_IFREG)
                 or item.file_size > MAX_FILE
                 for item in items
             )

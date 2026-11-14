@@ -220,7 +220,7 @@ class HandoffTests(unittest.TestCase):
 
     def test_special_unix_member_types_are_rejected_before_content_verification(self):
         original = self.bundle(self.fixture())
-        for mode in (stat.S_IFIFO, stat.S_IFCHR, stat.S_IFBLK, stat.S_IFSOCK):
+        for mode in (stat.S_IFIFO, stat.S_IFCHR, stat.S_IFBLK, stat.S_IFSOCK, stat.S_IFDIR):
             output = io.BytesIO()
             with (
                 zipfile.ZipFile(io.BytesIO(original)) as source,
@@ -233,6 +233,10 @@ class HandoffTests(unittest.TestCase):
                     target.writestr(info, source.read(info.filename))
             with self.subTest(mode=mode), self.assertRaisesRegex(ValueError, "unsafe_type"):
                 verify_handoff_data(output.getvalue())
+        files = self.fixture()
+        files["source/folder/"] = b""
+        with self.assertRaisesRegex(ValueError, "unsafe_type"):
+            verify_handoff_data(self.bundle(files))
 
     def test_missing_or_changed_packaged_legal_text_cannot_be_resealed(self):
         files = self.fixture()
