@@ -5,3 +5,7 @@
 .upload-progress{margin:12px 0;padding:12px 16px;background:#f3f7f4;border:1px solid #dce8df;border-radius:10px;color:#315b43}.upload-progress .ant-progress{margin-bottom:0}
 
 .report-scope{overflow-wrap:anywhere;margin:8px 0}
+
+.trial-guide-steps{padding-left:22px;margin:20px 0}.trial-guide-steps li{margin:12px 0}.trial-guide-steps p{margin:4px 0}.trial-feedback-field{display:flex;flex-direction:column;gap:8px;margin:18px 0;font-size:13px}.trial-help-actions .ant-btn{font-size:12px}@media(max-width:600px){.topbar{height:auto;min-height:60px;flex-wrap:wrap;gap:10px;padding-block:12px}.topbar>div{flex-wrap:wrap}.trial-help-actions .ant-btn{padding-inline:8px;font-size:11px}}
+
+.trial-next-step{display:flex;align-items:baseline;gap:12px;padding:12px 16px;margin-bottom:16px;background:#f3f7f4;border:1px solid #dce8df;border-radius:10px;font-size:13px;color:#315b43}.trial-next-step b{white-space:nowrap}@media(max-width:600px){.trial-next-step{font-size:12px;align-items:flex-start}}
