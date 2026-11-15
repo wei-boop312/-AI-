@@ -2,9 +2,11 @@
 
 基于V4计划的私有图片工作台：FastAPI/Worker、PostgreSQL、RabbitMQ、私有S3、React/Konva。已验证的离线MVP包含私有登录、产品与外观配置、真实原图上传、保护区域平移、报价/任务、进度与历史、PNG/报告下载、积分账本，以及独立备份恢复和故障演练。规则证据不足时保持人工复核，不保证商城上架。
 
-最新完整已验基线为[e9b8943e / CI43636041162](https://github.com/wei-boop312/-AI-/actions/runs/43636041162)：217单元、92离线协议契约、270原生PG/MQ/S3测试、4普通+11受控浏览器、完整8服务Compose、独立冷恢复与离线门槛通过。1690文件交付包sidecar及本机独立复验通过。包括私有回执归档、受限恢复摘要、显式百炼运行身份/分币种预算、价格证据与异步查询后费用估算；真实供应商仍仅由MockTransport替代。百炼非空查询/计量与保护图的独立冷恢复也已通过，后续源码仍须自身CI。详见[状态](docs/STATUS.md)、[任务状态](docs/TASK_STATUS.md)和[原始证据](docs/evidence)。
+初版操作与反馈收集见[初版试用说明](docs/INITIAL_TRIAL.md)。工作台包含“试用指引”“下一步操作”和仅本机反馈导出；这些新增交互已通过桌面与窄屏本机浏览器验证，并通过对应提交的完整CI。
 
-**当前运行模式仍是offline Fake。百炼图片编辑和Hubway/Gemini检测已有离线适配与Worker演练，尚未真实接通；完整V4、真实供应商验收和生产发布均未完成。** 本机百炼密钥配置见[BAILIAN_SETUP](docs/BAILIAN_SETUP.md)，剩余条件见[REMAINING_WORK](docs/REMAINING_WORK.md)。
+初版交互基线[5bc6c273 / CI43709997483](https://github.com/wei-boop312/-AI-/actions/runs/43709997483)整轮通过：225单元、133契约、278原生PG/MQ/S3、6普通浏览器（4真实服务闭环+2合成HTTP界面）、11受控浏览器、8服务Compose及独立恢复，1790文件交付包本机独立校验通过。本轮零付费调用。原始报告和日志摘要见[当次证据](docs/evidence/ci-43709997483)。本机完整后端尚未启动，运行需按下文准备专属环境；单独前端预览不能完成登录及任务。
+
+**应用日常任务仍使用offline Fake。** 独立受限实验已完成一次百炼真实生成；追加授权后的检测返回空数组，未通过事实校验，真实账单未核实。实验未开放日常应用的付费传输。出图回贴色块/错位已按用户决定列入[试用后改进项IMG-001](docs/POST_TRIAL_IMPROVEMENTS.md)，不阻断初版交互试用，也不代表质量已通过。完整V4、真实供应商任务接线及生产发布仍未完成。百炼配置见[BAILIAN_SETUP](docs/BAILIAN_SETUP.md)，后续工作见[REMAINING_WORK](docs/REMAINING_WORK.md)。
 
 ## 安装与本地运行
 
