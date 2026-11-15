@@ -5,7 +5,9 @@
   "reference": {"min_longest_edge": 500, "max_longest_edge": 10000},
   "meaning": "Technical longest-side dimensions, not a minimum on both axes. General article is not the full US electronics MAIN image rule set.",
   "sellercentral_policy_body": "JavaScript shell only in direct read; not archived as verified policy",
-  "user_target_confirmed": false,
+  "user_target_confirmed": true,
+  "confirmed_target": {"platform": "amazon", "marketplace": "US", "category_family": "electronics", "image_type": "MAIN"},
+  "specific_category_mapping_verified": false,
   "category_rule_complete": false,
   "rule_published": false,
   "scope": "Draft technical example only. Does not expand platform upload/output or supplier model limits, and does not certify listing compliance."
