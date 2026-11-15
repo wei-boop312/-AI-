@@ -300,14 +300,17 @@ class Worker:
                 step == "detect",
             )
             return False
-        except Exception:
+        except Exception as exc:
             # Any unclassified exception after intent is potentially a paid/accepted submission.
             await self.db(
                 "SELECT app.fail_task($1,$2,$3,$4,true)",
                 task,
                 self.owner,
                 fence,
-                "submission_outcome_unknown",
+                "submission_response_timeout"
+                if isinstance(exc, ProviderUncertain)
+                and str(exc) in {"qwen_read_timeout", "qwen_write_timeout", "qwen_connect_timeout"}
+                else "submission_outcome_unknown",
             )
             return False
         await self.receipt(task, fence, attempt, result, step=step)

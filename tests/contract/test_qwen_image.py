@@ -203,6 +203,30 @@ class QwenImageContracts(unittest.TestCase):
             provider.submit(intent, self.request())
         self.assertEqual(len(self.calls), 1)
 
+    def test_timeout_diagnostic_is_private_safe_and_blocks_lost_intent_resubmission(self):
+        def timeout(request):
+            self.calls.append(request)
+            self.assertEqual(request.extensions["timeout"]["read"], 30)
+            raise httpx.ReadTimeout("secret-key signed-url private-prompt")
+
+        provider = self.provider(timeout)
+        intent = uuid4()
+        with self.assertRaisesRegex(ProviderUncertain, "qwen_read_timeout"):
+            provider.submit(intent, self.request())
+        path = Path(self.temp.name) / (str(intent) + ".submission-diagnostic.json")
+        raw = path.read_text()
+        diagnostic = json.loads(raw)
+        self.assertEqual(diagnostic["reason"], "qwen_read_timeout")
+        self.assertEqual(diagnostic["outcome"], "unknown")
+        self.assertFalse(diagnostic["automatic_resubmission"])
+        self.assertGreaterEqual(diagnostic["elapsed_ms"], 0)
+        self.assertNotIn("secret", raw)
+        self.assertNotIn("signed-url", raw)
+        (Path(self.temp.name) / (str(intent) + ".intent")).unlink()
+        with self.assertRaises(ProviderUncertain):
+            provider.submit(intent, self.request())
+        self.assertEqual(len(self.calls), 1)
+
     def test_timeout_unknown_keeps_intent_and_never_retries_post(self):
         def timeout(request):
             self.calls.append(request)

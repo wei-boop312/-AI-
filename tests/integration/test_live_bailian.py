@@ -277,9 +277,9 @@ class LiveBailianTests(BailianFixture):
         with psycopg.connect(self.owner) as c:
             self.assertEqual(
                 c.execute(
-                    "SELECT status FROM app.generation_tasks WHERE id=%s", (task,)
-                ).fetchone()[0],
-                "uncertain",
+                    "SELECT status,error_code FROM app.generation_tasks WHERE id=%s", (task,)
+                ).fetchone(),
+                ("uncertain", "submission_response_timeout"),
             )
         self.assertEqual(self.run_live(task), "not_claimed")
         self.assertEqual(sum(method == "POST" for _, method, _ in self.calls), 1)

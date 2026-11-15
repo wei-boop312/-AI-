@@ -83,6 +83,8 @@ class LiveBailianTransportContracts(unittest.TestCase):
                 ) as provider:
                     self.assertEqual(provider.execution_profile, "bailian_live")
                     self.assertFalse(provider.bfl.offline_transport)
+                    self.assertEqual(provider.bfl.client.timeout.read, 120)
+                    self.assertEqual(provider.bfl.client.timeout.connect, 5)
                     self.assertFalse(provider.gemini.offline_transport)
                     self.assertEqual(calls, [])
 

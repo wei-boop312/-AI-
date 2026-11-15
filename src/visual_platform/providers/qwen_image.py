@@ -1,6 +1,6 @@
-"""Beijing Qwen Image async editing protocol; explicit offline transports only.
+"""Beijing Qwen Image async editing protocol; explicit live opt-in required.
 
-No live model path is exposed. POST is attempted once per private intent journal.
+POST is attempted once per private intent journal.
 The same reviewed workspace origin supplies task GETs; downloads never receive keys.
 """
 
@@ -10,6 +10,7 @@ import json
 import os
 import re
 import struct
+import time
 import zlib
 from dataclasses import dataclass
 from pathlib import Path
@@ -191,7 +192,7 @@ class QwenImageProvider:
             transport=httpx.HTTPTransport(retries=0) if live else transport,
             trust_env=False,
             follow_redirects=False,
-            timeout=httpx.Timeout(30, connect=5),
+            timeout=httpx.Timeout(120 if live else 30, connect=5),
         )
         self.download_client = httpx.Client(
             transport=httpx.HTTPTransport(retries=0) if live else transport,
@@ -240,6 +241,12 @@ class QwenImageProvider:
                     if len(raw) > MAX_BODY:
                         raise ProviderUncertain("Qwen response exceeds limit")
                 return bytes(raw)
+        except httpx.ReadTimeout:
+            raise ProviderUncertain("qwen_read_timeout") from None
+        except httpx.WriteTimeout:
+            raise ProviderUncertain("qwen_write_timeout") from None
+        except httpx.ConnectTimeout:
+            raise ProviderUncertain("qwen_connect_timeout") from None
         except httpx.HTTPError:
             raise ProviderUncertain("Qwen response cannot be confirmed") from None
 
@@ -249,14 +256,38 @@ class QwenImageProvider:
         payload = request.payload()
         intent = UUID(str(intent_id))
         paths = [self._path(intent, suffix) for suffix in (".intent", ".response.body")]
-        if any(path.exists() or path.is_symlink() for path in paths):
+        diagnostic = self._path(intent, ".submission-diagnostic.json")
+        if any(path.exists() or path.is_symlink() for path in [*paths, diagnostic]):
             raise ProviderUncertain("Qwen intent already attempted; do not resubmit")
         encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
         try:
             self._write(paths[0], hashlib.sha256(encoded).hexdigest().encode())
         except FileExistsError:
             raise ProviderUncertain("Qwen intent already attempted; do not resubmit") from None
-        raw = self._json_body("POST", self.endpoint, payload)
+        started = time.monotonic()
+        try:
+            raw = self._json_body("POST", self.endpoint, payload)
+        except (ProviderFailure, ProviderUncertain) as exc:
+            # Only fixed codes, never exception text, URLs, prompts or credentials.
+            reason = str(exc)
+            if reason not in {"qwen_read_timeout", "qwen_write_timeout", "qwen_connect_timeout"}:
+                reason = (
+                    "explicit_rejection" if isinstance(exc, ProviderFailure) else "response_unknown"
+                )
+            self._write(
+                self._path(intent, ".submission-diagnostic.json"),
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "outcome": "rejected" if isinstance(exc, ProviderFailure) else "unknown",
+                        "reason": reason,
+                        "elapsed_ms": round((time.monotonic() - started) * 1000),
+                        "automatic_resubmission": False,
+                    },
+                    sort_keys=True,
+                ).encode(),
+            )
+            raise
         try:
             self._write(paths[1], raw)
             body = strict_document(raw)
