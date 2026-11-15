@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-11-15T12:42:10.744791+00:00",
+  "result": "LOCAL_OFFLINE_TRIAL_RUNNING",
+  "migration_from": "0024",
+  "migration_to": "0066",
+  "private_database_backup_created": true,
+  "backup_sha256": "62454db7801b72c6d4d4c5e74b8037746bb24be6c0e06e6b6dc66b0effad4170",
+  "original_user_count": 100,
+  "original_user_ids_preserved": true,
+  "new_isolated_browser_test_users": 1,
+  "application_origin": "http://127.0.0.1:5173",
+  "api_health_http": 200,
+  "native_browser_smoke_passed": true,
+  "browser_smoke_tests": 1,
+  "real_infrastructure": true,
+  "provider_profile": "offline",
+  "paid_model_calls": 0,
+  "automatic_start_on_windows_login": false,
+  "private_launcher_idempotent_ready_check": true,
+  "desktop_start_shortcut_created": true
+}
