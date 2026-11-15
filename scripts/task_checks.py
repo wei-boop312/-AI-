@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 # Filenames intentionally consolidate some of the original planned modules.
 # These are actual behavioral suites, not existence checks or copied TODO states.
 SUITES = {
+    "P4-03": {
+        "contract": ["test_live_bailian_transport.py"],
+        "integration": ["test_live_bailian.py"],
+    },
     "P0-03": {"unit": ["test_contracts.py", "test_late_fake.py", "test_facts.py"]},
     "P1-01": {"integration": ["test_migrations.py", "test_foreign_keys.py", "test_accounting.py"]},
     "P1-03": {"integration": ["test_auth_api.py", "test_origin_startup.py"]},
@@ -60,7 +64,7 @@ SUITES = {
     },
     "P2-07": {"integration": ["test_offline_pipeline.py", "test_protocol_pipeline.py"]},
 }
-NATIVE_STORAGE = {"P2-02", "P2-03", "P2-04", "P2-05", "P2-06", "P2-07"}
+NATIVE_STORAGE = {"P4-03", "P2-02", "P2-03", "P2-04", "P2-05", "P2-06", "P2-07"}
 
 
 def run(task):

@@ -20,8 +20,11 @@ class Settings:
     s3_region: str = "us-east-1"
     issuer: str = "visual-platform"
     audience: str = "visual-web"
+    provider_profile: str = "offline"
 
     def __post_init__(self):
+        if self.provider_profile not in ("offline", "bailian_live"):
+            raise ValueError("unsupported_provider_profile")
         object.__setattr__(self, "origin", validate_app_origin(self.origin, self.cookie_secure))
         if self.s3_endpoint:
             validate_storage_endpoint(self.s3_endpoint)
@@ -34,6 +37,7 @@ class Settings:
         if cookie_mode not in ("0", "1"):
             raise ValueError("invalid_cookie_security_mode")
         return cls(
+            provider_profile=os.environ.get("PROVIDER_PROFILE", "offline"),
             api_database_url=os.environ["API_DATABASE_URL"],
             auth_database_url=os.environ["AUTH_DATABASE_URL"],
             private_key=Path(os.environ["JWT_PRIVATE_KEY_FILE"]).read_text(),

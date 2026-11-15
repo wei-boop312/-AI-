@@ -9,4 +9,9 @@ router = APIRouter(prefix="/api/v1/quotes", tags=["quotes"])
 
 @router.post("", status_code=201)
 async def quote(body: QuoteRequest, request: Request, user=Depends(current_user)):
-    return await create_quote(request.app.state.api_pool, user["id"], body)
+    return await create_quote(
+        request.app.state.api_pool,
+        user["id"],
+        body,
+        live=request.app.state.settings.provider_profile == "bailian_live",
+    )

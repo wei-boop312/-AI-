@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import json
 import os
+from contextlib import AsyncExitStack
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import UUID
@@ -9,6 +10,7 @@ from uuid import UUID
 from visual_platform.core.termination import run_service
 from visual_platform.db.pool import open_pool
 from visual_platform.providers.fake import DurableFakeProvider
+from visual_platform.providers.live_bailian import LiveRoutingWorker
 from visual_platform.services.heartbeat import service_heartbeat
 from visual_platform.storage.s3 import S3Storage
 from visual_platform.worker.runner import Worker
@@ -25,8 +27,9 @@ async def main():
         default="success",
     )
     args = parser.parse_args()
-    if os.environ.get("PROVIDER_PROFILE", "offline") != "offline":
-        raise SystemExit("Only offline provider is enabled")
+    profile = os.environ.get("PROVIDER_PROFILE", "offline")
+    if profile not in ("offline", "bailian_live"):
+        raise SystemExit("Unsupported provider profile")
     settings = SimpleNamespace(
         **{
             name.lower(): os.environ[name]
@@ -41,8 +44,25 @@ async def main():
             "FAKE_PROVIDER_DIR", str(Path(__file__).resolve().parents[3] / "work" / "fake-provider")
         )
     )
+    stack = AsyncExitStack()
     try:
-        worker = Worker(pool, storage, DurableFakeProvider(directory, mode=args.fake_mode))
+        worker: Worker | LiveRoutingWorker = Worker(
+            pool, storage, DurableFakeProvider(directory, mode=args.fake_mode)
+        )
+        if profile == "bailian_live":
+            from visual_platform.core.credentials import private_credential
+            from visual_platform.providers.live_bailian import live_bailian_runtime
+            from visual_platform.providers.runtime import load_runtime
+
+            runtime = load_runtime(Path(os.environ["LIVE_PROVIDER_RUNTIME_FILE"]))
+            provider = await stack.enter_async_context(
+                live_bailian_runtime(
+                    runtime,
+                    Path(os.environ["LIVE_PROVIDER_PRIVATE_DIR"]),
+                    key=private_credential("DASHSCOPE_API_KEY"),
+                )
+            )
+            worker = LiveRoutingWorker(pool, storage, provider, directory)
         if args.consume:
             from visual_platform.events.broker import Broker
             from visual_platform.worker.consumer import Consumer
@@ -59,6 +79,7 @@ async def main():
             result = await worker.run(args.task)
             print(json.dumps({"task_id": str(args.task), "result": result}))
     finally:
+        await stack.aclose()
         await pool.close()
         storage.close()
 

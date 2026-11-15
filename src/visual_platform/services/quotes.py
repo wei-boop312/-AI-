@@ -43,13 +43,14 @@ def db_conflict(exc):
         "unregistered_runtime_configuration",
         "registered_runtime_binding_mismatch",
         "runtime_profile_not_enabled",
+        "live_provider_not_authorized",
     }
     if code in known:
         raise HTTPException(404 if code in invisible else 409, code)
     raise exc
 
 
-async def create_quote(pool, uid, body: QuoteRequest):
+async def create_quote(pool, uid, body: QuoteRequest, *, live=False):
     import asyncpg
 
     business = body.model_dump(mode="json", exclude_none=True)
@@ -126,6 +127,26 @@ async def create_quote(pool, uid, body: QuoteRequest):
             "price_version": "trial-fake-v1",
             "rules": rules,
         }
+        if live:
+            from visual_platform.providers.qwen_image import checked_dimensions
+
+            try:
+                checked_dimensions(g.output.width, g.output.height)
+                configuration = json.loads(
+                    await c.fetchval("SELECT app.live_provider_configuration()")
+                )
+            except ValueError:
+                raise HTTPException(422, "live_model_dimensions_unsupported") from None
+            except asyncpg.RaiseError as exc:
+                db_conflict(exc)
+            execution.update(configuration["binding"])
+            execution.update(
+                provider_profile="bailian_live",
+                provider_model="qwen-image-3.0",
+                price_version="bailian-live-reference-v1",
+                live_reference_rates=configuration["reference_rates"],
+                live_price_evidence_sha256=configuration["price_evidence_sha256"],
+            )
         snapshot = {**business, "_execution": execution}
         identity = uuid4()
         try:
@@ -143,4 +164,22 @@ async def create_quote(pool, uid, body: QuoteRequest):
             "SELECT id AS quote_id,credits,expires_at,input_hash,price_version,provider_model FROM app.quotes WHERE id=$1",
             identity,
         )
-    return dict(row)
+    result = dict(row)
+    result["provider_profile"] = "bailian_live" if live else "offline"
+    if live:
+        from decimal import ROUND_CEILING, Decimal
+
+        rates = configuration["reference_rates"]
+        suffix = "1k" if g.output.width * g.output.height <= 2_250_000 else "2k"
+        generation = Decimal(rates["generate"]["qima_input_" + suffix]) + Decimal(
+            rates["generate"]["qima_output_" + suffix]
+        )
+        detection = (
+            Decimal(991808) * Decimal(rates["detect"]["input_token"])
+            + Decimal(8192) * Decimal(rates["detect"]["output_token"])
+        ) / 1000000
+        result["supplier_reference_upper_cny"] = str(
+            (generation + detection).quantize(Decimal("0.00000001"), rounding=ROUND_CEILING)
+        )
+        result["supplier_actual_spending_verified"] = False
+    return result

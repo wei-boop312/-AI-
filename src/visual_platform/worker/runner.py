@@ -44,7 +44,12 @@ class Worker:
                     "SELECT app.record_fake_cost($1,$2,$3,$4)", task, self.owner, fence, attempt_id
                 )
             return
-        usage = {"transport": "offline_mock", "state": "submission_outcome_not_yet_known"}
+        usage = {
+            "transport": "bailian_live"
+            if getattr(self.provider, "execution_profile", "offline") == "bailian_live"
+            else "offline_mock",
+            "state": "submission_outcome_not_yet_known",
+        }
         if stage == "response":
             ctx = await self.context(task, fence)
             if any(
@@ -241,6 +246,7 @@ class Worker:
                 "unregistered_runtime_configuration",
                 "registered_runtime_binding_mismatch",
                 "runtime_profile_not_enabled",
+                "live_provider_not_authorized",
             }:
                 raise
             needs_review = code == "provider_budget_cost_review_required"
@@ -249,6 +255,7 @@ class Worker:
                 "unregistered_runtime_configuration",
                 "registered_runtime_binding_mismatch",
                 "runtime_profile_not_enabled",
+                "live_provider_not_authorized",
             }
             if code == "provider_price_expired" or runtime_denial:
                 context = await self.context(task, fence)

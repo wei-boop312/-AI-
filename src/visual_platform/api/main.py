@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from uuid import uuid4
 
 import asyncpg
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -81,6 +81,17 @@ def create_app(settings: Settings | None = None):
                 }
             },
         )
+
+    @app.get("/api/v1/provider-status")
+    async def provider_status(request: Request, user=Depends(auth.current_user)):
+        live = request.app.state.settings.provider_profile == "bailian_live"
+        return {
+            "profile": "bailian_live" if live else "offline",
+            "label": "百炼 · 真实供应商" if live else "离线 · 假供应商",
+            "paid_calls_enabled": live,
+            "generation_model": "qwen-image-3.0" if live else "fake-v1",
+            "detection_model": "qwen3.8-flash" if live else "fake-facts-v1",
+        }
 
     @app.middleware("http")
     async def boundary(request: Request, call_next):

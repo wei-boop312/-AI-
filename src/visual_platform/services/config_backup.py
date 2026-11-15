@@ -92,7 +92,7 @@ def public_settings(values):
         elif key == "COOKIE_SECURE":
             require(value in ("0", "1"), "invalid cookie security mode")
         elif key == "PROVIDER_PROFILE":
-            require(value == "offline", "configuration rehearsal requires offline profile")
+            require(value in ("offline", "bailian_live"), "unrecognized provider profile")
         else:
             require(re.fullmatch(r"[A-Za-z0-9_.-]{1,80}", value), "invalid public runtime setting")
     return result

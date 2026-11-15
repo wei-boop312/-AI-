@@ -22,6 +22,7 @@ BASELINE_ENDPOINTS = {
 
 
 class ProtocolProvider:
+    allow_live_transport = False
     generation_model = "flux-3-image"
     detection_model = MODEL
     request_type = BflRequest
@@ -31,7 +32,9 @@ class ProtocolProvider:
     durable_generation_archive = True
 
     def __init__(self, bfl, gemini, *, merchant_accounts=None, runtime_sha256=None):
-        if not bfl.offline_transport or not gemini.offline_transport:
+        if (
+            not bfl.offline_transport or not gemini.offline_transport
+        ) and not self.allow_live_transport:
             raise ValueError(
                 "protocol pipeline requires explicit offline MockTransport on both suppliers"
             )

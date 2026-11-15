@@ -34,8 +34,14 @@ class Consumer:
             await message.reject(requeue=False)
             return "invalid"
         try:
+            profile = getattr(self.worker, "validation_profile", "offline")
             valid = await self.worker.db(
-                "SELECT ops.validate_delivery($1,$2)", delivery.outbox_id, delivery.task_id
+                "SELECT ops.validate_delivery($1,$2,$3)"
+                if profile != "offline"
+                else "SELECT ops.validate_delivery($1,$2)",
+                delivery.outbox_id,
+                delivery.task_id,
+                *([profile] if profile != "offline" else []),
             )
             if not valid:
                 await message.reject(requeue=False)

@@ -613,6 +613,13 @@ def restore_database(
                 c.execute("DELETE FROM ops.service_heartbeats")
             c.execute("UPDATE auth.session_families SET revoked_at=COALESCE(revoked_at,now())")
             c.execute("UPDATE auth.refresh_sessions SET revoked_at=COALESCE(revoked_at,now())")
+            live_policy_revocations = 0
+            if required_row(
+                c.execute("SELECT to_regprocedure('ops.revoke_restored_live_policies()')")
+            )[0]:
+                live_policy_revocations = required_row(
+                    c.execute("SELECT ops.revoke_restored_live_policies()")
+                )[0]
             provider_budget_revocations = 0
             if required_row(c.execute("SELECT to_regclass('ops.provider_budgets')"))[0]:
                 # An unconsumed quote may have spent money after the snapshot.
@@ -668,6 +675,7 @@ def restore_database(
             "old_logins_restored_as_nologin": True,
             "sessions_revoked": True,
             "provider_budgets_revoked": provider_budget_revocations,
+            "live_provider_policies_revoked": live_policy_revocations,
             "quarantined_tasks": len(tasks),
             "before_invariants": before,
             "after_invariants": after,

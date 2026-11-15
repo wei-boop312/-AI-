@@ -58,6 +58,7 @@ async def submit(
     request: Request,
     response: Response,
     idempotency_key: str = Header(min_length=1, max_length=200),
+    provider_confirmation: str | None = Header(default=None, alias="X-Provider-Confirmation"),
     user=Depends(current_user),
 ):
     business = QuoteRequest.model_validate(body.model_dump(exclude={"quote_id"}))
@@ -71,6 +72,12 @@ async def submit(
     )
     proposed = uuid4()
     async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
+        profile = await c.fetchval(
+            "SELECT input_snapshot->'_execution'->>'provider_profile' FROM app.quotes WHERE id=$1",
+            body.quote_id,
+        )
+        if profile == "bailian_live" and provider_confirmation != "bailian_live":
+            raise HTTPException(409, "live_provider_confirmation_required")
         try:
             identity = await c.fetchval(
                 "SELECT app.submit_quoted_task($1,$2,$3,$4,$5)",

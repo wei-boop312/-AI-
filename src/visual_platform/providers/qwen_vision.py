@@ -29,6 +29,12 @@ VISION_SYSTEM = (
 )
 
 
+LIVE_VISION_SYSTEM = (
+    VISION_SYSTEM
+    + "\n必须输出一个完整JSON对象，禁止输出数组、空数组或Markdown。逐项填写schema_version、image_width、image_height、analysis_complete、background、text_items、logo_items、watermark_items、product_extent、uncertainties。品牌文字应描述为商品本体上的内容；无法识别时明确标为unknown并加入uncertainties，不要编造。"
+)
+
+
 def parse_visual_response(raw, width, height):
     try:
         document = strict_document(raw)
@@ -155,7 +161,7 @@ def validate_vision_archive(record):
         record["provider"] != "aliyun_bailian_vision"
         or record["model"] != MODEL
         or record["response_format"] != FORMAT
-        or record["transport"] != "offline_mock"
+        or record["transport"] not in ("offline_mock", "bailian_live")
     ):
         raise ValueError("qwen_vision_archive_identity_mismatch")
     provider_id = record["provider_id"]
@@ -206,7 +212,11 @@ def validate_vision_archive(record):
         "response_structure_integrity": integrity,
         "manual_review_required": not facts.analysis_complete or bool(facts.uncertainties),
         "facts_schema_sha256": hashlib.sha256(encoded(Facts.model_json_schema())).hexdigest(),
-        "system_prompt_sha256": hashlib.sha256(VISION_SYSTEM.encode()).hexdigest(),
+        "system_prompt_sha256": hashlib.sha256(
+            (
+                LIVE_VISION_SYSTEM if record["transport"] == "bailian_live" else VISION_SYSTEM
+            ).encode()
+        ).hexdigest(),
         "cost": {"money_amount": None, "currency": None, "actual_spending_verified": False},
     }
     if any(encoded(record[key]) != encoded(value) for key, value in expected.items()):
@@ -218,9 +228,13 @@ class QwenVisionProvider:
     model = MODEL
     offline_transport = True
 
-    def __init__(self, key, directory: Path, *, endpoint_origin, transport=None):
-        if not isinstance(transport, httpx.MockTransport):
+    def __init__(self, key, directory: Path, *, endpoint_origin, transport=None, live=False):
+        if type(live) is not bool or (live and transport is not None):
+            raise ValueError("explicit_live_transport_cannot_be_mixed")
+        if not live and not isinstance(transport, httpx.MockTransport):
             raise ValueError("qwen_vision_requires_explicit_offline_mock_transport")
+        self.offline_transport = not live
+        self.transport_label = "bailian_live" if live else "offline_mock"
         self.endpoint_origin = workspace_origin(endpoint_origin)
         self.endpoint = self.endpoint_origin + PATH
         if type(key) is not str or not re.fullmatch(r"[\x21-\x7e]{1,4096}", key):
@@ -235,7 +249,10 @@ class QwenVisionProvider:
         self.directory = directory
         self._key = key
         self.client = httpx.AsyncClient(
-            transport=transport, trust_env=False, follow_redirects=False, timeout=35
+            transport=httpx.AsyncHTTPTransport(retries=0) if live else transport,
+            trust_env=False,
+            follow_redirects=False,
+            timeout=35,
         )
 
     async def aclose(self):
@@ -271,6 +288,7 @@ class QwenVisionProvider:
             canonical
         ).hexdigest() != expected_sha256:
             raise ValueError("qwen_vision_requires_exact_canonical_final")
+        prompt = LIVE_VISION_SYSTEM if not self.offline_transport else VISION_SYSTEM
         payload = {
             "model": MODEL,
             "stream": False,
@@ -280,7 +298,7 @@ class QwenVisionProvider:
             "messages": [
                 {
                     "role": "system",
-                    "content": VISION_SYSTEM,
+                    "content": prompt,
                 },
                 {
                     "role": "user",
@@ -361,14 +379,14 @@ class QwenVisionProvider:
                 "facts_schema_sha256": hashlib.sha256(
                     encoded(Facts.model_json_schema())
                 ).hexdigest(),
-                "system_prompt_sha256": hashlib.sha256(VISION_SYSTEM.encode()).hexdigest(),
+                "system_prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
                 "request_sha256": provenance["request_sha256"],
                 **metering,
                 "response_structure_integrity": integrity,
                 "manual_review_required": not facts.analysis_complete or bool(facts.uncertainties),
                 "cost": {"money_amount": None, "currency": None, "actual_spending_verified": False},
                 "response_format": FORMAT,
-                "transport": "offline_mock",
+                "transport": self.transport_label,
             }
             validate_vision_archive(record)
             serialized = encoded(record)
@@ -405,7 +423,8 @@ class QwenVisionProvider:
                 raise ValueError("oversized_qwen_vision_intent")
             provenance = strict_document(intent_raw)
             if (
-                record["provider_id"] != provider_id
+                record["transport"] != self.transport_label
+                or record["provider_id"] != provider_id
                 or record["endpoint_origin"] != self.endpoint_origin
                 or any(
                     record[field] != provenance[field]

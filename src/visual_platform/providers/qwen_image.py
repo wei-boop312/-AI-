@@ -104,7 +104,7 @@ def image_url(value):
         or parsed.port not in (None, 443)
         or parsed.fragment
         or not re.fullmatch(
-            r"dashscope-result-[a-z0-9-]+\.oss-cn-(?:beijing|shanghai|hangzhou|shenzhen)\.aliyuncs\.com",
+            r"(?:dashscope-result-[a-z0-9-]+\.oss-cn-(?:beijing|shanghai|hangzhou|shenzhen)|dashscope-[a-z0-9]{1,32}\.oss-accelerate)\.aliyuncs\.com",
             parsed.hostname or "",
         )
         or not parsed.path.endswith(".png")
@@ -171,9 +171,13 @@ class QwenImageProvider:
     model = MODEL
     offline_transport = True
 
-    def __init__(self, key, directory: Path, *, endpoint_origin, transport=None):
-        if not isinstance(transport, httpx.MockTransport):
+    def __init__(self, key, directory: Path, *, endpoint_origin, transport=None, live=False):
+        if type(live) is not bool or (live and transport is not None):
+            raise ValueError("explicit_live_transport_cannot_be_mixed")
+        if not live and not isinstance(transport, httpx.MockTransport):
             raise ValueError("qwen_image_requires_explicit_offline_mock_transport")
+        self.offline_transport = not live
+        self.transport_label = "bailian_live" if live else "offline_mock"
         self.endpoint_origin = workspace_origin(endpoint_origin)
         self.endpoint = self.endpoint_origin + ASYNC_PATH
         if type(key) is not str or not re.fullmatch(r"[\x21-\x7e]{1,4096}", key):
@@ -184,13 +188,13 @@ class QwenImageProvider:
         self.directory = directory
         self._key = key
         self.client = httpx.Client(
-            transport=transport,
+            transport=httpx.HTTPTransport(retries=0) if live else transport,
             trust_env=False,
             follow_redirects=False,
             timeout=httpx.Timeout(30, connect=5),
         )
         self.download_client = httpx.Client(
-            transport=transport,
+            transport=httpx.HTTPTransport(retries=0) if live else transport,
             trust_env=False,
             follow_redirects=False,
             timeout=httpx.Timeout(30, connect=5),
