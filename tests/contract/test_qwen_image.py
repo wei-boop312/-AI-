@@ -15,6 +15,7 @@ from qwen_fixture import canonical_png
 from visual_platform.providers.contract import ProviderFailure, ProviderUncertain, Receipt
 from visual_platform.providers.qwen_image import (
     ASYNC_PATH,
+    MAX_BODY,
     MAX_IMAGE,
     QwenImageProvider,
     QwenImageRequest,
@@ -28,6 +29,37 @@ URL = "https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/output.png?Expire
 
 
 class QwenImageContracts(unittest.TestCase):
+    def test_oversized_submit_body_preserves_intent_and_cannot_trigger_a_second_post(self):
+        def route(request):
+            self.calls.append(request)
+            return httpx.Response(
+                200, content=b" " * (MAX_BODY + 1), headers={"content-type": "application/json"}
+            )
+
+        provider = self.provider(route)
+        intent = uuid4()
+        with self.assertRaises(ProviderUncertain):
+            provider.submit(intent, self.request())
+        with self.assertRaises(ProviderUncertain):
+            provider.submit(intent, self.request())
+        self.assertEqual(len(self.calls), 1)
+        self.assertTrue((Path(self.temp.name) / (str(intent) + ".intent")).is_file())
+
+    def test_download_rejects_non_png_mime_and_false_png_signature_without_authentication(self):
+        for mime, raw in (("image/jpeg", PNG), ("image/png", b"not PNG bytes")):
+
+            def route(request):
+                if request.url.host.startswith("dashscope-result-"):
+                    self.calls.append(request)
+                    self.assertNotIn("authorization", request.headers)
+                    return httpx.Response(200, content=raw, headers={"content-type": mime})
+                return self.route(request)
+
+            provider = self.provider(route)
+            receipt = provider.submit(uuid4(), self.request())
+            with self.subTest(mime=mime), self.assertRaises(ProviderUncertain):
+                provider.fetch_result(provider.poll(receipt))
+
     def test_source_limits_reject_before_journal_or_network_even_after_model_copy(self):
         provider = self.provider()
         damaged = bytearray(PNG)

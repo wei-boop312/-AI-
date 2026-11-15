@@ -2,3 +2,5 @@
 third_party/licenses/** -text -whitespace
 third_party/supplements/** -text
 sbom/*.json text eol=lf
+# Evidence digests bind exact archived bytes on every checkout platform.
+rules/evidence/** -text

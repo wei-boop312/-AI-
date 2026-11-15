@@ -226,6 +226,11 @@ class QwenVisionContracts(unittest.IsolatedAsyncioTestCase):
         valid = copy.deepcopy(self.body)
         cases = []
         body = copy.deepcopy(valid)
+        wrong_dimensions = json.loads(body["choices"][0]["message"]["content"])
+        wrong_dimensions["image_width"] = 257
+        body["choices"][0]["message"]["content"] = json.dumps(wrong_dimensions)
+        cases.append(body)
+        body = copy.deepcopy(valid)
         body["choices"][0]["finish_reason"] = "length"
         cases.append(body)
         body = copy.deepcopy(valid)
@@ -308,6 +313,8 @@ class QwenVisionContracts(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(self.calls), 1)
         record = provider.fetch_facts(receipts[0].provider_id)
         for change in (
+            {"archive_version": 2},
+            {"response_digest": "f" * 64},
             {"manual_review_required": 0},
             {"final_sha256": "not-a-sha"},
             {"cost": {"money_amount": "0", "currency": "CNY", "actual_spending_verified": True}},

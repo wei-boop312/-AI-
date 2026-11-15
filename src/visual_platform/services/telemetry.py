@@ -53,6 +53,7 @@ class RequestTelemetry:
             try:
                 await send(message)
             except BaseException:
+                # Include cancellation; record interruption and propagate it unchanged.
                 send_failed = True
                 raise
             if message["type"] == "http.response.start":
@@ -68,6 +69,7 @@ class RequestTelemetry:
                 outcome = "interrupted" if send_failed else "exception"
             raise
         except BaseException:
+            # CancelledError must still escape; telemetry only labels the unfinished response.
             if completed_at is None:
                 outcome = "interrupted"
             raise
