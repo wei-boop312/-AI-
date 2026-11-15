@@ -9,7 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from visual_platform.core.credentials import private_credential
 from visual_platform.providers.bailian_connection import load_connection
-from visual_platform.services.paid_bailian_smoke import SingleRound, load_paid_scope
+from visual_platform.services.paid_bailian_smoke import (
+    DetectionSupplementApproval,
+    SingleRound,
+    bounded_file,
+    load_paid_scope,
+)
 
 
 def main():
@@ -18,6 +23,7 @@ def main():
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--scope", type=Path)
     parser.add_argument("--connection", type=Path)
+    parser.add_argument("--supplement-approval", type=Path)
     args = parser.parse_args()
     if not args.run:
         print(json.dumps({"result": "PAID_SMOKE_NOT_REQUESTED", "paid_posts_attempted": 0}))
@@ -37,7 +43,18 @@ def main():
             print(json.dumps({"result": "WAITING_PRIVATE_CREDENTIAL", "paid_posts_attempted": 0}))
             return 3
         runner = SingleRound(scope, connection, key, expected.parent, live=True, resume=args.resume)
-        report = runner.run()
+        if args.supplement_approval is not None:
+            if (
+                args.supplement_approval.absolute()
+                != expected.parent / "detection-supplement-approval.json"
+            ):
+                raise ValueError("bound_supplement_approval_path_required")
+            approval = DetectionSupplementApproval.model_validate_json(
+                bounded_file(args.supplement_approval, 16384)
+            )
+            report = runner.run_supplement(approval)
+        else:
+            report = runner.run()
         print(json.dumps(report))
         return 0 if report["result"] == "SINGLE_ROUND_COMPLETED" else 1
     except Exception as error:

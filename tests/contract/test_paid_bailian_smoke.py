@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
 
 import httpx
@@ -18,6 +19,7 @@ from visual_platform.providers.runtime import credential_fingerprint
 from visual_platform.services.paid_bailian_smoke import (
     MODEL,
     VISION_MODEL,
+    DetectionSupplementApproval,
     PaidSmokeScope,
     SingleRound,
     download_url,
@@ -86,6 +88,8 @@ class PaidBailianSmokeContracts(unittest.TestCase):
         self.calls = []
         self.timeout_step = None
         self.changed_price = False
+        self.access_denied = False
+        self.empty_facts = False
 
     def route(self, request):
         self.calls.append(request)
@@ -143,6 +147,17 @@ class PaidBailianSmokeContracts(unittest.TestCase):
                     200,
                     json={"output": {"task_id": "synthetic-paid-smoke", "task_status": "PENDING"}},
                 )
+            if self.access_denied:
+                return httpx.Response(
+                    403,
+                    json={
+                        "error": {
+                            "code": "access_denied",
+                            "type": "access_denied",
+                            "message": "Access denied by API-Key restrictions.",
+                        }
+                    },
+                )
             self.assertEqual(payload["max_tokens"], 8192)
             self.assertFalse(payload["enable_thinking"])
             self.assertNotIn("tools", payload)
@@ -155,7 +170,10 @@ class PaidBailianSmokeContracts(unittest.TestCase):
                     "choices": [
                         {
                             "finish_reason": "stop",
-                            "message": {"role": "assistant", "content": facts.model_dump_json()},
+                            "message": {
+                                "role": "assistant",
+                                "content": "[]" if self.empty_facts else facts.model_dump_json(),
+                            },
                         }
                     ],
                     "usage": {
@@ -215,6 +233,59 @@ class PaidBailianSmokeContracts(unittest.TestCase):
 
     def posts(self):
         return [request for request in self.calls if request.method == "POST"]
+
+    def supplement_approval(self):
+        now = datetime.now(timezone.utc)
+        return DetectionSupplementApproval(
+            authorization_id=self.scope.authorization_id,
+            approval_ref="user_20261115_permission_and_single_detection_supplement",
+            parent_scope_sha256=self.runner().report["authorization_sha256"],
+            prior_rejection_sha256=sha((self.folder / "detection.body").read_bytes()),
+            final_sha256=sha((self.folder / "final.png").read_bytes()),
+            approved_at=now - timedelta(seconds=1),
+            expires_at=self.scope.expires_at,
+        )
+
+    def test_explicit_supplement_after_key_policy_rejection_retains_original_evidence(self):
+        self.access_denied = True
+        first = self.runner().run()
+        self.assertEqual(first["result"], "STOPPED_REQUIRES_REVIEW")
+        original = (self.folder / "generation.intent").read_bytes()
+        rejected = (self.folder / "detection.body").read_bytes()
+        approval = self.supplement_approval()
+        self.access_denied = False
+        report = self.runner().run_supplement(approval)
+        self.assertEqual(report["result"], "SINGLE_ROUND_COMPLETED", report)
+        self.assertEqual(report["combined_reference_upper_cny"], "1.83112960")
+        self.assertEqual(report["mock_posts_attempted"], 3)
+        self.assertEqual(report["paid_posts_attempted"], 0)
+        self.assertEqual((self.folder / "generation.intent").read_bytes(), original)
+        self.assertEqual((self.folder / "detection.body").read_bytes(), rejected)
+        self.assertEqual(
+            self.runner().run_supplement(approval)["result"], "STOPPED_REQUIRES_REVIEW"
+        )
+        self.assertEqual(
+            self.runner(resume=True).run_supplement(approval)["result"], "SINGLE_ROUND_COMPLETED"
+        )
+        self.assertEqual(len(self.posts()), 3)
+
+    def test_supplement_does_not_retry_a_successful_response_or_expand_original_total(self):
+        self.assertEqual(self.runner().run()["result"], "SINGLE_ROUND_COMPLETED")
+        report = self.runner().run_supplement(self.supplement_approval())
+        self.assertEqual(report["result"], "STOPPED_REQUIRES_REVIEW")
+        self.assertEqual(len(self.posts()), 2)
+
+    def test_supplement_parent_hash_and_worst_case_total_are_checked_before_new_post(self):
+        self.access_denied = True
+        self.runner().run()
+        approval = self.supplement_approval()
+        self.access_denied = False
+        bad = approval.model_copy(update={"parent_scope_sha256": "f" * 64})
+        self.assertEqual(self.runner().run_supplement(bad)["result"], "STOPPED_REQUIRES_REVIEW")
+        with patch("visual_platform.services.paid_bailian_smoke.MAX_INPUT_TOKENS", 2000000):
+            report = self.runner().run_supplement(approval)
+        self.assertEqual(report["reason"], "supplement_worst_case_exceeds_original_total")
+        self.assertEqual(len(self.posts()), 2)
 
     def test_one_round_preserves_pixels_bounds_prices_and_never_claims_mock_as_real(self):
         report = self.runner().run()
@@ -286,3 +357,12 @@ class PaidBailianSmokeContracts(unittest.TestCase):
         self.assertEqual(process.returncode, 3)
         self.assertEqual(json.loads(process.stdout)["result"], "PAID_SMOKE_NOT_REQUESTED")
         self.assertEqual(self.calls, [])
+
+    def test_http_success_with_empty_array_is_not_visual_acceptance(self):
+        self.empty_facts = True
+        report = self.runner().run()
+        self.assertEqual(report["result"], "SINGLE_ROUND_COMPLETED")
+        self.assertFalse(report["detection_analysis_complete"])
+        self.assertFalse(report["detection_facts_schema_verified"])
+        self.assertTrue(report["manual_review_required"])
+        self.assertEqual(len([c for c in self.calls if c.method == "POST"]), 2)

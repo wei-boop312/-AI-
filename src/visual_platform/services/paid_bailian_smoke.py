@@ -124,6 +124,27 @@ def load_paid_scope(path):
     return PaidSmokeScope.model_validate_json(encoded(strict_document(bounded_file(path, 65536))))
 
 
+class DetectionSupplementApproval(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    authorization_id: UUID
+    approval_ref: Literal["user_20261115_permission_and_single_detection_supplement"]
+    parent_scope_sha256: DIGEST
+    prior_rejection_sha256: DIGEST
+    final_sha256: DIGEST
+    approved_at: datetime
+    expires_at: datetime
+    total_ceiling: Literal["2.00"] = "2.00"
+
+    @model_validator(mode="after")
+    def window(self):
+        if any(
+            value.tzinfo is None or value.utcoffset() != timedelta(0)
+            for value in (self.approved_at, self.expires_at)
+        ) or not timedelta(0) < self.expires_at - self.approved_at <= timedelta(hours=24):
+            raise ValueError("bounded_supplement_approval_required")
+        return self
+
+
 def amount(value):
     return str(Decimal(value).quantize(Decimal("0.00000001"), rounding=ROUND_CEILING))
 
@@ -145,6 +166,7 @@ def reference_prices(body, model):
         if model == MODEL
         else {"input_token": "0.8", "output_token": "2.7", "input_token_cache": "0.1"}
     )
+
     unit = "每张" if model == MODEL else "每百万tokens"
     observed = {}
     for row in groups[0]["prices"]:
@@ -366,6 +388,218 @@ class SingleRound:
             self.report["paid_posts_attempted" if self.live else "mock_posts_attempted"] = count
             save(self.folder / ("run-" + uuid4().hex + ".json"), encoded(self.report))
 
+    def run_supplement(self, approval):
+        """An explicit second user approval permits one new detector POST after a known 403.
+
+        Original intents/responses are never reset, removed, or treated as successful.
+        Even both detectors at the model context bound must fit the original total.
+        """
+        try:
+            self.valid_now()
+            approval = DetectionSupplementApproval.model_validate_json(approval.model_dump_json())
+            now = datetime.now(timezone.utc)
+            if (
+                not approval.approved_at <= now < approval.expires_at
+                or approval.expires_at > self.scope.expires_at
+                or approval.authorization_id != self.scope.authorization_id
+                or approval.parent_scope_sha256 != self.report["authorization_sha256"]
+            ):
+                raise ValueError("supplement_does_not_match_original_authority")
+            claim = GLOBAL_CLAIM if self.live else self.folder / "mock-authorization.claim"
+            if bounded_file(claim, 4096) != encoded(
+                {
+                    "authorization_id": str(self.scope.authorization_id),
+                    "authorization_sha256": self.report["authorization_sha256"],
+                }
+            ):
+                raise ValueError("original_round_claim_required")
+            rejected_raw = bounded_file(self.folder / "detection.body", MAX_JSON)
+            rejected_status = strict_document(
+                bounded_file(self.folder / "detection.status.json", 4096)
+            )
+            error = strict_document(rejected_raw).get("error", {})
+            if (
+                rejected_status.get("status") != 403
+                or rejected_status.get("body_sha256") != sha(rejected_raw)
+                or approval.prior_rejection_sha256 != sha(rejected_raw)
+                or error.get("code") != "access_denied"
+                or error.get("message") != "Access denied by API-Key restrictions."
+            ):
+                raise ValueError("only_confirmed_api_key_policy_rejection_can_be_supplemented")
+            source = bounded_file(self.scope.source_path, 10_000_000)
+            original = bounded_file(self.scope.original_path, MAX_DOWNLOAD)
+            final = bounded_file(self.folder / "final.png", 10_000_000)
+            if (
+                sha(source) != self.scope.source_sha256
+                or sha(original) != self.scope.original_sha256
+                or sha(final) != approval.final_sha256
+            ):
+                raise ValueError("supplement_source_or_final_changed")
+            canonical, meta = asyncio.run(decode(final, "image/png"))
+            if sha(canonical) != sha(final):
+                raise ValueError("canonical_final_required")
+            _, protection = asyncio.run(
+                transform(source, final, self.scope.generation.model_dump(mode="json"), verify=True)
+            )
+            old_payload = strict_document(
+                bounded_file(self.folder / "detection.request.json", MAX_DOWNLOAD)
+            )
+            old_intent = strict_document(bounded_file(self.folder / "detection.intent", 4096))
+            if (
+                old_intent
+                != {
+                    "authorization_sha256": self.report["authorization_sha256"],
+                    "request_sha256": sha(encoded(old_payload)),
+                }
+                or old_payload.get("model") != VISION_MODEL
+                or old_payload.get("max_tokens") != MAX_OUTPUT_TOKENS
+                or old_payload.get("enable_thinking") is not False
+                or old_payload.get("stream") is not False
+                or set(old_payload)
+                != {
+                    "model",
+                    "stream",
+                    "enable_thinking",
+                    "max_tokens",
+                    "response_format",
+                    "messages",
+                }
+            ):
+                raise ValueError("supplement_must_reuse_exact_original_detection_request")
+            embedded = old_payload["messages"][1]["content"][0]["image_url"]["url"]
+            if embedded != "data:image/png;base64," + base64.b64encode(final).decode():
+                raise ValueError("supplement_final_request_mismatch")
+            self.cached("generation", MAX_JSON, "application/json")
+            prices = {}
+            for model in (MODEL, VISION_MODEL):
+                report, body = probe_metadata(
+                    self.connection, self.key, model=model, transport=self.transport
+                )
+                save(
+                    self.folder / ("supplement-catalogue-" + model + "-" + uuid4().hex + ".body"),
+                    body,
+                )
+                if report["result"] != "REMOTE_MODEL_METADATA_READ":
+                    raise ValueError("authenticated_catalogue_preflight_failed")
+                prices[model] = reference_prices(body, model)
+            tier = "1k" if meta["width"] * meta["height"] <= 2250000 else "2k"
+            generated_cost = Decimal(prices[MODEL]["qima_input_" + tier]) + Decimal(
+                prices[MODEL]["qima_output_" + tier]
+            )
+            detection_upper = (
+                Decimal(MAX_INPUT_TOKENS) * Decimal(prices[VISION_MODEL]["input_token"])
+                + Decimal(MAX_OUTPUT_TOKENS) * Decimal(prices[VISION_MODEL]["output_token"])
+            ) / 1000000
+            if generated_cost + 2 * detection_upper > Decimal(
+                approval.total_ceiling
+            ) or detection_upper > Decimal(self.scope.detect_ceiling):
+                raise ValueError("supplement_worst_case_exceeds_original_total")
+            self.report.update(
+                supplemental_detection_authorized=True,
+                original_detection_http_status=403,
+                combined_reference_upper_cny=amount(generated_cost + 2 * detection_upper),
+                real_model_output_exists=self.live,
+                final_sha256=sha(final),
+                pixel_exact_passed=protection["pixel_exact_passed"],
+            )
+            approval_sha = sha(encoded(approval.model_dump(mode="json")))
+            save(
+                self.folder / "detection-supplement-approval.json",
+                encoded(approval.model_dump(mode="json")),
+                replay=True,
+            )
+            supplement_intent = self.folder / "detection-supplement.intent"
+            intent_body = encoded(
+                {
+                    "authorization_sha256": self.report["authorization_sha256"],
+                    "supplement_approval_sha256": approval_sha,
+                    "request_sha256": sha(encoded(old_payload)),
+                }
+            )
+            with httpx.Client(
+                transport=self.transport,
+                trust_env=False,
+                follow_redirects=False,
+                timeout=httpx.Timeout(60, connect=10),
+            ) as client:
+                if supplement_intent.exists():
+                    if not self.resume or bounded_file(supplement_intent, 4096) != intent_body:
+                        raise ValueError("supplement_already_attempted_do_not_resubmit")
+                    raw = self.cached("detection-supplement", MAX_JSON, "application/json")
+                else:
+                    self.valid_now()
+                    save(self.folder / "detection-supplement.request.json", encoded(old_payload))
+                    save(supplement_intent, intent_body)
+                    raw = self.exchange(
+                        client,
+                        "POST",
+                        self.origin + VISION_PATH,
+                        "detection-supplement",
+                        payload=old_payload,
+                    )
+            facts, metering, response_id, integrity = parse_visual_response(
+                raw, meta["width"], meta["height"]
+            )
+            save(
+                self.folder / "detection-supplement-facts.json",
+                encoded(
+                    {
+                        "facts": facts.model_dump(mode="json"),
+                        **metering,
+                        "response_id": response_id,
+                        "structure_integrity": integrity,
+                        "wire_response_sha256": sha(raw),
+                        "final_sha256": sha(final),
+                        "transport": self.report["transport"],
+                    }
+                ),
+                replay=True,
+            )
+            self.report.update(
+                result="SINGLE_ROUND_COMPLETED",
+                detection_structure_integrity=integrity,
+                detection_analysis_complete=facts.analysis_complete,
+                detection_facts_schema_verified="qwen_facts_schema_or_response_unverified"
+                not in facts.uncertainties
+                and integrity == "valid",
+                detection_metering=metering,
+                manual_review_required=True,
+                generation_reference_estimate_cny=amount(generated_cost),
+            )
+            if metering["quantities"] is not None:
+                counts = metering["quantities"]
+                detected_cost = (
+                    Decimal(counts["input_tokens"]) * Decimal(prices[VISION_MODEL]["input_token"])
+                    + Decimal(counts["cached_input_tokens"])
+                    * Decimal(prices[VISION_MODEL]["input_token_cache"])
+                    + Decimal(counts["output_tokens"])
+                    * Decimal(prices[VISION_MODEL]["output_token"])
+                ) / 1000000
+                self.report["successful_detection_reference_estimate_cny"] = amount(detected_cost)
+                self.report["successful_calls_reference_estimate_cny"] = amount(
+                    generated_cost + detected_cost
+                )
+            if (
+                sha(bounded_file(self.scope.source_path, 10_000_000)) != self.scope.source_sha256
+                or sha(bounded_file(self.scope.original_path, MAX_DOWNLOAD))
+                != self.scope.original_sha256
+            ):
+                raise ValueError("original_or_reference_changed_during_supplement")
+            self.report["original_and_reference_unchanged"] = True
+            return self.report
+        except Exception as error:
+            self.report.update(result="STOPPED_REQUIRES_REVIEW", error_type=type(error).__name__)
+            if isinstance(error, ValueError) and re.fullmatch(r"[a-z_]{1,100}", str(error)):
+                self.report["reason"] = str(error)
+            return self.report
+        finally:
+            count = sum(
+                (self.folder / (step + ".intent")).is_file()
+                for step in ("generation", "detection", "detection-supplement")
+            )
+            self.report["paid_posts_attempted" if self.live else "mock_posts_attempted"] = count
+            save(self.folder / ("supplement-run-" + uuid4().hex + ".json"), encoded(self.report))
+
     def execute(self):
         self.valid_now()
         source = bounded_file(self.scope.source_path, 10_000_000)
@@ -536,6 +770,10 @@ class SingleRound:
                 final_sha256=sha(final),
                 pixel_exact_passed=protection["pixel_exact_passed"],
                 detection_structure_integrity=integrity,
+                detection_analysis_complete=facts.analysis_complete,
+                detection_facts_schema_verified="qwen_facts_schema_or_response_unverified"
+                not in facts.uncertainties
+                and integrity == "valid",
                 detection_metering=vision_metering,
                 manual_review_required=True,
             )
