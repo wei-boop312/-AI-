@@ -20,11 +20,25 @@ from visual_platform.services.paid_bailian_smoke import (
     VISION_MODEL,
     PaidSmokeScope,
     SingleRound,
+    download_url,
     sha,
 )
 
 
 class PaidBailianSmokeContracts(unittest.TestCase):
+    def test_documented_accelerated_result_host_is_allowed_but_lookalikes_are_not(self):
+        url = "https://dashscope-a717.oss-accelerate.aliyuncs.com/image.png?synthetic=1"
+        self.assertEqual(download_url(url), url)
+        for invalid in (
+            url.replace("aliyuncs.com", "aliyuncs.com.evil.invalid"),
+            url.replace("https://", "http://"),
+            url.replace("https://", "https://user:secret@"),
+            url.replace("dashscope-a717", "arbitrary-bucket"),
+            url + "#secret",
+        ):
+            with self.subTest(url=invalid), self.assertRaises(ValueError):
+                download_url(invalid)
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)

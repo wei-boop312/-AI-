@@ -1,0 +1,91 @@
+{
+  "run_id": 43679309311,
+  "commit": "2768e42969e9fceaadfffe074502b5117063f8ab",
+  "conclusion": "success",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43679309311",
+  "artifact_id": 14147918508,
+  "archive_sha256": "d2816a4421b45f97f8c3f3971ec90aa2b640c40e082b4dca5a5fbdcaaf38dd55",
+  "files": {
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "276f5bf4cdf7cb273121d7528af8e3d6ffd4ac24ea3f03282d27f2e538cd977b"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "89e1875de7c270a7b8d46156754e4a094fa3a921725341a7e9be7c50981c489e"
+    },
+    "offline-gate.json": {
+      "artifact_path": "work/ci-public/offline-gate.json",
+      "sha256": "6225873081942a79d8bfe2560fcd7fb038b1f5d85d3abeda631c22ce1250a846"
+    },
+    "offline-handoff.json": {
+      "artifact_path": "work/ci-public/offline-handoff.json",
+      "sha256": "8a378b48ea346da55a8fc36a5e38b8de5bc716a201ea0d6fbc004f974420013a"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "a6ed88f55edabb9d6a051d998872ca85c4af23168a92de81ae06392fef976699"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "16353e962def7f62ec528e064af7f3977e8948b7e8fce41321907c9422d7495d"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "c871ffe3be1253842c99e5d29c85a1d98d59d4b35c6ea5466ba9e75e2f69361a"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "c02da029902380644f8cba1d0eb74bd8b2eea50c83c8b1a6310b9089a45411a0"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "731561fe3580a19f7d869b55d00325a726eb417d1243570354cc46421d84ecad"
+    }
+  },
+  "scope": "WorkBuddy review fix: byte-stable Ozon evidence and additional protocol boundary coverage",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "daeb4d59dbee6cdfd2859d5ae0fdc49b0e98806652f39a1b914059661e0d5561",
+      "passed_tests": [
+        11
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "ac3b9249271718c497eb4952d94f2394dba8d2d206e06daac773e21902e69b0f",
+      "passed_tests": [
+        4
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "08c06e93336d8946ffb0e2de4d9dc9ed863ec673a5ad7b6a7c8f957ac46854f1",
+      "passed_tests": [
+        122
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "78b786da8239cb46817dcc96c57ed8254712217e5059d31c270c3a4edfecfa02",
+      "passed_tests": [
+        278
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "444e8e8be2b9ef50517ab74f9d604dde6023d6e06967df9aaa7809bf0b765e8e",
+      "passed_tests": [
+        225
+      ]
+    }
+  ],
+  "handoff_archive": {
+    "filename": "43679309311-offline-handoff.zip",
+    "sha256": "af41621322c514259ea589fe4f93b7ea8509e0fa85780f8da6f267fe9017533d",
+    "size": 6599839,
+    "files": 1772,
+    "local_independent_verification": "OFFLINE_HANDOFF_VERIFIED"
+  }
+}

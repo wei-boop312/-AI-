@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "commit": "2768e42969e9fceaadfffe074502b5117063f8ab",
+  "observed_at": "2026-11-15T05:11:11.702Z",
+  "paid_calls": 0,
+  "browser": "158.0.8127.18",
+  "scope": "production React + native PG/S3; two actual quote responses delayed at browser boundary; queued task explicitly cancelled without supplier calls",
+  "stale_product_quote_discarded": true,
+  "stale_config_quote_discarded": true,
+  "confirmed_input_matches_current_quote": true,
+  "quotes": 3,
+  "task_posts": 1,
+  "one_freeze_one_refund": true,
+  "test_sha256": "4d9e45ed3927b0839f1c292a5e4696d94a26c2585a4887960c90b662a4491519"
+}

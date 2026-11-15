@@ -171,14 +171,21 @@ def download_url(value):
     if type(value) is not str or len(value) > 8192:
         raise ValueError("unreviewed_result_url")
     url = urlsplit(value)
-    # Both exact public result hosts appear in the official Beijing API reference.
+    # Exact regional examples plus the documented Qwen image-edit acceleration form.
+    accelerated = (
+        re.fullmatch(r"dashscope-[a-z0-9]{1,32}\.oss-accelerate\.aliyuncs\.com", url.hostname or "")
+        is not None
+    )
     if (
         url.scheme != "https"
-        or url.hostname
-        not in {
-            "dashscope-result-bj.oss-cn-beijing.aliyuncs.com",
-            "dashscope-result-sz.oss-cn-shenzhen.aliyuncs.com",
-        }
+        or (
+            not accelerated
+            and url.hostname
+            not in {
+                "dashscope-result-bj.oss-cn-beijing.aliyuncs.com",
+                "dashscope-result-sz.oss-cn-shenzhen.aliyuncs.com",
+            }
+        )
         or url.username
         or url.password
         or url.port not in (None, 443)
