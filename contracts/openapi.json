@@ -5,6 +5,22 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/provider-status": {
+      "get": {
+        "summary": "Provider Status",
+        "operationId": "provider_status_api_v1_provider_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/health/live": {
       "get": {
         "summary": "Live",
@@ -791,6 +807,22 @@
               "minLength": 1,
               "maxLength": 200,
               "title": "Idempotency-Key"
+            }
+          },
+          {
+            "name": "X-Provider-Confirmation",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Provider-Confirmation"
             }
           }
         ],

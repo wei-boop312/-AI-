@@ -1,0 +1,94 @@
+{
+  "run_id": 43722102329,
+  "commit": "5af5f2c43bcf0843bdc799e32ed440ca6424191a",
+  "conclusion": "failure",
+  "url": "https://github.com/wei-boop312/-AI-/actions/runs/43722102329",
+  "artifact_id": 14165516333,
+  "archive_sha256": "ef119620f3d06e4686d13fe04c7307dee70fd13677005a37b682c92360795c5d",
+  "files": {
+    "native-integration.log": {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "274417da60c5769941b80ef769f8c1eff16e4025ef5ab84f52e37ff5ecc9b40c"
+    },
+    "native-restore-v2.json": {
+      "artifact_path": "work/ci-public/native-restore-v2.json",
+      "sha256": "4b64a806096fcdcf647b306c8c08a67b02a3297acddc70d56f3f13869da9c439"
+    },
+    "native-result.json": {
+      "artifact_path": "work/ci-public/native-result.json",
+      "sha256": "8511879492920e68965636e390a39ee9a21d4ac77fc1eafb3510212939df7758"
+    },
+    "operations-gate.json": {
+      "artifact_path": "work/ci-public/operations-gate.json",
+      "sha256": "c5def1fef0bec01b0e40b91ff7ab19679da720b37b0d0f09529f9e56326db8d9"
+    },
+    "static-checks.json": {
+      "artifact_path": "work/ci-public/static-checks.json",
+      "sha256": "26624f1ec3fa8d340abf41d2843bbf393b5918dcaa2baeab8499d4e8c1babbcc"
+    },
+    "application-compose.json": {
+      "artifact_path": "work/ci-public/application-compose.json",
+      "sha256": "f1a1725a3222f95b4284132e344ea140acc4a64c95d750920bafea44245ba992"
+    },
+    "container-runtime.json": {
+      "artifact_path": "work/ci-public/container-runtime.json",
+      "sha256": "2a511e83de0b0da5f590afda389d37c9137021311d9c7f5284a5c46469984cf3"
+    },
+    "delivery-gate.json": {
+      "artifact_path": "work/ci-public/delivery-gate.json",
+      "sha256": "b469a368a6484c63942d2f6065833f855a9ffefa55fb0d620f3a430157f36c1f"
+    },
+    "frontend-quality-annotation.json": {
+      "artifact_path": "work/ci-public/frontend-quality-annotation.json",
+      "sha256": "8e818a3962e09d1601c68d489b65f226ef7868aa4c9b50bd514eb8c3ce813e0f"
+    },
+    "frontend-quotes.json": {
+      "artifact_path": "work/ci-public/frontend-quotes.json",
+      "sha256": "c9bd902df8c8a2c267924233a000b852730fc9257bd14147f28ff1d9eee0e14f"
+    },
+    "frontend-uploads.json": {
+      "artifact_path": "work/ci-public/frontend-uploads.json",
+      "sha256": "387cd5cb54913da418f6c05433c9f22109f59fd6f89ded7bd826e18c2906ac43"
+    }
+  },
+  "scope": "Live provider integration CI failure retained; inspect exact failed stage, local real task succeeded separately",
+  "test_logs": [
+    {
+      "artifact_path": "work/ci-public/unit.log",
+      "sha256": "b3997359788c8c82e1ac3f1fe4ace8d95eeef2acc3b4970692cfd66dc3fcdae6",
+      "passed_tests": [
+        225
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/contracts.log",
+      "sha256": "8baaf2dd1775392329a89195a922e16b6b7860c6787b0e15c2e6f5df0871c135",
+      "passed_tests": [
+        137
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/native-integration.log",
+      "sha256": "274417da60c5769941b80ef769f8c1eff16e4025ef5ab84f52e37ff5ecc9b40c",
+      "passed_tests": [
+        285
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-production.log",
+      "sha256": "b0af4bc9ad319f84b82a2f2dfe77863d6829da6bcb6c3cdf2611b3bcfe9601da",
+      "passed_tests": [
+        7
+      ]
+    },
+    {
+      "artifact_path": "work/ci-public/browser-controlled-faults.log",
+      "sha256": "70aa6b17795b13d25a0182ace9006e1f64333ab77a550a301c2f1e346b7844a9",
+      "passed_tests": [
+        11
+      ]
+    }
+  ],
+  "failure_stage": "Verify current P5-01 build evidence",
+  "failure_reason": "checked-in OpenAPI snapshot not regenerated for provider status route and confirmation header"
+}

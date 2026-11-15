@@ -1,0 +1,57 @@
+{
+  "observed_at": "2026-11-15T14:16:32.844127+00:00",
+  "code_commit": "5af5f2c43bcf0843bdc799e32ed440ca6424191a",
+  "result": "REAL_BAILIAN_TASK_SUCCEEDED",
+  "execution_profile": "bailian_live",
+  "authorization_ref": "user_20261115_no_spending_limit",
+  "spending_limit_cny": null,
+  "user_live_policy_enabled": true,
+  "task_submissions": 1,
+  "supplier_post_intents": 2,
+  "models": [
+    {
+      "step": "detect",
+      "provider": "bailian_vision_live",
+      "model": "qwen3.8-flash",
+      "status": "succeeded"
+    },
+    {
+      "step": "generate",
+      "provider": "bailian_live",
+      "model": "qwen-image-3.0",
+      "status": "succeeded"
+    }
+  ],
+  "final_dimensions": [
+    2000,
+    2000
+  ],
+  "final_download_hash_verified": true,
+  "original_user_image_unchanged": true,
+  "pixel_exact_passed": true,
+  "detection_facts_analysis_complete": true,
+  "detection_representation_version": 3,
+  "generation_usage_integrity": "complete",
+  "detection_usage_integrity": "incomplete_or_extra",
+  "reference_cost_records": [
+    {
+      "provider": "bailian_live",
+      "currency": "CNY",
+      "amount": "0.20000000",
+      "status": "estimated"
+    },
+    {
+      "provider": "bailian_vision_live",
+      "currency": null,
+      "amount": null,
+      "status": "unknown"
+    }
+  ],
+  "actual_spending_verified": false,
+  "auto_overall": "manual_review",
+  "visual_quality_accepted": false,
+  "visual_quality_issue": "IMG-001 deferred by user",
+  "browser_live_mode_verified": true,
+  "raw_provider_data_and_images_committed": false,
+  "prior_paid_smoke_authorization_reused": false
+}

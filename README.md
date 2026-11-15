@@ -6,7 +6,9 @@
 
 初版交互基线[5bc6c273 / CI43709997483](https://github.com/wei-boop312/-AI-/actions/runs/43709997483)整轮通过：225单元、133契约、278原生PG/MQ/S3、6普通浏览器（4真实服务闭环+2合成HTTP界面）、11受控浏览器、8服务Compose及独立恢复，1790文件交付包本机独立校验通过。本轮零付费调用。原始报告和日志摘要见[当次证据](docs/evidence/ci-43709997483)。2026-11-15本机完整环境已启动并通过真实浏览器闭环，使用[本机试用入口](docs/LOCAL_WINDOWS_TRIAL.md)；其他电脑仍需按下文准备专属环境。
 
-**应用日常任务仍使用offline Fake。** 独立受限实验已完成一次百炼真实生成；追加授权后的检测返回空数组，未通过事实校验，真实账单未核实。实验未开放日常应用的付费传输。出图回贴色块/错位已按用户决定列入[试用后改进项IMG-001](docs/POST_TRIAL_IMPROVEMENTS.md)，不阻断初版交互试用，也不代表质量已通过。完整V4、真实供应商任务接线及生产发布仍未完成。百炼配置见[BAILIAN_SETUP](docs/BAILIAN_SETUP.md)，后续工作见[REMAINING_WORK](docs/REMAINING_WORK.md)。
+**默认代码配置仍为offline；当前这台电脑的体验账号已按用户授权启用百炼真实供应商。** qwen-image-3.0生成与qwen3.8-flash检测已通过一次正常API/MQ/Worker真实任务，2000²成图及报告可下载；检测返回有效结构，报告保持人工复核。用户明确不设累计费用上限，每次仍需报价确认。真实任务的生成参考估价0.20CNY，检测费用因计量不完整保持unknown，不是已核实账单。见[真实接入与管理](docs/LIVE_BAILIAN.md)和[脱敏实际证据](docs/evidence/live-bailian-acceptance-20261115.json)。Hubway配置与适配保留，当前未启用，也不会自动切换。
+
+出图合成问题[IMG-001](docs/POST_TRIAL_IMPROVEMENTS.md)仍按用户决定留档，本次仅接入供应商。完整规则、真实账单及生产发布仍见[剩余工作](docs/REMAINING_WORK.md)，不标记整个项目完成。
 
 ## 安装与本地运行
 

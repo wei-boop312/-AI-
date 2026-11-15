@@ -1,0 +1,36 @@
+{
+  "commit": "5af5f2c43bcf0843bdc799e32ed440ca6424191a",
+  "observed_at": "2026-11-15T14:17:11.868845+00:00",
+  "paid_calls": 0,
+  "profile": "offline_fake",
+  "scope": "eight-service Compose and built non-root applications; Linux loopback rehearsal; no deployment",
+  "stage": "verified",
+  "result": "PASS",
+  "runtime_images": [
+    {
+      "image": "visual-api:ci",
+      "id": "sha256:2c7a6823579a795bf5408ae4a942dee3de0f72aea03b92466a208f8353697fb8",
+      "user": "10001:10001"
+    },
+    {
+      "image": "visual-web:ci",
+      "id": "sha256:8b7fe33c0b76a9717fd9ccf3fa239a16678592a4d555b530e49d8b4fc5934128",
+      "user": "101:101"
+    }
+  ],
+  "production_asset_sha256": {
+    "/assets/index-DqPSrIcm.js": "8842e51ad90e654bed7ad183f2082176ed989bd140946834034645131347c3ff",
+    "/assets/index-BxnxhhZu.css": "b92ff59a4d827101c10418c620d4e149270acb8d0b21701c47145425c058858e"
+  },
+  "final_sha256": "a270b2cc5893046efbc3fcac8de05d4a66d5c85221bc4041ba4fd1994a9278f7",
+  "pixel_exact": true,
+  "report_bound_to_final": true,
+  "manual_review": true,
+  "wallet": {
+    "available": 184,
+    "reserved": 0,
+    "funded_total": 200,
+    "spent_total": 16
+  },
+  "seconds": 50.916
+}

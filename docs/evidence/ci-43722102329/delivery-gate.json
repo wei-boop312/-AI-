@@ -1,0 +1,6 @@
+{
+  "observed_at": "2026-11-15T14:18:29.640343+00:00",
+  "scope": "P5-01 local/CI build candidate; no release or deployment approval",
+  "result": "FAIL",
+  "reason": "checked-in OpenAPI must match current routes and schemas"
+}

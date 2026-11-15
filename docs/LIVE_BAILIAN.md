@@ -1,5 +1,7 @@
 # 百炼真实供应商接入
 
+2026-11-15 已按最新用户授权在本机启用百炼真实模式（qwen-image-3.0生成＋qwen3.8-flash检测），不设人为累计费用上限。一次正常API/MQ/Worker真实任务已完成：2个供应商意图均succeeded，2000² PNG与报告下载摘要核对通过，三个保护区像素通过、原始3000²商品图未变，检测Facts结构有效且analysis_complete=true；结果继续manual_review。生成参考估价0.20CNY，检测计量缺失保持unknown，actual_spending_verified=false。使用全新任务及追加授权，不复用旧实验；原图/响应/密钥均留私有。浏览器已刷新并观察到“百炼 · 真实供应商”，桌面启动器已兼容新模式。代码5af5f2c，完整CI43722102329进行中；不把实际链路跑通当作画质/规则/账单或整个项目完成。详见LIVE_BAILIAN.md和evidence/live-bailian-acceptance-20261115.json。
+
 本次范围仅为真实供应商链路。用户于2026-11-15明确要求接入，并对费用上限回复“对我不设上限”。新模式为bailian_live：qwen-image-3.0生成、qwen3.8-flash检测，Hubway原配置与适配保留，不自动切换或混用。默认环境仍为offline，CI始终注入MockTransport，不调用真实模型。
 
 ## 用户操作
