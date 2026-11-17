@@ -673,6 +673,281 @@
         }
       }
     },
+    "/api/v1/appearance-understandings/quotes": {
+      "post": {
+        "tags": [
+          "appearance-understanding"
+        ],
+        "summary": "Quote",
+        "operationId": "quote_api_v1_appearance_understandings_quotes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnderstandingQuote"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appearance-understandings": {
+      "get": {
+        "tags": [
+          "appearance-understanding"
+        ],
+        "summary": "Listing",
+        "operationId": "listing_api_v1_appearance_understandings_get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "source_asset_version_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Source Asset Version Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appearance-understandings/{identity}": {
+      "get": {
+        "tags": [
+          "appearance-understanding"
+        ],
+        "summary": "Detail",
+        "operationId": "detail_api_v1_appearance_understandings__identity__get",
+        "parameters": [
+          {
+            "name": "identity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appearance-understandings/{identity}/submit": {
+      "post": {
+        "tags": [
+          "appearance-understanding"
+        ],
+        "summary": "Submit",
+        "operationId": "submit_api_v1_appearance_understandings__identity__submit_post",
+        "parameters": [
+          {
+            "name": "identity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identity"
+            }
+          },
+          {
+            "name": "x-provider-confirmation",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Provider-Confirmation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appearance-understandings/{identity}/confirm": {
+      "post": {
+        "tags": [
+          "appearance-understanding"
+        ],
+        "summary": "Confirm",
+        "operationId": "confirm_api_v1_appearance_understandings__identity__confirm_post",
+        "parameters": [
+          {
+            "name": "identity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identity"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmAppearance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appearance-understandings/{identity}/recover": {
+      "post": {
+        "tags": [
+          "appearance-understanding"
+        ],
+        "summary": "Recover",
+        "description": "Recover only an already archived original reply. Never calls a supplier.",
+        "operationId": "recover_api_v1_appearance_understandings__identity__recover_post",
+        "parameters": [
+          {
+            "name": "identity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/credits/balance": {
       "get": {
         "tags": [
@@ -1792,6 +2067,30 @@
     "schemas": {
       "AppearanceConfig": {
         "properties": {
+          "source_asset_version_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Asset Version Id"
+          },
+          "understanding_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Understanding Id"
+          },
           "description": {
             "type": "string",
             "maxLength": 4000,
@@ -1840,6 +2139,31 @@
           "config"
         ],
         "title": "AppearanceCreate"
+      },
+      "ConfirmAppearance": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "config": {
+            "$ref": "#/components/schemas/AppearanceConfig"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "title": "Confirmed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "config",
+          "confirmed"
+        ],
+        "title": "ConfirmAppearance"
       },
       "Generation": {
         "allOf": [
@@ -2232,6 +2556,27 @@
           "quote_id"
         ],
         "title": "TaskRequest"
+      },
+      "UnderstandingQuote": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Product Id"
+          },
+          "source_asset_version_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Asset Version Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "product_id",
+          "source_asset_version_id"
+        ],
+        "title": "UnderstandingQuote"
       },
       "Upload": {
         "properties": {

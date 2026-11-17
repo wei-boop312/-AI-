@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-18",
+  "scope": "AI source-image appearance understanding before redraw",
+  "unit": {
+    "count": 225,
+    "log_sha256": "5061470008a7ff6789649688ea283ca058611dfb425d283695567de16b961723"
+  },
+  "contracts": {
+    "count": 141,
+    "log_sha256": "24761e739328b6f8de1205a0670d632205237e38633b91c9bdf8ce8781365aae"
+  },
+  "native_broad_regression": {
+    "count": 288,
+    "passed": 287,
+    "failed": 1,
+    "failure": "legacy manual appearance snapshot included null provenance fields",
+    "corrected_by": "exclude_none serialization",
+    "log_sha256": "19d2138bff3203320a70b50130fc0210b794d0f25287184a804ddbb53cec95f1"
+  },
+  "legacy_compatibility_fix_recheck": {
+    "count": 1,
+    "log_sha256": "ca316ff18034d937cc035421b38d7f1ec76cb3db0f9e4322fcf4e5b8a74aab84"
+  },
+  "final_understanding_native_pg_s3": {
+    "count": 3,
+    "log_sha256": "73416edadd2003aa750e57c17fc599e82fa4381f4f16992a08ad1f3fd172360f"
+  },
+  "final_understanding_contracts": {
+    "count": 3,
+    "log_sha256": "1bdf1f65acf56cb01b843d93de700351db3f3fa4362629e22e718d25202d1575"
+  },
+  "browser_synthetic_http": {
+    "count": 4,
+    "supplier_network": "mock",
+    "scenario": "fee confirmation, editable summary, user confirmation, no pixel regions in redraw quote"
+  },
+  "local_rollout": {
+    "from_migration": "0067",
+    "to_migration": "0068",
+    "database_backup_created": true,
+    "live_configuration_quote_http_status": 201,
+    "supplier_inference_posts": 0
+  },
+  "quality_acceptance": "not_exercised_with_real_AI_in_this_run",
+  "actual_spending_verified": false,
+  "source_sha256": {
+    "src/visual_platform/api/appearance_understanding.py": "7ad78ab08386626eb6fee47a1c35fc4f3181572f79b724cce7efff6c9c1dfc01",
+    "src/visual_platform/providers/appearance_understanding.py": "b5066221e38f02c12dba25b78231ca57e6531fe8411199c4b4af3ded2b9e7d57",
+    "src/visual_platform/api/products.py": "d2b3639b6f7de5297584197a1f14921aa45bb67a5ecb7e00b2256d6c9f8b336f",
+    "src/visual_platform/domain/appearance.py": "c5bc71e2f8535b26b428f84b0cc1b6c52b5d105eec74f518cc4dca4e310b2bc3",
+    "src/visual_platform/providers/bfl.py": "0e0f0800ddb704b892264fe7dd9a603645c26fa5df718cef80ecd7895c4f26cb",
+    "apps/web/src/AppearanceUnderstanding.tsx": "ea127e4069e34b7a4aa06b206354f6816feaf2a5bde4c917707254c4c09cc0c4",
+    "apps/web/src/App.tsx": "57aa9b159b0efcfc01193cf3109dce3c31f3d19e3801777cf4abfedc5c3886a2",
+    "migrations/versions/0068_appearance_understanding.sql": "cccca8006cc687f6a2a80ef72dc6d8bf8067e97a7c729499c1df38b5daf36dde",
+    "tests/integration/test_appearance_understanding.py": "fcae300aad2f96987d69e94b39598207d468dd35c3b387b242cebb53ccc6d927",
+    "tests/contract/test_appearance_understanding.py": "697339f9146b23f98790b8404b2cbf600b314a163b3668dc71ee4a041b012087",
+    "apps/web/e2e/appearance-understanding.spec.ts": "8a5c76c35569d8eaf669343d548cb6f26885574248310ba7fdb8d02e47d8593c"
+  }
+}

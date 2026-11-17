@@ -141,6 +141,8 @@ async def archive(product_id: UUID, request: Request, user=Depends(current_user)
 async def appearance_create(
     product_id: UUID, body: AppearanceCreate, request: Request, user=Depends(current_user)
 ):
+    if body.config.understanding_id or body.config.source_asset_version_id:
+        raise HTTPException(422, "appearance_confirmation_required")
     async with tenant_transaction(request.app.state.api_pool, user["id"]) as c:
         product = await c.fetchval(
             "SELECT id FROM app.products WHERE id=$1 AND archived_at IS NULL FOR SHARE", product_id
@@ -153,7 +155,7 @@ async def appearance_create(
             user["id"],
             product_id,
             body.name,
-            body.config.model_dump_json(),
+            body.config.model_dump_json(exclude_none=True),
         )
     result = dict(row)
     result["config"] = json.loads(result["config"])
@@ -206,7 +208,7 @@ async def appearance_update(
         ):
             raise HTTPException(404, "not_found")
         old = await c.fetchrow(
-            "SELECT revision FROM app.appearance_profiles WHERE id=$1 AND product_id=$2 AND archived_at IS NULL FOR UPDATE",
+            "SELECT revision,config FROM app.appearance_profiles WHERE id=$1 AND product_id=$2 AND archived_at IS NULL FOR UPDATE",
             appearance_id,
             product_id,
         )
@@ -214,11 +216,16 @@ async def appearance_update(
             raise HTTPException(404, "not_found")
         if old["revision"] != revision:
             raise HTTPException(409, "revision_conflict")
+        previous = json.loads(old["config"])
+        for key in ("understanding_id", "source_asset_version_id"):
+            value = getattr(body.config, key)
+            if (str(value) if value else None) != previous.get(key):
+                raise HTTPException(422, "appearance_source_binding_immutable")
         row = await c.fetchrow(
             "UPDATE app.appearance_profiles SET name=$2,config=$3::jsonb,revision=revision+1,updated_at=now() WHERE id=$1 RETURNING id,name,config,revision",
             appearance_id,
             body.name,
-            body.config.model_dump_json(),
+            body.config.model_dump_json(exclude_none=True),
         )
     return {**dict(row), "config": json.loads(row["config"])}
 

@@ -8,7 +8,17 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from visual_platform.api import assets, auth, credits, products, quotes, reviews, rules, tasks
+from visual_platform.api import (
+    appearance_understanding,
+    assets,
+    auth,
+    credits,
+    products,
+    quotes,
+    reviews,
+    rules,
+    tasks,
+)
 from visual_platform.core.lifecycle import clear_api_shutdown_marker, record_api_shutdown
 from visual_platform.core.settings import Settings
 from visual_platform.db.pool import open_pool
@@ -135,6 +145,7 @@ def create_app(settings: Settings | None = None):
 
     app.include_router(auth.router)
     app.include_router(products.router)
+    app.include_router(appearance_understanding.router)
     app.include_router(credits.router)
     app.include_router(quotes.router)
     app.include_router(tasks.router)

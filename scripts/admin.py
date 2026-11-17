@@ -27,6 +27,12 @@ reconcile.add_argument("--receipt", type=UUID)
 reconcile.add_argument("--reason", required=True)
 reconcile.add_argument("--evidence-digest", required=True)
 reconcile.add_argument("--operation-id", type=UUID, required=True)
+understanding = sub.add_parser("close-understanding")
+understanding.add_argument("--user", type=UUID, required=True)
+understanding.add_argument("--understanding", type=UUID, required=True)
+understanding.add_argument("--reason", required=True)
+understanding.add_argument("--evidence-digest", required=True)
+understanding.add_argument("--operation-id", type=UUID, required=True)
 inspect = sub.add_parser("inspect")
 inspect.add_argument("--task", type=UUID, required=True)
 receipt = sub.add_parser("accept-receipt")
@@ -74,6 +80,22 @@ try:
                 )
             )[0]
             result = {"review_id": str(identity)}
+        elif args.command == "close-understanding":
+            c.execute(
+                "SELECT ops.close_appearance_understanding(%s,%s,%s,%s,%s)",
+                (
+                    args.user,
+                    args.understanding,
+                    args.operation_id,
+                    args.reason,
+                    args.evidence_digest,
+                ),
+            )
+            result = {
+                "operation_id": str(args.operation_id),
+                "action": "close_understanding_delivery",
+                "supplier_charge": "unknown",
+            }
         elif args.command == "reconcile":
             if args.action == "resume" and not args.receipt:
                 p.error("resume requires an existing receipt")

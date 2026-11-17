@@ -84,6 +84,9 @@ async def create_quote(pool, uid, body: QuoteRequest, *, live=False):
             if not row:
                 raise HTTPException(404, "appearance_unavailable")
             appearance = {**dict(row), "id": str(row["id"]), "config": json.loads(row["config"])}
+            bound_source = appearance["config"].get("source_asset_version_id")
+            if bound_source and bound_source != str(body.source_asset_version_id):
+                raise HTTPException(409, "appearance_source_mismatch")
         rules = []
         for target in body.targets:
             row = await c.fetchrow(
